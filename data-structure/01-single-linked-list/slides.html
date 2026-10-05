@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Single Linked List</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+  <style>
+    .d { width: 100%; max-width: 880px; height: auto; }
+    .d .box { fill: var(--card-2); }
+    .d .sep { stroke: var(--bg); stroke-width: 3; }
+    .d .val { fill: var(--ink); font-size: 22px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+    .d .lbl { fill: var(--ink-2); font-size: 17px; text-anchor: middle; }
+    .d .cell { fill: var(--ink-3); font-size: 14px; text-anchor: middle; }
+    .d .ar { fill: none; stroke-width: 2.5; stroke: var(--go-ink); marker-end: url(#d-n); }
+    .d .ptr { stroke: var(--ink-3); stroke-width: 1.5; }
+    .t-next { color: var(--go-ink); font-weight: 600; }
+    .flow { font-size: 0.6em; }
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+    .steps li::marker { font-weight: 700; color: var(--go-ink); }
+  </style>
+</head>
+<body class="deck">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="d-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--go-ink)"/></marker>
+  </defs>
+</svg>
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Single linked list</h1>
+  <p>Data structure · cara <b>menurunkan</b> kode linked list, bukan menghafalnya</p>
+</section>
+
+<section class="slide">
+  <h2>Kenapa linked list?</h2>
+  <p>Mau sisipkan <code>25</code> setelah <code>20</code>:</p>
+  <table>
+    <tr><th></th><th>Array</th><th>Linked list</th></tr>
+    <tr><td>Insert di tengah</td><td>Geser semua elemen sesudahnya: <b>O(n)</b></td><td>Ubah <b>2 panah</b>, tidak ada yang digeser</td></tr>
+    <tr><td>Ukuran</td><td>Tetap (atau harus realokasi)</td><td>Tambah node kapan saja</td></tr>
+    <tr><td>Akses elemen ke-i</td><td><b>O(1)</b></td><td>Jalan dari head: O(n)</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Node = data + alamat node berikutnya</h2>
+  <svg class="d" viewBox="0 0 660 140" role="img" aria-label="Single linked list dengan tiga node: 10, 20, 30">
+    <text class="lbl" x="67" y="20">head</text><line class="ptr" x1="67" y1="28" x2="67" y2="46"/>
+    <g transform="translate(30 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">10</text></g>
+    <g transform="translate(230 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">20</text></g>
+    <g transform="translate(430 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">30</text></g>
+    <path class="ar" d="M122 78H226"/><path class="ar" d="M322 78H426"/><path class="ar" d="M522 78H580"/>
+    <text class="cell" x="610" y="83">NULL</text>
+    <text class="cell" x="67" y="128">data</text><text class="cell" x="122" y="128">next</text>
+  </svg>
+  <div class="cols">
+<pre><code>typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+Node* head = NULL;</code></pre>
+    <ul>
+      <li>List cukup diwakili <code>head</code>: alamat node pertama.</li>
+      <li>Node terakhir: <code><span class="t-next">next</span> = NULL</code>.</li>
+      <li><code>head</code>, <code>cur</code>, <code>del</code> = <b>variabel berisi alamat</b>, bukan node.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2><code>createNode</code>: kenapa begini?</h2>
+  <div class="cols">
+<pre><code>Node* createNode(int x) {
+    Node* n = malloc(sizeof(Node));
+    n->data = x;
+    n->next = NULL;
+    return n;
+}</code></pre>
+    <ul>
+      <li><code>malloc</code>: node harus tetap hidup setelah fungsi selesai → simpan di <b>heap</b>, bukan variabel lokal.</li>
+      <li><code>n->next = NULL</code>: <code>malloc</code> tidak mengosongkan memory. Tanpa ini, <code>next</code> berisi alamat acak.</li>
+      <li>Setiap <code>malloc</code> nanti butuh satu <code>free</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Resep: tulis operasi apa pun tanpa menghafal</h2>
+  <ol class="steps">
+    <li><b>Gambar</b> list sebelum dan sesudah (3 node cukup).</li>
+    <li><b>Tandai panah</b> yang hilang dan yang baru. 1 panah baru = 1 baris kode.</li>
+    <li><b>Cari pemilik panah.</b> Untuk mengubah sebuah panah, kamu butuh alamat node pemiliknya.</li>
+    <li><b>Urutkan</b>: jangan timpa pointer yang alamatnya masih dibutuhkan.</li>
+    <li><b>Cek edge case</b>: list kosong, posisi 0, node terakhir, 1 node.</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2>4 pola yang selalu muncul</h2>
+  <table>
+    <tr><th>Pola</th><th>Kode</th><th><code>cur</code> berhenti di</th></tr>
+    <tr><td><b>A.</b> Kunjungi semua</td><td><code>while (cur != NULL)</code></td><td>NULL</td></tr>
+    <tr><td><b>B.</b> Cari node terakhir</td><td><code>while (cur->next != NULL)</code></td><td>Node terakhir</td></tr>
+    <tr><td><b>C.</b> Satu sebelum <code>pos</code></td><td><code>for (i = 0; i &lt; pos - 1; i++)</code></td><td>Node di <code>pos - 1</code></td></tr>
+    <tr><td><b>D.</b> Sambung dulu, putus kemudian</td><td><code>new->next = X; A->next = new;</code></td><td>(urutan)</td></tr>
+  </table>
+  <div class="callout tip"><strong>Cara memilih</strong>Tanya: "Saat loop berhenti, <code>cur</code> harus di mana?"</div>
+</section>
+
+<section class="slide">
+  <h2><code>insertFront</code>: sambung dulu</h2>
+  <div class="cols">
+    <div>
+<pre class="flow"><code>Sebelum:  head → [10] → [20] → NULL
+Sesudah:  head → [5] → [10] → [20] → NULL</code></pre>
+<pre><code>Node* newNode = createNode(x);
+newNode->next = head;   // 1. sambung
+head = newNode;         // 2. pindah</code></pre>
+    </div>
+    <div>
+      <ul>
+        <li>Panah baru: <code>[5] → [10]</code> dan <code>head → [5]</code>.</li>
+        <li><code>head</code> = satu-satunya alamat <code>[10]</code> → pakai dulu, baru timpa.</li>
+        <li>List kosong? <code>next = head = NULL</code>. Sudah benar, <b>tanpa if</b>.</li>
+      </ul>
+      <div class="callout warn"><strong>Kalau ditukar</strong><code>newNode->next = newNode</code>: list lama hilang, print looping selamanya.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2><code>insertBack</code>: cari node terakhir</h2>
+  <div class="cols">
+<pre><code>if (head == NULL) {
+    head = newNode;
+} else {
+    Node* cur = head;
+    while (cur->next != NULL)   // pola B
+        cur = cur->next;
+    cur->next = newNode;
+}</code></pre>
+    <div>
+      <ul>
+        <li>Panah baru: <code>[terakhir] → [new]</code>. Pemiliknya node terakhir → <b>pola B</b>.</li>
+        <li>List kosong: tidak ada node terakhir → <code>head</code> yang berubah.</li>
+        <li>Harus traverse → <b>O(n)</b>.</li>
+      </ul>
+      <div class="callout warn"><strong>Kenapa bukan <code>cur != NULL</code>?</strong>Loop berhenti saat <code>cur</code> sudah NULL, lalu <code>cur->next</code> crash.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2><code>insertAt</code>: berhenti satu sebelum</h2>
+  <div class="cols">
+    <div>
+<pre class="flow"><code>insertAt(2, 25)
+Sebelum:  [10] → [20] → [30] → NULL
+Sesudah:  [10] → [20] → [25] → [30] → NULL</code></pre>
+<pre><code>if (pos == 0) { insertFront(x); return; }
+Node* cur = head;
+for (int i = 0; i < pos - 1; i++)   // pola C
+    cur = cur->next;
+newNode->next = cur->next;   // sambung
+cur->next = newNode;         // putus</code></pre>
+    </div>
+    <ul>
+      <li>Yang berubah: <code>next</code> milik <code>[20]</code> = node di <b><code>pos - 1</code></b>.</li>
+      <li>Loop <code>pos - 1</code> kali → <code>cur</code> di posisi <code>pos - 1</code>.</li>
+      <li>Alamat <code>[30]</code> hanya ada di <code>cur->next</code> → pakai dulu (<b>pola D</b>).</li>
+      <li><code>pos == 0</code>: tidak ada node di -1 → <code>head</code> berubah.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2><code>deleteAt</code>: simpan dulu, free terakhir</h2>
+  <div class="cols">
+<pre><code>Node* del;
+if (pos == 0) {
+    del = head;
+    head = head->next;
+} else {
+    Node* cur = head;
+    for (int i = 0; i < pos - 1; i++)
+        cur = cur->next;
+    del = cur->next;        // simpan alamat
+    cur->next = del->next;  // lompati
+}
+free(del);                  // terakhir</code></pre>
+    <ul>
+      <li>Panah baru: <code>[pos-1] → [pos+1]</code> → butuh node <code>pos - 1</code> lagi (<b>pola C</b>).</li>
+      <li>Setelah <code>cur->next</code> ditimpa, alamat <code>del</code> hilang → <b>simpan dulu</b>.</li>
+      <li><code>free</code> paling akhir. Setelah free, <code>del->next</code> tidak boleh dibaca (<b>use-after-free</b>).</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: nyalakan mode tebak</h2>
+  <iframe src="viz/operasi.html" title="Visualisasi operasi single linked list"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Bug yang sering muncul</h2>
+  <table>
+    <tr><th>Bug</th><th>Gejala</th><th>Langgar</th></tr>
+    <tr><td><code>head = newNode</code> duluan</td><td>List hilang, looping</td><td>Pola D</td></tr>
+    <tr><td><code>while (cur != NULL)</code> lalu <code>cur->next = ...</code></td><td>Crash</td><td>Pola B</td></tr>
+    <tr><td>Loop <code>pos</code> kali</td><td>Posisi geser 1</td><td>Pola C</td></tr>
+    <tr><td>Lupa kasus <code>pos == 0</code></td><td>Crash / head salah</td><td>Edge case</td></tr>
+    <tr><td><code>free</code> sebelum baca <code>del->next</code></td><td>Kadang crash</td><td>Urutan</td></tr>
+    <tr><td>Lupa <code>free</code></td><td>Memory leak</td><td>malloc ↔ free</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Time complexity</h2>
+  <table>
+    <tr><th>Operasi</th><th>Single LL</th><th>Kenapa</th></tr>
+    <tr><td><code>insertFront</code>, delete node pertama</td><td><b>O(1)</b></td><td><code>head</code> langsung tersedia</td></tr>
+    <tr><td><code>insertBack</code></td><td>O(n)</td><td>Cari node terakhir (O(1) kalau ada <code>tail</code>)</td></tr>
+    <tr><td><code>insertAt</code>, <code>deleteAt</code></td><td>O(n)</td><td>Jalan ke <code>pos - 1</code></td></tr>
+    <tr><td><code>search</code>, akses ke-i</td><td>O(n)</td><td>Tidak ada index</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Operasi linked list = <b>mengubah panah</b>. Gambar dulu, kode belakangan.</li>
+    <li>Node hanya bisa mengubah <span class="t-next">next</span> miliknya → butuh node <b><code>pos - 1</code></b>.</li>
+    <li><b>Sambung dulu, putus kemudian</b>. Jangan pernah kehilangan alamat.</li>
+    <li>Selalu cek: list kosong, <code>pos == 0</code>, node terakhir.</li>
+  </ul>
+  <p class="label">Latihan (trace, cari bug, turunkan sendiri) ada di notes. Lanjut: double linked list.</p>
+</section>
+
+<script src="../../_shared/slides.js"></script>
+</body>
+</html>

@@ -40,6 +40,7 @@
   <img class="logo" src="../../_shared/logo.svg" alt="">
   <h1>Double linked list</h1>
   <p>Data structure · linked list yang bisa traverse <b>maju dan mundur</b></p>
+  <p class="label">Prasyarat: single linked list (resep 5 langkah dan pola "sambung dulu").</p>
 </section>
 
 <section class="slide">
@@ -105,6 +106,17 @@ Node* createNode(int x) {
       <li><b>Trade-off:</b> butuh memory 1 pointer ekstra per node</li>
     </ul>
   </div>
+</section>
+
+<section class="slide">
+  <h2>Cara berpikir: resep yang sama + 1 aturan</h2>
+  <ol>
+    <li><b>Gambar</b> sebelum &amp; sesudah, <b>tandai panah</b> yang berubah.</li>
+    <li><b>Cari pemilik panah</b>, lalu <b>urutkan</b>: sambung dulu, putus kemudian.</li>
+    <li><b>Cek edge case</b>: list kosong, <code>head</code>, <code>tail</code>, 1 node.</li>
+  </ol>
+  <div class="callout tip"><strong>Aturan tambahan DLL: setiap panah punya pasangan</strong>Sambungan baru A ⇄ B = <b>2 baris</b>: <code>A->next = B</code> dan <code>B->prev = A</code>. Jumlah baris ganjil? Hampir pasti ada yang lupa.</div>
+  <p class="label">Bonus: node sebelum <code>cur</code> = <code>cur->prev</code>, jadi tidak perlu berhenti di <code>pos - 1</code> seperti di single linked list.</p>
 </section>
 
 <section class="slide">
@@ -201,7 +213,7 @@ free(del);</code></pre>
 </section>
 
 <section class="slide full">
-  <h2>Coba sendiri</h2>
+  <h2>Coba sendiri: nyalakan mode tebak</h2>
   <iframe src="viz/operasi.html" title="Visualisasi operasi double linked list"></iframe>
 </section>
 

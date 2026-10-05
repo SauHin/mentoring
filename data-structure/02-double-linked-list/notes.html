@@ -19,13 +19,14 @@
 <h1>Double linked list</h1>
 <p class="lead">Linked list yang tiap node-nya tahu node <b>sebelum</b> dan <b>sesudahnya</b>.</p>
 <p><a href="slides.html">Slide</a> · <a href="viz/operasi.html">Visualisasi operasi</a> · <a href="viz/riwayat-browser.html">Browser history</a></p>
+<div class="callout"><strong>Prasyarat</strong>Pahami dulu <a href="../01-single-linked-list/notes.html">single linked list</a>, terutama <b>resep 5 langkah</b> dan <b>pola D (sambung dulu, putus kemudian)</b>. Materi ini memakai resep yang sama.</div>
 
 <div class="card tldr">
   <strong>TL;DR</strong>
   <ul>
     <li>Node punya <code>prev</code> + <code>next</code>. List menyimpan <code>head</code> + <code>tail</code>.</li>
     <li>Bisa traverse <b>2 arah</b>. Delete node yang sudah ditunjuk cukup <b>O(1)</b>.</li>
-    <li>Setiap ubah <code>next</code>, cek apakah <code>prev</code> pasangannya juga harus diubah.</li>
+    <li>Resepnya sama dengan single linked list, plus satu aturan: <b>setiap panah punya pasangan</b>. Ubah <code>next</code> → ubah juga <code>prev</code> pasangannya.</li>
     <li>Edge case wajib: list kosong, 1 node, node pertama, node terakhir.</li>
   </ul>
 </div>
@@ -61,10 +62,24 @@ Node* createNode(int x) {
 
 <p class="label">Di sini <code>head</code>, <code>tail</code>, dan <code>size</code> dibuat global supaya kode pendek. Di project nyata biasanya dibungkus dalam satu <code>struct</code> (misalnya <code>DList</code>) yang dikirim sebagai pointer ke setiap fungsi.</p>
 
-<h2>3. Operasi</h2>
+<h2>3. Cara berpikir</h2>
+<p>Pakai <b>resep 5 langkah</b> dari single linked list: gambar sebelum/sesudah, tandai panah, cari pemilik panah, urutkan, cek edge case. Di double linked list ada dua perubahan:</p>
+<table>
+  <tr><th></th><th>Single LL</th><th>Double LL</th></tr>
+  <tr><td>Panah antar dua node</td><td>1 (<code>next</code>)</td><td><b>2</b> (<code>next</code> + <code>prev</code>)</td></tr>
+  <tr><td>Baris kode per sambungan</td><td>1</td><td><b>2</b>, satu untuk tiap arah</td></tr>
+  <tr><td>Node sebelum <code>cur</code></td><td>Harus dicari (pola C: berhenti di <code>pos - 1</code>)</td><td>Langsung: <code>cur->prev</code>. Jadi <code>cur</code> boleh berhenti <b>di</b> <code>pos</code></td></tr>
+  <tr><td>Ujung list</td><td><code>head</code></td><td><code>head</code> <b>dan</b> <code>tail</code>, dua-duanya bisa berubah</td></tr>
+</table>
+<div class="callout tip"><strong>Cara cek kode sendiri</strong>Hitung panah yang berubah di gambarmu. Setiap sambungan baru antara A dan B harus menghasilkan <b>dua</b> baris: <code>A->next = B</code> dan <code>B->prev = A</code>. Kalau jumlah baris ganjil, hampir pasti ada yang lupa.</div>
+
+<h2>4. Operasi</h2>
 <p>Buka <a href="viz/operasi.html">visualisasi operasi</a> sambil membaca. Kodenya sama persis.</p>
 
 <h3><code>insertFront(x)</code>: O(1)</h3>
+<pre><code>Sebelum:  head → [10] ⇄ [20] ← tail
+Sesudah:  head → [5] ⇄ [10] ⇄ [20] ← tail</code></pre>
+<p><b>Sambungan baru:</b> <code>[5] ⇄ [10]</code> (2 baris) + <code>head</code> pindah. <b>Edge case:</b> list kosong → node baru jadi <code>head</code> <b>dan</b> <code>tail</code>.</p>
 <pre><code>void insertFront(int x) {
     Node* newNode = createNode(x);
     if (head == NULL) {            // list kosong
@@ -79,6 +94,9 @@ Node* createNode(int x) {
 <div class="callout warn"><strong>Awas urutan</strong>Kalau langkah 3 jalan duluan, langkah 2 jadi <code>newNode->prev = newNode</code>: node menunjuk dirinya sendiri.</div>
 
 <h3><code>insertBack(x)</code>: O(1)</h3>
+<pre><code>Sebelum:  head → [10] ⇄ [20] ← tail
+Sesudah:  head → [10] ⇄ [20] ⇄ [50] ← tail</code></pre>
+<p>Beda dengan single linked list: node terakhir <b>tidak perlu dicari</b>, karena sudah ada di <code>tail</code>.</p>
 <pre><code>void insertBack(int x) {
     Node* newNode = createNode(x);
     if (tail == NULL) {
@@ -93,6 +111,10 @@ Node* createNode(int x) {
 <p><b>Cermin</b> dari <code>insertFront</code>: tukar <code>head</code> ↔ <code>tail</code> dan <code>next</code> ↔ <code>prev</code>.</p>
 
 <h3><code>insertAt(pos, x)</code>: O(n)</h3>
+<pre><code>insertAt(2, 25)
+Sebelum:  [10] ⇄ [20] ⇄ [30]
+Sesudah:  [10] ⇄ [20] ⇄ [25] ⇄ [30]</code></pre>
+<p><b>Sambungan baru:</b> <code>[20] ⇄ [25]</code> dan <code>[25] ⇄ [30]</code> → <b>4 baris</b>. <b>Pemilik panah:</b> <code>[20]</code> dan <code>[30]</code>. Cukup cari <code>[30]</code> (node di <code>pos</code>), karena <code>[20]</code> = <code>cur->prev</code>.</p>
 <pre><code>void insertAt(int pos, int x) {          // syarat: 0 <= pos <= size
     if (pos == 0) { insertFront(x); return; }
     if (pos == size) { insertBack(x); return; }
@@ -113,6 +135,10 @@ Node* createNode(int x) {
 </ul>
 
 <h3><code>deleteAt(pos)</code>: O(n), atau O(1) kalau node sudah ditunjuk</h3>
+<pre><code>deleteAt(1)
+Sebelum:  [10] ⇄ [20] ⇄ [30]
+Sesudah:  [10] ⇄ [30]          [20] di-free</code></pre>
+<p><b>Sambungan baru:</b> <code>[10] ⇄ [30]</code> → 2 baris. Keduanya bisa ditemukan dari <code>del</code> sendiri (<code>del->prev</code> dan <code>del->next</code>), jadi tidak perlu node <code>pos - 1</code> seperti di single linked list.</p>
 <pre><code>void deleteAt(int pos) {                 // syarat: 0 <= pos < size
     Node* del = head;
     for (int i = 0; i < pos; i++)
@@ -161,7 +187,7 @@ void printBackward() {
 }</code></pre>
 <div class="callout tip"><strong>Trik debugging</strong>Print maju lalu print mundur. Kalau hasilnya tidak saling terbalik, ada pointer <code>prev</code> yang salah.</div>
 
-<h2>4. Time complexity</h2>
+<h2>5. Time complexity</h2>
 <table>
   <tr><th>Operasi</th><th>Dynamic array</th><th>Single LL</th><th>Double LL</th></tr>
   <tr><td>Akses index ke-i</td><td><b>O(1)</b></td><td>O(n)</td><td>O(n)</td></tr>
@@ -174,7 +200,7 @@ void printBackward() {
 </table>
 <p class="label">Kenapa delete node terakhir di single LL tetap O(n) walau ada <code>tail</code>? Karena <code>tail</code> baru = node sebelum tail lama, dan node itu harus dicari dari <code>head</code>.</p>
 
-<h2>5. Bug yang sering muncul</h2>
+<h2>6. Bug yang sering muncul</h2>
 <table>
   <tr><th>Bug</th><th>Gejala</th></tr>
   <tr><td>Cuma ubah <code>next</code>, lupa <code>prev</code></td><td>Print maju benar, print mundur salah</td></tr>
@@ -184,7 +210,7 @@ void printBackward() {
   <tr><td>Lupa <code>free</code></td><td><b>Memory leak</b></td></tr>
 </table>
 
-<h2>6. Dipakai di mana?</h2>
+<h2>7. Dipakai di mana?</h2>
 <ul>
   <li><b>Browser back / forward</b>: coba di <a href="viz/riwayat-browser.html">visualisasi browser history</a></li>
   <li><b>Undo / redo</b> di editor</li>
@@ -193,7 +219,7 @@ void printBackward() {
   <li><b>Linux kernel</b>: <code>struct list_head</code> adalah (circular) double linked list</li>
 </ul>
 
-<h2>7. Full code</h2>
+<h2>8. Full code</h2>
 <details>
   <summary>Lihat full code</summary>
 <pre><code>#include &lt;stdio.h&gt;
@@ -312,7 +338,7 @@ int main() {
 }</code></pre>
 </details>
 
-<h2>8. Latihan</h2>
+<h2>9. Latihan</h2>
 
 <p><b>1.</b> Mulai dari list kosong, jalankan <code>insertBack(5)</code>, <code>insertFront(3)</code>, <code>insertAt(1, 4)</code>, <code>deleteAt(0)</code>. Tulis isi list, <code>head</code>, dan <code>tail</code> tiap langkah.</p>
 <details>
@@ -381,6 +407,17 @@ int main() {
     return cur;
 }</code></pre>
   <p>Tetap O(n), tapi maksimal ~n/2 langkah.</p>
+</details>
+
+<p><b>6. Temukan bug.</b> Fungsi ini lolos tes untuk node di tengah. Di posisi mana dia crash, dan baris mana yang hilang?</p>
+<pre><code>void deleteNode(Node* del) {
+    del->prev->next = del->next;
+    del->next->prev = del->prev;
+    free(del);
+}</code></pre>
+<details>
+  <summary>Jawaban</summary>
+  <p>Crash untuk <b>node pertama</b> (<code>del->prev</code> = NULL) dan <b>node terakhir</b> (<code>del->next</code> = NULL). Langkah 5 resep (edge case) terlewat: di ujung list, yang berubah adalah <code>head</code> atau <code>tail</code>, bukan node tetangga. Perbaikannya adalah dua <code>if/else</code> seperti di <code>deleteAt</code>.</p>
 </details>
 
 <h2>Daftar pustaka</h2>

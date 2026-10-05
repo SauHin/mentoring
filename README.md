@@ -15,6 +15,7 @@ Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 
 | No | Materi | Notes | Slide |
 |----|--------|-------|-------|
+| 01 | Single linked list | [notes](data-structure/01-single-linked-list/notes.html) | [slides](data-structure/01-single-linked-list/slides.html) |
 | 02 | Double linked list | [notes](data-structure/02-double-linked-list/notes.html) | [slides](data-structure/02-double-linked-list/slides.html) |
 
 ## Struktur
@@ -22,7 +23,7 @@ Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 ```
 mentoring/
 ├── index.html              homepage: daftar materi per matkul
-├── _shared/                style.css, theme.js, slides.js, notes.js, font, logo
+├── _shared/                style.css, theme.js, slides.js, notes.js, listviz.js/css, font, logo
 ├── _template/
 │   └── NN-nama-materi/     salin folder ini untuk materi baru
 │       ├── notes.html
@@ -30,6 +31,7 @@ mentoring/
 │       ├── viz/            satu file HTML per konsep interaktif
 │       └── assets/         gambar, data, dll.
 └── data-structure/         satu folder per matkul
+    ├── 01-single-linked-list/
     └── 02-double-linked-list/
 ```
 
@@ -48,6 +50,8 @@ Matkul baru: buat folder baru, lalu tambahkan `<section class="matkul" id="nama-
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.
 - Singkat. Pakai **bold**, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
 - Bahasa pemrograman per matkul: **data structure pakai C** (`malloc`/`free`, `NULL`, `printf`).
+- Fokus pada **pemahaman kode**: tiap operasi diturunkan (sebelum → sesudah → panah yang berubah → urutan → edge case → kode), latihan berupa trace, cari bug, dan turunkan sendiri.
+- Visualisasi linked list memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak).
 - Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.
 - Daftar isi dan tombol kembali ke atas dibuat otomatis oleh `notes.js` dari setiap `<h2>`.
 

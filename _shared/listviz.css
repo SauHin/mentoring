@@ -1,0 +1,43 @@
+/* Gaya visualisasi linked list (dipakai bersama listviz.js). */
+.viz { max-width: 1100px; }
+.controls .field { width: 5.5rem; }
+.ops { display: flex; flex-wrap: wrap; gap: 10px; }
+.bottom { display: grid; gap: 12px; margin-top: 12px; }
+@media (min-width: 760px) { .bottom { grid-template-columns: 1.15fr 1fr; } }
+.code { margin: 0; font-size: 0.85rem; line-height: 1.55; }
+.code .ln { display: block; padding: 0 0.5rem; border-radius: 6px; white-space: pre; }
+.code .ln.on { background: var(--marker); }
+.code .ln.was { background: var(--card-2); } /* mode tebak: baris terakhir yang sudah jalan */
+.side { display: flex; flex-direction: column; gap: 10px; padding: 20px; }
+.side p { margin: 0; }
+#caption { font-size: 1.05rem; min-height: 3.3em; }
+#vars { color: var(--ink-2); font-size: 0.875rem; }
+#output { font-weight: 600; font-variant-numeric: tabular-nums; }
+.guess { display: flex; gap: 8px; align-items: center; font-size: 0.95rem; cursor: pointer; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.legend span::before { content: ''; display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--c); }
+
+/* Gambar list */
+.node .body { fill: var(--card-2); }
+.node .div { stroke: var(--surface); stroke-width: 3; }
+.node .null { stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round; }
+.node .val { fill: var(--ink); font-size: 20px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.node.cur .body { fill: color-mix(in srgb, var(--focus) 24%, var(--surface)); }
+.node.new .body { fill: color-mix(in srgb, var(--go) 24%, var(--surface)); }
+.node.del .body { fill: color-mix(in srgb, var(--stop) 24%, var(--surface)); }
+.node.found .body { fill: var(--go); }
+.node.found .val { fill: #fff; }
+.node.found .null { stroke: rgb(255 255 255 / 0.6); }
+.arrow { fill: none; stroke-width: 2; }
+.arrow.next { stroke: var(--go-ink); }
+.arrow.prev { stroke: var(--focus); }
+.arrow.hot { stroke: var(--hot); stroke-width: 3.5; }
+.dot.next, .tip.next { fill: var(--go-ink); }
+.dot.prev, .tip.prev { fill: var(--focus); }
+.dot.hot, .tip.hot { fill: var(--hot); }
+.ptr { fill: var(--ink-2); font-size: 17px; font-weight: 500; text-anchor: middle; }
+.ptr.hot { fill: var(--hot); font-weight: 700; }
+.ptr-line { stroke: var(--ink-3); stroke-width: 1.5; }
+.ptr-line.hot { stroke: var(--hot); stroke-width: 2.5; }
+.idx { fill: var(--ink-3); font-size: 14px; text-anchor: middle; }
+.empty { fill: var(--ink-3); font-size: 20px; text-anchor: middle; }

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operasi Single Linked List</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <link rel="stylesheet" href="../../../_shared/listviz.css">
+  <script src="../../../_shared/theme.js"></script>
+</head>
+<body class="viz">
+
+<h1>Operasi single linked list</h1>
+<p>Pilih operasi, lalu jalankan <b>step by step</b>. Pointer yang baru berubah berwarna <b>oranye</b>. Nyalakan <b>mode tebak</b> untuk menebak tiap langkah sebelum ditampilkan.</p>
+
+<script src="../../../_shared/listviz.js"></script>
+<script>
+const CODE = {
+  struct: `typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+Node* head = NULL;
+int size = 0;
+
+Node* createNode(int x) {
+    Node* n = malloc(sizeof(Node));
+    n->data = x;
+    n->next = NULL;
+    return n;
+}`,
+  insertFront: `void insertFront(int x) {
+    Node* newNode = createNode(x);
+    newNode->next = head;
+    head = newNode;
+    size++;
+}`,
+  insertBack: `void insertBack(int x) {
+    Node* newNode = createNode(x);
+    if (head == NULL) {
+        head = newNode;
+    } else {
+        Node* cur = head;
+        while (cur->next != NULL)
+            cur = cur->next;
+        cur->next = newNode;
+    }
+    size++;
+}`,
+  insertAt: `void insertAt(int pos, int x) {
+    if (pos == 0) { insertFront(x); return; }
+    Node* cur = head;
+    for (int i = 0; i < pos - 1; i++)
+        cur = cur->next;
+    Node* newNode = createNode(x);
+    newNode->next = cur->next;
+    cur->next = newNode;
+    size++;
+}`,
+  deleteAt: `void deleteAt(int pos) {
+    Node* del;
+    if (pos == 0) {
+        del = head;
+        head = head->next;
+    } else {
+        Node* cur = head;
+        for (int i = 0; i < pos - 1; i++)
+            cur = cur->next;
+        del = cur->next;
+        cur->next = del->next;
+    }
+    free(del);
+    size--;
+}`,
+  search: `Node* search(int x) {
+    Node* cur = head;
+    while (cur != NULL) {
+        if (cur->data == x)
+            return cur;
+        cur = cur->next;
+    }
+    return NULL;
+}`,
+  printList: `void printList() {
+    Node* cur = head;
+    while (cur != NULL) {
+        printf("%d ", cur->data);
+        cur = cur->next;
+    }
+}`,
+};
+for (const k in CODE) CODE[k] = CODE[k].split('\n');
+
+/* ---------- Operasi: setiap yield adalah satu langkah. Caption menjelaskan KENAPA, bukan cuma APA. ---------- */
+function* insertFront(x) {
+  const c = 'insertFront';
+  const n = make(x, 0);
+  yield step(c, 'createNode', `Buat node baru berisi ${x}. next masih NULL, jadi node ini belum terhubung ke list.`, ['newNode']);
+  n.next = head;
+  yield step(c, 'newNode->next = head', head === null
+    ? 'head == NULL, jadi newNode->next tetap NULL. Tidak perlu if khusus untuk list kosong.'
+    : `Sambungkan node baru ke node pertama (${val(head)}) DULU. Kalau head dipindah duluan, alamat node ${val(head)} hilang dan seluruh list ikut hilang.`, [n.id + '.next']);
+  head = n.id;
+  yield step(c, 'head = newNode', 'Baru head pindah ke node baru. Sisa list masih tersambung lewat newNode->next.', ['head']);
+  yield* finishInsert(c, n);
+}
+
+function* insertBack(x) {
+  const c = 'insertBack';
+  const n = make(x, order.length);
+  yield step(c, 'createNode', `Buat node baru berisi ${x}. Dia akan jadi node terakhir, jadi next-nya memang harus NULL.`, ['newNode']);
+  if (head === null) {
+    head = n.id;
+    yield step(c, 'head = newNode', 'List kosong: tidak ada node terakhir untuk disambung, jadi node baru langsung jadi head.', ['head']);
+    return yield* finishInsert(c, n);
+  }
+  vars.cur = head;
+  yield step(c, 'Node* cur = head', 'Kita perlu node TERAKHIR, karena hanya next miliknya yang boleh diubah. Tidak ada tail, jadi harus dicari dari head.', ['cur']);
+  while (nodes[vars.cur].next !== null) {
+    vars.cur = nodes[vars.cur].next;
+    yield step(c, 'cur = cur->next', 'cur->next bukan NULL, berarti cur belum node terakhir. Maju.', ['cur']);
+  }
+  yield step(c, 'while (cur->next != NULL)', `cur->next == NULL: cur (${val(vars.cur)}) adalah node terakhir. Perhatikan kondisinya cur->next, bukan cur. Kalau cur, loop baru berhenti saat cur sudah NULL dan kita tidak bisa menyambung apa-apa.`);
+  nodes[vars.cur].next = n.id;
+  yield step(c, 'cur->next = newNode', `Node ${val(vars.cur)} menunjuk node baru. Karena harus traverse dulu, insertBack di single linked list O(n).`, [vars.cur + '.next']);
+  delete vars.cur;
+  yield* finishInsert(c, n);
+}
+
+function* insertAt(pos, x) {
+  const c = 'insertAt';
+  if (pos === 0) {
+    yield step(c, 'pos == 0', 'Posisi 0: tidak ada node sebelumnya, jadi yang berubah adalah head. Pakai ulang insertFront.');
+    return yield* insertFront(x);
+  }
+  vars.cur = head;
+  yield step(c, 'Node* cur = head', `Kita butuh node SEBELUM posisi ${pos}, karena hanya next miliknya yang perlu diubah.`, ['cur']);
+  for (let i = 0; i < pos - 1; i++) {
+    vars.cur = nodes[vars.cur].next;
+    yield step(c, 'cur = cur->next', `i = ${i}: cur maju. Loop jalan pos - 1 = ${pos - 1} kali, jadi cur berhenti di posisi ${pos - 1}.`, ['cur']);
+  }
+  const cur = nodes[vars.cur];
+  const n = make(x, order.indexOf(cur.id) + 1);
+  yield step(c, 'createNode', `cur berhenti di node ${cur.val} (posisi ${pos - 1}). Node baru akan masuk tepat sesudahnya.`, ['newNode']);
+  n.next = cur.next;
+  yield step(c, 'newNode->next = cur->next', `Sambungkan node baru ke sisa list DULU (${val(cur.next)}). cur->next masih menyimpan alamat itu.`, [n.id + '.next']);
+  cur.next = n.id;
+  yield step(c, 'cur->next = newNode', 'Baru cur menunjuk node baru. Kalau dua baris ini ditukar, cur->next tertimpa dan sisa list hilang.', [cur.id + '.next']);
+  delete vars.cur;
+  yield* finishInsert(c, n);
+}
+
+function* deleteAt(pos) {
+  const c = 'deleteAt';
+  let d;
+  if (pos === 0) {
+    vars.del = head;
+    d = nodes[head];
+    yield step(c, 'del = head;', 'Posisi 0: node yang dihapus adalah head. Simpan alamatnya di del supaya bisa di-free nanti.', ['del']);
+    head = d.next;
+    yield step(c, 'head = head->next', 'head pindah ke node kedua. Node pertama sekarang terlepas dari list.', ['head']);
+  } else {
+    vars.cur = head;
+    yield step(c, 'Node* cur = head', `Untuk melepas node di posisi ${pos}, yang diubah adalah next milik node SEBELUMNYA. Jadi cari node di posisi ${pos - 1}.`, ['cur']);
+    for (let i = 0; i < pos - 1; i++) {
+      vars.cur = nodes[vars.cur].next;
+      yield step(c, 'cur = cur->next', `i = ${i}: cur maju.`, ['cur']);
+    }
+    const cur = nodes[vars.cur];
+    vars.del = cur.next;
+    d = nodes[cur.next];
+    yield step(c, 'del = cur->next', `Node yang dihapus = node sesudah cur (${d.val}). Simpan alamatnya dulu, karena baris berikutnya akan menimpa cur->next.`, ['del']);
+    cur.next = d.next;
+    yield step(c, 'cur->next = del->next', `cur melompati del, langsung ke ${val(d.next)}. del sekarang terlepas dari list.`, [cur.id + '.next']);
+    delete vars.cur;
+  }
+  d.lifted = true;
+  yield step(c, 'free(del)', 'Tidak ada pointer di list yang menunjuk del lagi, jadi aman di-free. Tanpa free, memory node ini bocor (memory leak).');
+  remove(d.id);
+  delete vars.del;
+  yield done(c, 'size--', `Selesai. Node ${d.val} sudah di-delete. List sekarang berisi ${order.length} node.`);
+}
+
+function* search(x) {
+  const c = 'search';
+  vars.cur = head;
+  yield step(c, 'Node* cur = head', 'Linked list tidak punya index, jadi satu-satunya cara: cek node satu per satu dari head.', ['cur']);
+  while (vars.cur !== null) {
+    const n = nodes[vars.cur];
+    if (n.val === x) {
+      found = n.id;
+      delete vars.cur;
+      return yield done(c, 'return cur', `${n.val} == ${x}. Ketemu di posisi ${order.indexOf(n.id)}, langsung return.`);
+    }
+    yield step(c, 'if (cur->data == x)', `${n.val} != ${x}, lanjut.`);
+    vars.cur = n.next;
+    yield step(c, 'cur = cur->next', vars.cur === null ? 'cur sekarang NULL: semua node sudah dicek.' : 'cur maju satu node.', ['cur']);
+  }
+  delete vars.cur;
+  yield done(c, 'return NULL', `${x} tidak ada di list. Return NULL sebagai tanda "tidak ketemu".`);
+}
+
+function* printList() {
+  const c = 'printList';
+  output = [];
+  vars.cur = head;
+  yield step(c, 'Node* cur = head', 'Pola traversal: mulai dari head, ikuti next sampai NULL. Pola ini dipakai hampir di semua operasi.', ['cur']);
+  while (vars.cur !== null) {
+    output.push(nodes[vars.cur].val);
+    yield step(c, 'printf', `Print ${nodes[vars.cur].val}.`);
+    vars.cur = nodes[vars.cur].next;
+    yield step(c, 'cur = cur->next', vars.cur === null ? 'cur sekarang NULL, jadi loop berhenti.' : 'cur maju lewat next.', ['cur']);
+  }
+  delete vars.cur;
+  yield done(c, 'while', `Selesai. Output: ${output.join(' ') || '(kosong)'}.`);
+}
+
+const OPS = {
+  insertFront: (x) => insertFront(x),
+  insertBack: (x) => insertBack(x),
+  insertAt: (x, p) => insertAt(p, x),
+  deleteAt: (x, p) => deleteAt(p),
+  search: (x) => search(x),
+  printList: () => printList(),
+};
+const check = checkCommon;
+listViz({ doubly: false });
+</script>
+</body>
+</html>

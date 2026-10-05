@@ -154,7 +154,7 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
   justify-content: center;
   min-height: 100vh;
   padding: max(6vh, 68px) 8vw 6vh; /* atas: ruang untuk tombol Home */
-  font-size: clamp(16px, 2.2vw, 28px);
+  font-size: clamp(15px, min(2.2vw, 3.3vh), 28px); /* ikut lebar dan tinggi layar, supaya muat di proyektor 16:9 */
 }
 .deck .slide.active { display: flex; }
 .deck h1 { font-size: 2.6em; margin: 0 0 0.3em; line-height: 1.05; }
@@ -162,6 +162,7 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
 .deck p, .deck li { color: var(--ink-2); }
 .deck li + li { margin-top: 0.4em; }
 .deck pre { font-size: 0.68em; margin: 0; }
+.deck pre + pre { margin-top: 0.6em; }
 .deck td, .deck th { font-size: 0.85em; }
 .deck .logo { width: 3em; height: 3em; margin-bottom: 1em; }
 .deck iframe { width: 100%; flex: 1; min-height: 60vh; border: 1px solid var(--line); border-radius: 28px; background: var(--surface); }

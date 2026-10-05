@@ -92,6 +92,33 @@
         ],
         "createdAt": "2026-10-05T07:56:30.338Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/01-single-linked-list/notes.html"
+        ],
+        "createdAt": "2026-10-05T09:12:48.794Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/01-single-linked-list/slides.html"
+        ],
+        "createdAt": "2026-10-05T09:12:49.039Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/01-single-linked-list/viz/operasi.html"
+        ],
+        "createdAt": "2026-10-05T09:12:49.282Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
       }
     ]
   }
