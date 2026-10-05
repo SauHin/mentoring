@@ -83,6 +83,15 @@
         ],
         "createdAt": "2026-10-05T07:42:04.510Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-05T07:56:30.338Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
       }
     ]
   }

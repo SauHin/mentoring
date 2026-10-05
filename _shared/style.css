@@ -117,7 +117,7 @@ th { font-weight: 600; color: var(--ink-2); }
 .btn {
   --edge: var(--card-2);
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  border: 0; border-radius: 999px; padding: 0.85rem 1.8rem;
+  border: 0; border-radius: 999px; padding: 0.85rem 1.8rem; text-decoration: none;
   font: 600 1.1rem/1.5 var(--font);
   background: var(--card); color: var(--ink);
   box-shadow: 0 5px 0 var(--edge);
@@ -127,6 +127,7 @@ th { font-weight: 600; color: var(--ink-2); }
 .btn:hover { filter: brightness(1.04); }
 .btn:active { transform: translateY(5px); box-shadow: 0 0 0 var(--edge); }
 :where(.card, .controls) .btn { --edge: var(--btn-edge); background: var(--btn-bg); }
+.card .chip { background: var(--surface); }
 .btn-go { --edge: var(--go-edge); background: var(--go); color: #fff; }
 .btn-stop { --edge: var(--stop-edge); background: var(--stop); color: #fff; }
 .btn-sm { padding: 0.45rem 1rem; font-size: 0.95rem; box-shadow: 0 4px 0 var(--edge); }
