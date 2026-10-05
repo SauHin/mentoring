@@ -237,8 +237,12 @@
     document.body.classList.toggle('drawing', on);
     toggle.classList.toggle('sel', on);
     palette.hidden = !on;
-    if (!on) { selected.clear(); redraw(); }
+    if (on) getSelection().removeAllRanges(); // buang seleksi teks yang sudah ada
+    else { selected.clear(); redraw(); }
   }
+  // Selama mode coret, seleksi teks dan menu tekan-lama diblok (CSS saja tidak cukup di sebagian browser HP).
+  document.addEventListener('selectstart', (e) => active && e.preventDefault());
+  document.addEventListener('contextmenu', (e) => active && e.preventDefault());
   setTool('pen');
 
   /* ---------- Keyboard ---------- */

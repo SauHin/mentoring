@@ -194,6 +194,8 @@ body:not(.deck) .topbar { right: 0; background: var(--bg); }
 /* Scratch pad (scratch.js): kanvas transparan di atas halaman. Hanya menangkap mouse/pena saat mode coret aktif. */
 .scratch { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; touch-action: none; } /* ukuran tampil = layar; resolusi internal = layar × devicePixelRatio */
 .drawing .scratch { pointer-events: auto; cursor: crosshair; }
+/* Mode coret: tidak ada seleksi teks, menu tekan-lama, atau highlight sentuh (terutama di HP). */
+.drawing, .drawing * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
 .scratch-palette { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; border-radius: 999px; background: var(--card); }
 .scratch-palette[hidden] { display: none; }
 .scratch-palette .tool { background: var(--surface); }
