@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operasi Double Linked List</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+  <style>
+    .viz { max-width: 1100px; }
+    .controls .field { width: 5.5rem; }
+    .ops { display: flex; flex-wrap: wrap; gap: 10px; }
+    .bottom { display: grid; gap: 12px; margin-top: 12px; }
+    @media (min-width: 760px) { .bottom { grid-template-columns: 1.15fr 1fr; } }
+    .code { margin: 0; font-size: 0.85rem; line-height: 1.55; }
+    .code .ln { display: block; padding: 0 0.5rem; border-radius: 6px; white-space: pre; }
+    .code .ln.on { background: var(--marker); }
+    .side { display: flex; flex-direction: column; gap: 10px; padding: 20px; }
+    .side p { margin: 0; }
+    #caption { font-size: 1.05rem; min-height: 3.3em; }
+    #vars { color: var(--ink-2); }
+    #output { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+    .legend span::before { content: ''; display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--c); }
+
+    /* Gambar list */
+    .node .body { fill: var(--card-2); }
+    .node .div { stroke: var(--surface); stroke-width: 3; }
+    .node .null { stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round; }
+    .node .val { fill: var(--ink); font-size: 20px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+    .node.cur .body { fill: color-mix(in srgb, var(--focus) 24%, var(--surface)); }
+    .node.new .body { fill: color-mix(in srgb, var(--go) 24%, var(--surface)); }
+    .node.del .body { fill: color-mix(in srgb, var(--stop) 24%, var(--surface)); }
+    .node.found .body { fill: var(--go); }
+    .node.found .val { fill: #fff; }
+    .node.found .null { stroke: rgb(255 255 255 / 0.6); }
+    .arrow { fill: none; stroke-width: 2; }
+    .arrow.next { stroke: var(--go-ink); }
+    .arrow.prev { stroke: var(--focus); }
+    .arrow.hot { stroke: var(--hot); stroke-width: 3.5; }
+    .dot.next, .tip.next { fill: var(--go-ink); }
+    .dot.prev, .tip.prev { fill: var(--focus); }
+    .dot.hot, .tip.hot { fill: var(--hot); }
+    .ptr { fill: var(--ink-2); font-size: 17px; font-weight: 500; text-anchor: middle; }
+    .ptr.hot { fill: var(--hot); font-weight: 700; }
+    .ptr-line { stroke: var(--ink-3); stroke-width: 1.5; }
+    .ptr-line.hot { stroke: var(--hot); stroke-width: 2.5; }
+    .idx { fill: var(--ink-3); font-size: 14px; text-anchor: middle; }
+    .empty { fill: var(--ink-3); font-size: 20px; text-anchor: middle; }
+  </style>
+</head>
+<body class="viz">
+
+<h1>Operasi double linked list</h1>
+<p>Pilih operasi, lalu jalankan langkah demi langkah. Pointer yang baru berubah berwarna oranye.</p>
+
+<div class="controls">
+  <label>Nilai <input class="field" id="val" type="number" value="25"></label>
+  <label>Posisi <input class="field" id="pos" type="number" value="2" min="0"></label>
+  <div class="ops">
+    <button class="btn btn-sm" data-op="insertFront">Tambah depan</button>
+    <button class="btn btn-sm" data-op="insertBack">Tambah belakang</button>
+    <button class="btn btn-sm" data-op="insertAt">Sisip di posisi</button>
+    <button class="btn btn-sm" data-op="deleteAt">Hapus di posisi</button>
+    <button class="btn btn-sm" data-op="search">Cari nilai</button>
+    <button class="btn btn-sm" data-op="printForward">Telusuri maju</button>
+    <button class="btn btn-sm" data-op="printBackward">Telusuri mundur</button>
+    <button class="btn btn-sm" id="reset">Reset</button>
+  </div>
+</div>
+
+<svg id="stage" viewBox="0 0 1270 330" role="img" aria-label="Gambar double linked list"></svg>
+
+<div class="bottom">
+  <pre class="code" id="code"></pre>
+  <div class="card side">
+    <p id="caption" aria-live="polite"></p>
+    <p class="label" id="vars"></p>
+    <p id="output"></p>
+    <div class="ops">
+      <button class="btn btn-go btn-sm" id="next">Langkah berikutnya</button>
+      <button class="btn btn-sm" id="play">Putar otomatis</button>
+    </div>
+    <p class="label legend">
+      <span style="--c: var(--go-ink)">next</span>
+      <span style="--c: var(--focus)">prev</span>
+      <span style="--c: var(--hot)">baru berubah</span>
+    </p>
+  </div>
+</div>
+
+<script>
+const CODE = {
+  struct: `struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+};
+
+Node* head = nullptr;
+Node* tail = nullptr;
+int size = 0;`,
+  insertFront: `void insertFront(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (head == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->next = head;
+        head->prev = newNode;
+        head = newNode;
+    }
+    size++;
+}`,
+  insertBack: `void insertBack(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (tail == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->prev = tail;
+        tail->next = newNode;
+        tail = newNode;
+    }
+    size++;
+}`,
+  insertAt: `void insertAt(int pos, int x) {
+    if (pos == 0) { insertFront(x); return; }
+    if (pos == size) { insertBack(x); return; }
+    Node* cur = head;
+    for (int i = 0; i < pos; i++)
+        cur = cur->next;
+    Node* newNode = new Node{x, nullptr, nullptr};
+    newNode->next = cur;
+    newNode->prev = cur->prev;
+    cur->prev->next = newNode;
+    cur->prev = newNode;
+    size++;
+}`,
+  deleteAt: `void deleteAt(int pos) {
+    Node* del = head;
+    for (int i = 0; i < pos; i++)
+        del = del->next;
+    if (del->prev != nullptr)
+        del->prev->next = del->next;
+    else
+        head = del->next;
+    if (del->next != nullptr)
+        del->next->prev = del->prev;
+    else
+        tail = del->prev;
+    delete del;
+    size--;
+}`,
+  search: `Node* search(int x) {
+    Node* cur = head;
+    while (cur != nullptr) {
+        if (cur->data == x)
+            return cur;
+        cur = cur->next;
+    }
+    return nullptr;
+}`,
+  printForward: `void printForward() {
+    Node* cur = head;
+    while (cur != nullptr) {
+        std::cout << cur->data << " ";
+        cur = cur->next;
+    }
+}`,
+  printBackward: `void printBackward() {
+    Node* cur = tail;
+    while (cur != nullptr) {
+        std::cout << cur->data << " ";
+        cur = cur->prev;
+    }
+}`,
+};
+for (const k in CODE) CODE[k] = CODE[k].split('\n');
+
+const $ = (id) => document.getElementById(id);
+const W = 120, H = 50, STRIDE = 170, TOP = 90, LIFT = 140, MAX = 7, VBW = 1270;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Pointer di sini adalah id node (angka) atau null.
+let nodes, order, head, tail, vars, found, output, nextId, hl = new Set();
+let running = null, playTimer = null, shown = {}, anim = 0;
+
+const val = (id) => (id === null ? 'null' : nodes[id].val);
+const step = (code, find, text, hot = []) => ({ code, line: CODE[code].findIndex((l) => l.includes(find)), text, hl: hot });
+const done = (code, find, text) => ({ ...step(code, find, text), final: true });
+
+// Node baru digambar turun di bawah list sampai semua pointernya tersambung.
+function make(x, index) {
+  const id = nextId++;
+  nodes[id] = { id, val: x, prev: null, next: null, lifted: true };
+  order.splice(index, 0, id);
+  vars.newNode = id;
+  return nodes[id];
+}
+
+function* finishInsert(c, n) {
+  n.lifted = false;
+  delete vars.newNode;
+  yield done(c, 'size++', `Selesai. Node ${n.val} sudah masuk. List sekarang berisi ${order.length} node.`);
+}
+
+/* ---------- Operasi: setiap yield adalah satu langkah ---------- */
+function* insertFront(x) {
+  const c = 'insertFront';
+  const n = make(x, 0);
+  yield step(c, 'new Node', `Buat node baru berisi ${x}. prev dan next masih null.`, ['newNode']);
+  if (head === null) {
+    head = tail = n.id;
+    yield step(c, 'head = tail', 'List kosong, jadi head dan tail sama-sama menunjuk node baru.', ['head', 'tail']);
+  } else {
+    n.next = head;
+    yield step(c, 'newNode->next = head', `next milik node baru menunjuk node pertama (${val(head)}).`, [n.id + '.next']);
+    nodes[head].prev = n.id;
+    yield step(c, 'head->prev = newNode', `prev milik node ${val(head)} menunjuk balik ke node baru.`, [head + '.prev']);
+    head = n.id;
+    yield step(c, 'head = newNode', 'head pindah ke node baru. Node baru sekarang node pertama.', ['head']);
+  }
+  yield* finishInsert(c, n);
+}
+
+function* insertBack(x) {
+  const c = 'insertBack';
+  const n = make(x, order.length);
+  yield step(c, 'new Node', `Buat node baru berisi ${x}. prev dan next masih null.`, ['newNode']);
+  if (tail === null) {
+    head = tail = n.id;
+    yield step(c, 'head = tail', 'List kosong, jadi head dan tail sama-sama menunjuk node baru.', ['head', 'tail']);
+  } else {
+    n.prev = tail;
+    yield step(c, 'newNode->prev = tail', `prev milik node baru menunjuk node terakhir (${val(tail)}).`, [n.id + '.prev']);
+    nodes[tail].next = n.id;
+    yield step(c, 'tail->next = newNode', `next milik node ${val(tail)} menunjuk ke node baru.`, [tail + '.next']);
+    tail = n.id;
+    yield step(c, 'tail = newNode', 'tail pindah ke node baru. Node baru sekarang node terakhir.', ['tail']);
+  }
+  yield* finishInsert(c, n);
+}
+
+function* insertAt(pos, x) {
+  const c = 'insertAt';
+  if (pos === 0) {
+    yield step(c, 'pos == 0', 'Posisi 0 adalah depan list, jadi pakai insertFront.');
+    return yield* insertFront(x);
+  }
+  if (pos === order.length) {
+    yield step(c, 'pos == size', `Posisi ${pos} adalah akhir list, jadi pakai insertBack.`);
+    return yield* insertBack(x);
+  }
+  vars.cur = head;
+  yield step(c, 'Node* cur = head', 'Posisi ada di tengah. cur mulai dari head.', ['cur']);
+  for (let i = 0; i < pos; i++) {
+    vars.cur = nodes[vars.cur].next;
+    yield step(c, 'cur = cur->next', `i = ${i}: cur maju satu node.`, ['cur']);
+  }
+  const cur = nodes[vars.cur];
+  const n = make(x, order.indexOf(cur.id));
+  yield step(c, 'new Node', `cur berhenti di posisi ${pos}. Buat node baru berisi ${x}. Node ini akan masuk tepat sebelum cur.`, ['newNode']);
+  n.next = cur.id;
+  yield step(c, 'newNode->next = cur', `next milik node baru menunjuk cur (${cur.val}).`, [n.id + '.next']);
+  n.prev = cur.prev;
+  yield step(c, 'newNode->prev = cur->prev', `prev milik node baru menunjuk node sebelum cur (${val(cur.prev)}).`, [n.id + '.prev']);
+  nodes[cur.prev].next = n.id;
+  yield step(c, 'cur->prev->next = newNode', `Node ${val(cur.prev)} sekarang menunjuk node baru lewat next.`, [cur.prev + '.next']);
+  cur.prev = n.id;
+  yield step(c, 'cur->prev = newNode', `prev milik cur menunjuk node baru. Keempat pointer sudah tersambung.`, [cur.id + '.prev']);
+  delete vars.cur;
+  yield* finishInsert(c, n);
+}
+
+function* deleteAt(pos) {
+  const c = 'deleteAt';
+  vars.del = head;
+  yield step(c, 'Node* del = head', 'del mulai dari head.', ['del']);
+  for (let i = 0; i < pos; i++) {
+    vars.del = nodes[vars.del].next;
+    yield step(c, 'del = del->next', `i = ${i}: del maju satu node.`, ['del']);
+  }
+  const d = nodes[vars.del];
+  if (d.prev !== null) {
+    nodes[d.prev].next = d.next;
+    yield step(c, 'del->prev->next = del->next', `Node ${val(d.prev)} melompati del. next-nya sekarang menunjuk ${d.next === null ? 'null' : 'node ' + val(d.next)}.`, [d.prev + '.next']);
+  } else {
+    head = d.next;
+    yield step(c, 'head = del->next', 'del adalah node pertama, jadi head pindah ke node sesudahnya.', ['head']);
+  }
+  if (d.next !== null) {
+    nodes[d.next].prev = d.prev;
+    yield step(c, 'del->next->prev = del->prev', `Node ${val(d.next)} melompati del dari arah belakang. prev-nya sekarang menunjuk ${d.prev === null ? 'null' : 'node ' + val(d.prev)}.`, [d.next + '.prev']);
+  } else {
+    tail = d.prev;
+    yield step(c, 'tail = del->prev', 'del adalah node terakhir, jadi tail pindah ke node sebelumnya.', ['tail']);
+  }
+  d.lifted = true;
+  yield step(c, 'delete del', 'Tidak ada lagi pointer di list yang menunjuk del. Sekarang del aman untuk dihapus dari memori.');
+  order.splice(order.indexOf(d.id), 1);
+  delete nodes[d.id];
+  delete vars.del;
+  yield done(c, 'size--', `Selesai. Node ${d.val} sudah dihapus. List sekarang berisi ${order.length} node.`);
+}
+
+function* search(x) {
+  const c = 'search';
+  vars.cur = head;
+  yield step(c, 'Node* cur = head', 'cur mulai dari head.', ['cur']);
+  while (vars.cur !== null) {
+    const n = nodes[vars.cur];
+    if (n.val === x) {
+      found = n.id;
+      delete vars.cur;
+      return yield done(c, 'return cur', `${n.val} sama dengan ${x}. Ketemu di posisi ${order.indexOf(n.id)}.`);
+    }
+    yield step(c, 'if (cur->data == x)', `${n.val} tidak sama dengan ${x}.`);
+    vars.cur = n.next;
+    yield step(c, 'cur = cur->next', vars.cur === null ? 'cur sekarang null. Semua node sudah dicek.' : 'cur maju satu node.', ['cur']);
+  }
+  delete vars.cur;
+  yield done(c, 'return nullptr', `${x} tidak ada di list.`);
+}
+
+function* traverse(c, start, dir) {
+  output = [];
+  vars.cur = start;
+  yield step(c, 'Node* cur', `cur mulai dari ${start === head ? 'head' : 'tail'}.`, ['cur']);
+  while (vars.cur !== null) {
+    output.push(nodes[vars.cur].val);
+    yield step(c, 'std::cout', `Cetak ${nodes[vars.cur].val}.`);
+    vars.cur = nodes[vars.cur][dir];
+    yield step(c, `cur = cur->${dir}`, vars.cur === null ? 'cur sekarang null, jadi loop berhenti.' : `cur pindah lewat pointer ${dir}.`, ['cur']);
+  }
+  delete vars.cur;
+  yield done(c, 'while', `Selesai. Urutan output: ${output.join(' ') || '(kosong)'}.`);
+}
+
+const OPS = {
+  insertFront: (x) => insertFront(x),
+  insertBack: (x) => insertBack(x),
+  insertAt: (x, p) => insertAt(p, x),
+  deleteAt: (x, p) => deleteAt(p),
+  search: (x) => search(x),
+  printForward: () => traverse('printForward', head, 'next'),
+  printBackward: () => traverse('printBackward', tail, 'prev'),
+};
+
+function check(op, x, p, n) {
+  if (['insertFront', 'insertBack', 'insertAt', 'search'].includes(op) && !(Number.isInteger(x) && Math.abs(x) <= 999))
+    return 'Isi nilai dengan bilangan bulat dari -999 sampai 999.';
+  if (op.startsWith('insert') && n >= MAX) return `List sudah berisi ${MAX} node, batas gambar ini. Hapus satu node dulu.`;
+  if (op === 'insertAt' && !(Number.isInteger(p) && p >= 0 && p <= n)) return `Posisi sisip harus dari 0 sampai ${n}.`;
+  if (op === 'deleteAt' && n === 0) return 'List kosong. Tidak ada node yang bisa dihapus.';
+  if (op === 'deleteAt' && !(Number.isInteger(p) && p >= 0 && p < n)) return `Posisi hapus harus dari 0 sampai ${n - 1}.`;
+  return '';
+}
+
+/* ---------- Menjalankan langkah ---------- */
+function start(gen) {
+  found = null;
+  output = null;
+  running = gen;
+  setBusy(true);
+  advance();
+}
+
+function advance() {
+  if (!running) return;
+  const r = running.next();
+  if (r.done) return end();
+  showStep(r.value);
+  if (r.value.final) end();
+}
+
+function end() {
+  running = null;
+  stopPlay();
+  setBusy(false);
+  checkList();
+}
+
+function setBusy(busy) {
+  document.querySelectorAll('[data-op]').forEach((b) => (b.disabled = busy));
+  $('next').disabled = $('play').disabled = !busy;
+}
+
+function stopPlay() {
+  clearInterval(playTimer);
+  playTimer = null;
+  $('play').textContent = 'Putar otomatis';
+}
+
+// Pemeriksaan sendiri: setelah setiap operasi, prev dan next harus saling cocok.
+function checkList() {
+  const ids = [];
+  let prev = null;
+  for (let id = head; id !== null; id = nodes[id].next) {
+    console.assert(nodes[id].prev === prev, 'prev tidak cocok di node', nodes[id].val);
+    ids.push(id);
+    prev = id;
+  }
+  console.assert(tail === prev, 'tail tidak menunjuk node terakhir');
+  console.assert(ids.join() === order.join(), 'urutan gambar berbeda dengan urutan list');
+}
+
+/* ---------- Gambar ---------- */
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const ptrValue = (name) => (name === 'head' ? head : name === 'tail' ? tail : vars[name]);
+
+function showStep(st) {
+  hl = new Set(st.hl || []);
+  $('code').innerHTML = CODE[st.code].map((l, i) => `<span class="ln${i === st.line ? ' on' : ''}">${esc(l) || ' '}</span>`).join('');
+  $('caption').textContent = st.text;
+  $('vars').textContent = ['head', 'tail', ...Object.keys(vars)].map((k) => `${k} → ${val(ptrValue(k))}`).join('   ·   ');
+  $('output').textContent = output ? `Output: ${output.join(' ')}` : '';
+  draw();
+}
+
+function layout() {
+  const x0 = (VBW - (order.length * STRIDE - (STRIDE - W))) / 2;
+  const pos = {};
+  order.forEach((id, i) => (pos[id] = { x: x0 + i * STRIDE, y: TOP + (nodes[id].lifted ? LIFT : 0) }));
+  return pos;
+}
+
+// Node bergeser halus ke posisi baru (350 ms), kecuali pengguna memilih gerak dikurangi.
+function draw() {
+  const target = layout();
+  const from = {};
+  for (const id in target) from[id] = shown[id] || target[id];
+  cancelAnimationFrame(anim);
+  if (reduceMotion) return render((shown = target));
+  const t0 = performance.now();
+  const tick = (t) => {
+    const k = Math.min(1, (t - t0) / 350), e = 1 - (1 - k) ** 3;
+    shown = {};
+    for (const id in target) shown[id] = { x: from[id].x + (target[id].x - from[id].x) * e, y: from[id].y + (target[id].y - from[id].y) * e };
+    render(shown);
+    if (k < 1) anim = requestAnimationFrame(tick);
+  };
+  anim = requestAnimationFrame(tick);
+}
+
+function arrow(sx, sy, ex, ey, dir, kind, hot) {
+  const c = hot ? 'hot' : kind;
+  // Panah yang melompati node di baris yang sama melengkung: next ke atas, prev ke bawah.
+  const skip = Math.abs(ex - sx) > STRIDE && Math.abs(ey - sy) < H;
+  const dx = Math.max(40, Math.abs(ex - sx) * 0.45) * dir, dy = kind === 'next' ? -80 : 80;
+  const d = skip ? `M${sx} ${sy} C${sx} ${sy + dy} ${ex} ${ey + dy} ${ex} ${ey}` : `M${sx} ${sy} C${sx + dx} ${sy} ${ex - dx} ${ey} ${ex} ${ey}`;
+  return `<path class="arrow ${kind}${hot ? ' hot' : ''}" d="${d}" marker-end="url(#tip-${c})"/>` +
+    `<circle class="dot ${c}" cx="${sx}" cy="${sy}" r="4"/>`;
+}
+
+function render(pos) {
+  const s = ['<defs>' + ['next', 'prev', 'hot'].map((k) =>
+    `<marker id="tip-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path class="tip ${k}" d="M0 0L10 5L0 10z"/></marker>`).join('') + '</defs>'];
+
+  if (!order.length) s.push(`<text class="empty" x="${VBW / 2}" y="${TOP + H / 2}">List kosong: head = null, tail = null</text>`);
+
+  let idx = 0;
+  for (const id of order) {
+    const n = nodes[id], p = pos[id];
+    const st = vars.del === id ? 'del' : vars.newNode === id ? 'new' : found === id ? 'found' : vars.cur === id ? 'cur' : '';
+    s.push(`<g class="node ${st}" transform="translate(${p.x} ${p.y})">
+      <rect class="body" width="${W}" height="${H}" rx="10"/>
+      <line class="div" x1="30" y1="0" x2="30" y2="${H}"/><line class="div" x1="90" y1="0" x2="90" y2="${H}"/>
+      ${n.prev === null ? `<line class="null" x1="8" y1="${H - 10}" x2="22" y2="10"/>` : ''}
+      ${n.next === null ? `<line class="null" x1="98" y1="${H - 10}" x2="112" y2="10"/>` : ''}
+      <text class="val" x="60" y="${H / 2}">${n.val}</text>
+    </g>`);
+    if (!n.lifted) s.push(`<text class="idx" x="${p.x + W / 2}" y="${p.y + H + 24}">[${idx++}]</text>`);
+
+    // Label pointer (head, tail, cur, ...) di atas node, atau di bawah node yang sedang turun.
+    const names = ['head', 'tail', ...Object.keys(vars)].filter((k) => ptrValue(k) === id);
+    if (names.length) {
+      const hot = names.some((k) => hl.has(k)) ? ' hot' : '';
+      const cx = p.x + W / 2;
+      s.push(n.lifted
+        ? `<line class="ptr-line${hot}" x1="${cx}" y1="${p.y + H + 4}" x2="${cx}" y2="${p.y + H + 18}"/><text class="ptr${hot}" x="${cx}" y="${p.y + H + 36}">${names.join(', ')}</text>`
+        : `<text class="ptr${hot}" x="${cx}" y="${p.y - 30}">${names.join(', ')}</text><line class="ptr-line${hot}" x1="${cx}" y1="${p.y - 22}" x2="${cx}" y2="${p.y - 4}"/>`);
+    }
+  }
+
+  for (const id of order) {
+    const n = nodes[id], p = pos[id];
+    if (n.next !== null && pos[n.next]) {
+      const q = pos[n.next];
+      s.push(arrow(p.x + W - 15, p.y + H / 2, q.x - 3, q.y + H * 0.3, 1, 'next', hl.has(id + '.next')));
+    }
+    if (n.prev !== null && pos[n.prev]) {
+      const q = pos[n.prev];
+      s.push(arrow(p.x + 15, p.y + H / 2, q.x + W + 3, q.y + H * 0.7, -1, 'prev', hl.has(id + '.prev')));
+    }
+  }
+  $('stage').innerHTML = s.join('');
+}
+
+/* ---------- Kontrol ---------- */
+function reset(values = [10, 20, 30, 40]) {
+  stopPlay();
+  running = null;
+  nodes = {}; order = []; vars = {}; head = tail = found = output = null; nextId = 0;
+  let prev = null;
+  for (const v of values) {
+    const id = nextId++;
+    nodes[id] = { id, val: v, prev, next: null, lifted: false };
+    if (prev === null) head = id; else nodes[prev].next = id;
+    order.push(id);
+    prev = id;
+  }
+  tail = prev;
+  shown = {};
+  showStep({ code: 'struct', line: -1, text: 'Pilih operasi di atas. Setiap operasi berjalan langkah demi langkah.' });
+  setBusy(false);
+}
+
+document.querySelectorAll('[data-op]').forEach((b) => (b.onclick = () => {
+  const x = Number($('val').value), p = Number($('pos').value), op = b.dataset.op;
+  const err = check(op, x, p, order.length);
+  if (err) return ($('caption').textContent = err);
+  start(OPS[op](x, p));
+}));
+$('next').onclick = advance;
+$('play').onclick = () => {
+  if (playTimer) return stopPlay();
+  $('play').textContent = 'Jeda';
+  playTimer = setInterval(advance, 1100);
+  advance();
+};
+$('reset').onclick = () => reset();
+reset();
+</script>
+</body>
+</html>

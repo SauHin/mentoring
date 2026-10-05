@@ -1,0 +1,259 @@
+/* Gaya visual diambil dari Empur (D:\sem-5\speech-recognition\DESIGN.md):
+   terang dan bersih, kartu abu tanpa garis, tombol pil hijau papan tulis, satu font Lexend. */
+
+@font-face {
+  font-family: 'Lexend';
+  src: url('fonts/lexend-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* Siang */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --card: #f5f5f7;
+  --card-2: #ececf0;
+  --line: #e7e7ec;
+  --ink: #16161d;
+  --ink-2: #5c5c6e;
+  --ink-3: #8c8c9c;
+  --go: #22775b;
+  --go-edge: #17523f;
+  --go-ink: #22775b;
+  --stop: #f04438;
+  --stop-edge: #b42318;
+  --focus: #4b7bff;
+  --mentioned: #ffb020;
+  --marker: rgb(255 216 77 / 0.6);
+  /* Warna kapur untuk ilustrasi dan seri data di visualisasi. */
+  --c-jingga: #ff9f43;
+  --c-biru: #4b7bff;
+  --c-pink: #ff5a8a;
+  --c-mint: #12b886;
+  --c-lilac: #8b5cf6;
+  --tint-blue: #e8eeff;
+  /* Tombol di dalam kartu abu: harus lebih terang dari kartunya. */
+  --btn-bg: #ffffff;
+  --btn-edge: #d4d4dc;
+  --btn-off: #ececf0;
+  --hot: #e8590c; /* sorotan "baru berubah" di visualisasi */
+  --font: 'Lexend', system-ui, sans-serif;
+  --mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Malam: data-theme dipasang oleh theme.js (pilihan tersimpan, atau ikut sistem). */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #141414;
+  --surface: #1a1a1d;
+  --card: #1f1f22;
+  --card-2: #2a2a2e;
+  --line: #34343a;
+  --ink: #f5f5f7;
+  --ink-2: #a8a8b3;
+  --ink-3: #7c7c88;
+  --go-ink: #4fae8a;
+  --marker: rgb(255 216 77 / 0.32);
+  --tint-blue: #1c2748;
+  --btn-bg: #34343a;
+  --btn-edge: #0e0e10;
+  --btn-off: #1a1a1d;
+  --hot: #ff9f43;
+}
+
+/* ---------- Dasar ---------- */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1.05rem;
+  line-height: 1.625;
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--go-ink);
+}
+h1, h2, h3 { line-height: 1.25; }
+h1 { font-weight: 700; letter-spacing: -0.02em; }
+h2, h3 { font-weight: 600; }
+a { color: var(--go-ink); }
+::selection { background: #ffe27a; color: #16161d; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 12px; }
+code, pre { font-family: var(--mono); font-variant-ligatures: none; font-size: 0.92em; background: var(--card); border-radius: 8px; }
+code { padding: 0.1em 0.35em; }
+pre { padding: 1rem 1.25rem; overflow-x: auto; border-radius: 16px; }
+pre code { padding: 0; background: none; }
+
+/* Sorotan stabilo di separuh bawah huruf: <mark>istilah</mark> */
+mark {
+  color: inherit;
+  background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%);
+}
+
+/* Kutipan: garis kiri biru muda. */
+blockquote { margin: 1em 0; padding: 0.2em 0 0.2em 1em; border-left: 4px solid #9fdbff; color: var(--ink-2); }
+
+/* Lipatan untuk rincian, jawaban latihan, dll. */
+details { background: var(--card); border-radius: 16px; padding: 0.75rem 1rem; margin: 0.75rem 0; }
+summary { cursor: pointer; font-weight: 600; }
+
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 0.5em 0.8em; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; color: var(--ink-2); }
+
+/* Dua kolom dari layar lebar, satu kolom di HP. */
+.cols { display: grid; gap: 1.5em 3em; align-items: center; }
+@media (min-width: 900px) { .cols { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } }
+
+/* ---------- Komponen ---------- */
+/* Kartu abu tanpa garis, dan kartu putih dengan garis 1px. Kartu biasa tidak diberi bayangan. */
+.card { background: var(--card); border-radius: 28px; padding: 24px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 24px; }
+
+/* Tombol pil yang terasa bisa ditekan: tepi bawah lebih gelap, turun saat ditekan. */
+.btn {
+  --edge: var(--card-2);
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  border: 0; border-radius: 999px; padding: 0.85rem 1.8rem;
+  font: 600 1.1rem/1.5 var(--font);
+  background: var(--card); color: var(--ink);
+  box-shadow: 0 5px 0 var(--edge);
+  cursor: pointer;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out, filter 150ms ease-out;
+}
+.btn:hover { filter: brightness(1.04); }
+.btn:active { transform: translateY(5px); box-shadow: 0 0 0 var(--edge); }
+:where(.card, .controls) .btn { --edge: var(--btn-edge); background: var(--btn-bg); }
+.btn-go { --edge: var(--go-edge); background: var(--go); color: #fff; }
+.btn-stop { --edge: var(--stop-edge); background: var(--stop); color: #fff; }
+.btn-sm { padding: 0.45rem 1rem; font-size: 0.95rem; box-shadow: 0 4px 0 var(--edge); }
+.btn-sm:active { transform: translateY(4px); }
+/* Nonaktif: datar (tanpa tepi bawah) dan abu, tetapi teksnya tetap terbaca. */
+.btn:disabled { cursor: not-allowed; background: var(--btn-off); color: var(--ink-2); box-shadow: none; filter: none; transform: none; }
+
+/* Kolom isian: garis tipis, fokus berubah biru dengan cahaya lembut. */
+.field {
+  border: 1.5px solid var(--line); border-radius: 16px;
+  background: var(--surface); color: var(--ink);
+  padding: 0.45rem 0.8rem; font: inherit;
+}
+.field:focus-visible { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 22%, transparent); }
+
+.chip { display: inline-block; background: var(--card); border-radius: 999px; padding: 4px 14px; font-size: 0.875rem; color: var(--ink-2); }
+.label { font-size: 0.875rem; color: var(--ink-3); }
+input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color: var(--go); }
+
+/* ---------- Slide ---------- */
+.deck .slide {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 6vh 8vw;
+  font-size: clamp(16px, 2.2vw, 28px);
+}
+.deck .slide.active { display: flex; }
+.deck h1 { font-size: 2.6em; margin: 0 0 0.3em; line-height: 1.05; }
+.deck h2 { font-size: 1.6em; margin: 0 0 0.6em; }
+.deck p, .deck li { color: var(--ink-2); }
+.deck li + li { margin-top: 0.4em; }
+.deck pre { font-size: 0.68em; margin: 0; }
+.deck td, .deck th { font-size: 0.85em; }
+.deck .logo { width: 3em; height: 3em; margin-bottom: 1em; }
+.deck iframe { width: 100%; flex: 1; min-height: 60vh; border: 1px solid var(--line); border-radius: 28px; background: var(--surface); }
+
+/* Tombol ikon kecil: toolbar slide dan tombol tema di notes. */
+.tool {
+  height: 36px; min-width: 36px; padding: 0 10px; border: 0; border-radius: 999px;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--card); color: var(--ink-2);
+  font: 500 14px var(--font); font-variant-numeric: tabular-nums;
+  transition: background 150ms ease-out, color 150ms ease-out;
+}
+.tool:hover { background: var(--card-2); color: var(--ink); }
+.tool svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.tool .fill { fill: currentColor; stroke: none; }
+.tool.on { background: var(--stop); color: #fff; }
+.theme-toggle { position: fixed; top: 16px; right: 16px; }
+
+/* Toolbar kanan bawah: laser, tema, nomor slide (klik nomor untuk memilih slide). */
+.deck .toolbar { position: fixed; right: 16px; bottom: 16px; z-index: 4; display: flex; gap: 6px; }
+.deck .counter { padding: 0 14px; }
+
+/* Laser pointer */
+.deck .laser-dot {
+  position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; display: none;
+  width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 999px;
+  background: #ff3b30; box-shadow: 0 0 0 4px rgb(240 68 56 / 0.3), 0 0 20px 6px rgb(240 68 56 / 0.5);
+}
+.deck.laser .laser-dot { display: block; }
+/* Kursor disembunyikan, di slide maupun di dalam visualisasi (kelas laser-on dari theme.js). */
+.deck.laser, .deck.laser *, .laser-on, .laser-on * { cursor: none !important; }
+
+/* Pilih slide */
+.deck .picker {
+  border: 0; padding: 0; border-radius: 28px;
+  width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 64px);
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 24px 60px -28px rgb(0 0 0 / 0.45);
+}
+.deck .picker::backdrop { background: rgb(0 0 0 / 0.35); }
+.deck .picker-body { padding: 24px; }
+.deck .picker h2 { font-size: 1.25rem; margin: 0 0 12px; }
+.deck .picker ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.deck .picker li + li { margin-top: 0; }
+.deck .picker button {
+  width: 100%; display: flex; gap: 12px; align-items: center; text-align: left;
+  border: 0; border-radius: 16px; padding: 10px 14px; cursor: pointer;
+  background: var(--card); color: var(--ink); font: 500 1rem/1.3 var(--font);
+}
+.deck .picker button:hover { background: var(--card-2); }
+.deck .picker button.on { background: color-mix(in srgb, var(--go) 14%, var(--surface)); box-shadow: inset 0 0 0 2px var(--go-ink); }
+.deck .picker button span { min-width: 1.6em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.deck .picker button.on span { color: var(--go-ink); font-weight: 700; }
+
+/* Tombol prev/next di tepi layar: tersembunyi, muncul saat mouse mendekat (dari slides.js). */
+.deck .nav {
+  position: fixed; top: 50%; translate: 0 -50%; z-index: 4;
+  width: 56px; height: 56px; border: 0; border-radius: 999px;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--card); color: var(--ink);
+  opacity: 0; pointer-events: none; transition: opacity 150ms ease-out, background 150ms ease-out;
+}
+.deck .nav-prev { left: 16px; }
+.deck .nav-next { right: 16px; }
+.deck .nav:hover { background: var(--card-2); }
+.deck .nav.near:not(:disabled), .deck .nav:focus-visible:not(:disabled) { opacity: 1; pointer-events: auto; }
+.deck .nav svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+/* Layar sentuh tidak punya mouse: tombol selalu tampil. */
+@media (hover: none) { .deck .nav:not(:disabled) { opacity: 1; pointer-events: auto; } }
+
+/* Cetak ke PDF (Ctrl+P): semua slide tampil, satu per halaman. */
+@media print {
+  .deck .slide { display: flex; break-after: page; }
+  .deck .toolbar, .deck .nav, .deck .laser-dot, .theme-toggle { display: none !important; }
+}
+
+/* ---------- Notes ---------- */
+.notes { max-width: 44rem; margin: 0 auto; padding: 32px 16px 64px; }
+.notes h1 { font-size: 2.6rem; margin: 0.4em 0 0.2em; line-height: 1.05; }
+.notes h2 { font-size: 1.25rem; margin: 2em 0 0.5em; }
+.notes h3 { font-size: 1.05rem; margin: 1.5em 0 0.4em; }
+.notes .lead { font-size: 1.15rem; color: var(--ink-2); margin-top: 0; }
+.notes li + li { margin-top: 0.3em; }
+
+/* ---------- Visualisasi ---------- */
+.viz { max-width: 900px; margin: 0 auto; padding: 16px; }
+.viz h1 { font-size: 1.4rem; margin: 0 0 0.2em; }
+.viz > p { color: var(--ink-2); margin-top: 0; }
+.viz .controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; background: var(--card); border-radius: 20px; padding: 12px 16px; margin-bottom: 12px; }
+.viz label { display: flex; align-items: center; gap: 0.6em; }
+.viz output { min-width: 2ch; font-weight: 600; font-variant-numeric: tabular-nums; }
+.viz > canvas, .viz > svg { display: block; width: 100%; height: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

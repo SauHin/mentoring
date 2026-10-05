@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Double Linked List</title>
+  <link rel="icon" href="../_shared/favicon.svg">
+  <link rel="stylesheet" href="../_shared/style.css">
+  <script src="../_shared/theme.js"></script>
+  <style>
+    /* Diagram node statis */
+    .d { width: 100%; max-width: 880px; height: auto; }
+    .d .box { fill: var(--card-2); }
+    .d .sep { stroke: var(--bg); stroke-width: 3; }
+    .d .null { stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round; }
+    .d .val { fill: var(--ink); font-size: 22px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+    .d .lbl { fill: var(--ink-2); font-size: 17px; text-anchor: middle; }
+    .d .cell { fill: var(--ink-3); font-size: 14px; text-anchor: middle; }
+    .d .ar { fill: none; stroke-width: 2.5; }
+    .d .ar.n { stroke: var(--go-ink); marker-end: url(#d-n); }
+    .d .ar.p { stroke: var(--focus); marker-end: url(#d-p); }
+    .d .ptr { stroke: var(--ink-3); stroke-width: 1.5; }
+    .t-next { color: var(--go-ink); font-weight: 600; }
+    .t-prev { color: var(--focus); font-weight: 600; }
+    .deck .slide.full { padding-top: 3vh; padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 82vh; }
+  </style>
+</head>
+<body class="deck">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="d-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--go-ink)"/></marker>
+    <marker id="d-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--focus)"/></marker>
+  </defs>
+</svg>
+
+<section class="slide">
+  <img class="logo" src="../_shared/logo.svg" alt="">
+  <h1>Double linked list</h1>
+  <p>Struktur data · list yang bisa ditelusuri maju dan mundur</p>
+</section>
+
+<section class="slide">
+  <h2>Ingat lagi: single linked list</h2>
+  <svg class="d" viewBox="0 0 660 130" role="img" aria-label="Single linked list dengan tiga node: 10, 20, 30">
+    <text class="lbl" x="67" y="20">head</text><line class="ptr" x1="67" y1="28" x2="67" y2="46"/>
+    <g transform="translate(30 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">10</text></g>
+    <g transform="translate(230 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">20</text></g>
+    <g transform="translate(430 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">30</text></g>
+    <path class="ar n" d="M122 78H226"/><path class="ar n" d="M322 78H426"/><path class="ar n" d="M522 78H580"/>
+    <text class="cell" x="610" y="83">null</text>
+  </svg>
+  <ul>
+    <li>Setiap node hanya tahu node <b>sesudahnya</b>.</li>
+    <li>Mundur satu langkah berarti mulai lagi dari head: O(n).</li>
+    <li>Untuk menghapus node, kita butuh node sebelumnya, padahal node itu tidak tersimpan.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Idenya: tambah satu pointer</h2>
+  <svg class="d" viewBox="0 0 660 150" role="img" aria-label="Double linked list dengan tiga node: 10, 20, 30. Setiap node punya pointer prev dan next.">
+    <text class="lbl" x="100" y="22">head</text><line class="ptr" x1="100" y1="30" x2="100" y2="56"/>
+    <text class="lbl" x="560" y="22">tail</text><line class="ptr" x1="560" y1="30" x2="560" y2="56"/>
+    <g transform="translate(30 60)"><rect class="box" width="140" height="56" rx="10"/><line class="sep" x1="36" y1="0" x2="36" y2="56"/><line class="sep" x1="104" y1="0" x2="104" y2="56"/><line class="null" x1="10" y1="44" x2="26" y2="12"/><text class="val" x="70" y="28">10</text></g>
+    <g transform="translate(260 60)"><rect class="box" width="140" height="56" rx="10"/><line class="sep" x1="36" y1="0" x2="36" y2="56"/><line class="sep" x1="104" y1="0" x2="104" y2="56"/><text class="val" x="70" y="28">20</text></g>
+    <g transform="translate(490 60)"><rect class="box" width="140" height="56" rx="10"/><line class="sep" x1="36" y1="0" x2="36" y2="56"/><line class="sep" x1="104" y1="0" x2="104" y2="56"/><line class="null" x1="114" y1="44" x2="130" y2="12"/><text class="val" x="70" y="28">30</text></g>
+    <path class="ar n" d="M152 78H256"/><path class="ar n" d="M382 78H486"/>
+    <path class="ar p" d="M278 98H174"/><path class="ar p" d="M508 98H404"/>
+    <text class="cell" x="48" y="138">prev</text><text class="cell" x="100" y="138">data</text><text class="cell" x="152" y="138">next</text>
+  </svg>
+  <ul>
+    <li>Setiap node menyimpan <span class="t-prev">prev</span> (node sebelumnya) dan <span class="t-next">next</span> (node sesudahnya).</li>
+    <li>prev milik node pertama dan next milik node terakhir bernilai null (garis miring).</li>
+    <li>Kita menyimpan <b>head</b> dan <b>tail</b>, jadi kedua ujung bisa diakses langsung.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Struktur node</h2>
+  <div class="cols">
+<pre><code>struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+};
+
+Node* head = nullptr;
+Node* tail = nullptr;
+int size = 0;</code></pre>
+    <ul>
+      <li>Satu node = data + dua pointer.</li>
+      <li>List kosong: <code>head</code> dan <code>tail</code> sama-sama <code>nullptr</code>.</li>
+      <li>List satu node: <code>head</code> dan <code>tail</code> menunjuk node yang sama.</li>
+      <li>Harga yang dibayar: satu pointer tambahan per node.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Tambah di depan</h2>
+  <div class="cols">
+<pre><code>void insertFront(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (head == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->next = head;
+        head->prev = newNode;
+        head = newNode;
+    }
+    size++;
+}</code></pre>
+    <ol>
+      <li>Node baru menunjuk head lama lewat <span class="t-next">next</span>.</li>
+      <li>Head lama menunjuk balik lewat <span class="t-prev">prev</span>.</li>
+      <li>Baru setelah itu, pindahkan <b>head</b>.</li>
+      <li>Kalau head dipindah lebih dulu, kita kehilangan alamat node lama.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Tambah di belakang</h2>
+  <div class="cols">
+<pre><code>void insertBack(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (tail == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->prev = tail;
+        tail->next = newNode;
+        tail = newNode;
+    }
+    size++;
+}</code></pre>
+    <ul>
+      <li>Kebalikan dari tambah di depan: tukar <span class="t-next">next</span> dengan <span class="t-prev">prev</span>, dan head dengan tail.</li>
+      <li>Karena ada <b>tail</b>, operasi ini O(1). Tanpa tail, kita harus berjalan sampai ujung dulu.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Sisip di tengah: empat pointer</h2>
+  <div class="cols">
+<pre><code>Node* cur = head;
+for (int i = 0; i < pos; i++)
+    cur = cur->next;
+Node* newNode = new Node{x, nullptr, nullptr};
+newNode->next = cur;
+newNode->prev = cur->prev;
+cur->prev->next = newNode;
+cur->prev = newNode;</code></pre>
+    <ol>
+      <li>Jalan sampai <code>cur</code>, yaitu node di posisi <code>pos</code>.</li>
+      <li>Sambungkan node baru dulu: <span class="t-next">next</span> ke cur, <span class="t-prev">prev</span> ke node sebelum cur.</li>
+      <li>Lalu node sebelum cur menunjuk node baru.</li>
+      <li><code>cur->prev</code> diubah <b>paling akhir</b>, karena langkah 2 dan 3 masih memakai nilai lamanya.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Hapus node: lewati dari dua arah</h2>
+  <div class="cols">
+<pre><code>if (del->prev != nullptr)
+    del->prev->next = del->next;
+else
+    head = del->next;
+if (del->next != nullptr)
+    del->next->prev = del->prev;
+else
+    tail = del->prev;
+delete del;</code></pre>
+    <ul>
+      <li>Node sebelum del melompati del lewat <span class="t-next">next</span>.</li>
+      <li>Node sesudah del melompati del lewat <span class="t-prev">prev</span>.</li>
+      <li>Kalau del ada di ujung, yang berpindah adalah head atau tail.</li>
+      <li>Kalau kita sudah punya pointer ke del, hapus cukup O(1). Kita tidak perlu mencari node sebelumnya.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri</h2>
+  <iframe src="viz/operasi.html" title="Visualisasi operasi double linked list"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Kasus tepi yang sering salah</h2>
+  <table>
+    <tr><th>Kasus</th><th>Yang harus diingat</th></tr>
+    <tr><td>List kosong</td><td>Node baru menjadi head <b>dan</b> tail sekaligus.</td></tr>
+    <tr><td>List satu node</td><td>Setelah dihapus, head <b>dan</b> tail harus kembali null.</td></tr>
+    <tr><td>Hapus node pertama</td><td>Tidak ada <code>del->prev</code>. Yang dipindah adalah head.</td></tr>
+    <tr><td>Hapus node terakhir</td><td>Tidak ada <code>del->next</code>. Yang dipindah adalah tail.</td></tr>
+    <tr><td>Setiap operasi</td><td>Kalau mengubah <span class="t-next">next</span>, cek apakah <span class="t-prev">prev</span> pasangannya juga perlu diubah.</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Perbandingan kompleksitas</h2>
+  <table>
+    <tr><th>Operasi</th><th>Array dinamis</th><th>Single LL</th><th>Double LL</th></tr>
+    <tr><td>Akses elemen ke-i</td><td>O(1)</td><td>O(n)</td><td>O(n)</td></tr>
+    <tr><td>Tambah di depan</td><td>O(n)</td><td>O(1)</td><td>O(1)</td></tr>
+    <tr><td>Tambah di belakang</td><td>O(1)*</td><td>O(1) dengan tail</td><td>O(1)</td></tr>
+    <tr><td>Hapus node yang sudah ditunjuk</td><td>O(n)</td><td>O(n)</td><td>O(1)</td></tr>
+    <tr><td>Mundur satu langkah</td><td>O(1)</td><td>O(n)</td><td>O(1)</td></tr>
+    <tr><td>Memori per elemen</td><td>data</td><td>data + 1 pointer</td><td>data + 2 pointer</td></tr>
+  </table>
+  <p class="label">* Rata-rata (amortized). Sesekali array harus pindah ke memori yang lebih besar.</p>
+</section>
+
+<section class="slide">
+  <h2>Dipakai di mana?</h2>
+  <ul>
+    <li><b>Tombol kembali dan maju</b> di browser.</li>
+    <li><b>Undo dan redo</b> di editor teks.</li>
+    <li><b>Playlist musik</b>: lagu sebelumnya dan lagu berikutnya.</li>
+    <li><b>LRU cache</b>: memindahkan dan menghapus item di tengah list dalam O(1).</li>
+    <li><code>std::list</code> di C++ adalah double linked list.</li>
+  </ul>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: riwayat browser</h2>
+  <iframe src="viz/riwayat-browser.html" title="Visualisasi riwayat browser"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Double linked list = single linked list + pointer <span class="t-prev">prev</span> + pointer <b>tail</b>.</li>
+    <li>Bisa ditelusuri maju dan mundur, dan menghapus node yang sudah ditunjuk cukup O(1).</li>
+    <li>Setiap sambungan punya dua sisi. Ubah <span class="t-next">next</span> dan <span class="t-prev">prev</span> berpasangan.</li>
+    <li>Selalu cek kasus tepi: list kosong, satu node, head, dan tail.</li>
+  </ul>
+  <p class="label">Latihan dan program lengkap ada di notes.</p>
+</section>
+
+<script src="../_shared/slides.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "_shared/style.css"
+        ],
+        "createdAt": "2026-10-05T05:52:19.778Z",
+        "reason": "Empur DESIGN.md (D:/sem-5/speech-recognition) specifies blockquote as 4px light-blue left border; style copied on user request"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "_shared/style.css"
+        ],
+        "createdAt": "2026-10-05T07:41:19.347Z",
+        "reason": "Laser pointer dot in slides (.laser-dot) imitates real laser light; glow is the literal effect the user asked for"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "_template/viz/contoh.html"
+        ],
+        "createdAt": "2026-10-05T07:41:19.585Z",
+        "reason": "Laser pointer dot in slides (.laser-dot) imitates real laser light; glow is the literal effect the user asked for"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "_template/slides.html"
+        ],
+        "createdAt": "2026-10-05T07:42:03.297Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "_template/notes.html"
+        ],
+        "createdAt": "2026-10-05T07:42:03.540Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "01-double-linked-list/slides.html"
+        ],
+        "createdAt": "2026-10-05T07:42:03.781Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "01-double-linked-list/notes.html"
+        ],
+        "createdAt": "2026-10-05T07:42:04.022Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "01-double-linked-list/viz/operasi.html"
+        ],
+        "createdAt": "2026-10-05T07:42:04.268Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "01-double-linked-list/viz/riwayat-browser.html"
+        ],
+        "createdAt": "2026-10-05T07:42:04.510Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+// Tema Siang/Malam. Muat file ini di <head> supaya halaman tidak berkedip.
+// Pilihan tersimpan di localStorage. Kalau belum ada pilihan, tema ikut pengaturan sistem.
+// Halaman induk mengirim tema ke iframe (visualisasi) lewat postMessage, jadi tetap jalan di file://.
+(function () {
+  const root = document.documentElement;
+  const send = (f) => f.contentWindow && f.contentWindow.postMessage({ theme: root.dataset.theme }, '*');
+
+  function apply(theme) {
+    root.dataset.theme = theme;
+    document.querySelectorAll('iframe').forEach(send);
+    dispatchEvent(new Event('themechange')); // untuk canvas yang perlu digambar ulang
+  }
+
+  let saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (e) {}
+  root.dataset.theme = saved === 'light' || saved === 'dark' ? saved
+    : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+  window.toggleTheme = () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('theme', next); } catch (e) {}
+    apply(next);
+  };
+
+  // Laser pointer di slide: halaman di dalam iframe menyembunyikan kursornya
+  // dan melaporkan posisi mouse ke slide, supaya titik laser bisa mengikuti.
+  let laser = false;
+  if (parent !== window) {
+    addEventListener('mousemove', (e) => laser && parent.postMessage({ mouse: [e.clientX, e.clientY] }, '*'));
+  }
+
+  addEventListener('message', (e) => {
+    const t = e.data && e.data.theme;
+    if (t === 'light' || t === 'dark') apply(t);
+    if (e.data && typeof e.data.laser === 'boolean') root.classList.toggle('laser-on', (laser = e.data.laser));
+  });
+  // Event load halaman induk baru jalan setelah semua iframe selesai dimuat.
+  addEventListener('load', () => document.querySelectorAll('iframe').forEach(send));
+})();

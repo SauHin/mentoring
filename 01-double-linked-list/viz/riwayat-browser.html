@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Riwayat Browser</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+  <style>
+    .browser { display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 999px; margin-bottom: 12px; }
+    .icon { width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+    .icon:disabled { color: var(--ink-3); opacity: 0.5; cursor: not-allowed; }
+    .icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .addr { flex: 1; background: var(--surface); border-radius: 999px; padding: 0.55rem 1.1rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sites { display: flex; flex-wrap: wrap; gap: 10px; }
+    .track { display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 36px 8px 12px; }
+    .pg { position: relative; flex: none; background: var(--card-2); border-radius: 14px; padding: 0.6rem 1rem; font-weight: 600; }
+    .pg.on { background: color-mix(in srgb, var(--focus) 24%, var(--surface)); }
+    .pg.on::before { content: 'cur'; position: absolute; left: 50%; top: -30px; translate: -50% 0; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); }
+    .link { flex: none; width: 56px; height: 28px; }
+    .link .n { stroke: var(--go-ink); } .link .p { stroke: var(--focus); }
+    .link path { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .nil { flex: none; color: var(--ink-3); font-size: 0.9rem; padding: 0 10px; }
+    #msg { min-height: 3.2em; margin: 12px 0; }
+    .code { font-size: 0.85rem; line-height: 1.55; }
+    .code .ln { display: block; padding: 0 0.5rem; border-radius: 6px; white-space: pre; }
+    .code .ln.on { background: var(--marker); }
+  </style>
+</head>
+<body class="viz">
+
+<h1>Riwayat browser</h1>
+<p>Tombol kembali dan maju di browser bekerja seperti double linked list. Setiap halaman adalah node, dan cur menunjuk halaman yang sedang dibuka.</p>
+
+<div class="card browser">
+  <button class="icon" id="back" aria-label="Kembali"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="icon" id="fwd" aria-label="Maju"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <div class="addr" id="addr"></div>
+</div>
+
+<div class="controls">
+  <span class="label">Buka halaman:</span>
+  <div class="sites">
+    <button class="btn btn-sm">wikipedia.org</button>
+    <button class="btn btn-sm">youtube.com</button>
+    <button class="btn btn-sm">github.com</button>
+    <button class="btn btn-sm">kampus.ac.id/jadwal</button>
+    <button class="btn btn-sm">stackoverflow.com</button>
+  </div>
+</div>
+
+<div class="panel"><div class="track" id="track"></div></div>
+<p id="msg" aria-live="polite"></p>
+<pre class="code" id="code"></pre>
+
+<script>
+// Untuk gambar ini, riwayat cukup disimpan sebagai array + indeks cur.
+// Kode C++ di bawah menunjukkan versi double linked list-nya.
+const CODE = `void back() {
+    if (cur->prev != nullptr) cur = cur->prev;
+}
+void forward() {
+    if (cur->next != nullptr) cur = cur->next;
+}
+void visit(std::string url) {
+    while (cur->next != nullptr) {    // buang riwayat maju
+        Node* d = cur->next;
+        cur->next = d->next;
+        delete d;
+    }
+    Node* n = new Node{url, cur, nullptr};
+    cur->next = n;
+    cur = n;
+}`.split('\n');
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const LINK = '<svg class="link" viewBox="0 0 56 28"><path class="n" d="M6 9H50M44 4l6 5-6 5"/><path class="p" d="M50 19H6M12 14l-6 5 6 5"/></svg>';
+let pages = ['kampus.ac.id'], cur = 0;
+
+function render(fn, text) {
+  $('addr').textContent = pages[cur];
+  $('back').disabled = cur === 0;
+  $('fwd').disabled = cur === pages.length - 1;
+  $('track').innerHTML = '<span class="nil">null</span>' +
+    pages.map((p, i) => `<span class="pg${i === cur ? ' on' : ''}">${esc(p)}</span>`).join(LINK) +
+    '<span class="nil">null</span>';
+  $('track').querySelector('.on').scrollIntoView({ block: 'nearest', inline: 'center' });
+  const start = fn ? CODE.findIndex((l) => l.startsWith(`void ${fn}`)) : -1;
+  const stop = start < 0 ? -1 : CODE.indexOf('}', start);
+  $('code').innerHTML = CODE.map((l, i) => `<span class="ln${i >= start && i <= stop && start >= 0 ? ' on' : ''}">${esc(l)}</span>`).join('');
+  $('msg').textContent = text;
+}
+
+$('back').onclick = () => { cur--; render('back', 'cur = cur->prev. Halaman sebelumnya terbuka, dan riwayat maju tetap tersimpan.'); };
+$('fwd').onclick = () => { cur++; render('forward', 'cur = cur->next. Halaman sesudahnya terbuka lagi.'); };
+document.querySelectorAll('.sites .btn').forEach((b) => (b.onclick = () => {
+  const dropped = pages.length - 1 - cur;
+  pages = pages.slice(0, cur + 1).concat(b.textContent);
+  cur++;
+  render('visit', dropped
+    ? `Kamu membuka halaman baru dari tengah riwayat. ${dropped} halaman sesudah cur dibuang, lalu node baru disambung sesudah cur. Itu sebabnya tombol maju sekarang mati.`
+    : 'Node baru disambung sesudah cur, lalu cur pindah ke node baru.');
+}));
+
+render(null, 'Buka beberapa halaman, lalu tekan tombol kembali dan maju. Coba juga buka halaman baru setelah menekan kembali.');
+</script>
+</body>
+</html>

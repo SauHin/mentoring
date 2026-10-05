@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nama Konsep</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+</head>
+<body class="viz">
+
+<h1>Nama konsep</h1>
+<p>Satu kalimat: apa yang ditunjukkan visualisasi ini.</p>
+
+<div class="controls">
+  <label>Frekuensi
+    <input id="freq" type="range" min="1" max="10" value="3">
+    <output id="freqOut"></output>
+  </label>
+  <button class="btn btn-go" id="reset">Reset</button>
+</div>
+<canvas id="canvas" width="800" height="300"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const freq = document.getElementById('freq');
+const freqOut = document.getElementById('freqOut');
+// Ambil warna dari style.css, jadi ikut tema Siang/Malam.
+const color = (name) => getComputedStyle(document.documentElement).getPropertyValue(name);
+
+function draw() {
+  const f = Number(freq.value);
+  const { width: w, height: h } = canvas;
+  freqOut.textContent = f;
+  ctx.clearRect(0, 0, w, h);
+  ctx.strokeStyle = color('--go-ink');
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (let x = 0; x <= w; x++) {
+    const y = h / 2 - Math.sin((x / w) * f * 2 * Math.PI) * h * 0.38;
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+freq.addEventListener('input', draw);
+addEventListener('themechange', draw); // canvas tidak ikut CSS, jadi gambar ulang saat tema berganti
+document.getElementById('reset').addEventListener('click', () => { freq.value = 3; draw(); });
+draw();
+</script>
+</body>
+</html>
