@@ -34,6 +34,20 @@
     if (t === 'light' || t === 'dark') apply(t);
     if (e.data && typeof e.data.laser === 'boolean') root.classList.toggle('laser-on', (laser = e.data.laser));
   });
+  // Tombol Home di pojok kiri atas, posisinya sama persis di slide dan notes.
+  // Link-nya ke index.html di root (satu tingkat di atas _shared), langsung ke bagian matkul-nya.
+  addEventListener('DOMContentLoaded', () => {
+    if (parent !== window || !document.querySelector('body.deck, article.notes')) return;
+    const root = new URL('../', document.querySelector('link[href*="_shared/style.css"]').href);
+    const matkul = location.href.startsWith(root.href) ? location.href.slice(root.href.length).split('/')[0] : '';
+    const bar = document.body.appendChild(document.createElement('div'));
+    bar.className = 'topbar';
+    bar.innerHTML = '<a class="tool home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/></svg>Home</a>';
+    bar.firstChild.href = new URL(`index.html${matkul ? '#' + matkul : ''}`, root).href;
+    const crumbs = document.querySelector('.crumbs'); // notes: "/ Data structure" ikut di sebelah Home
+    if (crumbs) bar.append(crumbs);
+  });
+
   // Event load halaman induk baru jalan setelah semua iframe selesai dimuat.
   addEventListener('load', () => document.querySelectorAll('iframe').forEach(send));
 })();

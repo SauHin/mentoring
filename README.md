@@ -36,7 +36,7 @@ mentoring/
 ## Membuat Materi Baru
 
 1. Salin `_template/NN-nama-materi` ke folder matkul, misalnya `data-structure/01-single-linked-list`.
-2. Di `notes.html`, ganti `matkul` di breadcrumb dengan nama folder matkul.
+2. Di `notes.html`, ganti `matkul` di breadcrumb dengan nama folder matkul. Tombol Home dibuat otomatis oleh `theme.js`.
 3. Isi `notes.html` dan `slides.html`. Satu `<section class="slide">` = satu slide.
 4. Untuk tiap konsep interaktif, salin `viz/contoh.html` ke nama baru di `viz/`.
 5. Tambahkan kartu di `index.html` (di `<section>` matkul-nya) dan baris di tabel di atas.
@@ -64,7 +64,7 @@ Matkul baru: buat folder baru, lalu tambahkan `<section class="matkul" id="nama-
 | `.controls` | Wadah slider dan tombol di visualisasi |
 | `.callout`, `.callout.tip`, `.callout.warn` | Kotak catatan biru, tips hijau, peringatan merah |
 | `.card.tldr` | Kotak ringkasan di awal notes |
-| `.crumbs` | Breadcrumb ke homepage (tetap terlihat saat scroll) |
+| `.crumbs` | Nama matkul di sebelah tombol Home (notes) |
 | `ol.refs` | Daftar pustaka |
 
 Warna untuk seri data di visualisasi: `--go-ink`, `--c-jingga`, `--c-biru`, `--c-pink`, `--c-mint`, `--c-lilac`.
@@ -82,7 +82,7 @@ Aturan gaya Empur: huruf kalimat biasa (tidak ada teks kapital penuh), tidak ada
 | L | Laser pointer (nyala/mati) |
 | T | Tema Siang/Malam |
 | G, atau klik nomor slide | Pilih slide dari daftar judul |
-| Tombol rumah (kanan bawah) | Kembali ke homepage |
+| Tombol Home (kiri atas, sama di slide dan notes) | Kembali ke homepage |
 | Ctrl+P | Cetak / simpan PDF (semua slide) |
 
 Selama laser menyala, klik tetap jalan, termasuk di dalam visualisasi.

@@ -66,13 +66,6 @@ const tool = (label, html, onclick) => {
   b.onclick = () => { onclick(); b.blur(); };
   return b;
 };
-// Homepage = index.html di folder root (satu tingkat di atas _shared), lompat ke bagian matkul-nya.
-const root = new URL('../', document.querySelector('link[href*="_shared/style.css"]').href);
-const matkul = location.href.startsWith(root.href) ? location.href.slice(root.href.length).split('/')[0] : '';
-const home = add('a', 'tool', icon('<path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/>'), bar);
-home.href = new URL(`index.html${matkul ? '#' + matkul : ''}`, root).href;
-home.title = 'Homepage';
-home.setAttribute('aria-label', 'Homepage');
 const laserBtn = tool('Laser pointer (L)', icon('<circle cx="12" cy="12" r="8"/><circle class="fill" cx="12" cy="12" r="3"/>'), toggleLaser);
 tool('Tema Siang/Malam (T)', icon('<circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/>'), () => toggleTheme());
 const counter = tool('Pilih slide (G)', '', openPicker);

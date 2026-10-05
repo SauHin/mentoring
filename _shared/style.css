@@ -153,7 +153,7 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
   flex-direction: column;
   justify-content: center;
   min-height: 100vh;
-  padding: 6vh 8vw;
+  padding: max(6vh, 68px) 8vw 6vh; /* atas: ruang untuk tombol Home */
   font-size: clamp(16px, 2.2vw, 28px);
 }
 .deck .slide.active { display: flex; }
@@ -178,11 +178,17 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
 .tool svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 .tool .fill { fill: currentColor; stroke: none; }
 .tool.on { background: var(--stop); color: #fff; }
-.theme-toggle { position: fixed; top: 16px; right: 16px; }
+.theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 6; }
 a.tool { text-decoration: none; }
 
 /* Breadcrumb ke homepage: Home / Data structure */
-.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--ink-2); margin-bottom: 1.5rem; }
+/* Tombol Home: pojok kiri atas, sama persis di slide dan notes (dibuat theme.js).
+   Di notes, bar ini selebar layar dengan latar, jadi teks yang di-scroll tidak menabrak tombol. */
+.topbar { position: fixed; top: 0; left: 0; z-index: 5; display: flex; align-items: center; gap: 8px; padding: 16px; }
+body:not(.deck) .topbar { right: 0; background: var(--bg); }
+.tool.home { display: inline-flex; gap: 6px; padding: 0 14px 0 10px; color: var(--ink); font-weight: 600; }
+.tool.home svg { stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--ink-2); }
 .crumbs a { color: var(--ink-2); text-decoration: none; background: var(--card); border-radius: 999px; padding: 4px 12px; }
 .crumbs a:hover { background: var(--card-2); color: var(--ink); }
 
@@ -248,11 +254,12 @@ a.tool { text-decoration: none; }
 /* Cetak ke PDF (Ctrl+P): semua slide tampil, satu per halaman. */
 @media print {
   .deck .slide { display: flex; break-after: page; }
-  .deck .toolbar, .deck .nav, .deck .laser-dot, .theme-toggle, .toc-btn, .to-top { display: none !important; }
+  .deck .toolbar, .deck .nav, .deck .laser-dot, .theme-toggle, .toc-btn, .to-top, .topbar { display: none !important; }
 }
 
 /* ---------- Notes ---------- */
 .notes { max-width: 44rem; margin: 0 auto; padding: 32px 16px 64px; }
+article.notes { padding-top: 84px; } /* di bawah topbar */
 .notes h1 { font-size: 2.6rem; margin: 0.4em 0 0.2em; line-height: 1.05; }
 .notes h2 { font-size: 1.25rem; margin: 2em 0 0.5em; }
 .notes h3 { font-size: 1.05rem; margin: 1.5em 0 0.4em; }
@@ -263,8 +270,7 @@ a.tool { text-decoration: none; }
 @media (max-width: 640px) { .notes table { display: block; overflow-x: auto; } }
 
 /* Breadcrumb tetap terlihat di atas saat scroll, jadi Home selalu bisa diklik. */
-.notes .crumbs { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 12px 0; margin: -12px 0 1rem; }
-.notes h2 { scroll-margin-top: 64px; }
+.notes h2 { scroll-margin-top: 84px; }
 
 /* Daftar isi (dibuat notes.js). Layar sempit: kartu di bawah TL;DR. Layar lebar: menempel di kiri. */
 .toc { background: var(--card); border-radius: 20px; padding: 16px 20px; margin: 1.5rem 0; font-size: 0.95rem; }
