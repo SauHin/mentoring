@@ -301,7 +301,7 @@ article.notes { padding-top: 84px; } /* di bawah topbar */
 }
 .list-link p { margin-bottom: 0; }
 /* Kartu matkul di home: ikon gradasi warna kapur + latar bergradasi tipis dengan warna yang sama. */
-.course { display: flex; gap: 16px; align-items: flex-start;
+.course { display: flex; gap: 16px; align-items: center;
   background: linear-gradient(135deg, color-mix(in srgb, var(--a2) 14%, var(--surface)), var(--card) 70%); }
 .course:hover { background: linear-gradient(135deg, color-mix(in srgb, var(--a2) 22%, var(--surface)), var(--card-2) 70%); }
 .course-icon { flex: none; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
