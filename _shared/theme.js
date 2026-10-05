@@ -46,6 +46,8 @@
     bar.firstChild.href = new URL(`index.html${matkul ? '#' + matkul : ''}`, root).href;
     const crumbs = document.querySelector('.crumbs'); // notes: "/ Data structure" ikut di sebelah Home
     if (crumbs) bar.append(crumbs);
+    // Scratch pad (coret-coret) untuk slide dan notes.
+    document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js', root).href;
   });
 
   // Event load halaman induk baru jalan setelah semua iframe selesai dimuat.

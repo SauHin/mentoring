@@ -23,7 +23,7 @@ Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 ```
 mentoring/
 ├── index.html              homepage: daftar materi per matkul
-├── _shared/                style.css, theme.js, slides.js, notes.js, listviz.js/css, font, logo
+├── _shared/                style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, font, logo
 ├── _template/
 │   └── NN-nama-materi/     salin folder ini untuk materi baru
 │       ├── notes.html
@@ -85,6 +85,7 @@ Aturan gaya Empur: huruf kalimat biasa (tidak ada teks kapital penuh), tidak ada
 | Mouse di tepi kiri/kanan | Tombol slide sebelumnya/berikutnya muncul |
 | F | Layar penuh |
 | L | Laser pointer (nyala/mati) |
+| D, atau tombol pena di sebelah Home | Scratch pad: coret-coret di slide atau notes (Esc selesai, Ctrl+Z undo) |
 | T | Tema Siang/Malam |
 | G, atau klik nomor slide | Pilih slide dari daftar judul |
 | Tombol Home (kiri atas, sama di slide dan notes) | Kembali ke homepage |
@@ -92,6 +93,7 @@ Aturan gaya Empur: huruf kalimat biasa (tidak ada teks kapital penuh), tidak ada
 
 Selama laser menyala, klik tetap jalan, termasuk di dalam visualisasi.
 Pilihan tema tersimpan dan berlaku untuk slide, notes, dan visualisasi.
+Coretan scratch pad di slide disimpan per slide, di notes ikut ter-scroll. Coretan hilang saat halaman di-reload.
 
 Setelah Anda klik di dalam visualisasi, tombol keyboard masuk ke visualisasi tersebut.
 Klik di luar visualisasi untuk kembali mengontrol slide.

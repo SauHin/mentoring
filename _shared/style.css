@@ -189,6 +189,19 @@ a.tool { text-decoration: none; }
 body:not(.deck) .topbar { right: 0; background: var(--bg); }
 .tool.home { display: inline-flex; gap: 6px; padding: 0 14px 0 10px; color: var(--ink); font-weight: 600; }
 .tool.home svg { stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.topbar { flex-wrap: wrap; }
+
+/* Scratch pad (scratch.js): kanvas transparan di atas halaman. Hanya menangkap mouse/pena saat mode coret aktif. */
+.scratch { position: fixed; inset: 0; z-index: 3; pointer-events: none; touch-action: none; }
+.drawing .scratch { pointer-events: auto; cursor: crosshair; }
+.scratch-palette { display: flex; gap: 6px; padding: 4px; border-radius: 999px; background: var(--card); }
+.scratch-palette[hidden] { display: none; }
+.scratch-palette .tool { background: var(--surface); }
+.topbar .tool svg { stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.tool.sel { box-shadow: inset 0 0 0 2px var(--go-ink); color: var(--go-ink); }
+.swatch { width: 18px; height: 18px; border-radius: 999px; }
+.swatch.wide { width: 22px; height: 12px; border-radius: 4px; }
+.to-top, .toc-btn { z-index: 4; }
 .crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--ink-2); }
 .crumbs a { color: var(--ink-2); text-decoration: none; background: var(--card); border-radius: 999px; padding: 4px 12px; }
 .crumbs a:hover { background: var(--card-2); color: var(--ink); }
@@ -255,7 +268,7 @@ body:not(.deck) .topbar { right: 0; background: var(--bg); }
 /* Cetak ke PDF (Ctrl+P): semua slide tampil, satu per halaman. */
 @media print {
   .deck .slide { display: flex; break-after: page; }
-  .deck .toolbar, .deck .nav, .deck .laser-dot, .theme-toggle, .toc-btn, .to-top, .topbar { display: none !important; }
+  .deck .toolbar, .deck .nav, .deck .laser-dot, .theme-toggle, .toc-btn, .to-top, .topbar, .scratch { display: none !important; }
 }
 
 /* ---------- Notes ---------- */

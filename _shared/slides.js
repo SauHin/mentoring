@@ -19,6 +19,7 @@ function show(n) {
   history.replaceState(null, '', `#${current + 1}`);
   nav[0].disabled = current === 0;
   nav[1].disabled = current === slides.length - 1;
+  dispatchEvent(new Event('slidechange')); // scratch.js menampilkan coretan milik slide ini
 }
 
 /* ---------- Laser pointer: titik merah menggantikan kursor, klik tetap jalan ---------- */
