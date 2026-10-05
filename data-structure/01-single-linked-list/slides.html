@@ -79,13 +79,14 @@ Node* head = NULL;</code></pre>
   <h2><code>createNode</code>: kenapa begini?</h2>
   <div class="cols">
 <pre><code>Node* createNode(int x) {
-    Node* n = malloc(sizeof(Node));
+    Node* n = (Node*)malloc(sizeof(Node));
     n->data = x;
     n->next = NULL;
     return n;
 }</code></pre>
     <ul>
       <li><code>malloc</code>: node harus tetap hidup setelah fungsi selesai → simpan di <b>heap</b>, bukan variabel lokal.</li>
+      <li><code>(Node*)</code>: <code>malloc</code> mengembalikan <code>void*</code>. Compiler C++ wajib cast ini, C tidak. Pakai cast supaya jalan di keduanya.</li>
       <li><code>n->next = NULL</code>: <code>malloc</code> tidak mengosongkan memory. Tanpa ini, <code>next</code> berisi alamat acak.</li>
       <li>Setiap <code>malloc</code> nanti butuh satu <code>free</code>.</li>
     </ul>

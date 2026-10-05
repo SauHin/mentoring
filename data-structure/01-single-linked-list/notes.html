@@ -49,7 +49,7 @@ Node* head = NULL;        // alamat node pertama, NULL kalau list kosong
 int size = 0;
 
 Node* createNode(int x) {
-    Node* n = malloc(sizeof(Node));
+    Node* n = (Node*)malloc(sizeof(Node));
     n->data = x;
     n->next = NULL;
     return n;
@@ -61,6 +61,7 @@ Node* createNode(int x) {
   <tr><td><code>struct Node* next</code></td><td>Di dalam struct, nama <code>Node</code> (hasil <code>typedef</code>) belum selesai dibuat. Jadi pakai nama lengkapnya: <code>struct Node</code>.</td></tr>
   <tr><td><code>Node* head</code></td><td>List tidak disimpan "utuh". Cukup simpan alamat node pertama, sisanya bisa dicapai lewat <code>next</code>.</td></tr>
   <tr><td><code>malloc</code></td><td>Node harus tetap hidup setelah fungsi selesai. Variabel lokal hilang saat fungsi return, jadi node dibuat di <b>heap</b>.</td></tr>
+  <tr><td><code>(Node*)</code> di depan <code>malloc</code></td><td><code>malloc</code> mengembalikan <code>void*</code> (alamat tanpa tipe). C mengubahnya ke <code>Node*</code> otomatis, tapi <b>compiler C++</b> (g++, Dev-C++, Code::Blocks dengan file <code>.cpp</code>) tidak. Cast ini membuat kode jalan di keduanya.</td></tr>
   <tr><td><code>n->next = NULL</code></td><td><code>malloc</code> tidak mengosongkan memory. Tanpa baris ini, <code>next</code> berisi alamat acak.</td></tr>
 </table>
 
@@ -246,6 +247,7 @@ void printList() {
 </table>
 
 <h2>8. Full code</h2>
+<div class="callout tip"><strong>Bisa di-compile sebagai C atau C++</strong>Simpan sebagai <code>.c</code> (gcc) atau <code>.cpp</code> (g++, Dev-C++, Code::Blocks). Kodenya ditulis dalam gaya C, tapi tetap valid di compiler C++ berkat cast <code>(Node*)</code> di <code>malloc</code>.</div>
 <details>
   <summary>Lihat full code</summary>
 <pre><code>#include &lt;stdio.h&gt;
@@ -260,7 +262,7 @@ Node* head = NULL;
 int size = 0;
 
 Node* createNode(int x) {
-    Node* n = malloc(sizeof(Node));
+    Node* n = (Node*)malloc(sizeof(Node));
     n->data = x;
     n->next = NULL;
     return n;

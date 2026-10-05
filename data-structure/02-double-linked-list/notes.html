@@ -50,9 +50,10 @@ Node* head = NULL;
 Node* tail = NULL;
 int size = 0;
 
-// alokasi node baru di heap, prev & next kosong
+// alokasi node baru di heap, prev & next kosong.
+// (Node*) wajib kalau di-compile dengan compiler C++ (g++, Dev-C++).
 Node* createNode(int x) {
-    Node* n = malloc(sizeof(Node));
+    Node* n = (Node*)malloc(sizeof(Node));
     n->data = x;
     n->prev = n->next = NULL;
     return n;
@@ -220,6 +221,7 @@ void printBackward() {
 </ul>
 
 <h2>8. Full code</h2>
+<div class="callout tip"><strong>Bisa di-compile sebagai C atau C++</strong>Simpan sebagai <code>.c</code> (gcc) atau <code>.cpp</code> (g++, Dev-C++, Code::Blocks). Kodenya ditulis dalam gaya C, tapi tetap valid di compiler C++ berkat cast <code>(Node*)</code> di <code>malloc</code>.</div>
 <details>
   <summary>Lihat full code</summary>
 <pre><code>#include &lt;stdio.h&gt;
@@ -236,7 +238,7 @@ Node* tail = NULL;
 int size = 0;
 
 Node* createNode(int x) {
-    Node* n = malloc(sizeof(Node));
+    Node* n = (Node*)malloc(sizeof(Node));
     n->data = x;
     n->prev = n->next = NULL;
     return n;

@@ -28,7 +28,7 @@ Node* tail = NULL;
 int size = 0;
 
 Node* createNode(int x) {
-    Node* n = malloc(sizeof(Node));
+    Node* n = (Node*)malloc(sizeof(Node));
     n->data = x;
     n->prev = n->next = NULL;
     return n;

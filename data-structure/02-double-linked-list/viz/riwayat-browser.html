@@ -69,7 +69,7 @@ void visit(const char* url) {
         cur->next = d->next;
         free(d);
     }
-    Node* n = malloc(sizeof(Node));
+    Node* n = (Node*)malloc(sizeof(Node));
     n->url = url;
     n->prev = cur;
     n->next = NULL;
