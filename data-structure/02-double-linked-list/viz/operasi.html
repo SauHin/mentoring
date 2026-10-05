@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Operasi Double Linked List</title>
-  <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css">
-  <script src="../../_shared/theme.js"></script>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <script src="../../../_shared/theme.js"></script>
   <style>
     .viz { max-width: 1100px; }
     .controls .field { width: 5.5rem; }
@@ -53,19 +53,19 @@
 <body class="viz">
 
 <h1>Operasi double linked list</h1>
-<p>Pilih operasi, lalu jalankan langkah demi langkah. Pointer yang baru berubah berwarna oranye.</p>
+<p>Pilih operasi, lalu jalankan <b>step by step</b>. Pointer yang baru berubah berwarna <b>oranye</b>.</p>
 
 <div class="controls">
   <label>Nilai <input class="field" id="val" type="number" value="25"></label>
   <label>Posisi <input class="field" id="pos" type="number" value="2" min="0"></label>
   <div class="ops">
-    <button class="btn btn-sm" data-op="insertFront">Tambah depan</button>
-    <button class="btn btn-sm" data-op="insertBack">Tambah belakang</button>
-    <button class="btn btn-sm" data-op="insertAt">Sisip di posisi</button>
-    <button class="btn btn-sm" data-op="deleteAt">Hapus di posisi</button>
-    <button class="btn btn-sm" data-op="search">Cari nilai</button>
-    <button class="btn btn-sm" data-op="printForward">Telusuri maju</button>
-    <button class="btn btn-sm" data-op="printBackward">Telusuri mundur</button>
+    <button class="btn btn-sm" data-op="insertFront">insertFront</button>
+    <button class="btn btn-sm" data-op="insertBack">insertBack</button>
+    <button class="btn btn-sm" data-op="insertAt">insertAt</button>
+    <button class="btn btn-sm" data-op="deleteAt">deleteAt</button>
+    <button class="btn btn-sm" data-op="search">search</button>
+    <button class="btn btn-sm" data-op="printForward">printForward</button>
+    <button class="btn btn-sm" data-op="printBackward">printBackward</button>
     <button class="btn btn-sm" id="reset">Reset</button>
   </div>
 </div>
@@ -296,11 +296,11 @@ function* deleteAt(pos) {
     yield step(c, 'tail = del->prev', 'del adalah node terakhir, jadi tail pindah ke node sebelumnya.', ['tail']);
   }
   d.lifted = true;
-  yield step(c, 'delete del', 'Tidak ada lagi pointer di list yang menunjuk del. Sekarang del aman untuk dihapus dari memori.');
+  yield step(c, 'delete del', 'Tidak ada lagi pointer di list yang menunjuk del. Sekarang del aman di-delete dari memory.');
   order.splice(order.indexOf(d.id), 1);
   delete nodes[d.id];
   delete vars.del;
-  yield done(c, 'size--', `Selesai. Node ${d.val} sudah dihapus. List sekarang berisi ${order.length} node.`);
+  yield done(c, 'size--', `Selesai. Node ${d.val} sudah di-delete. List sekarang berisi ${order.length} node.`);
 }
 
 function* search(x) {
@@ -328,12 +328,12 @@ function* traverse(c, start, dir) {
   yield step(c, 'Node* cur', `cur mulai dari ${start === head ? 'head' : 'tail'}.`, ['cur']);
   while (vars.cur !== null) {
     output.push(nodes[vars.cur].val);
-    yield step(c, 'std::cout', `Cetak ${nodes[vars.cur].val}.`);
+    yield step(c, 'std::cout', `Print ${nodes[vars.cur].val}.`);
     vars.cur = nodes[vars.cur][dir];
     yield step(c, `cur = cur->${dir}`, vars.cur === null ? 'cur sekarang null, jadi loop berhenti.' : `cur pindah lewat pointer ${dir}.`, ['cur']);
   }
   delete vars.cur;
-  yield done(c, 'while', `Selesai. Urutan output: ${output.join(' ') || '(kosong)'}.`);
+  yield done(c, 'while', `Selesai. Output: ${output.join(' ') || '(kosong)'}.`);
 }
 
 const OPS = {
@@ -350,9 +350,9 @@ function check(op, x, p, n) {
   if (['insertFront', 'insertBack', 'insertAt', 'search'].includes(op) && !(Number.isInteger(x) && Math.abs(x) <= 999))
     return 'Isi nilai dengan bilangan bulat dari -999 sampai 999.';
   if (op.startsWith('insert') && n >= MAX) return `List sudah berisi ${MAX} node, batas gambar ini. Hapus satu node dulu.`;
-  if (op === 'insertAt' && !(Number.isInteger(p) && p >= 0 && p <= n)) return `Posisi sisip harus dari 0 sampai ${n}.`;
-  if (op === 'deleteAt' && n === 0) return 'List kosong. Tidak ada node yang bisa dihapus.';
-  if (op === 'deleteAt' && !(Number.isInteger(p) && p >= 0 && p < n)) return `Posisi hapus harus dari 0 sampai ${n - 1}.`;
+  if (op === 'insertAt' && !(Number.isInteger(p) && p >= 0 && p <= n)) return `Posisi insertAt harus 0 sampai ${n}.`;
+  if (op === 'deleteAt' && n === 0) return 'List kosong, tidak ada node yang bisa di-delete.';
+  if (op === 'deleteAt' && !(Number.isInteger(p) && p >= 0 && p < n)) return `Posisi deleteAt harus 0 sampai ${n - 1}.`;
   return '';
 }
 
@@ -511,7 +511,7 @@ function reset(values = [10, 20, 30, 40]) {
   }
   tail = prev;
   shown = {};
-  showStep({ code: 'struct', line: -1, text: 'Pilih operasi di atas. Setiap operasi berjalan langkah demi langkah.' });
+  showStep({ code: 'struct', line: -1, text: 'Pilih operasi di atas. Setiap operasi berjalan step by step.' });
   setBusy(false);
 }
 

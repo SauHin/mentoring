@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Double Linked List · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<nav class="crumbs"><a href="../../index.html">Home</a> / <a href="../../index.html#data-structure">Data structure</a></nav>
+
+<span class="chip">Data structure · 02</span>
+<h1>Double linked list</h1>
+<p class="lead">Linked list yang tiap node-nya tahu node <b>sebelum</b> dan <b>sesudahnya</b>.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/operasi.html">Visualisasi operasi</a> · <a href="viz/riwayat-browser.html">Browser history</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Node punya <code>prev</code> + <code>next</code>. List menyimpan <code>head</code> + <code>tail</code>.</li>
+    <li>Bisa traverse <b>2 arah</b>. Delete node yang sudah ditunjuk cukup <b>O(1)</b>.</li>
+    <li>Setiap ubah <code>next</code>, cek apakah <code>prev</code> pasangannya juga harus diubah.</li>
+    <li>Edge case wajib: list kosong, 1 node, node pertama, node terakhir.</li>
+  </ul>
+</div>
+
+<h2>1. Kenapa butuh double linked list?</h2>
+<p>Di <b>single linked list</b>, node cuma punya <code>next</code>. Akibatnya:</p>
+<ul>
+  <li><b>Mundur 1 langkah</b> → ulang traverse dari <code>head</code>: O(n).</li>
+  <li><b>Delete node X</b> → harus ubah <code>next</code> milik node sebelum X, padahal node itu tidak diketahui. Harus dicari dulu.</li>
+</ul>
+<p>Solusinya: tambah pointer <code>prev</code> di tiap node.</p>
+
+<h2>2. Struktur node</h2>
+<pre><code>struct Node {
+    int data;
+    Node* prev;   // node sebelumnya (nullptr kalau node pertama)
+    Node* next;   // node sesudahnya (nullptr kalau node terakhir)
+};
+
+Node* head = nullptr;
+Node* tail = nullptr;
+int size = 0;</code></pre>
+
+<div class="callout"><strong>Aturan emas</strong>Untuk dua node A dan B yang bersebelahan: <code>A->next == B</code> ⇔ <code>B->prev == A</code>. Pakai aturan ini untuk mengecek setiap operasi.</div>
+
+<p class="label">Di sini <code>head</code>, <code>tail</code>, dan <code>size</code> dibuat global supaya kode pendek. Di project nyata biasanya jadi member sebuah <code>class</code>.</p>
+
+<h2>3. Operasi</h2>
+<p>Buka <a href="viz/operasi.html">visualisasi operasi</a> sambil membaca. Kodenya sama persis.</p>
+
+<h3><code>insertFront(x)</code>: O(1)</h3>
+<pre><code>void insertFront(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (head == nullptr) {            // list kosong
+        head = tail = newNode;
+    } else {
+        newNode->next = head;         // 1. sambung ke head lama
+        head->prev = newNode;         // 2. head lama menunjuk balik
+        head = newNode;               // 3. baru pindahkan head
+    }
+    size++;
+}</code></pre>
+<div class="callout warn"><strong>Awas urutan</strong>Kalau langkah 3 jalan duluan, langkah 2 jadi <code>newNode->prev = newNode</code>: node menunjuk dirinya sendiri.</div>
+
+<h3><code>insertBack(x)</code>: O(1)</h3>
+<pre><code>void insertBack(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (tail == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->prev = tail;
+        tail->next = newNode;
+        tail = newNode;
+    }
+    size++;
+}</code></pre>
+<p><b>Cermin</b> dari <code>insertFront</code>: tukar <code>head</code> ↔ <code>tail</code> dan <code>next</code> ↔ <code>prev</code>.</p>
+
+<h3><code>insertAt(pos, x)</code>: O(n)</h3>
+<pre><code>void insertAt(int pos, int x) {          // syarat: 0 <= pos <= size
+    if (pos == 0) { insertFront(x); return; }
+    if (pos == size) { insertBack(x); return; }
+    Node* cur = head;
+    for (int i = 0; i < pos; i++)
+        cur = cur->next;                 // cur = node di posisi pos
+    Node* newNode = new Node{x, nullptr, nullptr};
+    newNode->next = cur;                 // 1
+    newNode->prev = cur->prev;           // 2
+    cur->prev->next = newNode;           // 3
+    cur->prev = newNode;                 // 4: paling akhir!
+    size++;
+}</code></pre>
+<ul>
+  <li>Index mulai dari <b>0</b>. Node baru masuk <b>tepat sebelum</b> <code>cur</code>.</li>
+  <li>Langkah 1–2 cuma mengisi pointer <code>newNode</code> → list belum berubah, aman.</li>
+  <li>Langkah 3–4 mengubah list. Langkah 4 harus terakhir karena langkah 2–3 masih butuh <code>cur->prev</code> yang lama.</li>
+</ul>
+
+<h3><code>deleteAt(pos)</code>: O(n), atau O(1) kalau node sudah ditunjuk</h3>
+<pre><code>void deleteAt(int pos) {                 // syarat: 0 <= pos < size
+    Node* del = head;
+    for (int i = 0; i < pos; i++)
+        del = del->next;
+    if (del->prev != nullptr)
+        del->prev->next = del->next;     // bypass dari depan
+    else
+        head = del->next;                // del = node pertama
+    if (del->next != nullptr)
+        del->next->prev = del->prev;     // bypass dari belakang
+    else
+        tail = del->prev;                // del = node terakhir
+    delete del;
+    size--;
+}</code></pre>
+<p>Dua <code>if</code> itu sudah menangani <b>semua</b> edge case:</p>
+<table>
+  <tr><th>Posisi <code>del</code></th><th><code>prev</code></th><th><code>next</code></th><th>Hasil</th></tr>
+  <tr><td>Di tengah</td><td>ada</td><td>ada</td><td>Kedua tetangga saling menunjuk</td></tr>
+  <tr><td>Node pertama</td><td>null</td><td>ada</td><td><code>head</code> pindah ke node ke-2</td></tr>
+  <tr><td>Node terakhir</td><td>ada</td><td>null</td><td><code>tail</code> pindah mundur</td></tr>
+  <tr><td>Satu-satunya node</td><td>null</td><td>null</td><td><code>head</code> & <code>tail</code> → <code>nullptr</code></td></tr>
+</table>
+<div class="callout tip"><strong>Keunggulan utama DLL</strong>Kalau sudah pegang pointer ke node yang mau dihapus, loop pencarian tidak perlu. Delete jadi <b>O(1)</b>. Di single linked list ini tetap O(n).</div>
+
+<h3><code>search(x)</code>: O(n)</h3>
+<pre><code>Node* search(int x) {
+    Node* cur = head;
+    while (cur != nullptr) {
+        if (cur->data == x)
+            return cur;
+        cur = cur->next;
+    }
+    return nullptr;                      // tidak ketemu
+}</code></pre>
+
+<h3>Traverse maju & mundur: O(n)</h3>
+<pre><code>void printForward() {
+    for (Node* cur = head; cur != nullptr; cur = cur->next)
+        std::cout << cur->data << " ";
+}
+
+void printBackward() {
+    for (Node* cur = tail; cur != nullptr; cur = cur->prev)
+        std::cout << cur->data << " ";
+}</code></pre>
+<div class="callout tip"><strong>Trik debugging</strong>Print maju lalu print mundur. Kalau hasilnya tidak saling terbalik, ada pointer <code>prev</code> yang salah.</div>
+
+<h2>4. Time complexity</h2>
+<table>
+  <tr><th>Operasi</th><th>Dynamic array</th><th>Single LL</th><th>Double LL</th></tr>
+  <tr><td>Akses index ke-i</td><td><b>O(1)</b></td><td>O(n)</td><td>O(n)</td></tr>
+  <tr><td>Insert depan</td><td>O(n)</td><td><b>O(1)</b></td><td><b>O(1)</b></td></tr>
+  <tr><td>Insert belakang</td><td><b>O(1)</b> amortized</td><td><b>O(1)</b> (pakai tail)</td><td><b>O(1)</b></td></tr>
+  <tr><td>Delete node yang sudah ditunjuk</td><td>O(n)</td><td>O(n)</td><td><b>O(1)</b></td></tr>
+  <tr><td>Delete node terakhir</td><td><b>O(1)</b></td><td>O(n)</td><td><b>O(1)</b></td></tr>
+  <tr><td>Mundur 1 langkah</td><td><b>O(1)</b></td><td>O(n)</td><td><b>O(1)</b></td></tr>
+  <tr><td>Memory per elemen</td><td>data</td><td>data + 1 pointer</td><td>data + 2 pointer</td></tr>
+</table>
+<p class="label">Kenapa delete node terakhir di single LL tetap O(n) walau ada <code>tail</code>? Karena <code>tail</code> baru = node sebelum tail lama, dan node itu harus dicari dari <code>head</code>.</p>
+
+<h2>5. Bug yang sering muncul</h2>
+<table>
+  <tr><th>Bug</th><th>Gejala</th></tr>
+  <tr><td>Cuma ubah <code>next</code>, lupa <code>prev</code></td><td>Print maju benar, print mundur salah</td></tr>
+  <tr><td>Urutan update salah</td><td>Node menunjuk dirinya sendiri, atau sebagian list hilang</td></tr>
+  <tr><td>Akses <code>del->prev->next</code> tanpa cek null</td><td>Crash saat delete node pertama</td></tr>
+  <tr><td>Lupa pindahkan <code>head</code> / <code>tail</code></td><td><b>Dangling pointer</b>: menunjuk memory yang sudah di-<code>delete</code></td></tr>
+  <tr><td>Lupa <code>delete</code></td><td><b>Memory leak</b></td></tr>
+</table>
+
+<h2>6. Dipakai di mana?</h2>
+<ul>
+  <li><b>Browser back / forward</b>: coba di <a href="viz/riwayat-browser.html">visualisasi browser history</a></li>
+  <li><b>Undo / redo</b> di editor</li>
+  <li><b>Playlist</b>: lagu prev / next</li>
+  <li><b>LRU cache</b>: pindah & delete item di tengah dalam O(1)</li>
+  <li><code>std::list</code> di C++ adalah double linked list</li>
+</ul>
+
+<h2>7. Full code</h2>
+<details>
+  <summary>Lihat full code</summary>
+<pre><code>#include &lt;iostream&gt;
+
+struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+};
+
+Node* head = nullptr;
+Node* tail = nullptr;
+int size = 0;
+
+void insertFront(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (head == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->next = head;
+        head->prev = newNode;
+        head = newNode;
+    }
+    size++;
+}
+
+void insertBack(int x) {
+    Node* newNode = new Node{x, nullptr, nullptr};
+    if (tail == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->prev = tail;
+        tail->next = newNode;
+        tail = newNode;
+    }
+    size++;
+}
+
+void insertAt(int pos, int x) {
+    if (pos == 0) { insertFront(x); return; }
+    if (pos == size) { insertBack(x); return; }
+    Node* cur = head;
+    for (int i = 0; i < pos; i++)
+        cur = cur->next;
+    Node* newNode = new Node{x, nullptr, nullptr};
+    newNode->next = cur;
+    newNode->prev = cur->prev;
+    cur->prev->next = newNode;
+    cur->prev = newNode;
+    size++;
+}
+
+void deleteAt(int pos) {
+    Node* del = head;
+    for (int i = 0; i < pos; i++)
+        del = del->next;
+    if (del->prev != nullptr)
+        del->prev->next = del->next;
+    else
+        head = del->next;
+    if (del->next != nullptr)
+        del->next->prev = del->prev;
+    else
+        tail = del->prev;
+    delete del;
+    size--;
+}
+
+Node* search(int x) {
+    Node* cur = head;
+    while (cur != nullptr) {
+        if (cur->data == x)
+            return cur;
+        cur = cur->next;
+    }
+    return nullptr;
+}
+
+void printForward() {
+    for (Node* cur = head; cur != nullptr; cur = cur->next)
+        std::cout << cur->data << " ";
+    std::cout << "\n";
+}
+
+void printBackward() {
+    for (Node* cur = tail; cur != nullptr; cur = cur->prev)
+        std::cout << cur->data << " ";
+    std::cout << "\n";
+}
+
+int main() {
+    insertBack(20);
+    insertBack(30);
+    insertFront(10);
+    insertAt(2, 25);
+    printForward();       // 10 20 25 30
+    printBackward();      // 30 25 20 10
+
+    deleteAt(0);          // hapus 10
+    deleteAt(size - 1);   // hapus 30
+    printForward();       // 20 25
+
+    std::cout << (search(25) != nullptr ? "25 ketemu" : "25 tidak ada") << "\n";
+
+    while (head != nullptr)   // kosongkan list → tidak ada memory leak
+        deleteAt(0);
+    return 0;
+}</code></pre>
+</details>
+
+<h2>8. Latihan</h2>
+
+<p><b>1.</b> Mulai dari list kosong, jalankan <code>insertBack(5)</code>, <code>insertFront(3)</code>, <code>insertAt(1, 4)</code>, <code>deleteAt(0)</code>. Tulis isi list, <code>head</code>, dan <code>tail</code> tiap langkah.</p>
+<details>
+  <summary>Jawaban</summary>
+  <p><code>[5]</code> → <code>[3, 5]</code> → <code>[3, 4, 5]</code> → <code>[4, 5]</code>. Akhirnya <code>head</code> = 4, <code>tail</code> = 5.</p>
+</details>
+
+<p><b>2.</b> Di <code>insertFront</code>, apa yang terjadi kalau <code>head->prev = newNode</code> dan <code>head = newNode</code> ditukar urutannya?</p>
+<details>
+  <summary>Jawaban</summary>
+  <p><code>head->prev = newNode</code> jadi <code>newNode->prev = newNode</code> (menunjuk diri sendiri). Head lama tetap <code>prev == nullptr</code>, jadi print maju benar tapi print mundur berhenti di head lama.</p>
+</details>
+
+<p><b>3.</b> Tulis <code>reverse()</code> yang membalik list <b>tanpa</b> membuat node baru.</p>
+<details>
+  <summary>Jawaban</summary>
+<pre><code>void reverse() {
+    Node* cur = head;
+    while (cur != nullptr) {
+        Node* tmp = cur->next;
+        cur->next = cur->prev;    // tukar prev & next
+        cur->prev = tmp;
+        cur = tmp;
+    }
+    Node* tmp = head;             // tukar head & tail
+    head = tail;
+    tail = tmp;
+}</code></pre>
+  <p>O(n). Cukup tukar <code>prev</code> ↔ <code>next</code> di tiap node, lalu tukar <code>head</code> ↔ <code>tail</code>.</p>
+</details>
+
+<p><b>4.</b> Tulis <code>bool deleteValue(int x)</code>: hapus node <b>pertama</b> bernilai <code>x</code>, return <code>false</code> kalau tidak ada.</p>
+<details>
+  <summary>Jawaban</summary>
+<pre><code>bool deleteValue(int x) {
+    Node* del = search(x);
+    if (del == nullptr) return false;
+    if (del->prev != nullptr)
+        del->prev->next = del->next;
+    else
+        head = del->next;
+    if (del->next != nullptr)
+        del->next->prev = del->prev;
+    else
+        tail = del->prev;
+    delete del;
+    size--;
+    return true;
+}</code></pre>
+  <p>Bagian delete-nya sama dengan <code>deleteAt</code>. Bedanya hanya cara menemukan <code>del</code>.</p>
+</details>
+
+<p><b>5.</b> Tulis <code>Node* getNode(int i)</code>. Kalau <code>i</code> lebih dekat ke belakang, mulai dari <code>tail</code>.</p>
+<details>
+  <summary>Jawaban</summary>
+<pre><code>Node* getNode(int i) {
+    if (i < size / 2) {
+        Node* cur = head;
+        for (int k = 0; k < i; k++)
+            cur = cur->next;
+        return cur;
+    }
+    Node* cur = tail;
+    for (int k = size - 1; k > i; k--)
+        cur = cur->prev;
+    return cur;
+}</code></pre>
+  <p>Tetap O(n), tapi maksimal ~n/2 langkah.</p>
+</details>
+
+<h2>Referensi</h2>
+<ul>
+  <li>Cormen et al., <i>Introduction to Algorithms</i> (CLRS), bab 10.2 "Linked lists"</li>
+  <li><a href="https://en.cppreference.com/w/cpp/container/list">cppreference: std::list</a></li>
+</ul>
+
+</article>
+</body>
+</html>

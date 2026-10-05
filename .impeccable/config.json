@@ -25,7 +25,7 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "_template/viz/contoh.html"
+          "_template/NN-nama-materi/viz/contoh.html"
         ],
         "createdAt": "2026-10-05T07:41:19.585Z",
         "reason": "Laser pointer dot in slides (.laser-dot) imitates real laser light; glow is the literal effect the user asked for"
@@ -34,7 +34,7 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "_template/slides.html"
+          "_template/NN-nama-materi/slides.html"
         ],
         "createdAt": "2026-10-05T07:42:03.297Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
@@ -43,7 +43,7 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "_template/notes.html"
+          "_template/NN-nama-materi/notes.html"
         ],
         "createdAt": "2026-10-05T07:42:03.540Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
@@ -52,7 +52,7 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "01-double-linked-list/slides.html"
+          "data-structure/02-double-linked-list/slides.html"
         ],
         "createdAt": "2026-10-05T07:42:03.781Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
@@ -61,7 +61,7 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "01-double-linked-list/notes.html"
+          "data-structure/02-double-linked-list/notes.html"
         ],
         "createdAt": "2026-10-05T07:42:04.022Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
@@ -70,7 +70,7 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "01-double-linked-list/viz/operasi.html"
+          "data-structure/02-double-linked-list/viz/operasi.html"
         ],
         "createdAt": "2026-10-05T07:42:04.268Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
@@ -79,7 +79,7 @@
         "rule": "dark-glow",
         "value": "*",
         "files": [
-          "01-double-linked-list/viz/riwayat-browser.html"
+          "data-structure/02-double-linked-list/viz/riwayat-browser.html"
         ],
         "createdAt": "2026-10-05T07:42:04.510Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"

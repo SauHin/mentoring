@@ -127,7 +127,7 @@ th { font-weight: 600; color: var(--ink-2); }
 .btn:hover { filter: brightness(1.04); }
 .btn:active { transform: translateY(5px); box-shadow: 0 0 0 var(--edge); }
 :where(.card, .controls) .btn { --edge: var(--btn-edge); background: var(--btn-bg); }
-.card .chip { background: var(--surface); }
+.card .chip, .card :not(pre) > code { background: var(--surface); }
 .btn-go { --edge: var(--go-edge); background: var(--go); color: #fff; }
 .btn-stop { --edge: var(--stop-edge); background: var(--stop); color: #fff; }
 .btn-sm { padding: 0.45rem 1rem; font-size: 0.95rem; box-shadow: 0 4px 0 var(--edge); }
@@ -144,7 +144,7 @@ th { font-weight: 600; color: var(--ink-2); }
 .field:focus-visible { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 22%, transparent); }
 
 .chip { display: inline-block; background: var(--card); border-radius: 999px; padding: 4px 14px; font-size: 0.875rem; color: var(--ink-2); }
-.label { font-size: 0.875rem; color: var(--ink-3); }
+.label { font-size: 0.875rem; color: var(--ink-2); }
 input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color: var(--go); }
 
 /* ---------- Slide ---------- */
@@ -179,6 +179,19 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
 .tool .fill { fill: currentColor; stroke: none; }
 .tool.on { background: var(--stop); color: #fff; }
 .theme-toggle { position: fixed; top: 16px; right: 16px; }
+a.tool { text-decoration: none; }
+
+/* Breadcrumb ke homepage: Home / Data structure */
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--ink-3); margin-bottom: 1.5rem; }
+.crumbs a { color: var(--ink-2); text-decoration: none; background: var(--card); border-radius: 999px; padding: 4px 12px; }
+.crumbs a:hover { background: var(--card-2); color: var(--ink); }
+
+/* Callout: <div class="callout warn"><strong>Awas</strong> ...</div>. Tanpa garis samping, cukup warna latar. */
+.callout { border-radius: 16px; padding: 0.8em 1.1em; margin: 1em 0; background: var(--tint-blue); }
+.callout > strong:first-child { display: block; margin-bottom: 0.2em; }
+.callout.tip { background: color-mix(in srgb, var(--go) 13%, var(--surface)); }
+.callout.warn { background: color-mix(in srgb, var(--stop) 13%, var(--surface)); }
+.callout p { margin: 0.3em 0 0; }
 
 /* Toolbar kanan bawah: laser, tema, nomor slide (klik nomor untuk memilih slide). */
 .deck .toolbar { position: fixed; right: 16px; bottom: 16px; z-index: 4; display: flex; gap: 6px; }
@@ -245,6 +258,10 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
 .notes h3 { font-size: 1.05rem; margin: 1.5em 0 0.4em; }
 .notes .lead { font-size: 1.15rem; color: var(--ink-2); margin-top: 0; }
 .notes li + li { margin-top: 0.3em; }
+.notes .tldr { margin: 1.5rem 0; }
+.notes .tldr ul { margin: 0.4em 0 0; padding-left: 1.2em; }
+.deck .callout { font-size: 0.85em; color: var(--ink); }
+.deck .callout p { color: var(--ink); }
 
 /* ---------- Visualisasi ---------- */
 .viz { max-width: 900px; margin: 0 auto; padding: 16px; }

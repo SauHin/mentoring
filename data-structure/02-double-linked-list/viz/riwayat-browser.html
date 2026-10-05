@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Riwayat Browser</title>
-  <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css">
-  <script src="../../_shared/theme.js"></script>
+  <title>Browser History</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <script src="../../../_shared/theme.js"></script>
   <style>
     .browser { display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 999px; margin-bottom: 12px; }
     .icon { width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
@@ -30,12 +30,12 @@
 </head>
 <body class="viz">
 
-<h1>Riwayat browser</h1>
-<p>Tombol kembali dan maju di browser bekerja seperti double linked list. Setiap halaman adalah node, dan cur menunjuk halaman yang sedang dibuka.</p>
+<h1>Browser history</h1>
+<p>Tombol <b>back</b> dan <b>forward</b> di browser = double linked list. Tiap halaman adalah <b>node</b>, dan <code>cur</code> menunjuk halaman yang sedang dibuka.</p>
 
 <div class="card browser">
-  <button class="icon" id="back" aria-label="Kembali"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="icon" id="fwd" aria-label="Maju"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button class="icon" id="back" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="icon" id="fwd" aria-label="Forward"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
   <div class="addr" id="addr"></div>
 </div>
 
@@ -64,7 +64,7 @@ void forward() {
     if (cur->next != nullptr) cur = cur->next;
 }
 void visit(std::string url) {
-    while (cur->next != nullptr) {    // buang riwayat maju
+    while (cur->next != nullptr) {    // buang history forward
         Node* d = cur->next;
         cur->next = d->next;
         delete d;
@@ -93,18 +93,18 @@ function render(fn, text) {
   $('msg').textContent = text;
 }
 
-$('back').onclick = () => { cur--; render('back', 'cur = cur->prev. Halaman sebelumnya terbuka, dan riwayat maju tetap tersimpan.'); };
+$('back').onclick = () => { cur--; render('back', 'cur = cur->prev. Halaman sebelumnya terbuka. History forward tetap tersimpan.'); };
 $('fwd').onclick = () => { cur++; render('forward', 'cur = cur->next. Halaman sesudahnya terbuka lagi.'); };
 document.querySelectorAll('.sites .btn').forEach((b) => (b.onclick = () => {
   const dropped = pages.length - 1 - cur;
   pages = pages.slice(0, cur + 1).concat(b.textContent);
   cur++;
   render('visit', dropped
-    ? `Kamu membuka halaman baru dari tengah riwayat. ${dropped} halaman sesudah cur dibuang, lalu node baru disambung sesudah cur. Itu sebabnya tombol maju sekarang mati.`
+    ? `Buka halaman baru dari tengah history: ${dropped} node sesudah cur dibuang, lalu node baru disambung sesudah cur. Makanya tombol forward sekarang mati.`
     : 'Node baru disambung sesudah cur, lalu cur pindah ke node baru.');
 }));
 
-render(null, 'Buka beberapa halaman, lalu tekan tombol kembali dan maju. Coba juga buka halaman baru setelah menekan kembali.');
+render(null, 'Buka beberapa halaman, lalu tekan back dan forward. Coba juga buka halaman baru setelah menekan back.');
 </script>
 </body>
 </html>
