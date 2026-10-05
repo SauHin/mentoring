@@ -66,6 +66,10 @@ Tombol Home, breadcrumb "/ Nama matkul", dan scratch pad dibuat otomatis oleh `t
 
 **Matkul baru:** buat folder (nama pakai tanda hubung, misalnya `operating-system`), salin `compilation-technique/index.html` ke dalamnya, lalu tambahkan kartu di home.
 
+## Sebelum Commit
+
+Jalankan `python tools/cachebust.py`. Script ini menambahkan `?v=<hash>` ke setiap rujukan `_shared/*.css` dan `*.js`, supaya browser langsung memakai versi terbaru setelah deploy. Tanpa ini, GitHub Pages bisa memasangkan HTML baru dengan CSS lama selama 10 menit, dan halaman tampil rusak.
+
 ## Gaya Penulisan
 
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.

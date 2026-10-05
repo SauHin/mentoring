@@ -38,7 +38,8 @@
   // Link-nya ke index.html di root (satu tingkat di atas _shared), langsung ke bagian matkul-nya.
   addEventListener('DOMContentLoaded', () => {
     if (parent !== window || !document.querySelector('body.deck, article.notes')) return;
-    const root = new URL('../', document.querySelector('link[href*="_shared/style.css"]').href);
+    // Selector sengaja tanpa awalan "_shared/" supaya tidak ikut diberi ?v= oleh tools/cachebust.py.
+    const root = new URL('../', document.querySelector('link[href*="style.css"]').href);
     const matkul = location.href.startsWith(root.href) ? location.href.slice(root.href.length).split('/')[0] : '';
     const bar = document.body.appendChild(document.createElement('div'));
     bar.className = 'topbar';
@@ -55,7 +56,7 @@
     }
     // Scratch pad (coret-coret) hanya untuk slide dan notes materi, bukan halaman daftar matkul.
     if (document.querySelector('body.deck, script[src*="notes.js"]'))
-      document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js', root).href;
+      document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js?v=d4d95638', root).href;
   });
 
   // Event load halaman induk baru jalan setelah semua iframe selesai dimuat.

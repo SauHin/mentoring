@@ -321,6 +321,7 @@ article.notes { padding-top: 84px; } /* di bawah topbar */
 .list .course-head h2 { margin: 0; }
 .course-body p { margin-top: 0.35rem; }
 .course .chip { background: var(--surface); color: var(--ink-2); }
+.course { --a1: var(--card-2); --a2: var(--ink-3); } /* warna cadangan: kartu tetap terlihat walau kelas warna lupa diberi */
 .c-mint { --a1: #b8f5d6; --a2: #12b886; }
 .c-lilac { --a1: #dcc2ff; --a2: #8b5cf6; }
 .c-jingga { --a1: #ffe27a; --a2: #ff9f43; }
