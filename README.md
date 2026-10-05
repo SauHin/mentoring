@@ -13,6 +13,17 @@ Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 
 Home (`index.html`) berisi daftar mata kuliah. Tiap matkul punya `index.html` sendiri berisi daftar materinya.
 
+### Algorithm and programming
+
+Semua kode C untuk Dev-C++. Visualisasi memakai mesin bersama `_shared/cviz.js` (memory, pointer, buffer keyboard, trace table, mode tebak).
+
+| No | Materi | Notes | Slide |
+|----|--------|-------|-------|
+| 01 | Algoritma dan struktur program C | [notes](algorithm-and-programming/01-algoritma-dan-struktur-c/notes.html) | [slides](algorithm-and-programming/01-algoritma-dan-struktur-c/slides.html) |
+| 02 | Variabel, tipe data, dan input/output | [notes](algorithm-and-programming/02-variabel-tipe-data-io/notes.html) | [slides](algorithm-and-programming/02-variabel-tipe-data-io/slides.html) |
+| 03 | Repetition (loop) | [notes](algorithm-and-programming/03-repetition/notes.html) | [slides](algorithm-and-programming/03-repetition/slides.html) |
+| 04 | Pointer dan array | [notes](algorithm-and-programming/04-pointer-dan-array/notes.html) | [slides](algorithm-and-programming/04-pointer-dan-array/slides.html) |
+
 ### Data structure
 
 | No | Materi | Notes | Slide |
@@ -32,6 +43,9 @@ mentoring/
 ├── _shared/                    style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, font, logo
 ├── _template/
 │   └── NN-nama-materi/         salin folder ini untuk materi baru
+├── algorithm-and-programming/
+│   ├── index.html
+│   └── 01-… sampai 04-…
 ├── data-structure/
 │   ├── index.html              daftar materi data structure
 │   ├── 01-single-linked-list/
@@ -56,7 +70,7 @@ Tombol Home, breadcrumb "/ Nama matkul", dan scratch pad dibuat otomatis oleh `t
 
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.
 - Singkat. Pakai **bold**, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
-- Bahasa pemrograman per matkul: **data structure pakai C** (`malloc`/`free`, `NULL`, `printf`), dan harus juga jalan di compiler C++ (cast `(Node*)malloc(...)`).
+- Bahasa pemrograman per matkul: **algorithm and programming dan data structure pakai C** untuk Dev-C++. Kode harus jalan di compiler C dan C++. Data structure memakai (`malloc`/`free`, `NULL`, `printf`), dan harus juga jalan di compiler C++ (cast `(Node*)malloc(...)`).
 - Fokus pada **pemahaman kode**: tiap operasi diturunkan (sebelum → sesudah → panah yang berubah → urutan → edge case → kode), latihan berupa trace, cari bug, dan turunkan sendiri.
 - Visualisasi linked list memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak).
 - Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pointer dan Array</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <link rel="stylesheet" href="../../../_shared/cviz.css">
+  <script src="../../../_shared/theme.js"></script>
+</head>
+<body class="viz">
+
+<h1>Pointer dan array di memory</h1>
+<p>Pointer = kotak yang isinya <b>alamat</b> kotak lain (digambar sebagai panah biru). Array = kotak-kotak yang <b>berderet</b> di memory, lihat alamatnya yang berurutan. Ukuran mengikuti Dev-C++: <code>int</code> 4 byte, pointer 8 byte.</p>
+
+<script src="../../../_shared/cviz.js"></script>
+<script>
+cviz({
+  programs: {
+    ptr: {
+      title: 'Pointer dasar',
+      code: `int i = 7;
+int *ptr;
+ptr = &i;
+*ptr = 5;
+printf("%d %d\\n", i, *ptr);`,
+      *run(m) {
+        m.decl('int', 'i', 7);
+        yield m.step('int i', 'Kotak biasa: nama i, nilai 7, dan punya <b>alamat</b> (di bawah kotak).', { hot: ['i'] });
+        m.decl('int*', 'ptr');
+        yield m.step('int *ptr', '<code>int *ptr</code>: kotak yang akan menyimpan <b>alamat</b> sebuah int. Belum diisi: menunjuk entah ke mana (<code>?</code>). Jangan dipakai sebelum diisi.', { hot: ['ptr'] });
+        m.set('ptr', m.addr('i'));
+        yield m.step('ptr = &i', `<code>&i</code> = "alamat dari i" = ${'0x' + m.addr('i').toString(16)}. Alamat itu disimpan di ptr, jadi ptr <b>menunjuk</b> ke i (panah).`, { hot: ['ptr'] });
+        m.set('*ptr', 5);
+        yield m.step('*ptr = 5', '<code>*ptr</code> = "kotak yang ditunjuk ptr" = i. Jadi baris ini mengubah <b>i</b> menjadi 5, tanpa menyebut nama i sama sekali.', { hot: ['i'] });
+        m.printf('%d %d\n', m.get('i'), m.get('*ptr'));
+        yield m.step('printf', 'i dan *ptr adalah kotak yang sama, jadi nilainya pasti sama. Ringkasnya: <code>&</code> = ambil alamat, <code>*</code> = ikuti alamat.', { final: true });
+      },
+    },
+    ptr2: {
+      title: 'Pointer ke pointer',
+      code: `int i = 1, *ptr, **ptr_ptr;
+ptr = &i;
+ptr_ptr = &ptr;
+*ptr = 5;
+**ptr_ptr = 9;`,
+      *run(m) {
+        m.decl('int', 'i', 1); m.decl('int*', 'ptr'); m.decl('int**', 'ptr_ptr');
+        yield m.step('int i', 'Tiga kotak: int, pointer ke int, dan pointer ke pointer ke int. Jumlah <code>*</code> = jumlah panah yang harus diikuti.');
+        m.set('ptr', m.addr('i'));
+        yield m.step('ptr = &i', 'ptr menunjuk i.', { hot: ['ptr'] });
+        m.set('ptr_ptr', m.addr('ptr'));
+        yield m.step('ptr_ptr = &ptr', 'ptr_ptr menunjuk <b>ptr</b> (bukan i). Pointer juga kotak, jadi punya alamat sendiri.', { hot: ['ptr_ptr'] });
+        m.set('*ptr', 5);
+        yield m.step('*ptr = 5', 'Ikuti 1 panah dari ptr → sampai di i. i = 5.', { hot: ['i'] });
+        m.set('**ptr_ptr', 9);
+        yield m.step('**ptr_ptr = 9', 'Ikuti 2 panah: ptr_ptr → ptr → i. i = 9.', { hot: ['i'], final: true });
+      },
+    },
+    arr: {
+      title: 'Array & *(A+i)',
+      watch: ['k', 'sum'],
+      code: `int A[5] = {10, 20, 30, 40, 50};
+int *p = A;
+printf("%d %d\\n", A[2], *(A + 2));
+p = p + 1;
+int sum = 0;
+for (int k = 0; k < 5; k++)
+    sum += *(A + k);`,
+      *run(m) {
+        m.decl('int', 'A[5]', [10, 20, 30, 40, 50]);
+        yield m.step('int A[5]', 'Lima int <b>berderet</b> tanpa celah. Alamatnya naik 4 byte (ukuran int) setiap elemen. Index mulai dari 0.', { hot: ['A[0]', 'A[1]', 'A[2]', 'A[3]', 'A[4]'] });
+        m.decl('int*', 'p', m.addr('A[0]'));
+        yield m.step('int *p = A', 'Nama array <code>A</code> sama dengan alamat elemen pertama (<code>&A[0]</code>). Jadi <code>p = A</code> membuat p menunjuk A[0].', { hot: ['p'] });
+        m.printf('%d %d\n', m.get('A[2]'), m.readAt(m.addr('A') + 2 * 4));
+        yield m.step('printf', '<code>*(A + 2)</code>: mulai dari alamat A, maju <b>2 elemen</b> (2 × 4 = 8 byte), lalu ambil isinya. Itulah <code>A[2]</code>. Tanda <code>[ ]</code> hanyalah singkatan dari aritmetika pointer.', { hot: ['A[2]'] });
+        m.set('p', m.get('p') + 4);
+        yield m.step('p = p + 1', '<code>p + 1</code> maju <b>satu elemen</b>, yaitu 4 byte untuk int, bukan 1 byte. Panah p pindah ke A[1].', { hot: ['p'] });
+        m.decl('int', 'sum', 0); m.decl('int', 'k', 0);
+        for (let k = 0; k < 5; k++) {
+          m.set('k', k);
+          m.set('sum', m.get('sum') + m.readAt(m.addr('A') + k * 4));
+          m.trace();
+          yield m.step('sum += *(A + k)', `k = ${k}: alamat A + ${k} elemen → isinya ${m.get(`A[${k}]`)}. sum = ${m.get('sum')}.`, { hot: [`A[${k}]`, 'sum'] });
+        }
+        yield m.step('sum += *(A + k)', 'sum = 150. Menulis <code>A[k]</code> atau <code>*(A + k)</code> hasilnya sama persis.', { final: true });
+      },
+    },
+    oob: {
+      title: 'Index di luar batas',
+      code: `int A[3] = {1, 2, 3};
+int x = 99;
+A[3] = 7;
+printf("%d\\n", x);`,
+      *run(m) {
+        m.decl('int', 'A[3]', [1, 2, 3]);
+        m.decl('int', 'x', 99);
+        yield m.step('int x', 'A punya index 0, 1, 2. Di gambar ini, x kebetulan diletakkan tepat setelah A di memory.', { hot: ['x'] });
+        m.writeAt(m.addr('A') + 3 * 4, 7);
+        yield m.step('A[3] = 7', '<code>A[3]</code> = alamat A + 3 × 4 byte, yaitu <b>alamat x</b>! C tidak memeriksa batas array: kode ini <b>lolos compile</b>, lalu diam-diam menimpa x.', { hot: ['x'] });
+        m.printf('%d\n', m.get('x'));
+        yield m.step('printf', 'x berubah jadi 7 padahal tidak pernah disentuh. Di program nyata, susunan memory bisa berbeda: yang tertimpa bisa variabel lain, atau program crash. Ini disebut <b>undefined behavior</b>.', { final: true });
+      },
+    },
+    arr2d: {
+      title: 'Array 2D (row-major)',
+      code: `int B[3][3] = {{1, 2}, {3, 4, 5}, {7}};
+printf("%d\\n", B[1][2]);
+printf("%d\\n", B[2][2]);`,
+      *run(m) {
+        m.decl('int', 'B[3][3]', [1, 2, 0, 3, 4, 5, 7, 0, 0]);
+        yield m.step('int B', 'Setiap <code>{ }</code> mengisi satu baris. Elemen yang tidak disebut otomatis <b>0</b>. Baris 0 = {1, 2, 0}, baris 1 = {3, 4, 5}, baris 2 = {7, 0, 0}.', { hot: ['B[0][2]', 'B[2][1]', 'B[2][2]'] });
+        m.printf('%d\n', m.get('B[1][2]'));
+        yield m.step('B[1][2]', 'B[1][2] = baris 1, kolom 2 = 5. Lihat alamatnya: baris 1 dimulai <b>tepat setelah</b> baris 0 berakhir. Di memory, array 2D tetap satu deret (row-major).', { hot: ['B[1][2]'] });
+        m.printf('%d\n', m.get('B[2][2]'));
+        yield m.step('B[2][2]', 'B[2][2] = 0, karena baris 2 hanya diisi {7}. Rumus posisinya: <code>baris × jumlah_kolom + kolom</code> = 2 × 3 + 2 = elemen ke-8 dari awal.', { hot: ['B[2][2]'], final: true });
+      },
+    },
+    strlen: {
+      title: 'String & \\0: hitung panjang',
+      watch: ['n'],
+      code: `char s[10] = "BiNus";
+int n = 0;
+while (s[n] != '\\0')
+    n++;
+printf("%d\\n", n);`,
+      *run(m) {
+        m.decl('char', 's[10]', 'BiNus');
+        yield m.step('char s[10]', 'String = array char yang diakhiri <code>\'\\0\'</code> (nilai 0). "BiNus" butuh 6 kotak: 5 huruf + <code>\\0</code>. Sisanya ikut diisi 0.', { hot: ['s[5]'] });
+        m.decl('int', 'n', 0);
+        while (m.get(`s[${m.get('n')}]`) !== 0) {
+          const n = m.get('n');
+          yield m.step('while (s[n]', `s[${n}] = '${String.fromCharCode(m.get(`s[${n}]`))}', bukan \\0 → lanjut.`, { hot: [`s[${n}]`] });
+          m.set('n', n + 1);
+          m.trace();
+          yield m.step('n++', `n = ${n + 1}.`, { hot: ['n'] });
+        }
+        yield m.step('while (s[n]', `s[${m.get('n')}] = '\\0' → berhenti. Beginilah cara kerja <code>strlen</code>: menghitung sampai ketemu \\0.`, { hot: [`s[${m.get('n')}]`] });
+        m.printf('%d\n', m.get('n'));
+        yield m.step('printf', 'Panjang = 5. Tanpa \\0, loop ini (dan strlen) akan terus membaca memory di luar array.', { final: true });
+      },
+    },
+    reverse: {
+      title: 'Balik string: KASUR → RUSAK',
+      watch: ['i', 'j', 's'],
+      code: `char s[] = "KASUR";
+int i, j;
+char c;
+for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
+    c = s[i];
+    s[i] = s[j];
+    s[j] = c;
+}`,
+      *run(m) {
+        m.decl('char', 's[6]', 'KASUR'); m.decl('int', 'i'); m.decl('int', 'j'); m.decl('char', 'c');
+        yield m.step('char s[]', 'Ide: tukar huruf paling kiri dengan paling kanan, lalu bergerak ke tengah. Dua index: i dari kiri, j dari kanan.');
+        m.set('i', 0); m.set('j', 4);
+        yield m.step('for (i = 0', 'Mulai: i = 0 (K), j = strlen − 1 = 4 (R). Ingat: index terakhir = panjang − 1.', { hot: ['s[0]', 's[4]'] });
+        while (m.get('i') < m.get('j')) {
+          const i = m.get('i'), j = m.get('j');
+          m.set('c', m.get(`s[${i}]`));
+          yield m.step('c = s[i]', `Simpan s[${i}] ke c dulu. Kalau langsung <code>s[i] = s[j]</code>, huruf lama di s[${i}] hilang tertimpa.`, { hot: ['c'] });
+          m.set(`s[${i}]`, m.get(`s[${j}]`));
+          yield m.step('s[i] = s[j]', `s[${i}] = s[${j}].`, { hot: [`s[${i}]`] });
+          m.set(`s[${j}]`, m.get('c'));
+          m.set('i', i + 1); m.set('j', j - 1);
+          m.trace();
+          yield m.step('s[j] = c', `s[${j}] = c. Tukar selesai, lalu i maju dan j mundur: i = ${i + 1}, j = ${j - 1}.`, { hot: [`s[${j}]`, 'i', 'j'] });
+        }
+        yield m.step('for (i = 0', `i = ${m.get('i')} tidak lagi &lt; j = ${m.get('j')}: sudah bertemu di tengah, berhenti. Huruf tengah (S) tidak perlu ditukar. Hasil: RUSAK.`, { final: true });
+      },
+    },
+  },
+});
+</script>
+</body>
+</html>

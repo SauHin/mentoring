@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Variabel, Tipe Data, dan Input/Output · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+  <script src="../../_shared/notes.js" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Algorithm and programming · 02</span>
+<h1>Variabel, tipe data, dan input/output</h1>
+<p class="lead">Satu gambar yang menjelaskan hampir semuanya: <b>variabel adalah kotak di memory</b>. Kalau gambar ini jelas, aturan <code>scanf</code>, casting, dan nanti pointer jadi masuk akal sendiri.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/memori-io.html">Visualisasi memory &amp; buffer</a> · <a href="viz/printf.html">Printf playground</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Variabel = kotak dengan <b>nama, tipe, alamat, dan nilai</b>. Belum diisi = isinya sampah.</li>
+    <li><b>int / int = int</b>: sisa dibuang. Cast salah satunya ke <code>float</code> sebelum membagi.</li>
+    <li><code>printf</code> butuh <b>nilai</b>, <code>scanf</code> butuh <b>alamat</b> (<code>&amp;x</code>), karena scanf menulis ke kotak.</li>
+    <li>Ketikan keyboard masuk ke <b>buffer</b> dulu. Enter yang tertinggal di buffer adalah penyebab <code>getchar</code> atau <code>%c</code> "dilewati".</li>
+  </ul>
+</div>
+
+<h2>1. Variabel = kotak di memory</h2>
+<pre><code>char ch = 65;
+
+  nama   ch
+        ┌──────┐
+  nilai │  65  │   ← R-value: isi kotak
+        └──────┘
+  alamat 0x1000    ← L-value: lokasi kotak di memory
+  tipe   char (1 byte, muat -128 … 127)</code></pre>
+<ul>
+  <li><b>Deklarasi</b> (<code>int x;</code>) = minta kotak. Isinya <b>sampah</b>: sisa data lama di memory. Jangan dibaca sebelum diisi.</li>
+  <li><b>Assignment</b> (<code>x = 10;</code>) = simpan nilai ke kotak. <code>=</code> bukan "sama dengan", tapi "simpan ke".</li>
+  <li><code>x = x + 5;</code> dibaca dari kanan: ambil isi x, tambah 5, simpan kembali ke x.</li>
+</ul>
+<p>Variabel bisa dideklarasikan di awal blok <code>{ }</code> mana pun, dan hanya dikenal di dalam blok itu.</p>
+<p>Lihat sendiri di <a href="viz/memori-io.html">visualisasi</a> (program "Variabel = kotak").</p>
+
+<h2>2. Tipe data: ukuran kotak</h2>
+<p>Tipe menentukan <b>berapa byte</b> kotaknya dan <b>bagaimana isinya dibaca</b>. Ukuran di bawah ini berlaku untuk Dev-C++ di Windows. Cek sendiri dengan <code>sizeof</code>.</p>
+<table>
+  <tr><th>Tipe</th><th>Ukuran</th><th>Isi</th><th>printf</th><th>scanf</th></tr>
+  <tr><td><code>char</code></td><td>1 byte</td><td>−128 … 127 (kode ASCII)</td><td><code>%c</code> / <code>%d</code></td><td><code>%c</code></td></tr>
+  <tr><td><code>int</code></td><td>4 byte</td><td>± 2,1 miliar</td><td><code>%d</code></td><td><code>%d</code></td></tr>
+  <tr><td><code>long</code></td><td>4 byte di Windows</td><td>sama dengan int</td><td><code>%ld</code></td><td><code>%ld</code></td></tr>
+  <tr><td><code>long long</code></td><td>8 byte</td><td>± 9,2 × 10¹⁸</td><td><code>%lld</code></td><td><code>%lld</code></td></tr>
+  <tr><td><code>float</code></td><td>4 byte</td><td>desimal, ± 7 digit akurat</td><td><code>%f</code></td><td><code>%f</code></td></tr>
+  <tr><td><code>double</code></td><td>8 byte</td><td>desimal, ± 15 digit akurat</td><td><code>%f</code> / <code>%lf</code></td><td><b><code>%lf</code></b></td></tr>
+</table>
+<p><b>Modifier</b>: <code>unsigned</code> (tanpa nilai negatif, jadi batas atasnya dua kali lipat), <code>short</code>, <code>long</code>. Contoh: <code>unsigned int</code>, <code>long long</code>.</p>
+<div class="callout warn"><strong>Catatan: long double di Dev-C++</strong>Di slide kuliah tertulis <code>long double → %lf</code>. Menurut standar C, yang benar <code>%Lf</code> (L besar). Tapi Dev-C++ memakai runtime Windows yang menganggap <code>long double</code> sama dengan <code>double</code>. Compiler-nya memberi warning untuk <code>%lf</code> <b>dan</b> <code>%Lf</code>, dan angka yang tercetak bisa salah. Untuk desimal, pakai <code>double</code> saja.</div>
+<div class="callout"><strong>Kenapa long dan int sama?</strong>Di Windows, <code>long</code> = 4 byte, sama dengan int. Itu sebabnya membaca <code>long</code> pakai <code>%d</code> masih jalan di Dev-C++ (compiler hanya memberi warning). Di Linux atau Mac, <code>long</code> = 8 byte dan hasilnya rusak. Biasakan <code>%ld</code> untuk long.</div>
+
+<h3>Overflow</h3>
+<p>Kalau nilai tidak muat di kotaknya, nilainya "berputar". Tidak ada error.</p>
+<pre><code>char c = 130;   // char hanya muat sampai 127
+printf("%d", c); // -126</code></pre>
+
+<h2>3. Aritmetika, pembagian, dan casting</h2>
+<p><b>Tebak dulu</b> isi setiap variabel:</p>
+<pre><code>int a = 7, b = 2;
+float r1 = a / b;
+float r2 = (float)a / b;
+float r3 = (float)(a / b);
+int t = (int)3.99;
+int s = 7 % 3;</code></pre>
+<details>
+  <summary>Jawaban</summary>
+  <table>
+    <tr><th>Variabel</th><th>Nilai</th><th>Kenapa</th></tr>
+    <tr><td><code>r1</code></td><td>3.0</td><td>int / int dihitung sebagai int dulu (3), baru disimpan ke float. Tipe tujuan tidak mengubah cara menghitung.</td></tr>
+    <tr><td><code>r2</code></td><td>3.5</td><td>a diubah jadi 7.0 <b>sebelum</b> dibagi. float / int = float.</td></tr>
+    <tr><td><code>r3</code></td><td>3.0</td><td>Kurung dihitung dulu: 7 / 2 = 3, baru di-cast. Terlambat.</td></tr>
+    <tr><td><code>t</code></td><td>3</td><td>Cast ke int <b>membuang</b> desimal, bukan membulatkan.</td></tr>
+    <tr><td><code>s</code></td><td>1</td><td><code>%</code> = sisa bagi: 7 = 2 × 3 + <b>1</b>. Hanya untuk int.</td></tr>
+  </table>
+</details>
+<p><b>Aturannya</b>: hasil operasi mengikuti tipe "terbesar" di antara kedua operand. int dan int menghasilkan int, sedangkan int dan float menghasilkan float. <b>Casting</b> <code>(tipe)nilai</code> mengubah tipe satu nilai, dan posisinya menentukan kapan perubahan terjadi.</p>
+
+<h2>4. Konstanta</h2>
+<pre><code>#define PI 3.14159        // diganti teks sebelum compile, tanpa tipe
+const float PI2 = 3.14159f; // variabel yang dikunci, punya tipe</code></pre>
+<ul>
+  <li>Nilai konstanta <b>tidak bisa diubah</b> saat program jalan.</li>
+  <li><b>Suffix</b> menentukan tipe angka: <code>3.14</code> = double, <code>3.14f</code> = float, <code>10L</code> = long, <code>10U</code> = unsigned.</li>
+  <li><code>float x = 3.14;</code> menyimpan double ke float. Beberapa compiler (misalnya Visual C++) memberi warning. Pakai <code>3.14f</code> atau <code>(float)3.14</code>.</li>
+</ul>
+<p><code>sizeof(tipe)</code> atau <code>sizeof(variabel)</code> memberi ukuran dalam byte. Contoh: <code>sizeof(int)</code> = 4 di Dev-C++.</p>
+
+<h2>5. Output dengan printf</h2>
+<p><code>printf(format, nilai1, nilai2, …)</code>: format berisi teks biasa dan <b>specifier</b> (<code>%…</code>) yang diganti nilai, berurutan dari kiri.</p>
+<p>Polanya selalu sama: <code>%[flags][width][.precision]type</code>. Coba langsung di <a href="viz/printf.html">printf playground</a>, jadi tidak perlu dihafal.</p>
+<table>
+  <tr><th>Contoh</th><th>Hasil (· = spasi)</th><th>Arti</th></tr>
+  <tr><td><code>%5d</code>, 42</td><td><code>···42</code></td><td>minimal 5 kolom, rata kanan</td></tr>
+  <tr><td><code>%-5d|</code>, 42</td><td><code>42···|</code></td><td><code>-</code> = rata kiri</td></tr>
+  <tr><td><code>%05d</code>, 42</td><td><code>00042</code></td><td>isi sisa kolom dengan 0</td></tr>
+  <tr><td><code>%.2f</code>, 3.14159</td><td><code>3.14</code></td><td>2 angka di belakang koma (dibulatkan)</td></tr>
+  <tr><td><code>%8.2f</code>, 3.14159</td><td><code>····3.14</code></td><td>width 8, precision 2</td></tr>
+  <tr><td><code>%c</code>, 65</td><td><code>A</code></td><td>angka ditampilkan sebagai karakter</td></tr>
+  <tr><td><code>%x</code>, 255</td><td><code>ff</code></td><td>heksadesimal</td></tr>
+  <tr><td><code>%%</code></td><td><code>%</code></td><td>mencetak tanda persen</td></tr>
+</table>
+<div class="callout warn"><strong>Jangan printf(variabel)</strong><code>printf(ss)</code> menganggap isi <code>ss</code> sebagai <b>format</b>. Kalau isinya mengandung <code>%</code> (misalnya <code>"10 % 3 = 1"</code>), printf mencari nilai yang tidak pernah diberikan, dan outputnya kacau. Tulis <code>printf("%s", ss)</code>.</div>
+
+<h3>Fungsi output lain</h3>
+<table>
+  <tr><th>Fungsi</th><th>Header</th><th>Gunanya</th></tr>
+  <tr><td><code>putchar(c)</code></td><td><code>stdio.h</code></td><td>Cetak satu karakter</td></tr>
+  <tr><td><code>puts(s)</code></td><td><code>stdio.h</code></td><td>Cetak string, lalu <b>otomatis pindah baris</b></td></tr>
+  <tr><td><code>putch(c)</code></td><td><code>conio.h</code></td><td>Cetak satu karakter. Jalan di Dev-C++, tapi khusus Windows.</td></tr>
+</table>
+
+<h2>6. Input dengan scanf</h2>
+<pre><code>int x;
+scanf("%d", &amp;x);</code></pre>
+<p><b>Kenapa harus <code>&amp;</code>?</b> Ingat gambar kotak. <code>printf("%d", x)</code> hanya perlu <b>melihat isi</b> kotak. <code>scanf</code> harus <b>menulis ke</b> kotak, jadi ia butuh <b>alamat</b> kotak itu: <code>&amp;x</code> = "alamat dari x". Lupa <code>&amp;</code> = scanf menulis ke alamat sembarang, dan program bisa crash.</p>
+<table>
+  <tr><th>Format</th><th>Membaca</th><th>Spasi/Enter di depan</th></tr>
+  <tr><td><code>%d</code>, <code>%f</code>, <code>%lf</code></td><td>Angka</td><td>Dilewati otomatis</td></tr>
+  <tr><td><code>%s</code></td><td>Satu kata, <b>berhenti di spasi</b></td><td>Dilewati otomatis</td></tr>
+  <tr><td><code>%c</code></td><td>Satu karakter <b>apa pun</b>, termasuk spasi dan Enter</td><td><b>Tidak</b> dilewati</td></tr>
+  <tr><td><code>%[^\n]</code></td><td>Satu baris penuh termasuk spasi, sampai sebelum Enter</td><td>Tidak dilewati</td></tr>
+  <tr><td><code>%4s</code></td><td>Maksimal 4 karakter</td><td>Dilewati</td></tr>
+</table>
+<ul>
+  <li>Array char (string) <b>tanpa</b> <code>&amp;</code>: <code>scanf("%s", nama);</code>. Nama array sudah berupa alamat (dibahas di materi 04).</li>
+  <li><b>Nilai kembalian</b> scanf = jumlah variabel yang <b>berhasil diisi</b>. Berguna untuk mengecek input.</li>
+  <li>Untuk <code>double</code>, scanf <b>wajib</b> <code>%lf</code>. printf boleh <code>%f</code> atau <code>%lf</code>.</li>
+</ul>
+
+<h2>7. Buffer keyboard: kenapa input "dilewati"</h2>
+<p>Ketikanmu tidak langsung masuk ke variabel. Semua yang diketik, <b>termasuk tombol Enter</b> (<code>\n</code>), masuk ke <b>buffer</b> dulu. scanf dan getchar lalu mengambil dari depan buffer.</p>
+<pre><code>printf("Name: ");          scanf("%[^\n]", name);
+printf("NIM: ");           scanf("%d", &amp;nim);
+printf("Gender (M/F): ");  gender = getchar();   // "dilewati"!</code></pre>
+<p>Isi buffer setelah pengguna mengetik nama, Enter, NIM, dan Enter:</p>
+<pre><code>B u d i ␣ S a n t o s o ↵ 1 2 3 4 5 ↵
+└──────── name ────────┘   └─ nim ─┘ ↑ tertinggal!</code></pre>
+<p><code>%d</code> berhenti tepat setelah angka, jadi Enter terakhir <b>tertinggal</b>. <code>getchar()</code> mengambil karakter apa pun di depan buffer, yaitu Enter itu. Program tidak menunggu ketikan baru, sehingga kelihatannya "dilewati".</p>
+<div class="callout tip"><strong>Perbaikan</strong>Pakai <code>scanf(" %c", &amp;gender);</code>. Spasi sebelum <code>%c</code> artinya "buang semua spasi dan Enter dulu". Atau panggil <code>getchar();</code> sekali untuk membuang Enter sisa.</div>
+<p>Jalankan kasus ini langkah demi langkah di <a href="viz/memori-io.html">visualisasi</a> (program "Kenapa getchar dilewati?"). Buffer-nya terlihat.</p>
+
+<h3>Fungsi input lain</h3>
+<table>
+  <tr><th>Fungsi</th><th>Header</th><th>Tunggu Enter?</th><th>Tampil di layar?</th><th>Catatan</th></tr>
+  <tr><td><code>getchar()</code></td><td><code>stdio.h</code></td><td>Ya</td><td>Ya</td><td>Standar, jalan di semua compiler</td></tr>
+  <tr><td><code>getch()</code></td><td><code>conio.h</code></td><td>Tidak</td><td>Tidak</td><td>Jalan di Dev-C++, khusus Windows</td></tr>
+  <tr><td><code>getche()</code></td><td><code>conio.h</code></td><td>Tidak</td><td>Ya</td><td>Jalan di Dev-C++, khusus Windows</td></tr>
+  <tr><td><code>gets(s)</code></td><td><code>stdio.h</code></td><td>Ya</td><td>Ya</td><td>Jalan di Dev-C++, tapi berbahaya (lihat bawah)</td></tr>
+</table>
+<div class="callout"><strong>Catatan tentang gets</strong><code>gets</code> jalan normal di Dev-C++. Bahayanya: gets tidak tahu ukuran array. Kalau input lebih panjang dari array, kelebihannya menimpa memory lain. Karena itu gets dihapus dari standar C sejak C11, dan compiler lain bisa menolaknya. Alternatif aman: <code>fgets(s, sizeof(s), stdin);</code>. Ingat bahwa fgets ikut menyimpan karakter Enter di akhir string.</div>
+
+<h2>8. Bug yang sering muncul</h2>
+<table>
+  <tr><th>Bug</th><th>Gejala</th><th>Perbaikan</th></tr>
+  <tr><td>Lupa <code>&amp;</code> di scanf</td><td>Crash atau nilai tidak berubah</td><td><code>scanf("%d", &amp;x)</code></td></tr>
+  <tr><td><code>scanf("%f", &amp;d)</code> untuk double</td><td>Nilai aneh</td><td>double pakai <code>%lf</code> di scanf</td></tr>
+  <tr><td><code>printf("%d", 3.5)</code></td><td>Angka aneh</td><td>Specifier harus cocok dengan tipe: <code>%f</code></td></tr>
+  <tr><td><code>avg = total / n</code> (semua int)</td><td>Desimal hilang</td><td><code>(float)total / n</code></td></tr>
+  <tr><td><code>getchar()</code> atau <code>%c</code> setelah <code>%d</code></td><td>Input "dilewati"</td><td><code>" %c"</code></td></tr>
+  <tr><td>Membaca variabel sebelum diisi</td><td>Nilai acak</td><td>Selalu inisialisasi: <code>int total = 0;</code></td></tr>
+</table>
+
+<h2>9. Latihan</h2>
+<p>Untuk setiap soal, <b>gambar isi buffer</b> dulu, baru jawab.</p>
+
+<p><b>1.</b> <code>x = scanf("%d %d %d", &amp;y, &amp;z, &amp;w);</code> (a) Apa yang terjadi kalau pengguna hanya mengetik 2 bilangan lalu Enter? (b) Berapa x kalau yang diketik 3 huruf?</p>
+<details>
+  <summary>Jawaban</summary>
+  <p>(a) scanf <b>terus menunggu</b> bilangan ketiga, karena Enter hanya dianggap spasi oleh <code>%d</code>. Setelah bilangan ketiga diketik, x = 3. (b) x = <b>0</b>: huruf pertama sudah gagal dibaca sebagai <code>%d</code>, jadi tidak ada variabel yang terisi.</p>
+</details>
+
+<p><b>2.</b> <code>x = scanf("%s %s", ss1, ss2);</code> dengan input <code>Good morning everyone</code>. Apa isi ss1, ss2, dan x? Bagaimana kalau inputnya <code>Class 1PAT</code>?</p>
+<details>
+  <summary>Jawaban</summary>
+  <p>ss1 = "Good", ss2 = "morning", x = 2. "everyone" tetap di buffer. Untuk <code>Class 1PAT</code>: ss1 = "Class", ss2 = "1PAT", x = 2 (<code>%s</code> menerima angka juga, selama bukan spasi).</p>
+</details>
+
+<p><b>3.</b> <code>scanf("%4s", ss);</code> dengan input <code>Good morning</code>.</p>
+<details>
+  <summary>Jawaban</summary>
+  <p>ss = "Good": maksimal 4 karakter.</p>
+</details>
+
+<p><b>4.</b> <code>ch = getchar();</code> dengan input <code>Binus</code>. Lalu, kalau ada <code>ch1 = getchar(); ch2 = getchar();</code>, apa isinya?</p>
+<details>
+  <summary>Jawaban</summary>
+  <p>ch = 'B'. getchar hanya mengambil satu karakter. ch1 = 'B', ch2 = 'i': karakter berikutnya di buffer, tanpa menunggu ketikan baru.</p>
+</details>
+
+<p><b>5.</b> Buat program yang membaca nilai assignment, mid exam, dan final exam, lalu mencetak <code>Final Score = 20% assignment + 30% mid + 50% final</code>.</p>
+<details>
+  <summary>Jawaban</summary>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main() {
+    float assignment, mid, final_exam, score;
+    printf("Assignment: "); scanf("%f", &amp;assignment);
+    printf("Mid exam  : "); scanf("%f", &amp;mid);
+    printf("Final exam: "); scanf("%f", &amp;final_exam);
+    score = 0.2f * assignment + 0.3f * mid + 0.5f * final_exam;
+    printf("Final Score = %.2f\n", score);
+    return 0;
+}</code></pre>
+  <p>Pakai <code>float</code> supaya desimal tidak hilang. Nama <code>final_exam</code> dipakai karena lebih jelas daripada <code>final</code>.</p>
+</details>
+
+<p><b>6.</b> Di program Name/NIM/Gender (bagian 7), kenapa <code>gender = getchar()</code> seolah tidak dijalankan?</p>
+<details>
+  <summary>Jawaban</summary>
+  <p>Enter setelah NIM tertinggal di buffer. getchar langsung mengambilnya, jadi gender = <code>'\n'</code> tanpa menunggu ketikan. Perbaikan: <code>scanf(" %c", &amp;gender);</code>.</p>
+</details>
+
+<p><b>7.</b> Kenapa <code>printf(ss)</code> dan <code>printf("%s", ss)</code> bisa berbeda kalau <code>ss = "10 % 3 = 1\n"</code>?</p>
+<details>
+  <summary>Jawaban</summary>
+  <p><code>printf(ss)</code> membaca isi ss sebagai format. <code>% 3</code> dianggap specifier yang butuh argumen, padahal tidak ada argumen. Hasilnya tidak bisa diandalkan. <code>printf("%s", ss)</code> mencetak isi ss apa adanya.</p>
+</details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Deitel, P., &amp; Deitel, H. (2021). <i>C How to Program</i> (9th ed.). Pearson Education. Bab 2 dan bab 9 (formatted input/output).</li>
+  <li>Kernighan, B. W., &amp; Ritchie, D. M. (1988). <i>The C Programming Language</i> (2nd ed.). Prentice Hall. Bab 2: Types, Operators, and Expressions.</li>
+  <li>cppreference.com. <i>printf, fprintf, sprintf</i>. <a href="https://en.cppreference.com/w/c/io/fprintf">https://en.cppreference.com/w/c/io/fprintf</a></li>
+</ol>
+
+</article>
+</body>
+</html>

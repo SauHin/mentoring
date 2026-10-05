@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pointer dan Array</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+  <style>
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Pointer dan array</h1>
+  <p>Algorithm and programming · kotak yang isinya alamat kotak lain</p>
+</section>
+
+<section class="slide">
+  <h2>Pointer = kotak berisi alamat</h2>
+  <div class="cols">
+<pre><code>int i = 7;
+int *ptr;
+ptr = &amp;i;
+*ptr = 5;     // i jadi 5
+
+   ptr              i
+┌────────┐      ┌─────┐
+│ 0x1000 │ ───▶ │  5  │
+└────────┘      └─────┘
+  0x1008         0x1000</code></pre>
+    <ul>
+      <li><code>&amp;i</code> = <b>ambil alamat</b> i</li>
+      <li><code>*ptr</code> = <b>ikuti alamat</b> di ptr</li>
+      <li>Belum diisi = menunjuk sampah. Pakai <code>NULL</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Tiga arti tanda *</h2>
+  <table>
+    <tr><th>Tempat</th><th>Contoh</th><th>Arti</th></tr>
+    <tr><td>Deklarasi</td><td><code>int *ptr;</code></td><td>ptr adalah pointer ke int</td></tr>
+    <tr><td>Di depan pointer</td><td><code>*ptr = 5;</code></td><td>kotak yang ditunjuk ptr</td></tr>
+    <tr><td>Di antara nilai</td><td><code>a * b</code></td><td>perkalian</td></tr>
+  </table>
+  <p>Pointer ke pointer: <code>**pp</code> = ikuti <b>2</b> panah. Jumlah <code>*</code> = jumlah panah.</p>
+</section>
+
+<section class="slide">
+  <h2>Array = kotak berderet</h2>
+<pre><code>int A[5] = {10, 20, 30, 40, 50};
+
+ index:   [0]    [1]    [2]    [3]    [4]
+        │  10  │  20  │  30  │  40  │  50  │
+ alamat: 0x1000 0x1004 0x1008 0x100c 0x1010</code></pre>
+  <ul>
+    <li>Index mulai <b>0</b>, terakhir = ukuran − 1.</li>
+    <li><code>int B[8] = {1, 2};</code> → sisanya otomatis <b>0</b>.</li>
+    <li><code>A = {…}</code> setelah deklarasi → <b>error</b>. Isi dengan loop.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>A[i] = *(A + i): turunkan sendiri</h2>
+  <ol>
+    <li><code>A</code> = alamat elemen pertama (<code>&amp;A[0]</code>).</li>
+    <li><code>A + i</code> = maju <b>i elemen</b> (otomatis × 4 byte untuk int).</li>
+    <li><code>*(A + i)</code> = isi elemen ke-i = <code>A[i]</code>.</li>
+  </ol>
+  <div class="callout"><strong>Catatan slide kuliah</strong>"ptr is a pointer <b>constant</b>": yang tepat, ptr adalah pointer <b>variable</b>. Yang konstan adalah nama array.</div>
+</section>
+
+<section class="slide">
+  <h2>Index di luar batas: lolos compile!</h2>
+  <div class="cols">
+<pre><code>int A[3] = {1, 2, 3};
+int x = 99;
+A[3] = 7;      // index valid: 0, 1, 2
+printf("%d", x);</code></pre>
+    <ul>
+      <li>C <b>tidak memeriksa</b> batas array.</li>
+      <li>Tidak ada error. Nilai 7 menimpa memory lain, misalnya x.</li>
+      <li>Disebut <b>undefined behavior</b>: lebih berbahaya dari error.</li>
+    </ul>
+  </div>
+  <p class="label">Catatan: di slide kuliah, <code>arr1[10] = 12</code> ditandai "error". Kenyataannya lolos compile di Dev-C++.</p>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: pointer &amp; array di memory</h2>
+  <iframe src="viz/pointer-array.html" title="Visualisasi pointer dan array"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Array 2D: tetap satu deret</h2>
+  <div class="cols">
+<pre><code>int B[3][3] = {{1, 2},
+               {3, 4, 5},
+               {7}};
+
+B: {1, 2, 0}
+   {3, 4, 5}
+   {7, 0, 0}</code></pre>
+    <ul>
+      <li>Setiap <code>{ }</code> = satu baris, sisanya 0.</li>
+      <li>Di memory: baris 0, lalu baris 1, … (<b>row-major</b>).</li>
+      <li>Posisi <code>a[i][j]</code> = <code>i × kolom + j</code>.</li>
+      <li>Proses dengan <b>nested loop</b>: luar = baris, dalam = kolom.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>String = array char + '\0'</h2>
+  <div class="cols">
+<pre><code>char s[] = "BiNus";
+// = {'B','i','N','u','s','\0'}  → 6 kotak
+
+int n = 0;
+while (s[n] != '\0')
+    n++;            // n = 5 = strlen</code></pre>
+    <ul>
+      <li><code>'A'</code> = 1 karakter. <code>"A"</code> = 2 byte (<code>'A'</code> + <code>'\0'</code>).</li>
+      <li>Fungsi string bekerja <b>sampai '\0'</b>.</li>
+      <li><code>name = "Amir";</code> → error. Pakai <code>strcpy</code>.</li>
+      <li>Bandingkan string: <code>strcmp(a, b) == 0</code>, <b>bukan</b> <code>==</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>string.h &amp; ctype.h: cukup tahu</h2>
+  <div class="cols">
+    <table>
+      <tr><td><code>strlen</code></td><td>panjang</td></tr>
+      <tr><td><code>strcpy</code></td><td>salin</td></tr>
+      <tr><td><code>strcat</code></td><td>sambung</td></tr>
+      <tr><td><code>strcmp</code></td><td>0 kalau sama</td></tr>
+    </table>
+    <table>
+      <tr><td><code>isupper</code> / <code>islower</code></td><td>huruf besar/kecil?</td></tr>
+      <tr><td><code>isdigit</code> / <code>isalpha</code></td><td>angka? huruf?</td></tr>
+      <tr><td><code>isspace</code></td><td>spasi?</td></tr>
+      <tr><td><code>toupper</code> / <code>tolower</code></td><td>ubah huruf</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li><code>&amp;</code> = ambil alamat, <code>*</code> = ikuti alamat.</li>
+    <li>Array = kotak berderet. <code>A[i]</code> = <code>*(A + i)</code>.</li>
+    <li>C <b>tidak memeriksa</b> batas array. Kamu yang harus menjaga index.</li>
+    <li>String = array char + <code>'\0'</code>.</li>
+  </ul>
+  <p class="label">Latihan (max/min, matriks, validasi password, balik string) ada di notes.</p>
+</section>
+
+<script src="../../_shared/slides.js"></script>
+</body>
+</html>

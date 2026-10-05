@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Loop Tracer</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <link rel="stylesheet" href="../../../_shared/cviz.css">
+  <script src="../../../_shared/theme.js"></script>
+</head>
+<body class="viz">
+
+<h1>Loop tracer</h1>
+<p>Jalankan loop <b>step by step</b> dan lihat <b>trace table</b> terisi: satu baris per putaran. Kalau kamu bisa mengisi trace table sendiri, kamu bisa membaca loop apa pun. Nyalakan <b>mode tebak</b> untuk latihan.</p>
+
+<script src="../../../_shared/cviz.js"></script>
+<script>
+// Urutan eksekusi for: exp1 sekali, lalu cek exp2 → body → exp3 → cek exp2 lagi ...
+const flowFor = cvFlow(320, 330, [
+  cvNode('init', 'proc', 150, 26, 150, 34, 'exp1: i = 1'),
+  cvNode('cond', 'dec', 150, 104, 170, 62, 'exp2: i <= n'),
+  cvNode('body', 'proc', 150, 190, 190, 34, 'body: total += i'),
+  cvNode('upd', 'proc', 150, 256, 150, 34, 'exp3: i++'),
+  cvNode('end', 'term', 275, 190, 70, 30, 'keluar'),
+  cvLine('M150 43V73'), cvLine('M150 135V173', 'true', 157, 156), cvLine('M150 207V239'),
+  cvLine('M75 256H30V104H65'), cvLine('M235 104H275V175', 'false', 240, 94),
+]);
+
+cviz({
+  programs: {
+    for: {
+      title: 'for: jumlah 1..n',
+      input: '5',
+      watch: ['i', 'total'],
+      panes: {
+        Flowchart: flowFor,
+        C: `int n, i, total = 0;
+scanf("%d", &n);
+for (i = 1; i <= n; i++) {
+    total += i;
+}
+printf("%d\\n", total);`,
+      },
+      *run(m) {
+        m.decl('int', 'n'); m.decl('int', 'i'); m.decl('int', 'total', 0);
+        yield m.step('int n', '<b>Akumulator</b> total harus mulai dari 0. Kalau lupa, isinya sampah dan hasilnya ngawur.', { hot: ['total'] });
+        m.scanf('%d', 'n');
+        yield m.step('scanf', `n = ${m.get('n')}: loop akan menjumlahkan 1 sampai ${m.get('n')}.`, { hot: ['n'] });
+        m.set('i', 1);
+        yield m.step({ Flowchart: 'init', C: 'for (' }, '<b>exp1</b> (<code>i = 1</code>) jalan <b>sekali saja</b>, sebelum loop dimulai.', { hot: ['i'] });
+        while (true) {
+          const i = m.get('i'), ok = i <= m.get('n');
+          yield m.step({ Flowchart: 'cond', C: 'for (' }, `<b>exp2</b>: ${i} &lt;= ${m.get('n')} → <b>${ok ? 'true' : 'false'}</b>. ${ok ? 'Jalankan body.' : 'Loop selesai.'} Kondisi dicek <b>sebelum</b> setiap putaran.`);
+          if (!ok) break;
+          m.set('total', m.get('total') + i);
+          m.trace();
+          yield m.step({ Flowchart: 'body', C: 'total += i' }, `<b>Body</b>: total += ${i} → total = ${m.get('total')}. Baris trace table bertambah.`, { hot: ['total'] });
+          m.set('i', i + 1);
+          yield m.step({ Flowchart: 'upd', C: 'for (' }, `<b>exp3</b> (<code>i++</code>) jalan <b>setelah</b> body, lalu kembali ke exp2. i = ${i + 1}.`, { hot: ['i'] });
+        }
+        m.printf('%d\n', m.get('total'));
+        yield m.step('printf', `Setelah loop, i = ${m.get('i')} (bukan ${m.get('n')}!), karena loop baru berhenti saat kondisi false. Total = ${m.get('total')}.`, { final: true });
+      },
+    },
+    while: {
+      title: 'while: loop yang sama',
+      input: '5',
+      watch: ['i', 'total'],
+      code: `int n, i, total = 0;
+scanf("%d", &n);
+i = 1;
+while (i <= n) {
+    total += i;
+    i++;
+}
+printf("%d\\n", total);`,
+      *run(m) {
+        m.decl('int', 'n'); m.decl('int', 'i'); m.decl('int', 'total', 0);
+        m.scanf('%d', 'n');
+        yield m.step('scanf', 'Program yang <b>persis sama</b> dengan versi for, ditulis dengan while. Keempat bagian loop tetap ada, hanya tempatnya berbeda.', { hot: ['n'] });
+        m.set('i', 1);
+        yield m.step('i = 1;', '<b>exp1</b> pindah ke sebelum while.', { hot: ['i'] });
+        while (true) {
+          const i = m.get('i'), ok = i <= m.get('n');
+          yield m.step('while (', `<b>exp2</b>: ${i} &lt;= ${m.get('n')} → ${ok ? 'true' : 'false'}.`);
+          if (!ok) break;
+          m.set('total', m.get('total') + i);
+          m.trace();
+          yield m.step('total += i', `total = ${m.get('total')}.`, { hot: ['total'] });
+          m.set('i', i + 1);
+          yield m.step('i++', '<b>exp3</b> pindah ke akhir body. Lupa baris ini = infinite loop.', { hot: ['i'] });
+        }
+        m.printf('%d\n', m.get('total'));
+        yield m.step('printf', 'Trace table-nya sama persis dengan versi for. for dan while hanyalah dua cara menulis loop yang sama.', { final: true });
+      },
+    },
+    dowhile: {
+      title: 'while vs do-while',
+      code: `int x = 10;
+while (x < 5) {
+    printf("while: %d\\n", x);
+}
+do {
+    printf("do-while: %d\\n", x);
+} while (x < 5);`,
+      *run(m) {
+        m.decl('int', 'x', 10);
+        yield m.step('int x', 'x = 10. Kondisi kedua loop sama: <code>x &lt; 5</code>, yang jelas false.', { hot: ['x'] });
+        yield m.step('while (x', '<b>while</b> mengecek kondisi <b>dulu</b>: 10 &lt; 5 false → body tidak pernah jalan, 0 kali.');
+        m.printf('do-while: %d\n', 10);
+        yield m.step('printf("do-while', '<b>do-while</b> menjalankan body <b>dulu</b>, baru mengecek. Body pasti jalan minimal 1 kali.');
+        yield m.step('} while (x', 'Baru sekarang dicek: false → berhenti. Pakai do-while kalau body harus jalan sekali dulu, misalnya menu atau validasi input.', { final: true });
+      },
+    },
+    break: {
+      title: 'break',
+      watch: ['i'],
+      code: `for (int i = 1; i <= 10; i++) {
+    if (i == 5) break;
+    printf("%d ", i);
+}`,
+      *run(m) {
+        m.decl('int', 'i', 1);
+        while (m.get('i') <= 10) {
+          const i = m.get('i');
+          m.trace();
+          yield m.step('if (i == 5)', `i = ${i}. ${i === 5 ? '5 == 5 → <b>break</b>: keluar dari loop <b>saat itu juga</b>, walaupun kondisi for masih true.' : 'Bukan 5, lanjut.'}`, { hot: ['i'] });
+          if (i === 5) break;
+          m.printf('%d ', i);
+          yield m.step('printf', `Cetak ${i}.`);
+          m.set('i', i + 1);
+        }
+        yield m.step('}', 'Output: 1 2 3 4. Angka 5 sampai 10 tidak pernah diproses.', { final: true });
+      },
+    },
+    continue: {
+      title: 'continue',
+      watch: ['i'],
+      code: `for (int i = 1; i <= 10; i++) {
+    if (i == 5) continue;
+    printf("%d ", i);
+}`,
+      *run(m) {
+        m.decl('int', 'i', 1);
+        while (m.get('i') <= 10) {
+          const i = m.get('i');
+          m.trace();
+          yield m.step('if (i == 5)', `i = ${i}. ${i === 5 ? '5 == 5 → <b>continue</b>: lewati sisa body <b>putaran ini saja</b>, langsung ke i++.' : 'Bukan 5, lanjut ke printf.'}`, { hot: ['i'] });
+          if (i !== 5) {
+            m.printf('%d ', i);
+            yield m.step('printf', `Cetak ${i}.`);
+          }
+          m.set('i', i + 1);
+        }
+        yield m.step('}', 'Output: 1 2 3 4 6 7 8 9 10. Hanya 5 yang dilewati, loop tetap berjalan sampai selesai.', { final: true });
+      },
+    },
+    nested: {
+      title: 'Nested loop: segitiga',
+      input: '4',
+      watch: ['i', 'j'],
+      code: `int n;
+scanf("%d", &n);
+for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= i; j++) {
+        printf("*");
+    }
+    printf("\\n");
+}`,
+      *run(m) {
+        m.decl('int', 'n');
+        m.scanf('%d', 'n');
+        yield m.step('scanf', `n = ${m.get('n')} baris.`, { hot: ['n'] });
+        m.decl('int', 'i', 1); m.decl('int', 'j');
+        for (let i = 1; i <= m.get('n'); i++) {
+          m.set('i', i);
+          yield m.step('for (int i', `Loop luar: baris ke-${i}. Loop dalam akan jalan <b>${i} kali</b> (j = 1 sampai i).`, { hot: ['i'] });
+          for (let j = 1; j <= i; j++) {
+            m.set('j', j);
+            m.printf('*');
+            m.trace();
+            yield m.step('printf("*")', `j = ${j}: cetak satu bintang.`, { hot: ['j'] });
+          }
+          m.printf('\n');
+          yield m.step('printf("\\n")', `Loop dalam selesai, pindah baris. Kembali ke loop luar.`);
+        }
+        yield m.step('}', `Total bintang = 1 + 2 + ... + ${m.get('n')} = ${m.rows.length}. Pola nested: <b>loop luar = baris</b>, <b>loop dalam = isi tiap baris</b>.`, { final: true });
+      },
+    },
+    sentinel: {
+      title: 'Sentinel: rata-rata sampai 0',
+      input: '8 6 10 0',
+      watch: ['x', 'total', 'count'],
+      code: `int x, total = 0, count = 0;
+scanf("%d", &x);
+while (x != 0) {
+    total += x;
+    count++;
+    scanf("%d", &x);
+}
+printf("%.2f\\n", (float)total / count);`,
+      *run(m) {
+        m.decl('int', 'x'); m.decl('int', 'total', 0); m.decl('int', 'count', 0);
+        yield m.step('int x', 'Jumlah input tidak diketahui. Pengguna mengetik 0 sebagai tanda selesai: <b>sentinel</b>.');
+        m.scanf('%d', 'x');
+        yield m.step('scanf("%d", &x);', `Baca angka pertama <b>sebelum</b> loop: x = ${m.get('x')}.`, { hot: ['x'] });
+        while (true) {
+          const x = m.get('x');
+          yield m.step('while (x != 0)', `${x} != 0 → ${x !== 0 ? 'true, proses angka ini' : 'false: ketemu sentinel, berhenti'}.`);
+          if (x === 0) break;
+          m.set('total', m.get('total') + x);
+          m.set('count', m.get('count') + 1);
+          m.trace();
+          yield m.step('count++', `total = ${m.get('total')}, count = ${m.get('count')}.`, { hot: ['total', 'count'] });
+          m.scanf('%d', 'x');
+          yield m.step('    scanf', `Baca angka berikutnya di <b>akhir</b> body: x = ${m.get('x')}. Pola: baca → cek → proses → baca lagi.`, { hot: ['x'] });
+        }
+        m.printf('%.2f\n', m.get('total') / m.get('count'));
+        yield m.step('printf', 'Angka 0 tidak ikut dihitung. <code>(float)</code> mencegah pembagian integer. (Kalau input pertama langsung 0, count = 0: harus dicek dulu supaya tidak membagi dengan 0.)', { final: true });
+      },
+    },
+    semicolon: {
+      title: 'Bug: titik koma setelah for',
+      watch: ['i'],
+      code: `int i;
+for (i = 0; i < 3; i++);
+    printf("%d\\n", i);`,
+      *run(m) {
+        m.decl('int', 'i');
+        yield m.step('int i', 'Sekilas, kode ini terlihat akan mencetak 0, 1, 2.');
+        m.set('i', 0);
+        while (m.get('i') < 3) {
+          m.trace();
+          yield m.step('for (i', `Perhatikan <b>;</b> di akhir baris for: body loop adalah <b>statement kosong</b>. Loop jalan tanpa melakukan apa-apa. i = ${m.get('i')}.`, { hot: ['i'] });
+          m.set('i', m.get('i') + 1);
+        }
+        yield m.step('for (i', 'i = 3, kondisi false, loop selesai.', { hot: ['i'] });
+        m.printf('%d\n', m.get('i'));
+        yield m.step('printf', 'printf <b>bukan</b> bagian loop (indentasi menipu!). Hanya jalan sekali dan mencetak 3. Compiler tidak memberi error.', { final: true });
+      },
+    },
+  },
+});
+</script>
+</body>
+</html>

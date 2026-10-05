@@ -119,6 +119,132 @@
         ],
         "createdAt": "2026-10-05T09:12:49.282Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/01-algoritma-dan-struktur-c/notes.html"
+        ],
+        "createdAt": "2026-10-05T16:34:06.501Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/01-algoritma-dan-struktur-c/slides.html"
+        ],
+        "createdAt": "2026-10-05T16:34:06.750Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/01-algoritma-dan-struktur-c/viz/tiga-bentuk.html"
+        ],
+        "createdAt": "2026-10-05T16:34:06.998Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/02-variabel-tipe-data-io/notes.html"
+        ],
+        "createdAt": "2026-10-05T16:34:07.254Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/02-variabel-tipe-data-io/slides.html"
+        ],
+        "createdAt": "2026-10-05T16:34:07.509Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/02-variabel-tipe-data-io/viz/memori-io.html"
+        ],
+        "createdAt": "2026-10-05T16:34:07.797Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/02-variabel-tipe-data-io/viz/printf.html"
+        ],
+        "createdAt": "2026-10-05T16:34:08.049Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/03-repetition/notes.html"
+        ],
+        "createdAt": "2026-10-05T16:34:08.302Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/03-repetition/slides.html"
+        ],
+        "createdAt": "2026-10-05T16:34:08.551Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/03-repetition/viz/loop.html"
+        ],
+        "createdAt": "2026-10-05T16:34:08.797Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/04-pointer-dan-array/notes.html"
+        ],
+        "createdAt": "2026-10-05T16:34:09.056Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/04-pointer-dan-array/slides.html"
+        ],
+        "createdAt": "2026-10-05T16:34:09.302Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/04-pointer-dan-array/viz/pointer-array.html"
+        ],
+        "createdAt": "2026-10-05T16:34:09.542Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "algorithm-and-programming/index.html"
+        ],
+        "createdAt": "2026-10-05T16:34:09.814Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
       }
     ]
   }

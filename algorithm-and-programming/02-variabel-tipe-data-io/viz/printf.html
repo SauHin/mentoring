@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Printf Playground</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <script src="../../../_shared/theme.js"></script>
+  <style>
+    .viz { max-width: 860px; }
+    .pf-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .pf-grid label { display: grid; gap: 4px; }
+    .pf-grid .field { width: 100%; font-family: var(--mono); }
+    .presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .presets .btn { font-family: var(--mono); }
+    .pf-out { margin-top: 12px; }
+    .ruler, .result { font-family: var(--mono); font-size: 1.15rem; white-space: pre; margin: 0; line-height: 1.6; }
+    .ruler { color: var(--ink-3); font-size: 0.85rem; }
+    .result span { background: color-mix(in srgb, var(--hot) 25%, var(--surface)); border-radius: 3px; }
+    .result .pad { background: color-mix(in srgb, var(--focus) 18%, var(--surface)); }
+    .parts { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .parts li { display: grid; grid-template-columns: 5.5rem 1fr; gap: 10px; align-items: baseline; }
+    .parts code { justify-self: start; }
+    .err { color: var(--stop); font-weight: 600; }
+  </style>
+</head>
+<body class="viz">
+
+<h1>Printf playground</h1>
+<p>Tidak perlu menghafal tabel format. Ketik format, lihat hasilnya, lalu baca penjelasan tiap bagian. Pola umumnya: <code>%[flags][width][.precision]type</code>.</p>
+
+<div class="controls pf-grid">
+  <label>Format (satu specifier) <input class="field" id="fmt" value="%8.2f" spellcheck="false"></label>
+  <label>Nilai <input class="field" id="val" value="3.14159" spellcheck="false"></label>
+</div>
+<div class="presets" id="presets"></div>
+
+<div class="card pf-out">
+  <div class="label">Output (kotak oranye = karakter yang dicetak, biru = spasi tambahan dari width)</div>
+  <pre class="ruler" id="ruler"></pre>
+  <pre class="result" id="result"></pre>
+</div>
+<div class="card pf-out">
+  <strong>Arti tiap bagian</strong>
+  <ul class="parts" id="parts"></ul>
+</div>
+
+<script src="../../../_shared/cviz.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const PRESETS = [
+  ['%d', '42'], ['%5d', '42'], ['%-5d', '42'], ['%05d', '42'], ['%+d', '42'],
+  ['%f', '3.14159'], ['%.2f', '3.14159'], ['%8.2f', '3.14159'], ['%e', '31415.9'],
+  ['%c', '65'], ['%s', 'BINUS'], ['%10s', 'BINUS'], ['%-10s', 'BINUS'], ['%.3s', 'BINUS'],
+  ['%x', '255'], ['%o', '8'], ['%%', ''],
+];
+$('presets').innerHTML = PRESETS.map(([f, v]) => `<button class="btn btn-sm" data-f="${esc(f)}" data-v="${esc(v)}">${esc(f)}</button>`).join('');
+document.querySelectorAll('[data-f]').forEach((b) => (b.onclick = () => { $('fmt').value = b.dataset.f; $('val').value = b.dataset.v; update(); }));
+
+const TYPES = {
+  d: ['int', 'bilangan bulat (desimal)'], i: ['int', 'bilangan bulat, sama dengan %d'], u: ['unsigned int', 'bilangan bulat tanpa tanda'],
+  f: ['float/double', 'desimal, default 6 angka di belakang koma'], e: ['float/double', 'notasi ilmiah: 3.14e+04 = 3.14 × 10⁴'],
+  c: ['char', 'satu karakter (nilai = kode ASCII)'], s: ['char[]', 'string sampai \\0'], x: ['int', 'heksadesimal (basis 16)'],
+  o: ['int', 'oktal (basis 8)'], '%': ['-', 'mencetak tanda % itu sendiri'],
+};
+
+function update() {
+  const fmt = $('fmt').value.trim(), raw = $('val').value;
+  const mm = fmt.match(/^%([-+0 ]*)(\d+)?(?:\.(\d+))?(l?)([diufecsxo%])$/);
+  if (!mm) {
+    $('result').textContent = ''; $('ruler').textContent = '';
+    $('parts').innerHTML = '<li class="err">Format belum dikenali. Contoh: %d, %5d, %-8.2f, %c, %s, %x</li>';
+    return;
+  }
+  const [, flags, width, prec, , type] = mm;
+  const value = type === 's' ? raw : type === 'c' && isNaN(+raw) ? raw.charCodeAt(0) : Number(raw);
+  const out = cfmt(fmt, [value]);
+  // Tandai spasi tambahan dari width supaya terlihat "kolom" yang dipesan.
+  const core = cfmt(`%${flags.replace(/[-0]/g, '')}${prec !== undefined ? '.' + prec : ''}${type}`, [value]);
+  const padLen = out.length - core.length;
+  const padLeft = padLen > 0 && !flags.includes('-') && !flags.includes('0');
+  const cells = [...out].map((ch, i) => {
+    const isPad = padLen > 0 && (padLeft ? i < padLen : flags.includes('-') && i >= core.length);
+    return `<span class="${isPad ? 'pad' : ''}">${ch === ' ' ? ' ' : esc(ch)}</span>`;
+  }).join('');
+  $('result').innerHTML = cells;
+  $('ruler').textContent = Array.from({ length: Math.max(out.length, 1) }, (_, i) => (i + 1) % 10).join('');
+
+  const p = [];
+  if (flags.includes('-')) p.push(['-', 'rata kiri: sisa kolom diisi spasi di <b>kanan</b>']);
+  if (flags.includes('0')) p.push(['0', 'sisa kolom diisi angka 0, bukan spasi']);
+  if (flags.includes('+')) p.push(['+', 'selalu tampilkan tanda, termasuk + untuk bilangan positif']);
+  if (width) p.push([width, `<b>width</b>: pesan minimal ${width} kolom. ${core.length >= +width ? 'Hasilnya sudah ' + core.length + ' karakter, jadi tidak ada spasi tambahan (width tidak pernah memotong).' : 'Hasilnya ' + core.length + ' karakter, jadi ditambah ' + (+width - core.length) + ' ' + (flags.includes('0') ? 'nol' : 'spasi') + (flags.includes('-') ? ' di kanan.' : ' di kiri (rata kanan).')}`]);
+  if (prec !== undefined) p.push(['.' + prec, type === 's' ? `<b>precision</b> untuk string: ambil maksimal ${prec} karakter pertama` : `<b>precision</b>: ${prec} angka di belakang koma (dibulatkan)`]);
+  p.push([type, `<b>type</b>: ${TYPES[type][1]}. Pasangan tipe variabel: <code>${TYPES[type][0]}</code>.`]);
+  $('parts').innerHTML = p.map(([k, d]) => `<li><code>${esc(k)}</code><span>${d}</span></li>`).join('');
+}
+$('fmt').oninput = $('val').oninput = update;
+update();
+</script>
+</body>
+</html>

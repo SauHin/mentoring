@@ -323,6 +323,7 @@ article.notes { padding-top: 84px; } /* di bawah topbar */
 .course .chip { background: var(--surface); color: var(--ink-2); }
 .c-mint { --a1: #b8f5d6; --a2: #12b886; }
 .c-lilac { --a1: #dcc2ff; --a2: #8b5cf6; }
+.c-jingga { --a1: #ffe27a; --a2: #ff9f43; }
 .empty { margin-top: 2rem; }
 .empty p { margin: 0.3em 0 0; color: var(--ink-2); }
 .notes .tldr { margin: 1.5rem 0; }

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Satu Algoritma, Tiga Bentuk</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <link rel="stylesheet" href="../../../_shared/cviz.css">
+  <script src="../../../_shared/theme.js"></script>
+</head>
+<body class="viz">
+
+<h1>Satu algoritma, tiga bentuk</h1>
+<p>Pseudocode, flowchart, dan kode C di bawah adalah <b>algoritma yang sama</b>. Jalankan <b>step by step</b> dan lihat langkah yang sama menyala di ketiganya. Ubah isi keyboard untuk mencoba input lain.</p>
+
+<script src="../../../_shared/cviz.js"></script>
+<script>
+/* ---------- Sequence: rata-rata 3 bilangan ---------- */
+const flowAvg = cvFlow(300, 300, [
+  cvNode('start', 'term', 150, 24, 100, 32, 'Start'),
+  cvNode('in', 'io', 150, 84, 170, 36, 'Input a, b, c'),
+  cvNode('calc', 'proc', 150, 146, 220, 36, 'avg = (a+b+c)/3'),
+  cvNode('out', 'io', 150, 208, 170, 36, 'Print avg'),
+  cvNode('end', 'term', 150, 270, 100, 32, 'End'),
+  cvLine('M150 40V64'), cvLine('M150 102V126'), cvLine('M150 164V188'), cvLine('M150 226V252'),
+]);
+
+/* ---------- Selection: ganjil atau genap ---------- */
+const flowOdd = cvFlow(320, 330, [
+  cvNode('start', 'term', 160, 24, 100, 32, 'Start'),
+  cvNode('in', 'io', 160, 84, 150, 36, 'Input n'),
+  cvNode('dec', 'dec', 160, 160, 180, 64, 'n % 2 == 0'),
+  cvNode('even', 'io', 258, 240, 110, 36, 'Print Genap'),
+  cvNode('odd', 'io', 62, 240, 110, 36, 'Print Ganjil'),
+  cvNode('end', 'term', 160, 304, 90, 30, 'End'),
+  cvLine('M160 40V64'), cvLine('M160 102V128'),
+  cvLine('M250 160H258V222', 'Ya', 262, 150), cvLine('M70 160H62V222', 'Tidak', 22, 150),
+  cvLine('M258 258V304H205'), cvLine('M62 258V304H115'),
+]);
+
+/* ---------- Repetition: DOWHILE dari slide kuliah ---------- */
+const flowLoop = cvFlow(330, 360, [
+  cvNode('start', 'term', 150, 24, 100, 32, 'Start'),
+  cvNode('init', 'proc', 150, 84, 150, 36, 'stars = 0'),
+  cvNode('dec', 'dec', 150, 162, 170, 64, 'stars < 5'),
+  cvNode('out', 'io', 150, 250, 150, 36, 'Print stars'),
+  cvNode('inc', 'proc', 150, 316, 190, 36, 'stars = stars + 1'),
+  cvNode('end', 'term', 285, 250, 80, 30, 'End'),
+  cvLine('M150 40V64'), cvLine('M150 102V128'),
+  cvLine('M150 194V230', 'Ya', 158, 214), cvLine('M150 268V296'),
+  cvLine('M55 316H22V162H63'), cvLine('M235 162H285V233', 'Tidak', 244, 152),
+]);
+
+cviz({
+  layout: 'wide',
+  programs: {
+    avg: {
+      title: 'Sequence: rata-rata 3 bilangan',
+      input: '70 80 95',
+      panes: {
+        Pseudocode: `Start
+Read a, b, c
+avg = (a + b + c) / 3
+Print avg
+End`,
+        Flowchart: flowAvg,
+        C: `#include <stdio.h>
+
+int main() {
+    float a, b, c, avg;
+    scanf("%f %f %f", &a, &b, &c);
+    avg = (a + b + c) / 3;
+    printf("%.2f\\n", avg);
+    return 0;
+}`,
+      },
+      *run(m) {
+        yield m.step({ Pseudocode: 'Start', Flowchart: 'start', C: 'int main' }, 'Program C selalu mulai dari <code>main()</code>. Di pseudocode dan flowchart, ini adalah <b>Start</b>.');
+        ['a', 'b', 'c', 'avg'].forEach((v) => m.decl('float', v));
+        yield m.step({ C: 'float a' }, 'Baris ini <b>tidak ada</b> di pseudocode: C mewajibkan variabel dideklarasikan dulu (tipe + nama). Isinya masih sampah (<code>?</code>) sampai diisi.', { hot: ['a', 'b', 'c', 'avg'] });
+        m.scanf('%f %f %f', 'a', 'b', 'c');
+        yield m.step({ Pseudocode: 'Read', Flowchart: 'in', C: 'scanf' }, '<b>Read</b> = <code>scanf</code>. Tiga angka dibaca dari keyboard ke a, b, dan c.', { hot: ['a', 'b', 'c'] });
+        m.set('avg', (m.get('a') + m.get('b') + m.get('c')) / 3);
+        yield m.step({ Pseudocode: 'avg =', Flowchart: 'calc', C: 'avg =' }, 'Hitung dan <b>simpan</b> hasilnya di avg. Rumusnya sama persis di ketiga bentuk.', { hot: ['avg'] });
+        m.printf('%.2f\n', m.get('avg'));
+        yield m.step({ Pseudocode: 'Print', Flowchart: 'out', C: 'printf' }, '<b>Print</b> = <code>printf</code>. <code>%.2f</code> artinya tampilkan desimal dengan 2 angka di belakang koma.');
+        yield m.step({ Pseudocode: 'End', Flowchart: 'end', C: 'return 0' }, 'Selesai. Urutannya lurus dari atas ke bawah tanpa cabang: inilah <b>sequence</b>.', { final: true });
+      },
+    },
+    odd: {
+      title: 'Selection: ganjil atau genap',
+      input: '7',
+      panes: {
+        Pseudocode: `Start
+Read n
+IF n MOD 2 = 0 THEN
+    Print "Genap"
+ELSE
+    Print "Ganjil"
+ENDIF
+End`,
+        Flowchart: flowOdd,
+        C: `#include <stdio.h>
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    if (n % 2 == 0)
+        printf("Genap\\n");
+    else
+        printf("Ganjil\\n");
+    return 0;
+}`,
+      },
+      *run(m) {
+        yield m.step({ Pseudocode: 'Start', Flowchart: 'start', C: 'int main' }, 'Mulai dari <code>main()</code>.');
+        m.decl('int', 'n');
+        yield m.step({ C: 'int n' }, 'Deklarasi: siapkan kotak bernama n untuk bilangan bulat.', { hot: ['n'] });
+        m.scanf('%d', 'n');
+        yield m.step({ Pseudocode: 'Read n', Flowchart: 'in', C: 'scanf' }, `n dibaca dari keyboard: n = ${m.get('n')}.`, { hot: ['n'] });
+        const even = m.get('n') % 2 === 0;
+        yield m.step({ Pseudocode: 'IF n MOD', Flowchart: 'dec', C: 'if (n % 2' }, `Cek kondisi: ${m.get('n')} % 2 = ${m.get('n') % 2}. Kondisinya <b>${even ? 'benar' : 'salah'}</b>, jadi program mengambil cabang <b>${even ? 'Ya' : 'Tidak'}</b>. Di C, <code>MOD</code> ditulis <code>%</code> dan "sama dengan" ditulis <code>==</code>.`);
+        if (even) {
+          m.printf('Genap\n');
+          yield m.step({ Pseudocode: 'Print "Genap"', Flowchart: 'even', C: 'printf("Genap' }, 'Cabang Ya: cetak Genap. Cabang Tidak dilewati sama sekali.');
+        } else {
+          m.printf('Ganjil\n');
+          yield m.step({ Pseudocode: 'Print "Ganjil"', Flowchart: 'odd', C: 'printf("Ganjil' }, 'Cabang Tidak (<code>else</code>): cetak Ganjil. Cabang Ya dilewati sama sekali.');
+        }
+        yield m.step({ Pseudocode: 'End', Flowchart: 'end', C: 'return 0' }, 'Selesai. Hanya <b>satu</b> dari dua cabang yang jalan: inilah <b>selection</b>. Coba ubah input jadi angka genap.', { final: true });
+      },
+    },
+    loop: {
+      title: 'Repetition: DOWHILE',
+      watch: ['stars'],
+      panes: {
+        Pseudocode: `Start
+Set stars = 0
+DOWHILE stars < 5
+    Print stars
+    stars = stars + 1
+ENDDO
+End`,
+        Flowchart: flowLoop,
+        C: `#include <stdio.h>
+
+int main() {
+    int stars = 0;
+    while (stars < 5) {
+        printf("%d ", stars);
+        stars = stars + 1;
+    }
+    return 0;
+}`,
+      },
+      *run(m) {
+        yield m.step({ Pseudocode: 'Start', Flowchart: 'start', C: 'int main' }, 'Mulai dari <code>main()</code>.');
+        m.decl('int', 'stars', 0);
+        yield m.step({ Pseudocode: 'Set stars', Flowchart: 'init', C: 'int stars' }, 'Set stars = 0. Di C, deklarasi dan pemberian nilai awal bisa sekaligus.', { hot: ['stars'] });
+        while (true) {
+          const s = m.get('stars');
+          yield m.step({ Pseudocode: 'DOWHILE', Flowchart: 'dec', C: 'while (stars' }, `Cek kondisi: ${s} &lt; 5 → <b>${s < 5 ? 'benar' : 'salah'}</b>. ${s < 5 ? 'Masuk ke dalam loop.' : 'Keluar dari loop.'}`);
+          if (s >= 5) break;
+          m.printf('%d ', s);
+          yield m.step({ Pseudocode: 'Print stars', Flowchart: 'out', C: 'printf' }, `Cetak ${s}.`);
+          m.set('stars', s + 1);
+          m.trace();
+          yield m.step({ Pseudocode: 'stars = stars + 1', Flowchart: 'inc', C: 'stars = stars + 1' }, `stars naik jadi ${s + 1}, lalu kembali ke pengecekan kondisi. Tanpa baris ini, kondisi selalu benar dan loop tidak pernah berhenti.`, { hot: ['stars'] });
+        }
+        yield m.step({ Pseudocode: 'End', Flowchart: 'end', C: 'return 0' }, 'Selesai: badan loop jalan 5 kali (stars = 0 sampai 4). Inilah <b>repetition</b>. Lihat trace table: setiap baris = satu putaran.', { final: true });
+      },
+    },
+  },
+});
+</script>
+</body>
+</html>

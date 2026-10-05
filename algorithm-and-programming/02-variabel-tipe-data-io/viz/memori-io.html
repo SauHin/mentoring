@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memory dan Input/Output</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css">
+  <link rel="stylesheet" href="../../../_shared/cviz.css">
+  <script src="../../../_shared/theme.js"></script>
+</head>
+<body class="viz">
+
+<h1>Memory dan input/output</h1>
+<p>Setiap variabel adalah <b>kotak di memory</b>: punya nama, tipe, nilai, dan alamat. Input dari keyboard masuk dulu ke <b>buffer</b>, lalu diambil oleh <code>scanf</code>/<code>getchar</code>. Ubah isi keyboard untuk mencoba sendiri.</p>
+
+<script src="../../../_shared/cviz.js"></script>
+<script>
+cviz({
+  programs: {
+    var: {
+      title: 'Variabel = kotak',
+      code: `int x;
+x = 10;
+x = x + 5;
+char ch = 65;
+printf("%c %d\\n", ch, ch);`,
+      *run(m) {
+        m.decl('int', 'x');
+        yield m.step('int x', 'Deklarasi: komputer menyiapkan kotak 4 byte bernama x di alamat tertentu. Isinya <b>sampah</b> (<code>?</code>), yaitu sisa data lama di memory. Jangan pernah membaca variabel sebelum diisi.', { hot: ['x'] });
+        m.set('x', 10);
+        yield m.step('x = 10', '<code>=</code> artinya <b>simpan</b> nilai kanan ke kotak kiri. Ini bukan "sama dengan" seperti di matematika.', { hot: ['x'] });
+        m.set('x', m.get('x') + 5);
+        yield m.step('x = x + 5', 'Baca dulu sisi kanan: ambil isi x (10), tambah 5, lalu simpan hasilnya (15) kembali ke x. Nilai lama tertimpa.', { hot: ['x'] });
+        m.decl('char', 'ch', 65);
+        yield m.step('char ch', 'char hanya 1 byte dan menyimpan <b>angka</b>. Angka 65 adalah kode ASCII huruf A.', { hot: ['ch'] });
+        m.printf('%c %d\n', m.get('ch'), m.get('ch'));
+        yield m.step('printf', 'Isi kotaknya sama (65), hanya cara menampilkannya yang beda: <code>%c</code> sebagai karakter, <code>%d</code> sebagai angka.', { final: true });
+      },
+    },
+    div: {
+      title: 'Pembagian integer & casting',
+      code: `int a = 7, b = 2;
+float r1 = a / b;
+float r2 = (float)a / b;
+float r3 = (float)(a / b);
+int t = (int)3.99;
+char c = 130;`,
+      *run(m) {
+        m.decl('int', 'a', 7); m.decl('int', 'b', 2);
+        yield m.step('int a = 7', 'Dua bilangan bulat (int).', { hot: ['a', 'b'] });
+        m.decl('float', 'r1', Math.trunc(7 / 2));
+        yield m.step('float r1', '<b>Jebakan:</b> int / int = int. 7 / 2 dihitung dulu sebagai integer = <b>3</b> (sisa dibuang), baru disimpan ke float jadi 3.0. Tipe tujuan tidak mengubah cara menghitung.', { hot: ['r1'] });
+        m.decl('float', 'r2', 7 / 2);
+        yield m.step('float r2', 'Cast <code>(float)a</code> mengubah 7 jadi 7.0 <b>sebelum</b> dibagi. float / int = float, jadi hasilnya 3.5.', { hot: ['r2'] });
+        m.decl('float', 'r3', Math.trunc(7 / 2));
+        yield m.step('float r3', 'Posisi kurung menentukan urutan: <code>(a / b)</code> sudah jadi 3 dulu, baru di-cast. Terlambat, hasilnya tetap 3.0.', { hot: ['r3'] });
+        m.decl('int', 't', 3.99);
+        yield m.step('int t', 'Cast ke int <b>membuang</b> bagian desimal, bukan membulatkan: 3.99 jadi 3.', { hot: ['t'] });
+        m.decl('char', 'c', 130);
+        yield m.step('char c', 'char hanya muat -128 sampai 127. 130 "berputar" ke -126 (overflow). Compiler tidak memberi error.', { hot: ['c'], final: true });
+      },
+    },
+    scanf: {
+      title: 'scanf & nilai kembaliannya',
+      input: '6 7 8',
+      code: `int x, y, z, w;
+x = scanf("%d %d %d", &y, &z, &w);
+printf("x = %d\\n", x);`,
+      *run(m) {
+        ['x', 'y', 'z', 'w'].forEach((v) => m.decl('int', v));
+        yield m.step('int x', 'Empat kotak int, semuanya masih sampah.', { hot: ['x', 'y', 'z', 'w'] });
+        const n = m.scanf('%d %d %d', 'y', 'z', 'w');
+        yield m.step('scanf', `<code>scanf</code> butuh <b>alamat</b> kotak (<code>&y</code>), karena tugasnya menulis ke kotak itu. Angka diambil dari buffer satu per satu; spasi dan Enter di antaranya dilewati oleh <code>%d</code>. Berhasil mengisi <b>${n}</b> variabel.`, { hot: ['y', 'z', 'w'] });
+        m.set('x', n);
+        yield m.step('x = scanf', `Nilai kembalian scanf = <b>jumlah variabel yang berhasil diisi</b>, yaitu ${n}. Coba ubah input jadi <code>6 7 abc</code>: hasilnya 2, karena "abc" bukan angka.`, { hot: ['x'] });
+        m.printf('x = %d\n', m.get('x'));
+        yield m.step('printf', 'Selesai.', { final: true });
+      },
+    },
+    buffer: {
+      title: 'Kenapa getchar dilewati?',
+      input: 'Budi Santoso\n12345\nM',
+      code: `char name[40];
+int nim;
+char gender;
+scanf("%[^\\n]", name);
+scanf("%d", &nim);
+gender = getchar();
+printf("[%c]\\n", gender);`,
+      *run(m) {
+        m.decl('char', 'name[40]'); m.decl('int', 'nim'); m.decl('char', 'gender');
+        yield m.step('char name', 'Pengguna mengetik nama, Enter, NIM, Enter, lalu M. Semua yang diketik (termasuk Enter = <code>↵</code>) masuk ke <b>buffer keyboard</b> dulu.');
+        m.scanf('%[^\n]', 'name');
+        yield m.step('scanf("%[^', '<code>%[^\\n]</code> membaca semua karakter <b>sampai sebelum</b> Enter. Enter-nya <b>tidak diambil</b>, tetap di buffer.', { hot: ['name[0]'] });
+        m.scanf('%d', 'nim');
+        yield m.step('scanf("%d"', '<code>%d</code> melewati Enter sisa tadi, lalu membaca 12345. Tapi Enter <b>setelah</b> 12345 tetap tertinggal di buffer.', { hot: ['nim'] });
+        m.set('gender', m.getchar());
+        yield m.step('gender = getchar', '<code>getchar</code> mengambil <b>satu karakter apa pun</b> yang paling depan di buffer: Enter sisa tadi. Program tidak menunggu ketikan baru, jadi kelihatannya "dilewati". gender berisi <code>\'\\n\'</code> (10), bukan M.', { hot: ['gender'] });
+        m.printf('[%c]\n', m.get('gender'));
+        yield m.step('printf', 'Output-nya baris kosong di dalam kurung siku. Perbaikannya: lihat program berikutnya.', { final: true });
+      },
+    },
+    buffer2: {
+      title: 'Perbaikan: " %c"',
+      input: 'Budi Santoso\n12345\nM',
+      code: `char name[40];
+int nim;
+char gender;
+scanf("%[^\\n]", name);
+scanf("%d", &nim);
+scanf(" %c", &gender);
+printf("[%c]\\n", gender);`,
+      *run(m) {
+        m.decl('char', 'name[40]'); m.decl('int', 'nim'); m.decl('char', 'gender');
+        m.scanf('%[^\n]', 'name');
+        m.scanf('%d', 'nim');
+        yield m.step('scanf("%d"', 'Sama seperti sebelumnya: setelah membaca NIM, Enter masih tertinggal di buffer.', { hot: ['nim'] });
+        m.scanf(' %c', 'gender');
+        yield m.step('scanf(" %c"', '<b>Spasi sebelum %c</b> artinya "lewati semua spasi dan Enter dulu". Jadi Enter sisa dibuang, dan yang dibaca adalah M.', { hot: ['gender'] });
+        m.printf('[%c]\n', m.get('gender'));
+        yield m.step('printf', 'Benar: [M]. Aturan praktis: kalau membaca char setelah membaca angka, pakai <code>" %c"</code>.', { final: true });
+      },
+    },
+    string: {
+      title: '%s vs %[^\\n]',
+      input: 'Good morning everyone',
+      code: `char s1[20], s2[30];
+scanf("%s", s1);
+scanf("%[^\\n]", s2);
+printf("[%s] [%s]\\n", s1, s2);`,
+      *run(m) {
+        m.decl('char', 's1[20]'); m.decl('char', 's2[30]');
+        yield m.step('char s1', 'Dua array char untuk menyimpan string. Nama array sudah berupa alamat, jadi di scanf <b>tanpa</b> <code>&</code>.');
+        m.scanf('%s', 's1');
+        yield m.step('scanf("%s"', '<code>%s</code> berhenti di spasi pertama: s1 hanya berisi "Good", lalu ditutup <code>\'\\0\'</code> (akhir string).', { hot: ['s1[0]'] });
+        m.scanf('%[^\n]', 's2');
+        yield m.step('scanf("%[^', '<code>%[^\\n]</code> membaca sisanya sampai Enter, <b>termasuk spasi di depannya</b>: " morning everyone".', { hot: ['s2[0]'] });
+        m.printf('[%s] [%s]\n', m.str('s1'), m.str('s2'));
+        yield m.step('printf', 'Perhatikan spasi di awal s2. Untuk membaca satu baris penuh sejak awal, pakai <code>%[^\\n]</code> langsung.', { final: true });
+      },
+    },
+  },
+});
+</script>
+</body>
+</html>

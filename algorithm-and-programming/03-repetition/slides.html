@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Repetition</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css">
+  <script src="../../_shared/theme.js"></script>
+  <style>
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Repetition (loop)</h1>
+  <p>Algorithm and programming · satu konsep, empat bagian, tiga cara menulis</p>
+</section>
+
+<section class="slide">
+  <h2>Empat bagian setiap loop</h2>
+  <table>
+    <tr><th>Bagian</th><th>Pertanyaan</th><th>Kalau salah</th></tr>
+    <tr><td><b>Inisialisasi</b></td><td>Mulai dari mana?</td><td>Hasil acak (nilai sampah)</td></tr>
+    <tr><td><b>Kondisi</b></td><td>Kapan masih lanjut?</td><td>Kurang/lebih satu putaran</td></tr>
+    <tr><td><b>Body</b></td><td>Apa yang diulang?</td><td>-</td></tr>
+    <tr><td><b>Update</b></td><td>Apa yang berubah?</td><td><b>Infinite loop</b></td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>for dan while: loop yang sama</h2>
+  <div class="cols">
+<pre><code>for (i = 1; i &lt;= n; i++) {
+    total += i;
+}</code></pre>
+<pre><code>i = 1;               // inisialisasi
+while (i &lt;= n) {     // kondisi
+    total += i;      // body
+    i++;             // update
+}</code></pre>
+  </div>
+  <p>Bagiannya sama, hanya <b>tempatnya</b> yang berbeda.</p>
+</section>
+
+<section class="slide">
+  <h2>Urutan eksekusi for</h2>
+<pre><code>for (exp1; exp2; exp3) body;
+
+exp1 → exp2? → body → exp3 → exp2? → body → exp3 → … → exp2 false → keluar
+ └ sekali    └──────────── diulang ────────────┘</code></pre>
+  <ul>
+    <li>exp2 dicek <b>sebelum</b> setiap putaran: bisa jalan 0 kali.</li>
+    <li>Setelah <code>for (i = 1; i &lt;= 5; i++)</code>, i = <b>6</b>.</li>
+    <li>Berapa kali? <code>i &lt; b</code> dari a: <b>b − a</b>. Ragu? <b>Trace</b> dengan angka kecil.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Trace table: cara membaca loop apa pun</h2>
+  <div class="cols">
+<pre><code>long number = 4, x = 1;
+while (number &gt;= 1)
+    x *= number--;</code></pre>
+    <table>
+      <tr><th>#</th><th>number</th><th>x</th></tr>
+      <tr><td>1</td><td>4 → 3</td><td>4</td></tr>
+      <tr><td>2</td><td>3 → 2</td><td>12</td></tr>
+      <tr><td>3</td><td>2 → 1</td><td>24</td></tr>
+      <tr><td>4</td><td>1 → 0</td><td>24</td></tr>
+    </table>
+  </div>
+  <p class="label"><code>number--</code>: pakai nilai lama dulu, baru dikurangi.</p>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: loop tracer</h2>
+  <iframe src="viz/loop.html" title="Loop tracer dengan trace table"></iframe>
+</section>
+
+<section class="slide">
+  <h2>while vs do-while</h2>
+  <div class="cols">
+    <table>
+      <tr><th></th><th>while</th><th>do-while</th></tr>
+      <tr><td>Cek kondisi</td><td><b>Sebelum</b> body</td><td><b>Sesudah</b> body</td></tr>
+      <tr><td>Minimal jalan</td><td>0 kali</td><td><b>1 kali</b></td></tr>
+    </table>
+<pre><code>do {
+    scanf("%d", &amp;nilai);
+} while (nilai &lt; 0 || nilai &gt; 100);</code></pre>
+  </div>
+  <p class="label">do-while cocok untuk menu dan validasi input. Ingat <code>;</code> setelah <code>while (…)</code>.</p>
+</section>
+
+<section class="slide">
+  <h2>Pola loop: kenali, lalu tulis sendiri</h2>
+  <table>
+    <tr><th>Pola</th><th>Kerangka</th></tr>
+    <tr><td>Ulangi N kali</td><td><code>for (i = 0; i &lt; n; i++)</code></td></tr>
+    <tr><td>Akumulasi</td><td><code>total = 0;</code> … <code>total += x;</code></td></tr>
+    <tr><td>Hitung yang memenuhi syarat</td><td><code>if (syarat) count++;</code></td></tr>
+    <tr><td>Cari max</td><td><code>max = data[0];</code> … <code>if (x &gt; max) max = x;</code></td></tr>
+    <tr><td>Sentinel</td><td>baca → <code>while (x != 0) { proses; baca; }</code></td></tr>
+    <tr><td>Nested</td><td>luar = baris, dalam = isi baris</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>break vs continue</h2>
+  <div class="cols">
+<pre><code>for (i = 1; i &lt;= 10; i++) {
+    if (i == 5) break;      // atau continue
+    printf("%d ", i);
+}</code></pre>
+    <ul>
+      <li><b>break</b>: keluar dari loop <b>sekarang</b> → <code>1 2 3 4</code></li>
+      <li><b>continue</b>: lewati sisa body <b>putaran ini</b> → <code>1 2 3 4 6 7 8 9 10</code></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Bug yang sering muncul</h2>
+  <table>
+    <tr><th>Kode</th><th>Gejala</th></tr>
+    <tr><td><code>for (i = 0; i &lt; 3; i++);</code></td><td>Body jalan sekali, setelah loop</td></tr>
+    <tr><td><code>while (x = 5)</code></td><td>Infinite loop (<code>=</code> bukan <code>==</code>)</td></tr>
+    <tr><td><code>i &lt; 10</code> untuk 1..10</td><td>10 tidak ikut (off-by-one)</td></tr>
+    <tr><td><code>int total;</code> tanpa <code>= 0</code></td><td>Hasil acak</td></tr>
+    <tr><td>Nested pakai <code>i</code> yang sama</td><td>Loop luar kacau</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Loop = <b>inisialisasi + kondisi + body + update</b>.</li>
+    <li>for, while, do-while = loop yang sama, beda tempat penulisan.</li>
+    <li>Ragu berapa kali jalan atau apa output-nya? <b>Buat trace table</b>.</li>
+    <li>Kenali <b>polanya</b> (akumulasi, max, sentinel, nested), lalu tulis sendiri.</li>
+  </ul>
+  <p class="label">Latihan (berapa kali jalan, tebak output, ganjil 11..188, hari dalam minggu) ada di notes.</p>
+</section>
+
+<script src="../../_shared/slides.js"></script>
+</body>
+</html>

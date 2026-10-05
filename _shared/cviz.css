@@ -1,0 +1,68 @@
+/* Gaya visualisasi program C (dipakai bersama cviz.js). */
+.viz { max-width: 1240px; }
+.cv-progs .btn.sel { box-shadow: inset 0 0 0 2px var(--go-ink), 0 4px 0 var(--edge); color: var(--go-ink); }
+.ops { display: flex; flex-wrap: wrap; gap: 10px; }
+.cv-main { display: grid; gap: 12px; }
+@media (min-width: 900px) {
+  .cv-main { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
+  .cv-main.wide { grid-template-columns: minmax(0, 1fr); }
+  .cv-main.wide .cv-side { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+  .cv-main.wide .cv-cap { grid-column: 1 / -1; }
+}
+.cv-panes { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start; }
+.cv-side { display: grid; gap: 12px; }
+.cv-pane, .cv-cap, .cv-io .card, .cv-trace .card { padding: 16px; border-radius: 20px; }
+.cv-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+.cv-code { margin: 0; font-size: 0.85rem; line-height: 1.55; background: var(--surface); }
+.cv-code .ln { display: block; padding: 0 0.5rem; border-radius: 6px; white-space: pre; }
+.cv-code .ln.on { background: var(--marker); }
+.cv-cap p { margin: 0 0 12px; min-height: 3.3em; font-size: 1.02rem; }
+.cv-warn { color: var(--stop); font-weight: 600; }
+.guess { display: flex; gap: 8px; align-items: center; font-size: 0.95rem; margin-top: 10px; cursor: pointer; }
+
+/* Memory */
+.cv-mem-wrap { position: relative; padding: 16px; border-radius: 20px; }
+.cv-mem { display: flex; flex-wrap: wrap; gap: 26px 18px; align-items: flex-start; padding: 22px 0 28px; } /* ruang untuk lengkung panah */
+.cv-arrows { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.cv-arrow { fill: none; stroke: var(--focus); stroke-width: 2; }
+.cv-tip { fill: var(--focus); }
+.cv-var { display: flex; flex-direction: column; gap: 4px; }
+.cv-name { font-weight: 600; font-family: var(--mono); font-size: 0.95rem; }
+.cv-name span { font-weight: 400; color: var(--ink-2); font-size: 0.8rem; }
+.cv-row { display: flex; gap: 3px; align-items: flex-start; }
+.cv-rowlbl { width: 28px; padding-top: 10px; color: var(--ink-2); font-family: var(--mono); font-size: 0.75rem; }
+.cv-box { min-width: 58px; text-align: center; }
+.cv-val { background: var(--card-2); border-radius: 10px; padding: 8px 8px; font-family: var(--mono); font-weight: 600; font-size: 1rem; min-height: 2.4em; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.cv-val small { font-weight: 400; color: var(--ink-2); font-size: 0.7rem; }
+.cv-box.hot .cv-val { background: color-mix(in srgb, var(--hot) 30%, var(--surface)); }
+.cv-box.ptr .cv-val { background: color-mix(in srgb, var(--focus) 22%, var(--surface)); }
+.cv-idx { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-2); }
+.cv-addr { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-2); }
+.cv-garbage { color: var(--stop); }
+.cv-more { align-self: center; color: var(--ink-2); font-size: 0.85rem; padding: 0 6px; }
+
+/* Input & output */
+.cv-io { display: grid; gap: 12px; }
+.cv-buf { display: flex; flex-wrap: wrap; gap: 3px; font-family: var(--mono); }
+.cv-ch { min-width: 24px; padding: 4px 6px; text-align: center; border-radius: 6px; background: var(--surface); }
+.cv-ch.done { color: var(--ink-3); text-decoration: line-through; background: transparent; }
+.cv-ch.read { background: color-mix(in srgb, var(--hot) 30%, var(--surface)); }
+.cv-ch.next { box-shadow: inset 0 0 0 2px var(--focus); }
+.cv-input { display: grid; gap: 4px; margin-top: 10px; }
+.cv-input textarea { font-family: var(--mono); font-size: 0.9rem; border: 1.5px solid var(--line); border-radius: 12px; padding: 6px 10px; background: var(--surface); color: var(--ink); resize: vertical; }
+.cv-out { margin: 0; min-height: 3em; white-space: pre-wrap; background: var(--surface); font-size: 0.9rem; }
+.cv-caret { display: inline-block; width: 8px; height: 1em; vertical-align: text-bottom; background: var(--ink-3); }
+
+/* Trace table */
+.cv-trace table { font-size: 0.88rem; }
+.cv-trace td, .cv-trace th { padding: 4px 10px; font-family: var(--mono); }
+.cv-trace tr.last td { background: color-mix(in srgb, var(--hot) 18%, transparent); }
+
+/* Flowchart */
+.cv-flowsvg { width: 100%; height: auto; display: block; }
+.cv-fn rect, .cv-fn polygon { fill: var(--card-2); }
+.cv-fn text { fill: var(--ink); font-size: 13px; text-anchor: middle; dominant-baseline: central; font-family: var(--mono); }
+.cv-fn.on rect, .cv-fn.on polygon { fill: color-mix(in srgb, var(--hot) 40%, var(--surface)); }
+.cv-fl { fill: none; stroke: var(--ink-3); stroke-width: 1.6; }
+.cv-ftip { fill: var(--ink-3); }
+.cv-flbl { fill: var(--ink-2); font-size: 12px; font-weight: 600; }
