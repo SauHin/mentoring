@@ -24,16 +24,19 @@
   let pen = PENS[0], erasing = false, active = false, current = null;
 
   /* ---------- Gambar ---------- */
+  // Resolusi internal mengikuti ukuran tampil kanvas yang sebenarnya (tanpa scrollbar) × devicePixelRatio,
+  // supaya 1 unit gambar = 1 piksel CSS, dan coretan tepat di bawah kursor pada skala layar berapa pun.
   function resize() {
     const r = devicePixelRatio || 1;
-    canvas.width = innerWidth * r;
-    canvas.height = innerHeight * r;
+    const { width, height } = canvas.getBoundingClientRect();
+    canvas.width = Math.round(width * r);
+    canvas.height = Math.round(height * r);
     ctx.setTransform(r, 0, 0, r, 0, 0);
     redraw();
   }
 
   function redraw() {
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     const dy = offsetY();
     for (const s of strokes()) {
       ctx.strokeStyle = s.color;
@@ -131,7 +134,8 @@
     queued = true;
     requestAnimationFrame(() => { queued = false; redraw(); });
   }, { passive: true });
-  addEventListener('resize', resize);
+  new ResizeObserver(resize).observe(canvas); // ukuran jendela, scrollbar, atau zoom berubah
+  matchMedia(`(resolution: ${devicePixelRatio}dppx)`).addEventListener('change', resize); // pindah ke monitor lain
   addEventListener('slidechange', redraw); // dari slides.js: tampilkan coretan milik slide yang baru
   resize();
 })();

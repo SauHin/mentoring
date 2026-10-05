@@ -192,7 +192,7 @@ body:not(.deck) .topbar { right: 0; background: var(--bg); }
 .topbar { flex-wrap: wrap; }
 
 /* Scratch pad (scratch.js): kanvas transparan di atas halaman. Hanya menangkap mouse/pena saat mode coret aktif. */
-.scratch { position: fixed; inset: 0; z-index: 3; pointer-events: none; touch-action: none; }
+.scratch { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; touch-action: none; } /* ukuran tampil = layar; resolusi internal = layar × devicePixelRatio */
 .drawing .scratch { pointer-events: auto; cursor: crosshair; }
 .scratch-palette { display: flex; gap: 6px; padding: 4px; border-radius: 999px; background: var(--card); }
 .scratch-palette[hidden] { display: none; }
