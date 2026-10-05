@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Single Linked List · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
 </head>
@@ -185,7 +185,7 @@ Sesudah:  head → [10] → [30] → NULL                 [20] di-free</code></p
 }</code></pre>
 <details>
   <summary>Cek pemahaman: apa salahnya <code>free(del); cur->next = del->next;</code>?</summary>
-  <p>Setelah <code>free</code>, memory <code>del</code> sudah dikembalikan. Membaca <code>del->next</code> adalah <b>use-after-free</b>: kadang terlihat jalan, kadang crash, kadang membaca data sampah. Selalu putus sambungan dulu, baru free.</p>
+  <p>Setelah <code>free</code>, memory <code>del</code> sudah dikembalikan. Membaca <code>del->next</code> adalah <b>use-after-free</b>: kadang terlihat jalan, kadang crash, kadang membaca garbage value. Selalu putus sambungan dulu, baru free.</p>
 </details>
 
 <h3><code>search(x)</code> dan <code>printList()</code>: O(n)</h3>

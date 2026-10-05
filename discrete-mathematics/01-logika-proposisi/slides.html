@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Logika Proposisi</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <style>
     .deck .slide.full { padding-bottom: 3vh; }
@@ -18,48 +18,51 @@
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
   <h1>Logika proposisi</h1>
-  <p>Discrete mathematics · statement, connective, truth table, dan ekuivalensi</p>
+  <p>Discrete mathematics · statement, connective, truth table, dan logical equivalence.</p>
 </section>
 
 <section class="slide">
   <h2>Statement: benar atau salah, tidak keduanya</h2>
+  <p class="sub">Logika proposisi hanya bekerja dengan <b>statement</b>: kalimat yang nilainya pasti benar (T) atau pasti salah (F).</p>
   <div class="cols">
     <table>
       <tr><th>Kalimat</th><th>Statement?</th></tr>
-      <tr><td>2 + 2 = 4</td><td>Ya (T)</td></tr>
-      <tr><td>Jakarta ibu kota Jepang</td><td>Ya (F)</td></tr>
-      <tr><td>x + 1 = 5</td><td><b>Bukan</b>: bergantung x</td></tr>
-      <tr><td>Tutup pintunya!</td><td><b>Bukan</b>: perintah</td></tr>
+      <tr><td>2 + 2 = 4</td><td>Ya, nilainya T</td></tr>
+      <tr><td>Jakarta ibu kota Jepang</td><td>Ya, nilainya F</td></tr>
+      <tr><td>x + 1 = 5</td><td><b>Bukan</b>: nilainya bergantung pada x</td></tr>
+      <tr><td>Tutup pintunya!</td><td><b>Bukan</b>: perintah tidak bisa benar atau salah</td></tr>
     </table>
     <ul>
-      <li>Statement diberi nama huruf: <b>p, q, r</b>.</li>
-      <li>Statement digabung dengan <b>connective</b> menjadi <b>compound statement</b>.</li>
-      <li>Nilai compound statement <b>hanya</b> bergantung pada nilai p, q, r.</li>
+      <li>Statement diberi nama dengan huruf: <b>p, q, r</b>.</li>
+      <li>Beberapa statement bisa digabung dengan <b>connective</b> (∧, ∨, →, …) menjadi <b>compound statement</b>.</li>
+      <li>Nilai compound statement <b>hanya</b> bergantung pada nilai p, q, dan r.</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
   <h2>Enam connective dan padanannya di C</h2>
+  <p class="sub">Connective menggabungkan statement. Hampir semuanya sudah kamu pakai di kondisi <code>if</code>.</p>
   <table>
-    <tr><th>Simbol</th><th>Nama</th><th>Dibaca</th><th>T jika</th><th>Di C</th></tr>
-    <tr><td><code>~p</code></td><td>negation</td><td>not p</td><td>p salah</td><td><code>!p</code></td></tr>
+    <tr><th>Simbol</th><th>Nama</th><th>Dibaca</th><th>Bernilai T jika</th><th>Di C</th></tr>
+    <tr><td><code>~p</code></td><td>negation</td><td>not p</td><td>p bernilai F</td><td><code>!p</code></td></tr>
     <tr><td><code>p ∧ q</code></td><td>conjunction</td><td>p and q</td><td>keduanya T</td><td><code>p &amp;&amp; q</code></td></tr>
     <tr><td><code>p ∨ q</code></td><td>disjunction</td><td>p or q</td><td>minimal satu T</td><td><code>p || q</code></td></tr>
     <tr><td><code>p ⊕ q</code></td><td>exclusive or</td><td>p xor q</td><td>tepat satu T</td><td><code>p != q</code></td></tr>
-    <tr><td><code>p → q</code></td><td>conditional</td><td>if p then q</td><td>bukan (p T, q F)</td><td><code>!p || q</code></td></tr>
-    <tr><td><code>p ↔ q</code></td><td>biconditional</td><td>p if and only if q</td><td>nilainya sama</td><td><code>p == q</code></td></tr>
+    <tr><td><code>p → q</code></td><td>conditional</td><td>if p then q</td><td>selain kasus p T dan q F</td><td><code>!p || q</code></td></tr>
+    <tr><td><code>p ↔ q</code></td><td>biconditional</td><td>p if and only if q</td><td>nilai p dan q sama</td><td><code>p == q</code></td></tr>
   </table>
 </section>
 
 <section class="slide">
   <h2>Membuat truth table</h2>
+  <p class="sub">Truth table menghitung nilai sebuah ekspresi untuk <b>semua</b> kombinasi nilai variabelnya. Kerjakan dari dalam ke luar.</p>
   <div class="cols">
     <ol>
-      <li>n variabel → <b>2ⁿ baris</b>.</li>
-      <li>Kolom variabel: pola T/F berselang 4-2-1.</li>
-      <li>Satu kolom untuk setiap <b>sub-ekspresi</b>, dari dalam ke luar.</li>
-      <li>Kolom terakhir = jawaban.</li>
+      <li>n variabel menghasilkan <b>2ⁿ baris</b>.</li>
+      <li>Isi kolom variabel dengan pola T/F. Kolom pertama berganti di tengah tabel, kolom berikutnya berganti dua kali lebih sering, dan kolom terakhir berganti setiap baris.</li>
+      <li>Buat satu kolom untuk setiap <b>sub-ekspresi</b>, dari yang paling dalam.</li>
+      <li>Kolom terakhir adalah nilai ekspresi.</li>
     </ol>
     <table>
       <tr><th>p</th><th>q</th><th>~q</th><th>p ∧ ~q</th></tr>
@@ -69,54 +72,57 @@
       <tr><td>F</td><td>F</td><td>T</td><td>F</td></tr>
     </table>
   </div>
-  <p class="label">Semua baris T = <b>tautology</b>. Semua F = <b>contradiction</b>. Campuran = contingency.</p>
+  <p class="label">Kolom terakhir semuanya T: <b>tautology</b>. Semuanya F: <b>contradiction</b>. Campuran: <b>contingency</b>.</p>
 </section>
 
 <section class="slide">
   <h2>Urutan operasi</h2>
+  <p class="sub">Seperti × sebelum + di aritmetika, connective juga punya urutan. Tanpa kurung, operator di baris atas dikerjakan lebih dulu.</p>
   <table>
     <tr><th>Urutan</th><th>Operator</th><th>Contoh</th></tr>
-    <tr><td>1</td><td><code>~</code></td><td><code>~p ∧ q</code> = <code>(~p) ∧ q</code>, bukan <code>~(p ∧ q)</code></td></tr>
-    <tr><td>2</td><td><code>∧ ∨ ⊕</code> (setingkat)</td><td><code>p ∧ q ∨ r</code> ambigu: <b>wajib kurung</b></td></tr>
-    <tr><td>3</td><td><code>→ ↔</code> (setingkat)</td><td><code>p ∨ q → r</code> = <code>(p ∨ q) → r</code></td></tr>
+    <tr><td>1</td><td><code>~</code></td><td><code>~p ∧ q</code> artinya <code>(~p) ∧ q</code>, bukan <code>~(p ∧ q)</code></td></tr>
+    <tr><td>2</td><td><code>∧ ∨ ⊕</code> (setingkat)</td><td><code>p ∧ q ∨ r</code> ambigu, jadi <b>wajib diberi kurung</b></td></tr>
+    <tr><td>3</td><td><code>→ ↔</code> (setingkat)</td><td><code>p ∨ q → r</code> artinya <code>(p ∨ q) → r</code></td></tr>
   </table>
-  <p>Ragu? <b>Pakai kurung.</b> Kurung tidak pernah salah.</p>
+  <p>Kalau ragu, <b>pakai kurung</b>. Kurung tambahan tidak pernah membuat ekspresi salah.</p>
 </section>
 
 <section class="slide">
   <h2>Logical equivalence dan De Morgan</h2>
+  <p class="sub">Dua ekspresi <b>ekuivalen</b> (<code>P ≡ Q</code>) jika kolom terakhir truth table-nya sama di setiap baris. Artinya, keduanya bisa saling menggantikan.</p>
   <div class="cols">
     <div>
-      <p><code>P ≡ Q</code> jika kolom terakhirnya <b>sama di setiap baris</b>.</p>
 <pre><code>~(p ∧ q) ≡ ~p ∨ ~q
 ~(p ∨ q) ≡ ~p ∧ ~q</code></pre>
-      <p>Negasi masuk ke dalam kurung, <b>∧ dan ∨ bertukar</b>.</p>
+      <p><b>De Morgan's law:</b> saat negasi masuk ke dalam kurung, setiap variabel dinegasikan, dan ∧ dan ∨ bertukar.</p>
     </div>
     <div>
-      <p class="label">Di C:</p>
+      <p class="label">Contoh di C:</p>
 <pre><code>!(x &gt; 0 &amp;&amp; x &lt; 10)
 ≡ x &lt;= 0 || x &gt;= 10</code></pre>
-      <p class="label">"Tidak di antara 0 dan 10" = "≤ 0 atau ≥ 10".</p>
+      <p class="label">"Tidak di antara 0 dan 10" sama dengan "≤ 0 atau ≥ 10".</p>
     </div>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Hukum penting untuk menyederhanakan</h2>
+  <h2>Hukum untuk menyederhanakan ekspresi</h2>
+  <p class="sub">Setiap hukum di bawah adalah logical equivalence yang sudah terbukti. Pakai untuk menyederhanakan ekspresi tanpa membuat truth table.</p>
   <table>
     <tr><th>Hukum</th><th>Bentuk</th></tr>
-    <tr><td>Commutative / associative</td><td><code>p ∧ q ≡ q ∧ p</code>, <code>(p ∨ q) ∨ r ≡ p ∨ (q ∨ r)</code></td></tr>
+    <tr><td>Commutative, associative</td><td><code>p ∧ q ≡ q ∧ p</code>, <code>(p ∨ q) ∨ r ≡ p ∨ (q ∨ r)</code></td></tr>
     <tr><td>Distributive</td><td><code>p ∧ (q ∨ r) ≡ (p ∧ q) ∨ (p ∧ r)</code></td></tr>
-    <tr><td>Negation / double negation</td><td><code>p ∨ ~p ≡ t</code>, <code>p ∧ ~p ≡ c</code>, <code>~(~p) ≡ p</code></td></tr>
-    <tr><td>Identity / universal bound</td><td><code>p ∧ t ≡ p</code>, <code>p ∨ t ≡ t</code></td></tr>
+    <tr><td>Negation, double negation</td><td><code>p ∨ ~p ≡ t</code>, <code>p ∧ ~p ≡ c</code>, <code>~(~p) ≡ p</code></td></tr>
+    <tr><td>Identity, universal bound</td><td><code>p ∧ t ≡ p</code>, <code>p ∨ t ≡ t</code></td></tr>
     <tr><td>Absorption</td><td><code>p ∨ (p ∧ q) ≡ p</code></td></tr>
     <tr><td>Conditional</td><td><code>p → q ≡ ~p ∨ q</code>, <code>~(p → q) ≡ p ∧ ~q</code></td></tr>
   </table>
-  <p class="label">t = tautology, c = contradiction. Contoh penyederhanaan dari slide ada di notes.</p>
+  <p class="label">t = tautology (selalu T), c = contradiction (selalu F). Contoh penyederhanaan langkah demi langkah ada di notes.</p>
 </section>
 
 <section class="slide">
   <h2>Conditional: anggap sebagai janji</h2>
+  <p class="sub"><code>p → q</code> sering terasa aneh di baris p = F. Cara termudah memahaminya: anggap p → q sebagai janji.</p>
   <div class="cols">
     <table>
       <tr><th>p</th><th>q</th><th>p → q</th></tr>
@@ -126,10 +132,10 @@
       <tr><td>F</td><td>F</td><td>T</td></tr>
     </table>
     <div>
-      <p>"Kalau kamu lulus (p), aku traktir (q)."</p>
+      <p>Janji: "Kalau kamu lulus (p), aku traktir (q)."</p>
       <ul>
-        <li>Janji dilanggar <b>hanya</b> jika lulus tapi tidak ditraktir.</li>
-        <li>Tidak lulus? Janji tidak diuji, jadi tetap T (<b>vacuously true</b>).</li>
+        <li>Janji hanya dilanggar kalau kamu lulus tapi tidak ditraktir. Itu satu-satunya baris F.</li>
+        <li>Kalau kamu tidak lulus, janjinya tidak diuji. Janji tidak dilanggar, jadi nilainya T. Ini disebut <b>vacuously true</b>.</li>
       </ul>
     </div>
   </div>
@@ -137,40 +143,42 @@
 
 <section class="slide">
   <h2>Contrapositive, converse, inverse</h2>
+  <p class="sub">Dari satu conditional <code>p → q</code> bisa dibuat tiga variasi. Hanya contrapositive yang nilainya selalu sama dengan aslinya.</p>
   <table>
     <tr><th>Nama</th><th>Bentuk</th><th>Ekuivalen dengan p → q?</th></tr>
     <tr><td>Contrapositive</td><td><code>~q → ~p</code></td><td><b>Ya</b></td></tr>
     <tr><td>Converse</td><td><code>q → p</code></td><td>Tidak</td></tr>
-    <tr><td>Inverse</td><td><code>~p → ~q</code></td><td>Tidak (tapi ≡ converse)</td></tr>
+    <tr><td>Inverse</td><td><code>~p → ~q</code></td><td>Tidak (tapi inverse ekuivalen dengan converse)</td></tr>
   </table>
-  <p>"Jika hujan, jalan basah" ≡ "jika jalan tidak basah, tidak hujan". Tapi jalan basah <b>tidak berarti</b> hujan.</p>
+  <p>Contoh: "Jika hujan, jalan basah" ekuivalen dengan "Jika jalan tidak basah, maka tidak hujan". Tapi jalan basah <b>tidak berarti</b> hujan, karena jalan bisa basah karena disiram.</p>
 </section>
 
 <section class="slide">
-  <h2>Biconditional, "only if", perlu dan cukup</h2>
+  <h2>Biconditional, "only if", necessary dan sufficient</h2>
+  <p class="sub">Kalimat sehari-hari punya banyak cara menulis conditional. Arah panahnya sering tertukar, jadi pakai tabel ini.</p>
   <table>
     <tr><th>Kalimat</th><th>Simbol</th></tr>
     <tr><td>p if q</td><td><code>q → p</code></td></tr>
     <tr><td>p <b>only if</b> q</td><td><code>p → q</code></td></tr>
-    <tr><td>p if and only if q</td><td><code>p ↔ q</code> ≡ <code>(p → q) ∧ (q → p)</code></td></tr>
-    <tr><td>p <b>sufficient</b> condition untuk q</td><td><code>p → q</code></td></tr>
-    <tr><td>p <b>necessary</b> condition untuk q</td><td><code>q → p</code></td></tr>
+    <tr><td>p if and only if q</td><td><code>p ↔ q</code>, sama dengan <code>(p → q) ∧ (q → p)</code></td></tr>
+    <tr><td>p adalah <b>sufficient condition</b> untuk q</td><td><code>p → q</code></td></tr>
+    <tr><td>p adalah <b>necessary condition</b> untuk q</td><td><code>q → p</code></td></tr>
   </table>
-  <p class="label">"Lulus only if hadir 75%": hadir itu syarat perlu, bukan jaminan lulus.</p>
+  <p class="label">Contoh: "Lulus only if kehadiran 75%". Kehadiran 75% adalah syarat wajib (necessary), tapi tidak menjamin lulus.</p>
 </section>
 
 <section class="slide full">
-  <h2>Coba sendiri: truth table dan cek ekuivalensi</h2>
-  <iframe src="viz/tabel-kebenaran.html" title="Pembuat truth table dan pengecek ekuivalensi"></iframe>
+  <h2>Coba sendiri: truth table dan cek equivalence</h2>
+  <iframe src="viz/tabel-kebenaran.html" title="Pembuat truth table dan pengecek equivalence"></iframe>
 </section>
 
 <section class="slide">
   <h2>Ringkasan</h2>
   <ul>
-    <li>Statement bernilai T atau F. Connective menggabungkannya, dan semuanya punya padanan di C.</li>
-    <li>Truth table: 2ⁿ baris, satu kolom per sub-ekspresi.</li>
-    <li>Ekuivalen = kolom terakhir sama. Dua yang paling sering dipakai: <b>De Morgan</b> dan <code>p → q ≡ ~p ∨ q</code>.</li>
-    <li><code>p → q</code> hanya F saat p T dan q F. Contrapositive ekuivalen, converse dan inverse tidak.</li>
+    <li>Statement bernilai T atau F. Connective menggabungkan statement, dan semuanya punya padanan di C.</li>
+    <li>Truth table berisi 2ⁿ baris, dengan satu kolom untuk setiap sub-ekspresi.</li>
+    <li>Dua ekspresi ekuivalen jika kolom terakhirnya sama. Yang paling sering dipakai: <b>De Morgan</b> dan <code>p → q ≡ ~p ∨ q</code>.</li>
+    <li><code>p → q</code> hanya F saat p T dan q F. Contrapositive ekuivalen dengan aslinya, converse dan inverse tidak.</li>
   </ul>
   <p class="label">Latihan ada di notes.</p>
 </section>

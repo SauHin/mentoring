@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Logika Proposisi · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
 </head>
@@ -16,7 +16,7 @@
 <span class="chip">Discrete mathematics · 01</span>
 <h1>Logika proposisi</h1>
 <p class="lead">Di logika proposisi, <b>truth table adalah hakim</b>. Hukum apa pun bisa dicek dengan truth table, jadi kamu tidak perlu menghafal: cukup paham <b>kapan</b> setiap operator bernilai T.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/tabel-kebenaran.html">Visualisasi: truth table &amp; cek ekuivalensi</a></p>
+<p><a href="slides.html">Slide</a> · <a href="viz/tabel-kebenaran.html">Visualisasi: truth table &amp; cek equivalence</a></p>
 
 <div class="card tldr">
   <strong>TL;DR</strong>
@@ -68,7 +68,7 @@
 <p><b>Urutan operasi</b>: <code>~</code> dikerjakan dulu, lalu <code>∧ ∨</code>, terakhir <code>→ ↔</code>. <code>∧</code> dan <code>∨</code> <b>setingkat</b>, jadi <code>p ∧ q ∨ r</code> ambigu dan wajib diberi kurung. Jadi <code>~p ∧ q</code> = <code>(~p) ∧ q</code>, dan <code>p ∧ q → r</code> = <code>(p ∧ q) → r</code>.</p>
 <p>Coba sendiri di <a href="viz/tabel-kebenaran.html">visualisasi truth table</a>. Ekspresi yang ambigu akan ditolak beserta alasannya.</p>
 
-<h2>4. Ekuivalensi logis</h2>
+<h2>4. Logical equivalence</h2>
 <p><code>P ≡ Q</code> artinya P dan Q bernilai <b>sama di setiap baris</b>. Contoh paling penting, <b>De Morgan</b>:</p>
 <table>
   <tr><th>p</th><th>q</th><th>~(p ∧ q)</th><th>~p ∨ ~q</th><th>~p ∧ ~q</th></tr>
@@ -174,7 +174,7 @@
 <p>Cek setiap jawabanmu di <a href="viz/tabel-kebenaran.html">visualisasi</a>.</p>
 
 <p><b>1.</b> Buat truth table <code>(p ∨ q) ∧ ~(p ∧ q)</code>. Operator apa yang hasilnya sama persis?</p>
-<details><summary>Jawaban</summary><p>Kolom akhirnya F, T, T, F. Hasilnya T kalau tepat satu dari p dan q yang T, jadi sama dengan <code>p ⊕ q</code> (exclusive or). Bentuk ini muncul lagi di rangkaian logika (materi 03).</p></details>
+<details><summary>Jawaban</summary><p>Kolom akhirnya F, T, T, F. Hasilnya T kalau tepat satu dari p dan q yang T, jadi sama dengan <code>p ⊕ q</code> (exclusive or). Bentuk ini muncul lagi di logic circuit (materi 03).</p></details>
 
 <p><b>2.</b> Apakah <code>p → (q → r)</code> ekuivalen dengan <code>(p → q) → r</code>?</p>
 <details><summary>Jawaban</summary><p><b>Tidak.</b> Bukti: p = F, q = T, r = F. Kiri: p F, jadi vacuously true (T). Kanan: <code>p → q</code> = T, lalu <code>T → F</code> = F. Ini alasan <code>p → q → r</code> tanpa kurung dianggap ambigu.</p></details>
@@ -205,7 +205,7 @@
 </details>
 
 <p><b>7.</b> Apakah <code>(p ∧ (p → q)) → q</code> tautology?</p>
-<details><summary>Jawaban</summary><p><b>Ya.</b> Satu-satunya cara membuatnya F adalah bagian kiri T dan q F. Tapi kalau p T dan <code>p → q</code> T, maka q pasti T. Bentuk ini adalah <b>modus ponens</b>, aturan inferensi pertama di materi 02.</p></details>
+<details><summary>Jawaban</summary><p><b>Ya.</b> Satu-satunya cara membuatnya F adalah bagian kiri T dan q F. Tapi kalau p T dan <code>p → q</code> T, maka q pasti T. Bentuk ini adalah <b>modus ponens</b>, rule of inference pertama di materi 02.</p></details>
 
 <h2>Daftar pustaka</h2>
 <ol class="refs">

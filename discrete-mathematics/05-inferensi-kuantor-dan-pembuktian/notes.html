@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Inferensi Kuantor dan Pembuktian · Notes</title>
+  <title>Inference dengan Quantifier dan Teknik Pembuktian · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
 </head>
@@ -14,14 +14,14 @@
 <article class="notes">
 
 <span class="chip">Discrete mathematics · 05</span>
-<h1>Inferensi kuantor dan teknik pembuktian</h1>
+<h1>Inference dengan quantifier dan teknik pembuktian</h1>
 <p class="lead">Materi 02 membahas argumen untuk proposisi. Di sini argumennya memakai ∀ dan ∃. Bukti matematika adalah <b>argumen valid</b> yang disusun dari aturan-aturan ini.</p>
-<p><a href="slides.html">Slide</a> · <a href="../04-predikat-dan-kuantor/viz/kuantor.html">Visualisasi: playground kuantor</a></p>
+<p><a href="slides.html">Slide</a> · <a href="../04-predikat-dan-kuantor/viz/kuantor.html">Visualisasi: quantifier playground</a></p>
 
 <div class="card tldr">
   <strong>TL;DR</strong>
   <ul>
-    <li><b>Instantiation</b> = turun dari kuantor ke satu elemen. <b>Generalization</b> = naik dari elemen ke kuantor.</li>
+    <li><b>Instantiation</b> = turun dari quantifier ke satu elemen. <b>Generalization</b> = naik dari elemen ke quantifier.</li>
     <li>"Semua A adalah B, c adalah A, jadi c adalah B" = <b>universal modus ponens</b>.</li>
     <li>Empat teknik bukti: <b>direct</b>, <b>contrapositive</b>, <b>contradiction</b>, <b>induction</b>.</li>
     <li>Contoh hanya membuktikan ∃. Untuk ∀, ambil elemen <b>sembarang</b> (arbitrary), lalu buktikan secara umum.</li>
@@ -36,7 +36,7 @@
 3. SCE(Jackson) → DM(Jackson)   universal instantiation dari 1
 4. DM(Jackson)              modus ponens dari 2 dan 3</code></pre>
 
-<h2>2. Empat aturan kuantor</h2>
+<h2>2. Empat aturan quantifier</h2>
 <table>
   <tr><th>Aturan</th><th>Bentuk</th><th>Artinya</th></tr>
   <tr><td><b>Universal instantiation</b></td><td><code>∀x P(x)  ∴ P(c)</code></td><td>Kalau berlaku untuk semua, berlaku untuk c mana pun</td></tr>
@@ -91,15 +91,15 @@ n² = 4k² + 4k + 1 = 2(2k² + 2k) + 1   →  ganjil  ∎</code></pre>
 <h3>Proof by contradiction</h3>
 <p>Asumsikan pernyataannya <b>salah</b>, yaitu P benar dan Q salah. Turunkan sampai muncul kontradiksi <code>C ∧ ~C</code> (sesuatu yang benar dan salah sekaligus). Karena kontradiksi tidak mungkin, asumsinya pasti salah.</p>
 <p><b>Contoh yang sama:</b> misalkan n² genap tetapi n ganjil. Maka n = 2k + 1, jadi n² = 2(2k² + 2k) + 1 ganjil. Ini bertentangan dengan "n² genap". ∎</p>
-<p>Kenapa sah? Tabel kebenaran menunjukkan <code>(~S → (C ∧ ~C)) ≡ S</code>. Coba cek di <a href="../01-logika-proposisi/viz/tabel-kebenaran.html">visualisasi tabel kebenaran</a>.</p>
+<p>Kenapa valid? Truth table menunjukkan <code>(~S → (C ∧ ~C)) ≡ S</code>. Coba cek di <a href="../01-logika-proposisi/viz/tabel-kebenaran.html">visualisasi truth table</a>.</p>
 
 <h3>Mathematical induction</h3>
-<p>Untuk pernyataan <code>∀n ≥ 1, P(n)</code>. Dua langkah:</p>
+<p>Untuk statement <code>∀n ≥ 1, P(n)</code>. Dua langkah:</p>
 <ol>
   <li><b>Basis step:</b> tunjukkan P(1) benar.</li>
   <li><b>Inductive step:</b> asumsikan P(k) benar (<b>inductive hypothesis</b>), lalu tunjukkan P(k + 1) benar.</li>
 </ol>
-<p>Kenapa sah? Seperti domino, atau naik tangga. P(1) benar, dan P(1) → P(2), jadi P(2) benar (modus ponens). Lalu P(2) → P(3), dan seterusnya. Secara formal: <code>[P(1) ∧ ∀k (P(k) → P(k + 1))] → ∀n P(n)</code>.</p>
+<p>Kenapa valid? Seperti domino, atau naik tangga. P(1) benar, dan P(1) → P(2), jadi P(2) benar (modus ponens). Lalu P(2) → P(3), dan seterusnya. Secara formal: <code>[P(1) ∧ ∀k (P(k) → P(k + 1))] → ∀n P(n)</code>.</p>
 <p><b>Contoh:</b> <code>1 + 2 + … + n = n(n + 1)/2</code>.</p>
 <pre><code>Basis:     n = 1  →  1 = 1·2/2  ✓
 Hipotesis: 1 + … + k = k(k + 1)/2
@@ -133,7 +133,7 @@ int main() {
   <tr><td>Contrapositive</td><td>~Q lebih mudah diolah daripada P. Contoh: "n ganjil" memberi n = 2k + 1, sedangkan "n² genap" sulit diolah</td></tr>
   <tr><td>Contradiction</td><td>Kesimpulannya berbentuk "tidak ada …" atau "… irrational" (tidak bisa ditulis sebagai pecahan)</td></tr>
   <tr><td>Induction</td><td>Pernyataannya berlaku untuk semua n = 1, 2, 3, … (jumlah deret, habis dibagi, rekursi)</td></tr>
-  <tr><td>Counterexample</td><td>Ingin menunjukkan pernyataan ∀ itu <b>salah</b></td></tr>
+  <tr><td>Counterexample</td><td>Ingin menunjukkan statement ∀ itu <b>salah</b></td></tr>
 </table>
 
 <h2>4. Kesalahan yang sering muncul</h2>
@@ -149,10 +149,10 @@ int main() {
 <h2>5. Latihan</h2>
 
 <p><b>1.</b> Tunjukkan bahwa <code>∀x, P(x) → Q(x)</code> ekuivalen dengan contrapositive-nya.</p>
-<details><summary>Jawaban</summary><p>Untuk setiap x, <code>P(x) → Q(x) ≡ ~Q(x) → ~P(x)</code> (ekuivalensi proposisi). Kalau dua predikat bernilai sama untuk setiap x, maka ∀ dari keduanya juga bernilai sama.</p></details>
+<details><summary>Jawaban</summary><p>Untuk setiap x, <code>P(x) → Q(x) ≡ ~Q(x) → ~P(x)</code> (logical equivalence). Kalau dua predicate bernilai sama untuk setiap x, maka ∀ dari keduanya juga bernilai sama.</p></details>
 
 <p><b>2.</b> Tunjukkan <code>~(∀x, P(x) → Q(x)) ≡ ∃x, P(x) ∧ ~Q(x)</code>.</p>
-<details><summary>Jawaban</summary><p><code>~∀x (P → Q) ≡ ∃x ~(P → Q) ≡ ∃x (P ∧ ~Q)</code>. Langkah pertama memakai negasi kuantor, langkah kedua memakai <code>~(p → q) ≡ p ∧ ~q</code>.</p></details>
+<details><summary>Jawaban</summary><p><code>~∀x (P → Q) ≡ ∃x ~(P → Q) ≡ ∃x (P ∧ ~Q)</code>. Langkah pertama memakai negasi quantifier, langkah kedua memakai <code>~(p → q) ≡ p ∧ ~q</code>.</p></details>
 
 <p><b>3.</b> Premise: (1) untuk setiap bilangan x, kalau x &gt; 1 maka x − 1 &gt; 0. (2) Setiap bilangan di D lebih dari 1. Buktikan: untuk setiap x di D, x − 1 &gt; 0.</p>
 <details><summary>Jawaban</summary>

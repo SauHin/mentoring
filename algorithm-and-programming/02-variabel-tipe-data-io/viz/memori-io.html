@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Memory dan Input/Output</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
   <link rel="stylesheet" href="../../../_shared/cviz.css?v=4a957ffa">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
 </head>
@@ -14,7 +14,7 @@
 <h1>Memory dan input/output</h1>
 <p>Setiap variabel adalah <b>kotak di memory</b>: punya nama, tipe, nilai, dan alamat. Input dari keyboard masuk dulu ke <b>buffer</b>, lalu diambil oleh <code>scanf</code>/<code>getchar</code>. Ubah isi keyboard untuk mencoba sendiri.</p>
 
-<script src="../../../_shared/cviz.js?v=19a3456e"></script>
+<script src="../../../_shared/cviz.js?v=e22d6926"></script>
 <script>
 cviz({
   programs: {
@@ -27,7 +27,7 @@ char ch = 65;
 printf("%c %d\\n", ch, ch);`,
       *run(m) {
         m.decl('int', 'x');
-        yield m.step('int x', 'Deklarasi: komputer menyiapkan kotak 4 byte bernama x di alamat tertentu. Isinya <b>sampah</b> (<code>?</code>), yaitu sisa data lama di memory. Jangan pernah membaca variabel sebelum diisi.', { hot: ['x'] });
+        yield m.step('int x', 'Deklarasi: komputer menyiapkan kotak 4 byte bernama x di alamat tertentu. Isinya <b>garbage value</b> (<code>?</code>), yaitu sisa data lama di memory. Jangan pernah membaca variabel sebelum diisi.', { hot: ['x'] });
         m.set('x', 10);
         yield m.step('x = 10', '<code>=</code> artinya <b>simpan</b> nilai kanan ke kotak kiri. Ini bukan "sama dengan" seperti di matematika.', { hot: ['x'] });
         m.set('x', m.get('x') + 5);
@@ -58,7 +58,7 @@ char c = 130;`,
         m.decl('int', 't', 3.99);
         yield m.step('int t', 'Cast ke int <b>membuang</b> bagian desimal, bukan membulatkan: 3.99 jadi 3.', { hot: ['t'] });
         m.decl('char', 'c', 130);
-        yield m.step('char c', 'char hanya muat -128 sampai 127. 130 "berputar" ke -126 (overflow). Compiler tidak memberi error.', { hot: ['c'], final: true });
+        yield m.step('char c', 'char hanya muat -128 sampai 127. 130 wrap around menjadi -126 (overflow). Compiler tidak memberi error.', { hot: ['c'], final: true });
       },
     },
     scanf: {
@@ -69,11 +69,11 @@ x = scanf("%d %d %d", &y, &z, &w);
 printf("x = %d\\n", x);`,
       *run(m) {
         ['x', 'y', 'z', 'w'].forEach((v) => m.decl('int', v));
-        yield m.step('int x', 'Empat kotak int, semuanya masih sampah.', { hot: ['x', 'y', 'z', 'w'] });
+        yield m.step('int x', 'Empat kotak int, semuanya masih berisi garbage value.', { hot: ['x', 'y', 'z', 'w'] });
         const n = m.scanf('%d %d %d', 'y', 'z', 'w');
         yield m.step('scanf', `<code>scanf</code> butuh <b>alamat</b> kotak (<code>&y</code>), karena tugasnya menulis ke kotak itu. Angka diambil dari buffer satu per satu; spasi dan Enter di antaranya dilewati oleh <code>%d</code>. Berhasil mengisi <b>${n}</b> variabel.`, { hot: ['y', 'z', 'w'] });
         m.set('x', n);
-        yield m.step('x = scanf', `Nilai kembalian scanf = <b>jumlah variabel yang berhasil diisi</b>, yaitu ${n}. Coba ubah input jadi <code>6 7 abc</code>: hasilnya 2, karena "abc" bukan angka.`, { hot: ['x'] });
+        yield m.step('x = scanf', `Return value scanf = <b>jumlah variabel yang berhasil diisi</b>, yaitu ${n}. Coba ubah input jadi <code>6 7 abc</code>: hasilnya 2, karena "abc" bukan angka.`, { hot: ['x'] });
         m.printf('x = %d\n', m.get('x'));
         yield m.step('printf', 'Selesai.', { final: true });
       },

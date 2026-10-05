@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Variabel, Tipe Data, dan Input/Output · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
 </head>
@@ -21,7 +21,7 @@
 <div class="card tldr">
   <strong>TL;DR</strong>
   <ul>
-    <li>Variabel = kotak dengan <b>nama, tipe, alamat, dan nilai</b>. Belum diisi = isinya sampah.</li>
+    <li>Variabel = kotak dengan <b>nama, tipe, alamat, dan nilai</b>. Belum diisi = isinya garbage value.</li>
     <li><b>int / int = int</b>: sisa dibuang. Cast salah satunya ke <code>float</code> sebelum membagi.</li>
     <li><code>printf</code> butuh <b>nilai</b>, <code>scanf</code> butuh <b>alamat</b> (<code>&amp;x</code>), karena scanf menulis ke kotak.</li>
     <li>Ketikan keyboard masuk ke <b>buffer</b> dulu. Enter yang tertinggal di buffer adalah penyebab <code>getchar</code> atau <code>%c</code> "dilewati".</li>
@@ -38,7 +38,7 @@
   alamat 0x1000    ← L-value: lokasi kotak di memory
   tipe   char (1 byte, muat -128 … 127)</code></pre>
 <ul>
-  <li><b>Deklarasi</b> (<code>int x;</code>) = minta kotak. Isinya <b>sampah</b>: sisa data lama di memory. Jangan dibaca sebelum diisi.</li>
+  <li><b>Deklarasi</b> (<code>int x;</code>) = minta kotak. Isinya <b>garbage value</b>: sisa data lama di memory. Jangan dibaca sebelum diisi.</li>
   <li><b>Assignment</b> (<code>x = 10;</code>) = simpan nilai ke kotak. <code>=</code> bukan "sama dengan", tapi "simpan ke".</li>
   <li><code>x = x + 5;</code> dibaca dari kanan: ambil isi x, tambah 5, simpan kembali ke x.</li>
 </ul>
@@ -61,7 +61,7 @@
 <div class="callout"><strong>Kenapa long dan int sama?</strong>Di Windows, <code>long</code> = 4 byte, sama dengan int. Itu sebabnya membaca <code>long</code> pakai <code>%d</code> masih jalan di Dev-C++ (compiler hanya memberi warning). Di Linux atau Mac, <code>long</code> = 8 byte dan hasilnya rusak. Biasakan <code>%ld</code> untuk long.</div>
 
 <h3>Overflow</h3>
-<p>Kalau nilai tidak muat di kotaknya, nilainya "berputar". Tidak ada error.</p>
+<p>Kalau nilai tidak muat di kotaknya, nilainya <b>wrap around</b>: lewat dari batas atas, lalu mulai lagi dari batas bawah. Tidak ada error.</p>
 <pre><code>char c = 130;   // char hanya muat sampai 127
 printf("%d", c); // -126</code></pre>
 
@@ -134,7 +134,7 @@ scanf("%d", &amp;x);</code></pre>
 </table>
 <ul>
   <li>Array char (string) <b>tanpa</b> <code>&amp;</code>: <code>scanf("%s", nama);</code>. Nama array sudah berupa alamat (dibahas di materi 04).</li>
-  <li><b>Nilai kembalian</b> scanf = jumlah variabel yang <b>berhasil diisi</b>. Berguna untuk mengecek input.</li>
+  <li><b>Return value</b> scanf = jumlah variabel yang <b>berhasil diisi</b>. Berguna untuk mengecek input.</li>
   <li>Untuk <code>double</code>, scanf <b>wajib</b> <code>%lf</code>. printf boleh <code>%f</code> atau <code>%lf</code>.</li>
 </ul>
 

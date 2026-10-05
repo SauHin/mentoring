@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Satu Algoritma, Tiga Bentuk</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
   <link rel="stylesheet" href="../../../_shared/cviz.css?v=4a957ffa">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
 </head>
@@ -14,7 +14,7 @@
 <h1>Satu algoritma, tiga bentuk</h1>
 <p>Pseudocode, flowchart, dan kode C di bawah adalah <b>algoritma yang sama</b>. Jalankan <b>step by step</b> dan lihat langkah yang sama menyala di ketiganya. Ubah isi keyboard untuk mencoba input lain.</p>
 
-<script src="../../../_shared/cviz.js?v=19a3456e"></script>
+<script src="../../../_shared/cviz.js?v=e22d6926"></script>
 <script>
 /* ---------- Sequence: rata-rata 3 bilangan ---------- */
 const flowAvg = cvFlow(300, 300, [
@@ -78,7 +78,7 @@ int main() {
       *run(m) {
         yield m.step({ Pseudocode: 'Start', Flowchart: 'start', C: 'int main' }, 'Program C selalu mulai dari <code>main()</code>. Di pseudocode dan flowchart, ini adalah <b>Start</b>.');
         ['a', 'b', 'c', 'avg'].forEach((v) => m.decl('float', v));
-        yield m.step({ C: 'float a' }, 'Baris ini <b>tidak ada</b> di pseudocode: C mewajibkan variabel dideklarasikan dulu (tipe + nama). Isinya masih sampah (<code>?</code>) sampai diisi.', { hot: ['a', 'b', 'c', 'avg'] });
+        yield m.step({ C: 'float a' }, 'Baris ini <b>tidak ada</b> di pseudocode: C mewajibkan variabel dideklarasikan dulu (tipe + nama). Isinya masih garbage value (<code>?</code>) sampai diisi.', { hot: ['a', 'b', 'c', 'avg'] });
         m.scanf('%f %f %f', 'a', 'b', 'c');
         yield m.step({ Pseudocode: 'Read', Flowchart: 'in', C: 'scanf' }, '<b>Read</b> = <code>scanf</code>. Tiga angka dibaca dari keyboard ke a, b, dan c.', { hot: ['a', 'b', 'c'] });
         m.set('avg', (m.get('a') + m.get('b') + m.get('c')) / 3);

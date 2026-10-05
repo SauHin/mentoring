@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Algoritma dan Struktur Program C · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
   <style>
@@ -43,7 +43,7 @@
 
 <table>
   <tr><th>Ciri algoritma yang baik</th><th>Artinya</th></tr>
-  <tr><td>Logikanya benar</td><td>Menghasilkan output yang benar untuk semua input yang sah</td></tr>
+  <tr><td>Logikanya benar</td><td>Menghasilkan output yang benar untuk semua input yang valid</td></tr>
   <tr><td>Tidak ambigu</td><td>Setiap langkah hanya bisa diartikan satu cara</td></tr>
   <tr><td>Berhenti</td><td>Setelah sejumlah langkah, pasti selesai (tidak berputar selamanya)</td></tr>
   <tr><td>Efisien</td><td>Tidak membuang langkah yang tidak perlu</td></tr>
@@ -79,8 +79,8 @@
   <tr><td>Output</td><td>Print, Display, Write</td><td><code>printf("%d", x);</code></td></tr>
   <tr><td>Simpan nilai</td><td>Set x to 0, x = 0, Store</td><td><code>x = 0;</code></td></tr>
   <tr><td>Hitung</td><td>Compute, Add, +, −, *, /</td><td><code>total = total + x;</code></td></tr>
-  <tr><td>Pilihan</td><td>IF … THEN … ELSE … ENDIF</td><td><code>if (…) { … } else { … }</code></td></tr>
-  <tr><td>Perulangan</td><td>DOWHILE … ENDDO, WHILE</td><td><code>while (…) { … }</code></td></tr>
+  <tr><td>Selection</td><td>IF … THEN … ELSE … ENDIF</td><td><code>if (…) { … } else { … }</code></td></tr>
+  <tr><td>Repetition</td><td>DOWHILE … ENDDO, WHILE</td><td><code>while (…) { … }</code></td></tr>
 </table>
 <div class="callout"><strong>Yang ada di C tapi tidak di pseudocode</strong>Deklarasi variabel dan tipenya (<code>int x;</code>), <code>#include</code>, <code>main()</code>, dan titik koma. Ini aturan bahasa, bukan bagian dari logika.</div>
 
@@ -156,11 +156,11 @@ C\D "E"</code></pre>
   <li>Case sensitive, dan tidak boleh sama dengan <b>keyword</b>.</li>
 </ul>
 <p><b>Keyword</b> = kata yang sudah dipakai C sendiri: <code>int</code>, <code>float</code>, <code>char</code>, <code>if</code>, <code>else</code>, <code>for</code>, <code>while</code>, <code>do</code>, <code>return</code>, <code>void</code>, <code>break</code>, <code>continue</code>, dan seterusnya. Dev-C++ mewarnai keyword dengan tebal, jadi mudah dikenali.</p>
-<p><b>Cek sendiri</b>: mana yang identifier sah?</p>
+<p><b>Cek sendiri</b>: mana yang identifier valid?</p>
 <pre><code>name   x1   _total   1time   int   total-harga   jumlahData   Total</code></pre>
 <details>
   <summary>Jawaban</summary>
-  <p>Sah: <code>name</code>, <code>x1</code>, <code>_total</code>, <code>jumlahData</code>, <code>Total</code> (berbeda dari <code>total</code>). Tidak sah: <code>1time</code> (diawali angka), <code>int</code> (keyword), <code>total-harga</code> (tanda <code>-</code> dibaca sebagai operator kurang).</p>
+  <p>Valid: <code>name</code>, <code>x1</code>, <code>_total</code>, <code>jumlahData</code>, <code>Total</code> (berbeda dari <code>total</code>). Tidak valid: <code>1time</code> (diawali angka), <code>int</code> (keyword), <code>total-harga</code> (tanda <code>-</code> dibaca sebagai operator kurang).</p>
 </details>
 
 <h2>8. Standard library: katalog fungsi siap pakai</h2>
@@ -169,7 +169,7 @@ C\D "E"</code></pre>
   <tr><th>Header</th><th>Isinya</th><th>Contoh fungsi</th></tr>
   <tr><td><code>stdio.h</code></td><td>Input/output</td><td><code>printf</code>, <code>scanf</code>, <code>getchar</code>, <code>puts</code></td></tr>
   <tr><td><code>math.h</code></td><td>Matematika</td><td><code>sqrt</code>, <code>pow</code>, <code>fabs</code>, <code>ceil</code>, <code>floor</code></td></tr>
-  <tr><td><code>stdlib.h</code></td><td>Utilitas umum</td><td><code>malloc</code>, <code>free</code>, <code>rand</code>, <code>srand</code>, <code>atoi</code>, <code>exit</code></td></tr>
+  <tr><td><code>stdlib.h</code></td><td>Utility umum</td><td><code>malloc</code>, <code>free</code>, <code>rand</code>, <code>srand</code>, <code>atoi</code>, <code>exit</code></td></tr>
   <tr><td><code>string.h</code></td><td>Olah string</td><td><code>strlen</code>, <code>strcpy</code>, <code>strcmp</code>, <code>strcat</code></td></tr>
   <tr><td><code>time.h</code></td><td>Waktu dan tanggal</td><td><code>time</code>, <code>clock</code></td></tr>
 </table>

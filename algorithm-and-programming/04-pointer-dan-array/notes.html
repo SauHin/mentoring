@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pointer dan Array · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
 </head>
@@ -52,7 +52,7 @@ ptr = &amp;i;      // simpan alamat i ke ptr  → ptr "menunjuk" i
   <tr><td>Di depan pointer, dalam ekspresi</td><td><code>*ptr = 5;</code></td><td>"kotak yang ditunjuk ptr" (dereference)</td></tr>
   <tr><td>Di antara dua nilai</td><td><code>a * b</code></td><td>Perkalian</td></tr>
 </table>
-<div class="callout warn"><strong>Pointer kosong</strong>Pointer yang belum diisi menunjuk ke alamat sampah. <code>*ptr = 5;</code> sebelum <code>ptr = &amp;i;</code> bisa merusak memory atau crash. Kalau belum punya alamat, isi dengan <code>NULL</code> supaya jelas "belum menunjuk apa-apa".</div>
+<div class="callout warn"><strong>Pointer kosong</strong>Pointer yang belum diisi menunjuk ke alamat acak. <code>*ptr = 5;</code> sebelum <code>ptr = &amp;i;</code> bisa merusak memory atau crash. Kalau belum punya alamat, isi dengan <code>NULL</code> supaya jelas "belum menunjuk apa-apa".</div>
 <p>Jalankan langkah ini di <a href="viz/pointer-array.html">visualisasi</a> (program "Pointer dasar"). Panahnya terlihat.</p>
 
 <h3>Pointer ke pointer</h3>

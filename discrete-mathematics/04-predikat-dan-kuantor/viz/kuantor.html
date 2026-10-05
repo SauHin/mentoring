@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Playground Kuantor</title>
+  <title>Quantifier Playground</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
   <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
   <style>
@@ -34,12 +34,12 @@
 </head>
 <body class="viz">
 
-<h1>Playground kuantor</h1>
+<h1>Quantifier playground</h1>
 <p><b>∀x P(x)</b> = P benar untuk <b>semua</b> elemen = AND besar. <b>∃x P(x)</b> = P benar untuk <b>minimal satu</b> elemen = OR besar. Di kode, keduanya hanyalah loop.</p>
 
 <section class="lg-section">
-  <h2>1. Satu kuantor</h2>
-  <p>Predikat ditulis seperti kondisi di C, dengan variabel <code>x</code>. Contoh: <code>x*x &gt;= x</code>, <code>x % 2 == 0</code>, <code>8 % x == 0</code>.</p>
+  <h2>1. Satu quantifier</h2>
+  <p>Predicate ditulis seperti kondisi di C, dengan variabel <code>x</code>. Contoh: <code>x*x &gt;= x</code>, <code>x % 2 == 0</code>, <code>8 % x == 0</code>.</p>
   <div class="lg-presets" id="pre1"></div>
   <div class="controls q-row">
     <div class="seg" id="quant"></div>
@@ -57,8 +57,8 @@
 </section>
 
 <section class="lg-section">
-  <h2>2. Dua kuantor: urutan menentukan arti</h2>
-  <p>Baris = nilai x, kolom = nilai y. ✓ = P(x, y) benar. Pilih bentuk pernyataan dan lihat bagian tabel mana yang menentukan jawabannya.</p>
+  <h2>2. Dua quantifier: urutan menentukan arti</h2>
+  <p>Baris = nilai x, kolom = nilai y. ✓ = P(x, y) benar. Pilih bentuk statement dan lihat bagian tabel mana yang menentukan jawabannya.</p>
   <div class="lg-presets" id="pre2"></div>
   <div class="seg" id="forms"></div>
   <div class="card lg-table-wrap" style="margin-top:12px"><table class="grid" id="grid"></table></div>
@@ -69,7 +69,7 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
-/* ---------- 1. Satu kuantor ---------- */
+/* ---------- 1. Satu quantifier ---------- */
 const P1 = [
   ['∀ x² ≥ x, D = {1..5}', '∀', '1, 2, 3, 4, 5', 'x*x >= x'],
   ['∀ x² ≥ x, D berisi 0.5', '∀', '2, 1, 0.5, -2', 'x*x >= x'],
@@ -86,7 +86,7 @@ document.querySelectorAll('[data-q]').forEach((b) => (b.onclick = () => { q = b.
 
 function compile() {
   const src = $('pred').value.trim();
-  if (!/^[\dx\s+\-*/%<>=!&|().]+$/.test(src)) throw new Error('Predikat hanya boleh berisi x, angka, dan operator C (+ - * / % < > == != && || !).');
+  if (!/^[\dx\s+\-*/%<>=!&|().]+$/.test(src)) throw new Error('Predicate hanya boleh berisi x, angka, dan operator C (+ - * / % < > == != && || !).');
   return new Function('x', `return (${src});`); // hanya karakter di atas yang lolos, jadi aman
 }
 function reset1() {
@@ -136,7 +136,7 @@ function draw() {
   }
   $('ver1').className = cls; $('ver1').innerHTML = text;
   $('neg').innerHTML = q === '∀'
-    ? `~(∀x P(x)) ≡ <b>∃x ~P(x)</b>: "tidak semua memenuhi" sama dengan "ada yang tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(false) ? 'BENAR' : 'SALAH'}, selalu kebalikan dari pernyataan aslinya.` : ''}`
+    ? `~(∀x P(x)) ≡ <b>∃x ~P(x)</b>: "tidak semua memenuhi" sama dengan "ada yang tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(false) ? 'BENAR' : 'SALAH'}, selalu kebalikan dari statement aslinya.` : ''}`
     : `~(∃x P(x)) ≡ <b>∀x ~P(x)</b>: "tidak ada yang memenuhi" sama dengan "semua tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(true) ? 'SALAH' : 'BENAR'}.` : ''}`;
   $('step').disabled = !fn || done();
   $('back1').disabled = !pos;
@@ -147,7 +147,7 @@ $('all').onclick = () => { while (fn && !done()) stepOne(); };
 $('reset1').onclick = reset1;
 $('dom').oninput = $('pred').oninput = reset1;
 
-/* ---------- 2. Dua kuantor ---------- */
+/* ---------- 2. Dua quantifier ---------- */
 const P2 = [
   { name: 'Kafetaria (slide)', x: 'S', y: 'I', P: 'S memilih I', rows: ['Uta', 'Tim', 'Yuen'],
     cols: ['green salad', 'fruit salad', 'spaghetti', 'fish', 'pie', 'cake', 'milk', 'soda', 'coffee'],

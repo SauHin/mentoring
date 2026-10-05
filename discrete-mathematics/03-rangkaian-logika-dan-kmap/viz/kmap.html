@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Karnaugh Map</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
   <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
   <style>
@@ -130,11 +130,11 @@ function render() {
   const sop = groups.map(termHTML).join(' + ') || '0';
   $('out').innerHTML = `
     <h3>1. Dari tabel (sum of minterms)</h3>
-    <p>Satu suku untuk setiap sel bernilai 1: <span class="sop">${dnf}</span> (${list.length} suku)</p>
+    <p>Satu term untuk setiap sel bernilai 1: <span class="sop">${dnf}</span> (${list.length} term)</p>
     <h3>2. Setelah digabung di K-map</h3>
     <div class="terms">${groups.map((g, i) => `<span class="term" data-t="${i}" style="background:color-mix(in srgb, ${COLORS[i % COLORS.length]} 30%, var(--surface))">${termHTML(g)}</span>`).join('') || '<span class="label">Tidak ada 1: hasilnya 0.</span>'}</div>
     <p>Hasil paling sederhana: <span class="sop">${sop}</span></p>
-    <p class="label">Arahkan kursor ke satu suku untuk melihat grupnya. Grup = persegi panjang berisi 1, 2, 4, atau 8 sel (boleh menyambung lewat tepi). Variabel yang <b>berubah</b> di dalam grup hilang, dan yang <b>tetap</b> menjadi suku.</p>`;
+    <p class="label">Arahkan kursor ke satu term untuk melihat grupnya. Grup = persegi panjang berisi 1, 2, 4, atau 8 sel (boleh menyambung lewat tepi). Variabel yang <b>berubah</b> di dalam grup hilang, dan yang <b>tetap</b> menjadi term.</p>`;
   document.querySelectorAll('[data-t]').forEach((t) => {
     t.onmouseenter = () => { $('km').classList.add('focus'); document.querySelectorAll('#km button').forEach((b) => b.classList.toggle('hl', b.dataset.g.split(' ').includes(t.dataset.t))); };
     t.onmouseleave = () => $('km').classList.remove('focus');

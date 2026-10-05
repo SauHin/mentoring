@@ -64,7 +64,7 @@ function cvMachine(input) {
   const elemType = (t) => t.replace(/\*$/, '');
   const sizeOf = (t) => (t.endsWith('*') ? CV_PTR : CV_SIZE[t]);
 
-  // Konversi nilai seperti C: int dipotong ke bawah (menuju 0), char berputar di -128..127, float dibulatkan.
+  // Konversi nilai seperti C: int dipotong ke bawah (menuju 0), char wrap around di -128..127, float dibulatkan.
   function conv(type, v) {
     if (v === undefined || v === null || type.endsWith('*')) return v;
     if (type === 'char') return ((Math.trunc(v) + 128) % 256 + 256) % 256 - 128;
@@ -231,7 +231,7 @@ function cviz({ programs, layout }) {
 
   // Nilai dalam kotak: char tampil sebagai karakter + kodenya, pointer sebagai alamat, float tanpa nol berlebih.
   function show(cell, v) {
-    if (v === undefined) return '<span class="cv-garbage" title="Belum diisi: nilai sampah">?</span>';
+    if (v === undefined) return '<span class="cv-garbage" title="Belum diisi: garbage value">?</span>';
     if (cell.type.endsWith('*')) return v === 0 ? 'NULL' : hex(v);
     if (cell.type === 'char') {
       const map = { 0: "'\\0'", 10: "'\\n'", 32: "' '", 9: "'\\t'" };

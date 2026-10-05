@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Repetition · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
 </head>
@@ -51,7 +51,7 @@ for (i = 1; i &lt;= n; i++) {        i = 1;
 <p>Kalau salah satu bagian hilang atau salah, gejalanya bisa ditebak:</p>
 <table>
   <tr><th>Yang salah</th><th>Gejala</th></tr>
-  <tr><td>Inisialisasi lupa (<code>int total;</code> tanpa <code>= 0</code>)</td><td>Hasil acak (mulai dari nilai sampah)</td></tr>
+  <tr><td>Inisialisasi lupa (<code>int total;</code> tanpa <code>= 0</code>)</td><td>Hasil acak (mulai dari garbage value)</td></tr>
   <tr><td>Update lupa (<code>i++</code> tidak ada)</td><td><b>Infinite loop</b>: kondisi selalu benar</td></tr>
   <tr><td>Kondisi meleset (<code>&lt;</code> vs <code>&lt;=</code>)</td><td>Kurang atau lebih satu putaran (<b>off-by-one</b>)</td></tr>
 </table>

@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rangkaian Logika dan K-map</title>
+  <title>Logic Circuit dan K-map</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <style>
     .deck .slide.full { padding-bottom: 3vh; }
     .deck .slide.full h2 { margin-bottom: 0.3em; }
     .deck .slide.full iframe { min-height: 0; }
-    .gate { width: 92px; height: 44px; vertical-align: middle; }
+    .gate { width: 92px; height: 40px; vertical-align: middle; }
     .gate .body { fill: var(--card-2); stroke: var(--ink-2); stroke-width: 1.6; }
     .gate .wire { stroke: var(--ink-2); stroke-width: 1.6; fill: none; }
     .ov { text-decoration: overline; display: inline-block; margin: 0 0.07em; }
@@ -21,35 +21,39 @@
 
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
-  <h1>Rangkaian logika dan K-map</h1>
-  <p>Discrete mathematics · dari saklar ke gerbang, dari tabel ke rangkaian terkecil</p>
+  <h1>Logic circuit dan K-map</h1>
+  <p>Discrete mathematics · dari saklar ke logic gate, lalu dari truth table ke circuit yang paling kecil.</p>
 </section>
 
 <section class="slide">
   <h2>Saklar = logika</h2>
+  <p class="sub">Logika proposisi bisa dibuat menjadi hardware. Saklar tertutup (arus mengalir) bernilai <b>1</b>, saklar terbuka bernilai <b>0</b>.</p>
 <pre><code>Seri (berderet):     ──[P]──[Q]──(lampu)    menyala jika P DAN Q tertutup  → P ∧ Q
 Paralel (bercabang): ──┬─[P]─┬──(lampu)    menyala jika P ATAU Q tertutup → P ∨ Q
                        └─[Q]─┘</code></pre>
   <ul>
-    <li>Tertutup / arus mengalir = <b>1</b>. Terbuka = <b>0</b>.</li>
-    <li>Komputer membangun semua operasi dari prinsip ini.</li>
+    <li>Saklar seri berperilaku seperti ∧, saklar paralel seperti ∨.</li>
+    <li>Komputer membangun semua operasinya dari prinsip ini, dengan transistor sebagai saklar.</li>
   </ul>
 </section>
 
 <section class="slide">
-  <h2>Gerbang logika</h2>
+  <h2>Logic gate</h2>
+  <p class="sub">Logic gate adalah connective dalam bentuk hardware. Input dan output-nya bernilai 1 atau 0.</p>
   <table>
-    <tr><th>Simbol</th><th>Gerbang</th><th>Output 1 jika</th><th>Ekspresi</th></tr>
+    <tr><th>Simbol</th><th>Gate</th><th>Output 1 jika</th><th>Ekspresi</th></tr>
     <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 22H22M68 22H92"/><path class="body" d="M22 6L58 22L22 38Z"/><circle class="body" cx="63" cy="22" r="5"/></svg></td><td><b>NOT</b></td><td>input 0</td><td><code>~P</code></td></tr>
     <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H24M0 30H24M64 22H92"/><path class="body" d="M24 6H44A16 16 0 0 1 44 38H24Z"/></svg></td><td><b>AND</b></td><td>semua input 1</td><td><code>P ∧ Q</code></td></tr>
     <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H27M0 30H27M64 22H92"/><path class="body" d="M20 6Q32 22 20 38Q48 38 64 22Q48 6 20 6Z"/></svg></td><td><b>OR</b></td><td>minimal satu input 1</td><td><code>P ∨ Q</code></td></tr>
     <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H24M0 30H24M70 22H92"/><path class="body" d="M24 6H44A16 16 0 0 1 44 38H24Z"/><circle class="body" cx="65" cy="22" r="5"/></svg></td><td><b>NAND</b></td><td>tidak semua input 1</td><td><code>~(P ∧ Q)</code></td></tr>
     <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H27M0 30H27M70 22H92"/><path class="body" d="M20 6Q32 22 20 38Q48 38 64 22Q48 6 20 6Z"/><circle class="body" cx="69" cy="22" r="5"/></svg></td><td><b>NOR</b></td><td>semua input 0</td><td><code>~(P ∨ Q)</code></td></tr>
   </table>
+  <p class="label">Lingkaran kecil di ujung gate berarti output-nya dinegasikan.</p>
 </section>
 
 <section class="slide">
-  <h2>Rangkaian → ekspresi → tabel</h2>
+  <h2>Circuit → ekspresi → truth table</h2>
+  <p class="sub">Untuk membaca circuit, beri nama setiap kabel output gate dari kiri ke kanan. Ekspresi akhirnya tinggal disusun dari nama-nama itu.</p>
   <div class="cols">
 <pre><code>a = P ∨ Q          (OR)
 b = P ∧ Q          (AND)
@@ -64,16 +68,17 @@ out = a ∧ c        (AND)
       <tr><td>0</td><td>0</td><td>0</td></tr>
     </table>
   </div>
-  <p><b>Beri nama setiap kabel</b>, dari kiri ke kanan. Hasilnya: 1 jika tepat satu input 1, yaitu <b>XOR</b>.</p>
+  <p>Output bernilai 1 hanya jika tepat satu input bernilai 1. Jadi circuit ini adalah <b>XOR</b> (P ⊕ Q).</p>
 </section>
 
 <section class="slide">
-  <h2>Tabel → ekspresi: disjunctive normal form</h2>
+  <h2>Truth table → ekspresi: disjunctive normal form</h2>
+  <p class="sub">Kalau yang diketahui hanya truth table, ekspresinya bisa diturunkan secara mekanis dengan tiga langkah.</p>
   <div class="cols">
     <ol>
       <li>Ambil setiap baris dengan output <b>1</b>.</li>
-      <li>Buat suku AND yang hanya 1 di baris itu: nilai 1 apa adanya, nilai 0 diberi NOT.</li>
-      <li>Gabungkan semua suku dengan OR.</li>
+      <li>Buat satu term AND yang hanya bernilai 1 di baris itu. Variabel bernilai 1 ditulis apa adanya, variabel bernilai 0 diberi NOT.</li>
+      <li>Gabungkan semua term dengan OR.</li>
     </ol>
 <pre><code>111 → P ∧ Q ∧ R
 101 → P ∧ ~Q ∧ R
@@ -81,30 +86,32 @@ out = a ∧ c        (AND)
 
 out = (P∧Q∧R) ∨ (P∧~Q∧R) ∨ (P∧~Q∧~R)</code></pre>
   </div>
-  <p class="label">Selalu benar, tapi sering terlalu panjang. Bisa disederhanakan.</p>
+  <p class="label">Bentuk ini disebut disjunctive normal form atau sum of products. Hasilnya selalu benar, tapi sering terlalu panjang.</p>
 </section>
 
 <section class="slide">
-  <h2>Ide K-map: gabungkan yang beda satu variabel</h2>
+  <h2>Ide K-map: gabungkan term yang beda satu variabel</h2>
+  <p class="sub">Dua term yang hanya berbeda di satu variabel bisa digabung, dan variabel itu hilang.</p>
 <pre><code>(P ∧ Q ∧ R) ∨ (P ∧ ~Q ∧ R) = (P ∧ R) ∧ (Q ∨ ~Q) = P ∧ R</code></pre>
   <div class="cols">
-    <p>K-map menyusun truth table supaya suku yang beda satu variabel <b>bersebelahan</b>. Kolomnya memakai Gray code: <b>11, 10, 00, 01</b>.</p>
+    <p><b>Karnaugh map (K-map)</b> menyusun truth table menjadi kotak-kotak, sehingga term yang beda satu variabel selalu <b>bersebelahan</b>. Urutan kolomnya Gray code: <b>11, 10, 00, 01</b>.</p>
 <pre><code>        yz   yz̄   ȳz̄   ȳz
    x  [ 1 ][   ][ 1 ][ 1 ]
    x̄  [   ][   ][   ][   ]</code></pre>
   </div>
-  <p class="label">Kolom paling kiri dan paling kanan juga bertetangga.</p>
+  <p class="label">Huruf bergaris atas (ȳ) berarti NOT y. Kolom paling kiri dan paling kanan juga bertetangga.</p>
 </section>
 
 <section class="slide">
-  <h2>Aturan membuat grup</h2>
+  <h2>Aturan membuat grup di K-map</h2>
+  <p class="sub">Setiap grup di K-map menjadi satu term. Semakin besar grupnya, semakin pendek term-nya.</p>
   <ul>
-    <li>Persegi panjang berisi <b>1, 2, 4, atau 8</b> sel bernilai 1. Tidak boleh diagonal.</li>
-    <li>Boleh menyambung <b>lewat tepi</b> dan boleh tumpang tindih.</li>
-    <li>Grup <b>sebesar</b> mungkin, jumlah grup <b>sesedikit</b> mungkin.</li>
-    <li>Satu grup = satu suku: ambil variabel yang <b>tetap</b>, buang yang berubah.</li>
+    <li>Grup berbentuk persegi panjang berisi <b>1, 2, 4, atau 8</b> sel bernilai 1. Grup tidak boleh diagonal.</li>
+    <li>Grup boleh menyambung <b>lewat tepi</b> dan boleh tumpang tindih dengan grup lain.</li>
+    <li>Buat grup <b>sebesar</b> mungkin, dengan jumlah grup <b>sesedikit</b> mungkin, sampai semua 1 tertutup.</li>
+    <li>Untuk setiap grup, ambil variabel yang nilainya <b>tetap</b> di seluruh grup. Variabel yang berubah dibuang.</li>
   </ul>
-  <p>Contoh di atas: {xyz, x<span class="ov">y</span>z} → <b>xz</b>, {x<span class="ov">y</span>z, x<span class="ov">y</span><span class="ov">z</span>} → <b>x<span class="ov">y</span></b>. Hasil: <code>xz + xȳ</code>.</p>
+  <p>Contoh dari slide sebelumnya: grup {xyz, x<span class="ov">y</span>z} menjadi <b>xz</b>, dan grup {x<span class="ov">y</span>z, x<span class="ov">y</span><span class="ov">z</span>} menjadi <b>x<span class="ov">y</span></b>. Hasilnya <code>xz + xȳ</code>.</p>
 </section>
 
 <section class="slide full">
@@ -114,22 +121,23 @@ out = (P∧Q∧R) ∨ (P∧~Q∧R) ∨ (P∧~Q∧~R)</code></pre>
 
 <section class="slide">
   <h2>Kesalahan yang sering muncul</h2>
+  <p class="sub">Hampir semua kesalahan K-map berasal dari urutan kolom atau bentuk grup.</p>
   <table>
     <tr><th>Kesalahan</th><th>Yang benar</th></tr>
-    <tr><td>Kolom diurutkan 00, 01, 10, 11</td><td>Gray code: 11, 10, 00, 01</td></tr>
-    <tr><td>Grup berisi 3 atau 6 sel</td><td>Hanya pangkat dua: 1, 2, 4, 8</td></tr>
-    <tr><td>Lupa bahwa tepi kiri-kanan bertetangga</td><td>Cek sambungan tepi, dan di 4 variabel juga atas-bawah</td></tr>
-    <tr><td>Grup kecil padahal bisa lebih besar</td><td>Grup besar = suku lebih pendek</td></tr>
+    <tr><td>Kolom diurutkan 00, 01, 10, 11</td><td>Pakai Gray code 11, 10, 00, 01, supaya tetangga hanya beda satu variabel</td></tr>
+    <tr><td>Grup berisi 3 atau 6 sel</td><td>Ukuran grup hanya pangkat dua: 1, 2, 4, 8</td></tr>
+    <tr><td>Lupa bahwa tepi kiri dan kanan bertetangga</td><td>Cek sambungan lewat tepi. Di K-map 4 variabel, tepi atas dan bawah juga bertetangga</td></tr>
+    <tr><td>Membuat grup kecil padahal bisa lebih besar</td><td>Grup yang lebih besar menghasilkan term yang lebih pendek</td></tr>
   </table>
 </section>
 
 <section class="slide">
   <h2>Ringkasan</h2>
   <ul>
-    <li>Seri = ∧, paralel = ∨. Gerbang = connective dalam bentuk hardware.</li>
-    <li>Rangkaian → ekspresi: beri nama setiap kabel.</li>
-    <li>Tabel → ekspresi: satu suku AND per baris bernilai 1, lalu OR-kan.</li>
-    <li>K-map: grup persegi panjang berukuran pangkat dua, ambil variabel yang tetap.</li>
+    <li>Saklar seri = ∧, saklar paralel = ∨. Logic gate adalah connective dalam bentuk hardware.</li>
+    <li>Circuit → ekspresi: beri nama setiap kabel, dari kiri ke kanan.</li>
+    <li>Truth table → ekspresi: satu term AND untuk setiap baris bernilai 1, lalu gabungkan dengan OR.</li>
+    <li>K-map: buat grup persegi panjang berukuran pangkat dua, lalu ambil variabel yang tetap.</li>
   </ul>
   <p class="label">Latihan ada di notes.</p>
 </section>

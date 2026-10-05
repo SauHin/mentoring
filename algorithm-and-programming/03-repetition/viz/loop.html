@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Loop Tracer</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
   <link rel="stylesheet" href="../../../_shared/cviz.css?v=4a957ffa">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
 </head>
@@ -14,7 +14,7 @@
 <h1>Loop tracer</h1>
 <p>Jalankan loop <b>step by step</b> dan lihat <b>trace table</b> terisi: satu baris per putaran. Kalau kamu bisa mengisi trace table sendiri, kamu bisa membaca loop apa pun. Nyalakan <b>mode tebak</b> untuk latihan.</p>
 
-<script src="../../../_shared/cviz.js?v=19a3456e"></script>
+<script src="../../../_shared/cviz.js?v=e22d6926"></script>
 <script>
 // Urutan eksekusi for: exp1 sekali, lalu cek exp2 → body → exp3 → cek exp2 lagi ...
 const flowFor = cvFlow(320, 330, [
@@ -44,7 +44,7 @@ printf("%d\\n", total);`,
       },
       *run(m) {
         m.decl('int', 'n'); m.decl('int', 'i'); m.decl('int', 'total', 0);
-        yield m.step('int n', '<b>Akumulator</b> total harus mulai dari 0. Kalau lupa, isinya sampah dan hasilnya ngawur.', { hot: ['total'] });
+        yield m.step('int n', '<b>Akumulator</b> total harus mulai dari 0. Kalau lupa, isinya garbage value dan hasilnya ngawur.', { hot: ['total'] });
         m.scanf('%d', 'n');
         yield m.step('scanf', `n = ${m.get('n')}: loop akan menjumlahkan 1 sampai ${m.get('n')}.`, { hot: ['n'] });
         m.set('i', 1);

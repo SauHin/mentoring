@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Argumen dan Inferensi · Notes</title>
+  <title>Argumen dan Rules of Inference · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=355bf4fa">
   <script src="../../_shared/theme.js?v=7b53acb8"></script>
   <script src="../../_shared/notes.js?v=59415f79" defer></script>
 </head>
@@ -14,7 +14,7 @@
 <article class="notes">
 
 <span class="chip">Discrete mathematics · 02</span>
-<h1>Argumen dan aturan inferensi</h1>
+<h1>Argumen dan rules of inference</h1>
 <p class="lead">Kapan sebuah kesimpulan <b>pasti</b> mengikuti dari premise-nya? Jawabannya selalu bisa dicek dengan satu cara: cari baris yang premise-nya T semua.</p>
 <p><a href="slides.html">Slide</a> · <a href="viz/argumen.html">Visualisasi: cek validitas argumen</a></p>
 
@@ -23,7 +23,7 @@
   <ul>
     <li>Argumen <b>valid</b> = setiap baris yang semua premise-nya T (<b>critical row</b>) punya conclusion T.</li>
     <li>Valid itu soal <b>bentuk</b>, bukan soal isi benar atau tidak.</li>
-    <li>Aturan inferensi (modus ponens, modus tollens, …) adalah argumen kecil yang sudah terbukti valid. Gabungkan untuk deduksi panjang.</li>
+    <li>Rules of inference (modus ponens, modus tollens, …) adalah argumen kecil yang sudah terbukti valid. Gabungkan untuk deduksi panjang.</li>
     <li>Dua jebakan klasik: <b>converse error</b> dan <b>inverse error</b>.</li>
   </ul>
 </div>
@@ -56,7 +56,7 @@ q → p ∧ r
 <p>Baris p = T, q = F, r = F membuat kedua premise T tapi conclusion F, jadi argumennya <b>tidak valid</b>. Lihat tabel lengkapnya di <a href="viz/argumen.html">visualisasi</a> (preset "Contoh tidak valid").</p>
 <div class="callout"><strong>Valid ≠ benar</strong>"Jika bulan terbuat dari keju, maka aku presiden. Bulan terbuat dari keju. ∴ Aku presiden." Bentuknya modus ponens, jadi <b>valid</b>, walaupun premise dan conclusion-nya salah. Argumen yang valid <b>dan</b> premise-nya benar disebut <b>sound</b>. Hanya argumen sound yang menjamin conclusion benar.</div>
 
-<h2>3. Aturan inferensi: argumen kecil yang sudah pasti valid</h2>
+<h2>3. Rules of inference: argumen kecil yang sudah pasti valid</h2>
 <p>Setiap aturan di bawah bisa kamu cek sendiri di <a href="viz/argumen.html">visualisasi</a>. Pahami <b>kenapa</b>-nya, maka namanya mudah diingat.</p>
 <table>
   <tr><th>Nama</th><th>Bentuk</th><th>Kenapa valid</th></tr>
@@ -80,9 +80,9 @@ q → p ∧ r
 <p>Keduanya salah karena menganggap <code>p → q</code> berlaku dua arah. Ingat materi 01: converse dan inverse <b>tidak</b> ekuivalen dengan aslinya.</p>
 
 <h2>5. Deduksi berantai: di mana kacamatanya?</h2>
-<p>Contoh dari slide. Pagi ini kacamatamu hilang, dan semua pernyataan ini benar:</p>
+<p>Contoh dari slide. Pagi ini kacamatamu hilang, dan semua statement ini benar:</p>
 <table>
-  <tr><th></th><th>Pernyataan</th><th>Simbol</th></tr>
+  <tr><th></th><th>Statement</th><th>Simbol</th></tr>
   <tr><td>a</td><td>Kalau aku membaca koran di dapur, kacamataku di meja dapur.</td><td><code>RK → GK</code></td></tr>
   <tr><td>b</td><td>Kalau kacamataku di meja dapur, aku melihatnya saat sarapan.</td><td><code>GK → SB</code></td></tr>
   <tr><td>c</td><td>Aku tidak melihat kacamataku saat sarapan.</td><td><code>~SB</code></td></tr>
@@ -102,7 +102,7 @@ q → p ∧ r
    RL        (langkah 3)
    ∴ GC                 modus ponens</code></pre>
 <p><b>Kacamatanya di meja kopi.</b> Setiap langkah memakai satu aturan dari tabel di atas. Cara berpikirnya: mulai dari yang pasti (c), lalu cari aturan yang bisa "memakan" fakta itu.</p>
-<div class="callout"><strong>Catatan: slide "The conclusion"</strong>Di slide tertulis <code>GK → SB by (d)</code>. Yang tepat adalah <b>(b)</b>. Pernyataan (d) adalah <code>RL ∨ RK</code>, yang baru dipakai di langkah 3.</div>
+<div class="callout"><strong>Catatan: slide "The conclusion"</strong>Di slide tertulis <code>GK → SB by (d)</code>. Yang tepat adalah <b>(b)</b>. Statement (d) adalah <code>RL ∨ RK</code>, yang baru dipakai di langkah 3.</div>
 <p>Kelima premise dan conclusion GC bisa dicek sekaligus di <a href="viz/argumen.html">visualisasi</a> (preset "Di mana kacamatanya?"). Hasilnya valid.</p>
 
 <h2>6. Kesalahan yang sering muncul</h2>
@@ -134,7 +134,7 @@ Kedua kasus menghasilkan q ∨ s  ∴ q ∨ s</code></pre>
 </details>
 
 <p><b>5.</b> Kenapa <code>(p → q) ∧ (q → r) → (p → r)</code> adalah tautology, dan apa hubungannya dengan transitivity?</p>
-<details><summary>Jawaban</summary><p>Argumen <code>P1; P2 ∴ C</code> valid persis ketika <code>(P1 ∧ P2) → C</code> adalah tautology: tidak pernah ada baris dengan premise T dan conclusion F. Jadi setiap aturan inferensi juga bisa ditulis sebagai satu tautology. Cek di <a href="../01-logika-proposisi/viz/tabel-kebenaran.html">visualisasi materi 01</a>.</p></details>
+<details><summary>Jawaban</summary><p>Argumen <code>P1; P2 ∴ C</code> valid persis ketika <code>(P1 ∧ P2) → C</code> adalah tautology: tidak pernah ada baris dengan premise T dan conclusion F. Jadi setiap rule of inference juga bisa ditulis sebagai satu tautology. Cek di <a href="../01-logika-proposisi/viz/tabel-kebenaran.html">visualisasi materi 01</a>.</p></details>
 
 <h2>Daftar pustaka</h2>
 <ol class="refs">

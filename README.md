@@ -33,15 +33,15 @@ Semua kode C untuk Dev-C++. Visualisasi memakai mesin bersama `_shared/cviz.js` 
 
 ### Discrete mathematics
 
-Notasi mengikuti Epp: negasi `~`, nilai T/F, dan 1/0 untuk rangkaian. Visualisasi logika memakai mesin bersama `_shared/logic.js` dan `logic.css` (parser, truth table, urutan operasi Epp).
+Notasi mengikuti Epp: negasi `~`, nilai T/F, dan 1/0 untuk circuit. Visualisasi logika memakai mesin bersama `_shared/logic.js` dan `logic.css` (parser, truth table, urutan operasi Epp).
 
 | No | Materi | Notes | Slide |
 |----|--------|-------|-------|
 | 01 | Logika proposisi | [notes](discrete-mathematics/01-logika-proposisi/notes.html) | [slides](discrete-mathematics/01-logika-proposisi/slides.html) |
-| 02 | Argumen dan aturan inferensi | [notes](discrete-mathematics/02-argumen-dan-inferensi/notes.html) | [slides](discrete-mathematics/02-argumen-dan-inferensi/slides.html) |
-| 03 | Rangkaian logika dan K-map | [notes](discrete-mathematics/03-rangkaian-logika-dan-kmap/notes.html) | [slides](discrete-mathematics/03-rangkaian-logika-dan-kmap/slides.html) |
-| 04 | Predikat dan kuantor | [notes](discrete-mathematics/04-predikat-dan-kuantor/notes.html) | [slides](discrete-mathematics/04-predikat-dan-kuantor/slides.html) |
-| 05 | Inferensi kuantor dan teknik pembuktian | [notes](discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/notes.html) | [slides](discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/slides.html) |
+| 02 | Argumen dan rules of inference | [notes](discrete-mathematics/02-argumen-dan-inferensi/notes.html) | [slides](discrete-mathematics/02-argumen-dan-inferensi/slides.html) |
+| 03 | Logic circuit dan K-map | [notes](discrete-mathematics/03-rangkaian-logika-dan-kmap/notes.html) | [slides](discrete-mathematics/03-rangkaian-logika-dan-kmap/slides.html) |
+| 04 | Predicate dan quantifier | [notes](discrete-mathematics/04-predikat-dan-kuantor/notes.html) | [slides](discrete-mathematics/04-predikat-dan-kuantor/slides.html) |
+| 05 | Inference dengan quantifier dan teknik pembuktian | [notes](discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/notes.html) | [slides](discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/slides.html) |
 
 ### Compilation technique
 
@@ -89,6 +89,10 @@ Jalankan `python tools/cachebust.py`. Script ini menambahkan `?v=<hash>` ke seti
 
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.
 - Singkat. Pakai **bold**, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
+- Slide harus bisa dipahami tanpa penjelasan lisan, seperti notes versi ringkas.
+  - Setiap slide punya kalimat pembuka `<p class="sub">` di bawah judul.
+  - Poin ditulis sebagai kalimat lengkap, bukan rantai panah ("A → B → crash").
+- Pakai istilah Inggris kalau padanan Indonesianya terdengar janggal. Contoh: valid (bukan sah), garbage value (bukan nilai sampah), return value, newline, term, logic gate, predicate, quantifier, truth table.
 - Bahasa pemrograman per matkul: **algorithm and programming dan data structure pakai C** untuk Dev-C++. Kode harus jalan di compiler C dan C++. Data structure memakai (`malloc`/`free`, `NULL`, `printf`), dan harus juga jalan di compiler C++ (cast `(Node*)malloc(...)`).
 - Fokus pada **pemahaman kode**: tiap operasi diturunkan (sebelum → sesudah → panah yang berubah → urutan → edge case → kode), latihan berupa trace, cari bug, dan turunkan sendiri.
 - Visualisasi linked list memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak).
