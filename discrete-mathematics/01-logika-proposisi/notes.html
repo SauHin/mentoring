@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logika Proposisi · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Discrete mathematics · 01</span>
+<h1>Logika proposisi</h1>
+<p class="lead">Di logika proposisi, <b>truth table adalah hakim</b>. Hukum apa pun bisa dicek dengan truth table, jadi kamu tidak perlu menghafal: cukup paham <b>kapan</b> setiap operator bernilai T.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/tabel-kebenaran.html">Visualisasi: truth table &amp; cek ekuivalensi</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li><b>Statement</b> = kalimat yang pasti bernilai T atau F, tidak keduanya.</li>
+    <li>Pahami satu kalimat untuk setiap operator, misalnya "∧ hanya T kalau keduanya T". Tabelnya akan mengikuti sendiri.</li>
+    <li>Dua bentuk <b>ekuivalen</b> (≡) kalau nilainya sama di <b>setiap</b> baris. Satu baris beda = bukti tidak ekuivalen.</li>
+    <li><code>p → q</code> hanya F saat p T dan q F. Dari sini: <code>~(p → q) ≡ p ∧ ~q</code> dan <code>p → q ≡ ~q → ~p</code>.</li>
+  </ul>
+</div>
+
+<h2>1. Statement</h2>
+<p><b>Statement</b> (proposisi) adalah kalimat yang <b>pasti benar (T) atau pasti salah (F)</b>, tidak keduanya.</p>
+<table>
+  <tr><th>Kalimat</th><th>Statement?</th><th>Kenapa</th></tr>
+  <tr><td>"Jakarta adalah ibu kota Jepang."</td><td>Ya (F)</td><td>Salah, tapi tetap punya nilai pasti</td></tr>
+  <tr><td>"2 + 2 = 4"</td><td>Ya (T)</td><td>Pasti benar</td></tr>
+  <tr><td>"Tutup pintunya!"</td><td>Bukan</td><td>Perintah, tidak bernilai T/F</td></tr>
+  <tr><td>"x + 1 = 3"</td><td>Bukan (belum)</td><td>Nilainya bergantung pada x. Ini <b>predicate</b> (materi 04)</td></tr>
+</table>
+<p>Statement digabung dengan <b>connective</b> menjadi <b>compound statement</b>, misalnya "hujan <b>dan</b> dingin". Kita menulisnya dengan variabel: p = "hujan", q = "dingin", lalu <code>p ∧ q</code>.</p>
+
+<h2>2. Enam connective: cukup pahami kapan T</h2>
+<table>
+  <tr><th>Bentuk</th><th>Dibaca</th><th>Bernilai T jika …</th><th>Di bahasa C</th></tr>
+  <tr><td><code>~p</code></td><td>not p</td><td>p bernilai F</td><td><code>!p</code></td></tr>
+  <tr><td><code>p ∧ q</code></td><td>p and q</td><td><b>keduanya</b> T</td><td><code>p &amp;&amp; q</code></td></tr>
+  <tr><td><code>p ∨ q</code></td><td>p or q</td><td><b>minimal satu</b> T (termasuk keduanya)</td><td><code>p || q</code></td></tr>
+  <tr><td><code>p ⊕ q</code></td><td>exclusive or</td><td><b>tepat satu</b> T</td><td><code>p != q</code></td></tr>
+  <tr><td><code>p → q</code></td><td>if p then q</td><td>selalu T, <b>kecuali</b> p T dan q F</td><td><code>!p || q</code></td></tr>
+  <tr><td><code>p ↔ q</code></td><td>p if and only if q</td><td>p dan q <b>bernilai sama</b></td><td><code>p == q</code></td></tr>
+</table>
+<div class="callout"><strong>"Atau" sehari-hari vs ∨</strong>"Mau teh atau kopi?" biasanya berarti pilih satu (⊕). Di logika, <code>∨</code> selalu <b>inclusive</b>: dua-duanya T juga T.</div>
+
+<h2>3. Membuat truth table</h2>
+<ol>
+  <li><b>Hitung baris</b>: n variabel → 2<sup>n</sup> baris (2 variabel = 4, 3 variabel = 8). Setiap kombinasi T/F muncul tepat sekali.</li>
+  <li><b>Isi kolom variabel</b> dengan pola: variabel pertama TTTTFFFF, kedua TTFFTTFF, ketiga TFTFTFTF.</li>
+  <li><b>Satu kolom per sub-ekspresi</b>, dari dalam ke luar. Setiap kolom hanya memakai kolom yang sudah ada.</li>
+</ol>
+<p>Contoh <code>~(p ∧ q)</code>:</p>
+<table>
+  <tr><th>p</th><th>q</th><th>p ∧ q</th><th>~(p ∧ q)</th></tr>
+  <tr><td>T</td><td>T</td><td>T</td><td>F</td></tr>
+  <tr><td>T</td><td>F</td><td>F</td><td>T</td></tr>
+  <tr><td>F</td><td>T</td><td>F</td><td>T</td></tr>
+  <tr><td>F</td><td>F</td><td>F</td><td>T</td></tr>
+</table>
+<p><b>Urutan operasi</b>: <code>~</code> dikerjakan dulu, lalu <code>∧ ∨</code>, terakhir <code>→ ↔</code>. <code>∧</code> dan <code>∨</code> <b>setingkat</b>, jadi <code>p ∧ q ∨ r</code> ambigu dan wajib diberi kurung. Jadi <code>~p ∧ q</code> = <code>(~p) ∧ q</code>, dan <code>p ∧ q → r</code> = <code>(p ∧ q) → r</code>.</p>
+<p>Coba sendiri di <a href="viz/tabel-kebenaran.html">visualisasi truth table</a>. Ekspresi yang ambigu akan ditolak beserta alasannya.</p>
+
+<h2>4. Ekuivalensi logis</h2>
+<p><code>P ≡ Q</code> artinya P dan Q bernilai <b>sama di setiap baris</b>. Contoh paling penting, <b>De Morgan</b>:</p>
+<table>
+  <tr><th>p</th><th>q</th><th>~(p ∧ q)</th><th>~p ∨ ~q</th><th>~p ∧ ~q</th></tr>
+  <tr><td>T</td><td>T</td><td>F</td><td>F</td><td>F</td></tr>
+  <tr><td>T</td><td>F</td><td>T</td><td>T</td><td><b>F</b></td></tr>
+  <tr><td>F</td><td>T</td><td>T</td><td>T</td><td><b>F</b></td></tr>
+  <tr><td>F</td><td>F</td><td>T</td><td>T</td><td>T</td></tr>
+</table>
+<ul>
+  <li><code>~(p ∧ q) ≡ ~p ∨ ~q</code>: kolomnya sama di keempat baris.</li>
+  <li><code>~(p ∧ q)</code> <b>tidak</b> ekuivalen dengan <code>~p ∧ ~q</code>: baris p = T, q = F saja sudah cukup sebagai bukti.</li>
+  <li>Cara ingat De Morgan tanpa menghafal: "<b>tidak</b> (hujan <b>dan</b> dingin)" berarti minimal salah satunya tidak terjadi, yaitu "tidak hujan <b>atau</b> tidak dingin". Negasi <b>membalik</b> ∧ menjadi ∨ dan sebaliknya.</li>
+</ul>
+<div class="callout tip"><strong>Di kode C</strong><code>if (!(umur &gt;= 17 &amp;&amp; punyaKTP))</code> sama dengan <code>if (umur &lt; 17 || !punyaKTP)</code>. De Morgan dipakai setiap kali kamu membalik kondisi <code>if</code>.</div>
+<p><b>Tautology</b> = selalu T (contoh <code>p ∨ ~p</code>). <b>Contradiction</b> = selalu F (contoh <code>p ∧ ~p</code>). Di hukum logika, Epp menulisnya <b>t</b> dan <b>c</b>.</p>
+
+<h2>5. Hukum logika: kenali bentuknya, cek dengan tabel</h2>
+<p>Semua hukum di bawah bisa dibuktikan dengan truth table. Kamu tidak perlu hafal namanya untuk paham, tapi kenali bentuknya supaya bisa menyederhanakan ekspresi.</p>
+<table>
+  <tr><th>Hukum</th><th>Bentuk</th></tr>
+  <tr><td>Commutative</td><td><code>p ∧ q ≡ q ∧ p</code>, <code>p ∨ q ≡ q ∨ p</code></td></tr>
+  <tr><td>Associative</td><td><code>(p ∧ q) ∧ r ≡ p ∧ (q ∧ r)</code>, sama untuk ∨</td></tr>
+  <tr><td>Distributive</td><td><code>p ∧ (q ∨ r) ≡ (p ∧ q) ∨ (p ∧ r)</code>, <code>p ∨ (q ∧ r) ≡ (p ∨ q) ∧ (p ∨ r)</code></td></tr>
+  <tr><td>Identity</td><td><code>p ∧ t ≡ p</code>, <code>p ∨ c ≡ p</code></td></tr>
+  <tr><td>Negation</td><td><code>p ∨ ~p ≡ t</code>, <code>p ∧ ~p ≡ c</code></td></tr>
+  <tr><td>Double negation</td><td><code>~(~p) ≡ p</code></td></tr>
+  <tr><td>Idempotent</td><td><code>p ∧ p ≡ p</code>, <code>p ∨ p ≡ p</code></td></tr>
+  <tr><td>Universal bound</td><td><code>p ∨ t ≡ t</code>, <code>p ∧ c ≡ c</code></td></tr>
+  <tr><td>De Morgan</td><td><code>~(p ∧ q) ≡ ~p ∨ ~q</code>, <code>~(p ∨ q) ≡ ~p ∧ ~q</code></td></tr>
+  <tr><td>Absorption</td><td><code>p ∨ (p ∧ q) ≡ p</code>, <code>p ∧ (p ∨ q) ≡ p</code></td></tr>
+  <tr><td>Negation of t and c</td><td><code>~t ≡ c</code>, <code>~c ≡ t</code></td></tr>
+</table>
+<h3>Contoh menyederhanakan (dari slide)</h3>
+<pre><code>~(~p ∧ q) ∧ (p ∨ q)
+≡ (~~p ∨ ~q) ∧ (p ∨ q)     De Morgan
+≡ (p ∨ ~q) ∧ (p ∨ q)       double negation
+≡ p ∨ (~q ∧ q)             distributive (p "dikeluarkan")
+≡ p ∨ c                    negation: ~q ∧ q selalu F
+≡ p                        identity</code></pre>
+<p>Strategi umumnya: dorong <code>~</code> ke dalam dengan De Morgan, lalu cari pola <code>x ∧ ~x</code> atau <code>x ∨ ~x</code>.</p>
+
+<h2>6. Conditional: p → q</h2>
+<p>Bayangkan <code>p → q</code> sebagai <b>janji</b>: "Kalau kamu datang Senin pagi (p), kamu dapat pekerjaannya (q)."</p>
+<table>
+  <tr><th>p</th><th>q</th><th>p → q</th><th>Janjinya …</th></tr>
+  <tr><td>T</td><td>T</td><td>T</td><td>ditepati</td></tr>
+  <tr><td>T</td><td>F</td><td><b>F</b></td><td><b>dilanggar</b>: satu-satunya baris F</td></tr>
+  <tr><td>F</td><td>T</td><td>T</td><td>tidak diuji, jadi tidak dilanggar</td></tr>
+  <tr><td>F</td><td>F</td><td>T</td><td>tidak diuji, jadi tidak dilanggar</td></tr>
+</table>
+<p>Dua baris terakhir disebut <b>vacuously true</b> (benar secara default): kalau kamu tidak datang Senin, janjinya tidak bisa dibilang dilanggar.</p>
+<p>Karena hanya ada satu baris F, dua hal berikut bisa diturunkan sendiri:</p>
+<ul>
+  <li><code>p → q ≡ ~p ∨ q</code>: "p salah, atau q benar". Ini persis kondisi agar baris F tidak terjadi.</li>
+  <li><b>Negasi</b>: <code>~(p → q) ≡ p ∧ ~q</code>, yaitu baris F itu sendiri.</li>
+</ul>
+<div class="callout warn"><strong>Negasi conditional BUKAN conditional</strong>Negasi "Jika mobilku di bengkel, maka aku tidak bisa ke kampus" adalah "Mobilku di bengkel <b>dan</b> aku bisa ke kampus". Bukan "jika … maka aku bisa ke kampus".</div>
+
+<h2>7. Contrapositive, converse, inverse</h2>
+<table>
+  <tr><th>Nama</th><th>Bentuk (dari p → q)</th><th>Ekuivalen dengan p → q?</th></tr>
+  <tr><td><b>Contrapositive</b></td><td><code>~q → ~p</code></td><td><b>Ya</b>: selalu sama</td></tr>
+  <tr><td>Converse</td><td><code>q → p</code></td><td>Tidak</td></tr>
+  <tr><td>Inverse</td><td><code>~p → ~q</code></td><td>Tidak (tapi ekuivalen dengan converse)</td></tr>
+</table>
+<p>Contoh: "Jika hari ini Paskah, maka besok Senin."</p>
+<ul>
+  <li><b>Contrapositive</b>: Jika besok bukan Senin, maka hari ini bukan Paskah. (Pasti benar juga.)</li>
+  <li><b>Converse</b>: Jika besok Senin, maka hari ini Paskah. (Salah: setiap Minggu, besoknya Senin.)</li>
+  <li><b>Inverse</b>: Jika hari ini bukan Paskah, maka besok bukan Senin. (Salah, alasannya sama.)</li>
+</ul>
+<div class="callout tip"><strong>Cara ingat</strong>Contrapositive = <b>tukar dan negasikan</b>. Inverse adalah contrapositive dari converse, jadi keduanya selalu ekuivalen. Cek di <a href="viz/tabel-kebenaran.html">visualisasi</a> (preset "Contrapositive" dan "Converse").</div>
+
+<h2>8. Biconditional dan "only if"</h2>
+<p><code>p ↔ q</code> ("p if and only if q") ≡ <code>(p → q) ∧ (q → p)</code>: benar ke dua arah.</p>
+<p>Contoh slide: "Program ini benar <b>jika dan hanya jika</b> menghasilkan jawaban benar untuk semua input" sama dengan dua janji: "jika program benar, maka jawabannya benar untuk semua input" <b>dan</b> "jika jawabannya benar untuk semua input, maka programnya benar".</p>
+<div class="callout warn"><strong>"p only if q" = p → q</strong>"Kamu lulus <b>hanya jika</b> mengerjakan tugas" artinya: kalau lulus, pasti mengerjakan tugas (p → q). Bukan sebaliknya: mengerjakan tugas tidak menjamin lulus.</div>
+
+<h2>9. Syarat cukup dan syarat perlu</h2>
+<table>
+  <tr><th>Kalimat</th><th>Bentuk</th><th>Intuisi</th></tr>
+  <tr><td>r adalah <b>syarat cukup</b> (sufficient) untuk s</td><td><code>r → s</code></td><td>r saja sudah <b>menjamin</b> s</td></tr>
+  <tr><td>r adalah <b>syarat perlu</b> (necessary) untuk s</td><td><code>s → r</code> ≡ <code>~r → ~s</code></td><td>tanpa r, s <b>tidak mungkin</b> terjadi</td></tr>
+  <tr><td>r syarat perlu <b>dan</b> cukup untuk s</td><td><code>r ↔ s</code></td><td>keduanya</td></tr>
+</table>
+<ul>
+  <li>"Lahir di AS adalah syarat <b>cukup</b> untuk menjadi warga AS" → Jika Pia lahir di AS, maka ia warga AS.</li>
+  <li>"Berumur 35 adalah syarat <b>perlu</b> untuk menjadi presiden AS" → Jika George belum 35, maka ia tidak bisa jadi presiden. Atau: jika George bisa jadi presiden, maka ia sudah 35.</li>
+</ul>
+
+<h2>10. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Yang benar</th></tr>
+  <tr><td><code>~(p → q) ≡ p → ~q</code></td><td><code>~(p → q) ≡ p ∧ ~q</code> (negasi conditional berupa ∧)</td></tr>
+  <tr><td>Converse dianggap sama dengan aslinya</td><td>Hanya <b>contrapositive</b> yang selalu ekuivalen</td></tr>
+  <tr><td><code>~(p ∧ q) ≡ ~p ∧ ~q</code></td><td>De Morgan membalik operator: <code>~p ∨ ~q</code></td></tr>
+  <tr><td>Menulis <code>p ∧ q ∨ r</code></td><td>Wajib kurung: <code>(p ∧ q) ∨ r</code> atau <code>p ∧ (q ∨ r)</code></td></tr>
+  <tr><td>"p only if q" ditulis <code>q → p</code></td><td><code>p → q</code></td></tr>
+  <tr><td>Syarat perlu ditulis <code>r → s</code></td><td><code>s → r</code></td></tr>
+</table>
+
+<h2>11. Latihan</h2>
+<p>Cek setiap jawabanmu di <a href="viz/tabel-kebenaran.html">visualisasi</a>.</p>
+
+<p><b>1.</b> Buat truth table <code>(p ∨ q) ∧ ~(p ∧ q)</code>. Operator apa yang hasilnya sama persis?</p>
+<details><summary>Jawaban</summary><p>Kolom akhirnya F, T, T, F. Hasilnya T kalau tepat satu dari p dan q yang T, jadi sama dengan <code>p ⊕ q</code> (exclusive or). Bentuk ini muncul lagi di rangkaian logika (materi 03).</p></details>
+
+<p><b>2.</b> Apakah <code>p → (q → r)</code> ekuivalen dengan <code>(p → q) → r</code>?</p>
+<details><summary>Jawaban</summary><p><b>Tidak.</b> Bukti: p = F, q = T, r = F. Kiri: p F, jadi vacuously true (T). Kanan: <code>p → q</code> = T, lalu <code>T → F</code> = F. Ini alasan <code>p → q → r</code> tanpa kurung dianggap ambigu.</p></details>
+
+<p><b>3.</b> Tulis negasi dari "Jika hujan, maka jalan basah".</p>
+<details><summary>Jawaban</summary><p>"Hujan <b>dan</b> jalan tidak basah." Polanya <code>p ∧ ~q</code>: satu-satunya keadaan yang membuat janji dilanggar.</p></details>
+
+<p><b>4.</b> Untuk "Jika n habis dibagi 4, maka n genap" (n bilangan bulat), tulis contrapositive, converse, dan inverse. Mana yang benar?</p>
+<details><summary>Jawaban</summary>
+  <ul>
+    <li>Asli: benar.</li>
+    <li>Contrapositive: "Jika n tidak genap, maka n tidak habis dibagi 4". <b>Benar</b>, karena ekuivalen dengan aslinya.</li>
+    <li>Converse: "Jika n genap, maka n habis dibagi 4". <b>Salah</b>: n = 2.</li>
+    <li>Inverse: "Jika n tidak habis dibagi 4, maka n tidak genap". <b>Salah</b>: n = 2 juga.</li>
+  </ul>
+</details>
+
+<p><b>5.</b> "Lulus ujian akhir adalah syarat perlu untuk lulus mata kuliah." Tulis dalam bentuk if-then.</p>
+<details><summary>Jawaban</summary><p>Syarat perlu → arahnya dari hasil ke syarat: "Jika kamu lulus mata kuliah, maka kamu lulus ujian akhir". Versi contrapositive: "Jika kamu tidak lulus ujian akhir, maka kamu tidak lulus mata kuliah".</p></details>
+
+<p><b>6.</b> Sederhanakan <code>~(p ∨ ~q) ∨ (~p ∧ ~q)</code>.</p>
+<details><summary>Jawaban</summary>
+<pre><code>~(p ∨ ~q) ∨ (~p ∧ ~q)
+≡ (~p ∧ q) ∨ (~p ∧ ~q)     De Morgan + double negation
+≡ ~p ∧ (q ∨ ~q)            distributive
+≡ ~p ∧ t                   negation
+≡ ~p                       identity</code></pre>
+</details>
+
+<p><b>7.</b> Apakah <code>(p ∧ (p → q)) → q</code> tautology?</p>
+<details><summary>Jawaban</summary><p><b>Ya.</b> Satu-satunya cara membuatnya F adalah bagian kiri T dan q F. Tapi kalau p T dan <code>p → q</code> T, maka q pasti T. Bentuk ini adalah <b>modus ponens</b>, aturan inferensi pertama di materi 02.</p></details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Epp, S. S. (2020). <i>Discrete Mathematics with Applications</i> (5th ed.). Cengage. Bab 2.1–2.2: Logical form and logical equivalence; Conditional statements.</li>
+  <li>Rosen, K. H. (2019). <i>Discrete Mathematics and Its Applications</i> (8th ed.). McGraw-Hill Education. Bab 1.1–1.3.</li>
+</ol>
+
+</article>
+</body>
+</html>

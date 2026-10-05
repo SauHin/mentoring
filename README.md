@@ -31,6 +31,18 @@ Semua kode C untuk Dev-C++. Visualisasi memakai mesin bersama `_shared/cviz.js` 
 | 01 | Single linked list | [notes](data-structure/01-single-linked-list/notes.html) | [slides](data-structure/01-single-linked-list/slides.html) |
 | 02 | Double linked list | [notes](data-structure/02-double-linked-list/notes.html) | [slides](data-structure/02-double-linked-list/slides.html) |
 
+### Discrete mathematics
+
+Notasi mengikuti Epp: negasi `~`, nilai T/F, dan 1/0 untuk rangkaian. Visualisasi logika memakai mesin bersama `_shared/logic.js` dan `logic.css` (parser, truth table, urutan operasi Epp).
+
+| No | Materi | Notes | Slide |
+|----|--------|-------|-------|
+| 01 | Logika proposisi | [notes](discrete-mathematics/01-logika-proposisi/notes.html) | [slides](discrete-mathematics/01-logika-proposisi/slides.html) |
+| 02 | Argumen dan aturan inferensi | [notes](discrete-mathematics/02-argumen-dan-inferensi/notes.html) | [slides](discrete-mathematics/02-argumen-dan-inferensi/slides.html) |
+| 03 | Rangkaian logika dan K-map | [notes](discrete-mathematics/03-rangkaian-logika-dan-kmap/notes.html) | [slides](discrete-mathematics/03-rangkaian-logika-dan-kmap/slides.html) |
+| 04 | Predikat dan kuantor | [notes](discrete-mathematics/04-predikat-dan-kuantor/notes.html) | [slides](discrete-mathematics/04-predikat-dan-kuantor/slides.html) |
+| 05 | Inferensi kuantor dan teknik pembuktian | [notes](discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/notes.html) | [slides](discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/slides.html) |
+
 ### Compilation technique
 
 Belum ada materi.
@@ -40,7 +52,7 @@ Belum ada materi.
 ```
 mentoring/
 ├── index.html                  home: daftar mata kuliah
-├── _shared/                    style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, font, logo
+├── _shared/                    style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, cviz.js/css, logic.js/css, font, logo
 ├── _template/
 │   └── NN-nama-materi/         salin folder ini untuk materi baru
 ├── algorithm-and-programming/
@@ -50,6 +62,9 @@ mentoring/
 │   ├── index.html              daftar materi data structure
 │   ├── 01-single-linked-list/
 │   └── 02-double-linked-list/
+├── discrete-mathematics/
+│   ├── index.html
+│   └── 01-… sampai 05-…
 └── compilation-technique/
     └── index.html              daftar materi (masih kosong)
 ```

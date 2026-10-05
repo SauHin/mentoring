@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground Kuantor</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .q-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+    .q-row .lg-input { flex: 1 1 200px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+    .el { min-width: 64px; padding: 8px 12px; border-radius: 14px; background: var(--card-2); text-align: center; font-family: var(--mono); }
+    .el small { display: block; font-family: var(--font); font-size: 0.75rem; color: var(--ink-2); }
+    .el.now { box-shadow: inset 0 0 0 2px var(--focus); }
+    .el.yes { background: color-mix(in srgb, var(--go) 22%, var(--surface)); }
+    .el.no { background: color-mix(in srgb, var(--stop) 20%, var(--surface)); }
+    .el.skip { opacity: 0.45; }
+    .q-cols { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    @media (max-width: 760px) { .q-cols { grid-template-columns: minmax(0, 1fr); } }
+    .q-cols pre { margin: 0; font-size: 0.85rem; }
+    .grid { border-collapse: separate; border-spacing: 4px; width: auto; }
+    .grid th { font-size: 0.85rem; color: var(--ink-2); padding: 4px 8px; border: 0; }
+    .grid td { width: 54px; height: 40px; text-align: center; border: 0; border-radius: 10px; background: var(--card-2); font-weight: 700; }
+    .grid td.t { color: var(--go-ink); }
+    .grid td.f { color: var(--ink-3); font-weight: 400; }
+    .grid td.hit { background: color-mix(in srgb, var(--go) 30%, var(--surface)); }
+    .grid td.miss { background: color-mix(in srgb, var(--stop) 25%, var(--surface)); }
+    .grid tr.rowbad th, .grid th.colbad { color: var(--stop); }
+    .seg .btn.sel { box-shadow: inset 0 0 0 2px var(--go-ink), 0 4px 0 var(--edge); color: var(--go-ink); }
+  </style>
+</head>
+<body class="viz">
+
+<h1>Playground kuantor</h1>
+<p><b>∀x P(x)</b> = P benar untuk <b>semua</b> elemen = AND besar. <b>∃x P(x)</b> = P benar untuk <b>minimal satu</b> elemen = OR besar. Di kode, keduanya hanyalah loop.</p>
+
+<section class="lg-section">
+  <h2>1. Satu kuantor</h2>
+  <p>Predikat ditulis seperti kondisi di C, dengan variabel <code>x</code>. Contoh: <code>x*x &gt;= x</code>, <code>x % 2 == 0</code>, <code>8 % x == 0</code>.</p>
+  <div class="lg-presets" id="pre1"></div>
+  <div class="controls q-row">
+    <div class="seg" id="quant"></div>
+    <label class="lg-input">Domain D <input class="field" id="dom" spellcheck="false"></label>
+    <label class="lg-input">P(x) <input class="field" id="pred" spellcheck="false"></label>
+  </div>
+  <div class="lg-err" id="err1"></div>
+  <div class="chips" id="chips"></div>
+  <div class="ops"><button class="btn btn-go btn-sm" id="step">Cek elemen berikutnya</button><button class="btn btn-sm" id="all">Cek semua</button><button class="btn btn-sm" id="reset1">Ulang</button></div>
+  <div class="lg-verdict" id="ver1"></div>
+  <div class="q-cols">
+    <div class="card"><strong>Di kode C</strong><pre id="code"></pre></div>
+    <div class="card"><strong>Negasinya</strong><p id="neg"></p></div>
+  </div>
+</section>
+
+<section class="lg-section">
+  <h2>2. Dua kuantor: urutan menentukan arti</h2>
+  <p>Baris = nilai x, kolom = nilai y. ✓ = P(x, y) benar. Pilih bentuk pernyataan dan lihat bagian tabel mana yang menentukan jawabannya.</p>
+  <div class="lg-presets" id="pre2"></div>
+  <div class="seg" id="forms"></div>
+  <div class="card lg-table-wrap" style="margin-top:12px"><table class="grid" id="grid"></table></div>
+  <div class="lg-verdict" id="ver2"></div>
+</section>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+/* ---------- 1. Satu kuantor ---------- */
+const P1 = [
+  ['∀ x² ≥ x, D = {1..5}', '∀', '1, 2, 3, 4, 5', 'x*x >= x'],
+  ['∀ x² ≥ x, D berisi 0.5', '∀', '2, 1, 0.5, -2', 'x*x >= x'],
+  ['∃ m² = m, D = {5..9}', '∃', '5, 6, 7, 8, 9', 'x*x == x'],
+  ['∃ m² = m, D = {-2..2}', '∃', '-2, -1, 0, 1, 2', 'x*x == x'],
+  ['Faktor dari 8', '∃', '3, 5, 6, 4, 7', '8 % x == 0'],
+  ['Semua genap?', '∀', '2, 4, 6, 7, 8', 'x % 2 == 0'],
+];
+let q = '∀', pos = 0, results = [], fn = null, D = [];
+$('pre1').innerHTML = P1.map(([n], i) => `<button class="btn btn-sm" data-p1="${i}">${n}</button>`).join('');
+document.querySelectorAll('[data-p1]').forEach((b) => (b.onclick = () => { const [, qq, d, p] = P1[b.dataset.p1]; q = qq; $('dom').value = d; $('pred').value = p; reset1(); }));
+$('quant').innerHTML = ['∀', '∃'].map((s) => `<button class="btn btn-sm" data-q="${s}">${s} ${s === '∀' ? 'untuk semua' : 'ada'}</button>`).join('');
+document.querySelectorAll('[data-q]').forEach((b) => (b.onclick = () => { q = b.dataset.q; reset1(); }));
+
+function compile() {
+  const src = $('pred').value.trim();
+  if (!/^[\dx\s+\-*/%<>=!&|().]+$/.test(src)) throw new Error('Predikat hanya boleh berisi x, angka, dan operator C (+ - * / % < > == != && || !).');
+  return new Function('x', `return (${src});`); // hanya karakter di atas yang lolos, jadi aman
+}
+function reset1() {
+  document.querySelectorAll('[data-q]').forEach((b) => b.classList.toggle('sel', b.dataset.q === q));
+  $('err1').textContent = '';
+  pos = 0; results = [];
+  try {
+    fn = compile(); fn(1);
+    D = $('dom').value.split(',').map((s) => s.trim()).filter(Boolean).map(Number);
+    if (!D.length || D.some(Number.isNaN)) throw new Error('Domain harus berisi angka, dipisah koma.');
+  } catch (e) { $('err1').textContent = e.message; fn = null; }
+  const P = esc($('pred').value);
+  $('code').innerHTML = q === '∀'
+    ? `int hasil = 1;                 // anggap benar dulu
+for (int i = 0; i &lt; n; i++)
+    if (!(${P.replace(/x/g, 'D[i]')})) {
+        hasil = 0;                 // 1 counterexample cukup
+        break;
+    }`
+    : `int hasil = 0;                 // anggap salah dulu
+for (int i = 0; i &lt; n; i++)
+    if (${P.replace(/x/g, 'D[i]')}) {
+        hasil = 1;                 // 1 witness cukup
+        break;
+    }`;
+  draw();
+}
+function done() { return pos >= D.length || (q === '∀' && results.includes(false)) || (q === '∃' && results.includes(true)); }
+function stepOne() { if (!fn || done()) return; results.push(Boolean(fn(D[pos]))); pos++; draw(); }
+function draw() {
+  $('chips').innerHTML = D.map((v, i) => {
+    const r = results[i], cls = r === undefined ? (i === pos && !done() ? 'now' : done() ? 'skip' : '') : r ? 'yes' : 'no';
+    return `<div class="el ${cls}">${v}<small>${r === undefined ? (done() ? 'tidak perlu dicek' : '…') : r ? 'P benar ✓' : 'P salah ✗'}</small></div>`;
+  }).join('');
+  const P = `P(x): ${esc($('pred').value)}`;
+  let text = '', cls = 'lg-verdict';
+  if (!fn) text = '';
+  else if (!done()) text = `Sudah dicek ${pos} dari ${D.length} elemen. ${q === '∀' ? 'Belum ketemu counterexample, jadi belum bisa disimpulkan.' : 'Belum ketemu witness, jadi belum bisa disimpulkan.'}`;
+  else if (q === '∀') {
+    const bad = results.indexOf(false);
+    if (bad >= 0) { cls += ' no'; text = `<b>∀x ∈ D, P(x) SALAH.</b> Counterexample: x = ${D[bad]}. Satu saja sudah cukup, sisanya tidak perlu dicek.`; }
+    else { cls += ' yes'; text = `<b>∀x ∈ D, P(x) BENAR.</b> Semua ${D.length} elemen sudah dicek dan semuanya memenuhi P. Untuk ∀, contoh saja tidak cukup: <b>semua</b> elemen harus dicek (atau dibuktikan).`; }
+  } else {
+    const good = results.indexOf(true);
+    if (good >= 0) { cls += ' yes'; text = `<b>∃x ∈ D, P(x) BENAR.</b> Witness: x = ${D[good]}. Satu saja sudah cukup.`; }
+    else { cls += ' no'; text = `<b>∃x ∈ D, P(x) SALAH.</b> Tidak ada satu pun dari ${D.length} elemen yang memenuhi P. Untuk menyatakan ∃ salah, <b>semua</b> elemen harus dicek.`; }
+  }
+  $('ver1').className = cls; $('ver1').innerHTML = text;
+  $('neg').innerHTML = q === '∀'
+    ? `~(∀x P(x)) ≡ <b>∃x ~P(x)</b>: "tidak semua memenuhi" sama dengan "ada yang tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(false) ? 'BENAR' : 'SALAH'}, selalu kebalikan dari pernyataan aslinya.` : ''}`
+    : `~(∃x P(x)) ≡ <b>∀x ~P(x)</b>: "tidak ada yang memenuhi" sama dengan "semua tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(true) ? 'SALAH' : 'BENAR'}.` : ''}`;
+  $('step').disabled = !fn || done();
+}
+$('step').onclick = stepOne;
+$('all').onclick = () => { while (fn && !done()) stepOne(); };
+$('reset1').onclick = reset1;
+$('dom').oninput = $('pred').oninput = reset1;
+
+/* ---------- 2. Dua kuantor ---------- */
+const P2 = [
+  { name: 'Kafetaria (slide)', x: 'S', y: 'I', P: 'S memilih I', rows: ['Uta', 'Tim', 'Yuen'],
+    cols: ['green salad', 'fruit salad', 'spaghetti', 'fish', 'pie', 'cake', 'milk', 'soda', 'coffee'],
+    on: { Uta: ['green salad', 'spaghetti', 'pie', 'milk'], Tim: ['fruit salad', 'fish', 'pie', 'cake', 'milk', 'coffee'], Yuen: ['spaghetti', 'fish', 'pie', 'soda'] } },
+  { name: 'y membagi x', x: 'x', y: 'y', P: 'y membagi x', rows: [9, 10, 15], cols: [2, 3], f: (a, b) => a % b === 0 },
+  { name: 'x + y = 0', x: 'x', y: 'y', P: 'x + y = 0', rows: [-2, -1, 0, 1, 2], cols: [-2, -1, 0, 1, 2], f: (a, b) => a + b === 0 },
+  { name: 'x ≤ y', x: 'x', y: 'y', P: 'x ≤ y', rows: [1, 2, 3], cols: [1, 2, 3], f: (a, b) => a <= b },
+];
+const FORMS = ['∀x∀y', '∃x∃y', '∀x∃y', '∃x∀y', '∀y∃x', '∃y∀x'];
+let pr = P2[0], form = '∀x∃y';
+$('pre2').innerHTML = P2.map((p, i) => `<button class="btn btn-sm" data-p2="${i}">${p.name}</button>`).join('');
+document.querySelectorAll('[data-p2]').forEach((b) => (b.onclick = () => { pr = P2[b.dataset.p2]; grid(); }));
+
+function grid() {
+  const val = (r, c) => (pr.f ? pr.f(r, c) : pr.on[r].includes(c));
+  const M = pr.rows.map((r) => pr.cols.map((c) => val(r, c)));
+  const X = pr.x, Y = pr.y;
+  const label = (f) => f.replace(/x/g, X).replace(/y/g, Y);
+  $('forms').innerHTML = FORMS.map((f) => `<button class="btn btn-sm${f === form ? ' sel' : ''}" data-f="${f}">${label(f)}</button>`).join('');
+  document.querySelectorAll('[data-f]').forEach((b) => (b.onclick = () => { form = b.dataset.f; grid(); }));
+
+  // Tentukan sel/baris/kolom yang menjadi alasan jawaban.
+  const hit = new Set(), miss = new Set(), badRows = new Set(), badCols = new Set();
+  const R = M.length, C = M[0].length, key = (i, j) => i + ',' + j;
+  let truth, why;
+  const rowAll = (i) => M[i].every(Boolean), colAll = (j) => M.every((r) => r[j]);
+  const rowAny = (i) => M[i].some(Boolean), colAny = (j) => M.some((r) => r[j]);
+  if (form === '∀x∀y') {
+    truth = M.every((r) => r.every(Boolean));
+    M.forEach((r, i) => r.forEach((v, j) => { if (!v) miss.add(key(i, j)); }));
+    why = `Semua sel harus ✓. ${truth ? 'Memang semuanya ✓.' : 'Sel merah adalah counterexample.'}`;
+  } else if (form === '∃x∃y') {
+    truth = M.some((r) => r.some(Boolean));
+    M.forEach((r, i) => r.forEach((v, j) => { if (v && !hit.size) hit.add(key(i, j)); }));
+    why = `Cukup <b>satu sel</b> ✓. ${truth ? 'Sel hijau adalah witness.' : 'Tidak ada sel ✓ sama sekali.'}`;
+  } else if (form === '∀x∃y') {
+    truth = M.every((_, i) => rowAny(i));
+    M.forEach((r, i) => { const j = r.indexOf(true); if (j >= 0) hit.add(key(i, j)); else badRows.add(i); });
+    why = `Setiap <b>baris</b> (setiap ${X}) harus punya minimal satu ✓, dan ${Y}-nya <b>boleh berbeda</b> untuk tiap baris. ${truth ? 'Hijau = pasangan untuk tiap baris.' : 'Baris merah tidak punya ✓ sama sekali.'}`;
+  } else if (form === '∃x∀y') {
+    const i = M.findIndex((_, k) => rowAll(k));
+    truth = i >= 0;
+    if (truth) M[i].forEach((_, j) => hit.add(key(i, j))); else M.forEach((r, k) => miss.add(key(k, r.indexOf(false))));
+    why = `Harus ada <b>satu baris</b> yang <b>semuanya</b> ✓. ${truth ? `Baris ${esc(pr.rows[i])} memenuhi.` : 'Setiap baris punya minimal satu ✗ (merah).'}`;
+  } else if (form === '∀y∃x') {
+    truth = M[0].every((_, j) => colAny(j));
+    M[0].forEach((_, j) => { const i = M.findIndex((r) => r[j]); if (i >= 0) hit.add(key(i, j)); else badCols.add(j); });
+    why = `Setiap <b>kolom</b> (setiap ${Y}) harus punya minimal satu ✓. ${truth ? 'Hijau = pasangan untuk tiap kolom.' : 'Kolom merah tidak punya ✓.'}`;
+  } else {
+    const j = M[0].findIndex((_, k) => colAll(k));
+    truth = j >= 0;
+    if (truth) M.forEach((_, i) => hit.add(key(i, j))); else M[0].forEach((_, k) => miss.add(key(M.findIndex((r) => !r[k]), k)));
+    why = `Harus ada <b>satu kolom</b> yang <b>semuanya</b> ✓, satu ${Y} yang cocok untuk semua ${X}. ${truth ? `Kolom ${esc(pr.cols[j])} memenuhi.` : 'Setiap kolom punya minimal satu ✗ (merah).'}`;
+  }
+
+  $('grid').innerHTML = `<tr><th>${esc(X)} \\ ${esc(Y)}</th>${pr.cols.map((c, j) => `<th class="${badCols.has(j) ? 'colbad' : ''}">${esc(c)}</th>`).join('')}</tr>` +
+    M.map((r, i) => `<tr class="${badRows.has(i) ? 'rowbad' : ''}"><th>${esc(pr.rows[i])}</th>${r.map((v, j) => `<td class="${v ? 't' : 'f'} ${hit.has(key(i, j)) ? 'hit' : ''} ${miss.has(key(i, j)) ? 'miss' : ''}">${v ? '✓' : '·'}</td>`).join('')}</tr>`).join('');
+  $('ver2').className = 'lg-verdict ' + (truth ? 'yes' : 'no');
+  $('ver2').innerHTML = `<b>${label(form)}, ${esc(pr.P)}: ${truth ? 'BENAR' : 'SALAH'}.</b> ${why}`;
+  window.quantResult = { form, truth }; // untuk tes
+}
+
+q = '∀'; $('dom').value = P1[0][2]; $('pred').value = P1[0][3];
+reset1();
+grid();
+</script>
+</body>
+</html>

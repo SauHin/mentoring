@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inferensi Kuantor dan Pembuktian</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Inferensi kuantor dan teknik pembuktian</h1>
+  <p>Discrete mathematics · dari aturan inferensi ke bukti matematika</p>
+</section>
+
+<section class="slide">
+  <h2>Truth table tidak cukup</h2>
+  <div class="cols">
+    <p>"Setiap mahasiswa SCE mengambil discrete math. Jackson mahasiswa SCE. ∴ Jackson mengambil discrete math."</p>
+<pre><code>1. ∀x, SCE(x) → DM(x)
+2. SCE(Jackson)
+3. SCE(Jackson) → DM(Jackson)
+   ← universal instantiation
+4. DM(Jackson)
+   ← modus ponens 2, 3</code></pre>
+  </div>
+  <p class="label">Turunkan ∀ ke satu elemen dulu, baru aturan dari materi 02 bisa dipakai.</p>
+</section>
+
+<section class="slide">
+  <h2>Empat aturan kuantor</h2>
+  <table>
+    <tr><th>Aturan</th><th>Bentuk</th><th>Artinya</th></tr>
+    <tr><td>Universal instantiation</td><td><code>∀x P(x) ∴ P(c)</code></td><td>Berlaku untuk semua → berlaku untuk c</td></tr>
+    <tr><td>Universal generalization</td><td><code>P(c), c sembarang ∴ ∀x P(x)</code></td><td>c tidak dipilih secara khusus</td></tr>
+    <tr><td>Existential instantiation</td><td><code>∃x P(x) ∴ P(c)</code></td><td>Beri nama baru pada "yang ada"</td></tr>
+    <tr><td>Existential generalization</td><td><code>P(c) ∴ ∃x P(x)</code></td><td>Satu witness cukup</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Contoh: Sam dapat A</h2>
+  <div class="cols">
+    <p>Siapa pun yang nilainya &gt; 80 dapat A. Ada mahasiswa yang nilainya &gt; 80, dan Sam salah satunya.</p>
+<pre><code>1. ∀x, M(x) → A(x)    premise
+2. ∃x, M(x)           premise
+3. M(Sam)             existential inst.
+4. M(Sam) → A(Sam)    universal inst. 1
+5. A(Sam)             modus ponens 3, 4</code></pre>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Universal modus ponens dan tollens</h2>
+  <table>
+    <tr><th>Nama</th><th>Bentuk</th><th>Status</th></tr>
+    <tr><td>Universal modus ponens</td><td><code>∀x, P(x) → Q(x); P(a) ∴ Q(a)</code></td><td>Valid</td></tr>
+    <tr><td>Universal modus tollens</td><td><code>∀x, P(x) → Q(x); ~Q(a) ∴ ~P(a)</code></td><td>Valid</td></tr>
+    <tr><td>Converse error</td><td><code>∀x, P(x) → Q(x); Q(a) ∴ P(a)</code></td><td><b>Tidak valid</b></td></tr>
+    <tr><td>Inverse error</td><td><code>∀x, P(x) → Q(x); ~P(a) ∴ ~Q(a)</code></td><td><b>Tidak valid</b></td></tr>
+  </table>
+  <p class="label">"Semua kucing berbulu. Rex berbulu. ∴ Rex kucing." Converse error: Rex bisa saja anjing.</p>
+</section>
+
+<section class="slide">
+  <h2>Pola semua bukti ∀x, P(x) → Q(x)</h2>
+  <ol>
+    <li><b>Ambil x sembarang</b> yang memenuhi P(x).</li>
+    <li>Tunjukkan Q(x), dengan salah satu teknik:</li>
+  </ol>
+  <table>
+    <tr><th>Teknik</th><th>Asumsikan</th><th>Tunjukkan</th></tr>
+    <tr><td>Direct</td><td>P(x)</td><td>Q(x)</td></tr>
+    <tr><td>Contrapositive</td><td>~Q(x)</td><td>~P(x)</td></tr>
+    <tr><td>Contradiction</td><td>P(x) <b>dan</b> ~Q(x)</td><td>Kontradiksi <code>C ∧ ~C</code></td></tr>
+  </table>
+  <p class="label">Langkah 1 adalah universal generalization.</p>
+</section>
+
+<section class="slide">
+  <h2>Direct proof: trik Euler</h2>
+<pre><code>  S =   0   +   1   + … + (n−1) +   n
+  S =   n   + (n−1) + … +   1   +   0
+ 2S =   n   +   n   + … +   n   +   n     (n + 1 suku)
+
+ 2S = n(n + 1)   →   S = n(n + 1)/2</code></pre>
+  <p>Tulis jumlahnya dua kali, maju dan mundur. Setiap kolom berjumlah n.</p>
+</section>
+
+<section class="slide">
+  <h2>"Jika n² genap, maka n genap"</h2>
+  <div class="cols">
+    <div>
+      <p><b>Contrapositive:</b> jika n ganjil, maka n² ganjil.</p>
+<pre><code>n = 2k + 1
+n² = 4k² + 4k + 1
+   = 2(2k² + 2k) + 1   ganjil ∎</code></pre>
+    </div>
+    <div>
+      <p><b>Contradiction:</b> misalkan n² genap <b>dan</b> n ganjil.</p>
+      <p>Hitungan yang sama memberi n² ganjil. Ini bertentangan dengan "n² genap", jadi asumsinya salah. ∎</p>
+    </div>
+  </div>
+  <p class="label">"n² genap" sulit diolah, sedangkan "n ganjil" langsung memberi n = 2k + 1.</p>
+</section>
+
+<section class="slide">
+  <h2>Mathematical induction</h2>
+  <div class="cols">
+    <ol>
+      <li><b>Basis step:</b> P(1) benar.</li>
+      <li><b>Inductive step:</b> asumsikan P(k), lalu tunjukkan P(k + 1).</li>
+    </ol>
+    <p>Seperti domino: P(1) jatuh, dan setiap domino menjatuhkan berikutnya. Jadi semuanya jatuh.</p>
+  </div>
+<pre><code>P(1) benar, P(1) → P(2)  ∴ P(2)     modus ponens
+P(2) benar, P(2) → P(3)  ∴ P(3)     modus ponens  …</code></pre>
+</section>
+
+<section class="slide">
+  <h2>Contoh induksi: 1 + 2 + … + n = n(n + 1)/2</h2>
+<pre><code>Basis:     n = 1  →  1 = 1·2/2  ✓
+Hipotesis: 1 + … + k = k(k + 1)/2
+Langkah:   1 + … + k + (k + 1) = k(k + 1)/2 + (k + 1)
+                               = (k + 1)(k + 2)/2     ✓ bentuk P(k + 1)</code></pre>
+  <p><b>Trik:</b> tulis dulu P(k + 1) yang ingin dicapai. Pecah sisi kirinya menjadi "bagian P(k)" + "suku baru", lalu ganti bagian P(k) dengan hipotesis.</p>
+</section>
+
+<section class="slide">
+  <h2>Kapan memakai teknik yang mana</h2>
+  <table>
+    <tr><th>Teknik</th><th>Cocok jika</th></tr>
+    <tr><td>Direct</td><td>P bisa langsung diolah (rumus, definisi)</td></tr>
+    <tr><td>Contrapositive</td><td>~Q lebih mudah diolah daripada P</td></tr>
+    <tr><td>Contradiction</td><td>Kesimpulan berbentuk "tidak ada …" atau "irrational"</td></tr>
+    <tr><td>Induction</td><td>Berlaku untuk n = 1, 2, 3, … (deret, habis dibagi)</td></tr>
+    <tr><td>Counterexample</td><td>Ingin menunjukkan pernyataan ∀ <b>salah</b></td></tr>
+  </table>
+  <p class="label">Program yang mengecek n = 1..1000 bisa menemukan counterexample, tapi <b>tidak membuktikan</b> ∀n.</p>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Instantiation = turun ke satu elemen. Generalization = naik ke kuantor.</li>
+    <li>Universal modus ponens/tollens valid. Converse dan inverse error tidak.</li>
+    <li>Bukti ∀: ambil x <b>sembarang</b>, lalu direct, contrapositive, atau contradiction.</li>
+    <li>Induksi: basis + inductive step. Contoh tidak pernah membuktikan ∀.</li>
+  </ul>
+  <p class="label">Latihan (irrational, ganjil = n², n³ − n habis dibagi 3) ada di notes.</p>
+</section>
+
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

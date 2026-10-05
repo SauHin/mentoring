@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabel Kebenaran dan Ekuivalensi</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Tabel kebenaran dan ekuivalensi</h1>
+<p>Truth table adalah "hakim" di logika proposisi: hukum apa pun bisa dicek di sini, jadi tidak perlu dihafal. Ketik pakai simbol atau ASCII: <code>~ ! &amp; | -&gt; &lt;-&gt;</code>.</p>
+
+<div class="controls lg-keys" id="keys"></div>
+
+<section class="lg-section">
+  <h2>1. Truth table satu ekspresi</h2>
+  <p>Setiap sub-ekspresi jadi satu kolom, dikerjakan dari dalam ke luar. Kolom kuning = hasil akhir.</p>
+  <div class="controls">
+    <label class="lg-input">Ekspresi <input class="field" id="e1" value="~(p ∧ q)" spellcheck="false" autocomplete="off"></label>
+  </div>
+  <div class="lg-presets" id="pre1"></div>
+  <div class="lg-err" id="err1"></div>
+  <div class="card lg-table-wrap" id="tab1"></div>
+  <div class="lg-verdict" id="ver1"></div>
+</section>
+
+<section class="lg-section">
+  <h2>2. Cek ekuivalensi</h2>
+  <p>Dua ekspresi <b>ekuivalen</b> (≡) kalau nilainya sama di <b>setiap</b> baris. Satu baris berbeda saja sudah cukup sebagai bukti tidak ekuivalen.</p>
+  <div class="controls">
+    <label class="lg-input">Kiri <input class="field" id="a" value="~(p ∧ q)" spellcheck="false" autocomplete="off"></label>
+    <label class="lg-input">Kanan <input class="field" id="b" value="~p ∨ ~q" spellcheck="false" autocomplete="off"></label>
+  </div>
+  <div class="lg-presets" id="pre2"></div>
+  <div class="lg-err" id="err2"></div>
+  <div class="card lg-table-wrap" id="tab2"></div>
+  <div class="lg-verdict" id="ver2"></div>
+</section>
+
+<script src="../../../_shared/logic.js?v=ca4a35c5"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const cell = (b, cls = '') => `<td class="${TF(b)} ${cls}">${TF(b)}</td>`;
+
+// Tombol simbol: menyisipkan ke kolom input yang terakhir disentuh (berguna di HP).
+let lastInput = $('e1');
+document.querySelectorAll('.field').forEach((f) => f.addEventListener('focus', () => (lastInput = f)));
+$('keys').innerHTML = ['~', '∧', '∨', '→', '↔', '⊕', '(', ')'].map((s) => `<button class="btn btn-sm" data-k="${s}">${s}</button>`).join('');
+document.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
+  const f = lastInput, s = f.selectionStart ?? f.value.length, e = f.selectionEnd ?? s, k = b.dataset.k;
+  const ins = /[∧∨→↔⊕]/.test(k) ? ` ${k} ` : k;
+  f.value = f.value.slice(0, s) + ins + f.value.slice(e);
+  f.focus(); f.selectionStart = f.selectionEnd = s + ins.length;
+  f.dispatchEvent(new Event('input'));
+}));
+
+/* ---------- 1. Truth table ---------- */
+const P1 = ['~(p ∧ q)', 'p → q', 'p ↔ q', 'p ⊕ q', 'p ∨ ~p', 'p ∧ ~p', '(p → q) ∧ (q → r) → (p → r)', '~(~p ∧ q) ∧ (p ∨ q)'];
+$('pre1').innerHTML = P1.map((p) => `<button class="btn btn-sm" data-p1="${esc(p)}">${esc(p)}</button>`).join('');
+document.querySelectorAll('[data-p1]').forEach((b) => (b.onclick = () => { $('e1').value = b.dataset.p1; table1(); }));
+
+function table1() {
+  $('err1').textContent = '';
+  let tree;
+  try { tree = parseLogic($('e1').value); } catch (e) { $('err1').textContent = e.message; $('tab1').innerHTML = ''; $('ver1').className = 'lg-verdict'; $('ver1').textContent = ''; return; }
+  const vars = logicVars(tree), steps = logicSteps(tree), rows = logicRows(vars);
+  const last = steps.length - 1;
+  const head = `<tr>${vars.map((v) => `<th class="var">${esc(v)}</th>`).join('')}${steps.map((s, i) => `<th class="${i === last ? 'final' : ''}">${esc(s.label)}</th>`).join('')}</tr>`;
+  const results = [];
+  const body = rows.map((env) => {
+    const vals = steps.map((s) => evalLogic(s.node, env));
+    results.push(vals[last] ?? evalLogic(tree, env));
+    return `<tr>${vars.map((v) => cell(env[v], 'var')).join('')}${vals.map((b, i) => cell(b, i === last ? 'final' : '')).join('')}</tr>`;
+  }).join('');
+  $('tab1').innerHTML = `<table class="lg-table">${head}${body}</table>`;
+  const all = results.every(Boolean), none = !results.some(Boolean);
+  $('ver1').className = 'lg-verdict ' + (all ? 'yes' : none ? 'no' : 'mid');
+  $('ver1').innerHTML = all ? '<b>Tautology</b>: selalu T di semua baris, apa pun nilai variabelnya.'
+    : none ? '<b>Contradiction</b>: selalu F di semua baris.'
+    : `<b>Contingency</b>: kadang T (${results.filter(Boolean).length} baris), kadang F (${results.filter((r) => !r).length} baris). ${vars.length} variabel → 2<sup>${vars.length}</sup> = ${rows.length} baris.`;
+}
+$('e1').oninput = table1;
+
+/* ---------- 2. Ekuivalensi ---------- */
+const P2 = [
+  ['De Morgan', '~(p ∧ q)', '~p ∨ ~q'],
+  ['De Morgan yang salah', '~(p ∧ q)', '~p ∧ ~q'],
+  ['→ sebagai ∨', 'p → q', '~p ∨ q'],
+  ['Negasi →', '~(p → q)', 'p ∧ ~q'],
+  ['Contrapositive', 'p → q', '~q → ~p'],
+  ['Converse', 'p → q', 'q → p'],
+  ['Converse vs inverse', 'q → p', '~p → ~q'],
+  ['↔ = dua arah', 'p ↔ q', '(p → q) ∧ (q → p)'],
+  ['Distributive', 'p ∧ (q ∨ r)', '(p ∧ q) ∨ (p ∧ r)'],
+  ['Absorption', 'p ∨ (p ∧ q)', 'p'],
+  ['Contoh slide', '~(~p ∧ q) ∧ (p ∨ q)', 'p'],
+];
+$('pre2').innerHTML = P2.map(([n, a, b], i) => `<button class="btn btn-sm" data-p2="${i}">${n}</button>`).join('');
+document.querySelectorAll('[data-p2]').forEach((b) => (b.onclick = () => { const [, x, y] = P2[b.dataset.p2]; $('a').value = x; $('b').value = y; table2(); }));
+
+function table2() {
+  $('err2').textContent = '';
+  let ta, tb;
+  try { ta = parseLogic($('a').value); } catch (e) { $('err2').textContent = 'Kiri: ' + e.message; return clear2(); }
+  try { tb = parseLogic($('b').value); } catch (e) { $('err2').textContent = 'Kanan: ' + e.message; return clear2(); }
+  const vars = logicVars(ta, tb), rows = logicRows(vars);
+  let firstBad = -1;
+  const body = rows.map((env, i) => {
+    const x = evalLogic(ta, env), y = evalLogic(tb, env), same = x === y;
+    if (!same && firstBad < 0) firstBad = i;
+    return `<tr class="${same ? '' : 'bad'}">${vars.map((v) => cell(env[v], 'var')).join('')}${cell(x, 'final')}${cell(y, 'final')}<td class="mark">${same ? 'sama' : 'BEDA'}</td></tr>`;
+  }).join('');
+  $('tab2').innerHTML = `<table class="lg-table"><tr>${vars.map((v) => `<th class="var">${esc(v)}</th>`).join('')}<th class="final">${esc(showLogic(ta))}</th><th class="final">${esc(showLogic(tb))}</th><th></th></tr>${body}</table>`;
+  if (firstBad < 0) {
+    $('ver2').className = 'lg-verdict yes';
+    $('ver2').innerHTML = `<b>Ekuivalen</b>: ${esc(showLogic(ta))} ≡ ${esc(showLogic(tb))}. Kedua kolom sama di semua ${rows.length} baris.`;
+  } else {
+    const env = rows[firstBad];
+    $('ver2').className = 'lg-verdict no';
+    $('ver2').innerHTML = `<b>Tidak ekuivalen</b>. Bukti: saat ${vars.map((v) => `${esc(v)} = ${TF(env[v])}`).join(', ')}, kiri = ${TF(evalLogic(ta, env))} tapi kanan = ${TF(evalLogic(tb, env))}. Satu baris berbeda sudah cukup.`;
+  }
+}
+function clear2() { $('tab2').innerHTML = ''; $('ver2').className = 'lg-verdict'; $('ver2').textContent = ''; }
+$('a').oninput = $('b').oninput = table2;
+
+table1(); table2();
+</script>
+</body>
+</html>

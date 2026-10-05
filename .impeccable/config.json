@@ -245,6 +245,132 @@
         ],
         "createdAt": "2026-10-05T16:34:09.814Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/01-logika-proposisi/notes.html"
+        ],
+        "createdAt": "2026-10-05T17:29:33.908Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/02-argumen-dan-inferensi/notes.html"
+        ],
+        "createdAt": "2026-10-05T17:29:34.172Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/03-rangkaian-logika-dan-kmap/notes.html"
+        ],
+        "createdAt": "2026-10-05T17:29:34.414Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/04-predikat-dan-kuantor/notes.html"
+        ],
+        "createdAt": "2026-10-05T17:29:34.653Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/notes.html"
+        ],
+        "createdAt": "2026-10-05T17:29:34.893Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/01-logika-proposisi/slides.html"
+        ],
+        "createdAt": "2026-10-05T17:29:35.139Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/02-argumen-dan-inferensi/slides.html"
+        ],
+        "createdAt": "2026-10-05T17:29:35.382Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/03-rangkaian-logika-dan-kmap/slides.html"
+        ],
+        "createdAt": "2026-10-05T17:29:35.620Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/04-predikat-dan-kuantor/slides.html"
+        ],
+        "createdAt": "2026-10-05T17:29:35.856Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/05-inferensi-kuantor-dan-pembuktian/slides.html"
+        ],
+        "createdAt": "2026-10-05T17:29:36.115Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/01-logika-proposisi/viz/tabel-kebenaran.html"
+        ],
+        "createdAt": "2026-10-05T17:29:36.352Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/02-argumen-dan-inferensi/viz/argumen.html"
+        ],
+        "createdAt": "2026-10-05T17:29:36.592Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/03-rangkaian-logika-dan-kmap/viz/kmap.html"
+        ],
+        "createdAt": "2026-10-05T17:29:36.845Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "discrete-mathematics/04-predikat-dan-kuantor/viz/kuantor.html"
+        ],
+        "createdAt": "2026-10-05T17:29:37.084Z",
+        "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
       }
     ]
   }

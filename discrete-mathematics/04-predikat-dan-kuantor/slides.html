@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Predikat dan Kuantor</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Predikat dan kuantor</h1>
+  <p>Discrete mathematics · ∀ adalah AND besar, ∃ adalah OR besar</p>
+</section>
+
+<section class="slide">
+  <h2>Predicate: kalimat dengan variabel</h2>
+  <div class="cols">
+    <div>
+      <p>P(x) = "x² &gt; x", domain ℝ</p>
+      <table>
+        <tr><th>x</th><th>P(x)</th></tr>
+        <tr><td>2</td><td>4 &gt; 2 → T</td></tr>
+        <tr><td>1/2</td><td>1/4 &gt; 1/2 → F</td></tr>
+      </table>
+    </div>
+    <ul>
+      <li>P(x) baru menjadi statement kalau x <b>diisi</b> atau diberi <b>kuantor</b>.</li>
+      <li><b>Truth set</b> = semua x yang membuat P(x) T.</li>
+      <li>Truth set bergantung pada <b>domain</b>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Dua kuantor</h2>
+  <table>
+    <tr><th></th><th><code>∀x ∈ D, P(x)</code></th><th><code>∃x ∈ D, P(x)</code></th></tr>
+    <tr><td>Dibaca</td><td>for all, every, any</td><td>there exists, some</td></tr>
+    <tr><td>Benar jika</td><td>P(x) T untuk <b>setiap</b> x</td><td>P(x) T untuk <b>minimal satu</b> x</td></tr>
+    <tr><td>Salah jika</td><td>Ada <b>satu counterexample</b></td><td>P(x) F untuk semua x</td></tr>
+  </table>
+  <p><code>∀x ∈ ℝ, x² ≥ x</code> salah (x = 1/2). <code>∃m ∈ ℤ, m² = m</code> benar (witness m = 1).</p>
+</section>
+
+<section class="slide">
+  <h2>∀ = AND besar, ∃ = OR besar = loop</h2>
+  <div class="cols">
+<pre><code>// ∀: cari satu yang gagal
+int semua = 1;
+for (i = 0; i &lt; n; i++)
+    if (!P(D[i])) { semua = 0; break; }</code></pre>
+<pre><code>// ∃: cari satu yang berhasil
+int ada = 0;
+for (i = 0; i &lt; n; i++)
+    if (P(D[i])) { ada = 1; break; }</code></pre>
+  </div>
+  <p><code>∀x P(x) ≡ P(x₁) ∧ P(x₂) ∧ …</code> dan <code>∃x P(x) ≡ P(x₁) ∨ P(x₂) ∨ …</code></p>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: playground kuantor</h2>
+  <iframe src="viz/kuantor.html" title="Playground kuantor satu dan dua variabel"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Menerjemahkan: ∀ dengan →, ∃ dengan ∧</h2>
+  <table>
+    <tr><th>Kalimat</th><th>Benar</th><th>Salah</th></tr>
+    <tr><td>Semua kucing mengeong</td><td><code>∀x, K(x) → M(x)</code></td><td><code>∀x, K(x) ∧ M(x)</code></td></tr>
+    <tr><td>Ada kucing hitam</td><td><code>∃x, K(x) ∧ H(x)</code></td><td><code>∃x, K(x) → H(x)</code></td></tr>
+    <tr><td>Tidak ada anjing bersayap</td><td><code>∀x, A(x) → ~S(x)</code></td><td></td></tr>
+  </table>
+  <p class="label">Bentuk <code>∀x, P(x) → Q(x)</code> disebut <b>universal conditional</b>.</p>
+</section>
+
+<section class="slide">
+  <h2>Negasi: balik kuantor, negasikan predikat</h2>
+<pre><code>~(∀x, P(x))        ≡  ∃x, ~P(x)
+~(∃x, P(x))        ≡  ∀x, ~P(x)
+~(∀x, P(x) → Q(x)) ≡  ∃x, P(x) ∧ ~Q(x)</code></pre>
+  <table>
+    <tr><th>Pernyataan</th><th>Negasi</th></tr>
+    <tr><td>Semua bilangan prima ganjil.</td><td>Ada bilangan prima yang tidak ganjil.</td></tr>
+    <tr><td>Tidak ada politisi yang jujur.</td><td>Ada politisi yang jujur.</td></tr>
+    <tr><td>Semua orang pirang bermata biru.</td><td>Ada orang pirang yang tidak bermata biru.</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Universal conditional dan variannya</h2>
+  <table>
+    <tr><th>Varian</th><th>Bentuk</th><th>Nilai</th></tr>
+    <tr><td>Asli</td><td><code>∀x ∈ ℝ, x &gt; 2 → x² &gt; 4</code></td><td>T</td></tr>
+    <tr><td>Contrapositive</td><td><code>∀x, x² ≤ 4 → x ≤ 2</code></td><td>T</td></tr>
+    <tr><td>Converse</td><td><code>∀x, x² &gt; 4 → x &gt; 2</code></td><td>F (x = −3)</td></tr>
+    <tr><td>Inverse</td><td><code>∀x, x ≤ 2 → x² ≤ 4</code></td><td>F (x = −3)</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Dua kuantor: urutan mengubah arti</h2>
+  <table>
+    <tr><th>Bentuk</th><th>Di tabel (baris x, kolom y)</th></tr>
+    <tr><td><code>∀x ∀y</code></td><td>Semua sel ✓</td></tr>
+    <tr><td><code>∃x ∃y</code></td><td>Minimal satu sel ✓</td></tr>
+    <tr><td><code>∀x ∃y</code></td><td><b>Setiap baris</b> punya ✓ (y boleh berbeda)</td></tr>
+    <tr><td><code>∃x ∀y</code></td><td><b>Ada satu baris</b> yang semuanya ✓</td></tr>
+  </table>
+  <p>X = {9, 10, 15}, Y = {2, 3}, "y membagi x": <code>∀x ∃y</code> <b>T</b>, tapi <code>∃y ∀x</code> <b>F</b>.</p>
+</section>
+
+<section class="slide">
+  <h2>Kafetaria</h2>
+  <p class="label">Uta: green salad, spaghetti, pie, milk · Tim: fruit salad, fish, pie, cake, milk, coffee · Yuen: spaghetti, fish, pie, soda</p>
+  <table>
+    <tr><th>Pernyataan</th><th>Nilai</th></tr>
+    <tr><td>∃ item ∀ mahasiswa memilihnya</td><td>T (pie)</td></tr>
+    <tr><td>∃ mahasiswa ∀ item dipilihnya</td><td>F</td></tr>
+    <tr><td>∃ mahasiswa ∀ station ∃ item di station itu yang dipilihnya</td><td>T (Uta, Tim)</td></tr>
+    <tr><td>∀ mahasiswa ∀ station ∃ item di station itu yang dipilihnya</td><td>F (Yuen, salad)</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>∀ = AND besar (satu counterexample cukup untuk menyangkal). ∃ = OR besar (satu witness cukup).</li>
+    <li>∀ berpasangan dengan →, ∃ berpasangan dengan ∧.</li>
+    <li>Negasi: balik setiap kuantor, lalu negasikan predikatnya.</li>
+    <li>Urutan dua kuantor penting: <code>∀x ∃y ≠ ∃y ∀x</code>.</li>
+  </ul>
+  <p class="label">Latihan (xyz = 1, negasi, email, bilangan prima) ada di notes.</p>
+</section>
+
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

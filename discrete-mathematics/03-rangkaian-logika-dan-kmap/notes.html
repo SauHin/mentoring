@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rangkaian Logika dan K-map · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+  <style>
+    .gate { width: 92px; height: 44px; vertical-align: middle; }
+    .gate .body { fill: var(--card-2); stroke: var(--ink-2); stroke-width: 1.6; }
+    .gate .wire { stroke: var(--ink-2); stroke-width: 1.6; fill: none; }
+    .ov { text-decoration: overline; display: inline-block; margin: 0 0.06em; }
+  </style>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Discrete mathematics · 03</span>
+<h1>Rangkaian logika dan K-map</h1>
+<p class="lead">Rangkaian digital hanyalah logika proposisi dengan nama lain: T jadi <b>1</b>, F jadi <b>0</b>, dan connective jadi <b>gerbang</b>. Satu fungsi bisa ditulis dalam tiga bentuk: <b>rangkaian, ekspresi Boolean, dan tabel input/output</b>.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/kmap.html">Visualisasi: K-map interaktif</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>NOT, AND, OR = <code>~</code>, <code>∧</code>, <code>∨</code>. NAND = NOT dari AND, NOR = NOT dari OR.</li>
+    <li>Tabel → ekspresi: buat <b>satu suku AND untuk setiap baris bernilai 1</b>, lalu gabung dengan OR (<b>disjunctive normal form</b>).</li>
+    <li>Menyederhanakan: <code>xy + x<span class="ov">y</span> = x</code>. K-map menyusun tabel supaya pasangan seperti ini <b>bertetangga</b>.</li>
+    <li>Grup di K-map berbentuk persegi panjang berisi 1, 2, 4, 8 sel, boleh menyambung lewat tepi. Buat grup <b>sebesar</b> dan <b>sesedikit</b> mungkin.</li>
+  </ul>
+</div>
+
+<h2>1. Dari saklar ke logika</h2>
+<pre><code>Seri (berderet):     ──[P]──[Q]──(lampu)    menyala jika P DAN Q tertutup  → P ∧ Q
+Paralel (bercabang): ──┬─[P]─┬──(lampu)    menyala jika P ATAU Q tertutup → P ∨ Q
+                       └─[Q]─┘</code></pre>
+<p>Saklar tertutup = 1, terbuka = 0. Lampu menyala = 1. Dari sinilah logika dipakai untuk merancang rangkaian.</p>
+
+<h2>2. Gerbang logika</h2>
+<table>
+  <tr><th>Simbol</th><th>Gerbang</th><th>Output 1 jika …</th><th>Ekspresi</th></tr>
+  <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 22H22M68 22H92"/><path class="body" d="M22 6L58 22L22 38Z"/><circle class="body" cx="63" cy="22" r="5"/></svg></td><td><b>NOT</b></td><td>input 0</td><td><code>~P</code></td></tr>
+  <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H24M0 30H24M64 22H92"/><path class="body" d="M24 6H44A16 16 0 0 1 44 38H24Z"/></svg></td><td><b>AND</b></td><td>semua input 1</td><td><code>P ∧ Q</code></td></tr>
+  <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H27M0 30H27M64 22H92"/><path class="body" d="M20 6Q32 22 20 38Q48 38 64 22Q48 6 20 6Z"/></svg></td><td><b>OR</b></td><td>minimal satu input 1</td><td><code>P ∨ Q</code></td></tr>
+  <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H24M0 30H24M70 22H92"/><path class="body" d="M24 6H44A16 16 0 0 1 44 38H24Z"/><circle class="body" cx="65" cy="22" r="5"/></svg></td><td><b>NAND</b></td><td>tidak semua input 1</td><td><code>~(P ∧ Q)</code></td></tr>
+  <tr><td><svg class="gate" viewBox="0 0 92 44"><path class="wire" d="M0 14H27M0 30H27M70 22H92"/><path class="body" d="M20 6Q32 22 20 38Q48 38 64 22Q48 6 20 6Z"/><circle class="body" cx="69" cy="22" r="5"/></svg></td><td><b>NOR</b></td><td>semua input 0</td><td><code>~(P ∨ Q)</code></td></tr>
+</table>
+<p>Lingkaran kecil di ujung gerbang selalu berarti <b>NOT</b>. Di rangkaian, notasi yang sering dipakai: <code><span class="ov">x</span></code> atau <code>x'</code> = NOT x, <code>xy</code> = x AND y, <code>x + y</code> = x OR y.</p>
+
+<h2>3. Rangkaian → tabel → ekspresi</h2>
+<p>Cara membaca rangkaian: <b>beri nama setiap kabel</b> keluaran gerbang, dari kiri ke kanan. Contoh slide:</p>
+<pre><code>P, Q ──[OR]──── a = P ∨ Q
+P, Q ──[AND]─── b = P ∧ Q
+b ─────[NOT]─── c = ~(P ∧ Q)
+a, c ──[AND]─── output = (P ∨ Q) ∧ ~(P ∧ Q)</code></pre>
+<table>
+  <tr><th>P</th><th>Q</th><th>P ∨ Q</th><th>~(P ∧ Q)</th><th>output</th></tr>
+  <tr><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+  <tr><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+  <tr><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+  <tr><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+</table>
+<p>Output 1 hanya kalau tepat satu input 1: ini <b>exclusive or</b> (P ⊕ Q). Arah sebaliknya (ekspresi → rangkaian) caranya sama: kerjakan dari dalam ke luar, dan setiap operator menjadi satu gerbang.</p>
+
+<h2>4. Tabel → ekspresi: disjunctive normal form</h2>
+<p>Kalau yang diketahui hanya tabel input/output, ekspresinya bisa <b>diturunkan</b> dengan dua langkah:</p>
+<ol>
+  <li>Untuk setiap baris yang output-nya <b>1</b>, buat satu suku AND yang <b>hanya</b> bernilai 1 di baris itu. Variabel bernilai 1 ditulis apa adanya, variabel bernilai 0 diberi NOT.</li>
+  <li>Gabungkan semua suku itu dengan OR. Output 1 kalau salah satu baris tersebut terjadi.</li>
+</ol>
+<p>Contoh slide: output 1 di baris PQR = 111, 101, dan 100.</p>
+<pre><code>111 → P ∧ Q ∧ R
+101 → P ∧ ~Q ∧ R
+100 → P ∧ ~Q ∧ ~R
+output = (P ∧ Q ∧ R) ∨ (P ∧ ~Q ∧ R) ∨ (P ∧ ~Q ∧ ~R)</code></pre>
+<p>Bentuk ini disebut <b>disjunctive normal form</b> atau <b>sum of products</b>. Selalu benar, tapi sering terlalu panjang: di sini butuh 3 gerbang AND berinput tiga, 1 gerbang OR, dan beberapa NOT.</p>
+
+<h2>5. Menyederhanakan: ide di balik K-map</h2>
+<p>Dua suku yang <b>hanya berbeda di satu variabel</b> bisa digabung:</p>
+<pre><code>(P ∧ Q ∧ R) ∨ (P ∧ ~Q ∧ R) = (P ∧ R) ∧ (Q ∨ ~Q) = P ∧ R</code></pre>
+<p>Q boleh 0 atau 1, hasilnya tetap 1, jadi Q tidak berpengaruh dan bisa dibuang. <b>Karnaugh map</b> menyusun truth table menjadi kotak-kotak, sehingga suku yang berbeda satu variabel selalu <b>bersebelahan</b>. Penggabungan jadi bisa dilihat langsung dengan mata.</p>
+<pre><code>K-map 3 variabel (urutan kolom: yz, yz̄, ȳz̄, ȳz)
+
+        yz   yz̄   ȳz̄   ȳz
+   x  [   ][   ][   ][   ]
+   x̄  [   ][   ][   ][   ]</code></pre>
+<p>Kolom diurutkan <b>11, 10, 00, 01</b> (Gray code), bukan 00, 01, 10, 11. Dengan urutan ini, setiap dua kolom yang bertetangga hanya berbeda satu variabel, termasuk kolom paling kiri dan paling kanan.</p>
+
+<h3>Aturan membuat grup</h3>
+<ul>
+  <li>Grup = persegi panjang berisi <b>1, 2, 4, atau 8</b> sel bernilai 1 (pangkat dua). Bukan 3 atau 6, dan bukan diagonal.</li>
+  <li>Grup boleh <b>menyambung lewat tepi</b> (kiri ↔ kanan, atas ↔ bawah), dan boleh saling tumpang tindih.</li>
+  <li>Buat grup <b>sebesar mungkin</b> (lebih sedikit variabel) dan <b>sesedikit mungkin</b> (lebih sedikit suku), sampai semua 1 tertutup.</li>
+  <li>Satu grup → satu suku: ambil variabel yang nilainya <b>tetap</b> di seluruh grup. Variabel yang berubah dibuang.</li>
+</ul>
+<h3>Contoh: hasil disjunctive normal form di atas</h3>
+<p>Dengan x = P, y = Q, z = R, sel bernilai 1 adalah xyz, x<span class="ov">y</span>z, dan x<span class="ov">y</span><span class="ov">z</span>. Grup pertama {xyz, x<span class="ov">y</span>z}: y berubah, jadi sukunya <b>xz</b>. Grup kedua {x<span class="ov">y</span>z, x<span class="ov">y</span><span class="ov">z</span>}: z berubah, jadi sukunya <b>x<span class="ov">y</span></b>.</p>
+<pre><code>output = xz + xȳ = (P ∧ R) ∨ (P ∧ ~Q)</code></pre>
+<p>Dari 3 suku AND berinput tiga menjadi 2 suku AND berinput dua. Rangkaiannya lebih kecil dan lebih murah, tapi fungsinya sama persis. Coba di <a href="viz/kmap.html">visualisasi</a> (preset "Contoh slide: tabel → DNF").</p>
+
+<h3>K-map 2 dan 4 variabel</h3>
+<pre><code>2 variabel:          4 variabel (baris wx, kolom yz):
+      y   ȳ                  yz   yz̄   ȳz̄   ȳz
+  x [  ][  ]           wx  [   ][   ][   ][   ]
+  x̄ [  ][  ]           wx̄  [   ][   ][   ][   ]
+                       w̄x̄  [   ][   ][   ][   ]
+                       w̄x  [   ][   ][   ][   ]</code></pre>
+<p>Di 4 variabel, baris juga memakai Gray code, jadi baris atas dan bawah bertetangga. Akibatnya <b>empat sudut</b> pun satu grup.</p>
+
+<h2>6. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Kenapa salah</th></tr>
+  <tr><td>Kolom diurutkan 00, 01, 10, 11</td><td>01 dan 10 berbeda dua variabel. Harus Gray code: 11, 10, 00, 01 (atau 00, 01, 11, 10)</td></tr>
+  <tr><td>Grup berisi 3 atau 6 sel</td><td>Hanya pangkat dua yang bisa disederhanakan menjadi satu suku</td></tr>
+  <tr><td>Grup diagonal</td><td>Sel diagonal berbeda dua variabel</td></tr>
+  <tr><td>Lupa tepi menyambung</td><td>Kolom kiri dan kanan bertetangga, begitu juga baris atas dan bawah</td></tr>
+  <tr><td>Grup terlalu kecil</td><td>Hasilnya tetap benar, tapi tidak paling sederhana</td></tr>
+  <tr><td>Suku DNF ditulis untuk baris bernilai 0</td><td>DNF memakai baris bernilai <b>1</b></td></tr>
+</table>
+
+<h2>7. Latihan</h2>
+<p>Cek jawaban K-map di <a href="viz/kmap.html">visualisasi</a>: klik sel-sel bernilai 1, lalu bandingkan grupmu dengan hasilnya.</p>
+
+<p><b>1.</b> Tulis ekspresi dan tabel untuk rangkaian NAND yang kedua input-nya disambung ke kabel yang sama (P).</p>
+<details><summary>Jawaban</summary><p><code>~(P ∧ P) ≡ ~P</code> (idempotent). Jadi NAND dengan input disatukan = <b>NOT</b>. NAND bisa membangun semua gerbang lain, karena itu disebut gerbang universal.</p></details>
+
+<p><b>2.</b> Output 1 hanya di baris PQ = 10 dan 01. Tulis disjunctive normal form-nya.</p>
+<details><summary>Jawaban</summary><p><code>(P ∧ ~Q) ∨ (~P ∧ Q)</code>: exclusive or, bentuk lain dari <code>(P ∨ Q) ∧ ~(P ∧ Q)</code>.</p></details>
+
+<p><b>3.</b> Sederhanakan <code>xyz̄ + xȳz̄ + x̄yz + x̄ȳz̄</code> dengan K-map.</p>
+<details><summary>Jawaban</summary><p><code>xz̄ + ȳz̄ + x̄yz</code>. Sel x̄yz tidak punya tetangga bernilai 1, jadi tetap sendirian. Dua grup lainnya masing-masing berisi 2 sel.</p></details>
+
+<p><b>4.</b> Sederhanakan <code>xȳz + xȳz̄ + x̄yz + x̄ȳz + x̄ȳz̄</code>.</p>
+<details><summary>Jawaban</summary><p><code>ȳ + x̄z</code>. Empat sel dengan ȳ membentuk satu grup 4, jadi x dan z hilang. Sel x̄yz bergabung dengan x̄ȳz menjadi x̄z.</p></details>
+
+<p><b>5.</b> Di K-map 4 variabel, keempat sudut bernilai 1 dan sisanya 0. Apa hasilnya?</p>
+<details><summary>Jawaban</summary><p>Dengan susunan seperti di atas, keempat sudut adalah wxyz, wxȳz, w̄xyz, w̄xȳz. Di antara keempatnya, x dan z tetap (= 1), sedangkan w dan y berubah. Hasilnya <b>xz</b>: satu grup 4 yang menyambung lewat dua tepi sekaligus.</p></details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Epp, S. S. (2020). <i>Discrete Mathematics with Applications</i> (5th ed.). Cengage. Bab 2.4: Application: digital logic circuits.</li>
+  <li>Rosen, K. H. (2019). <i>Discrete Mathematics and Its Applications</i> (8th ed.). McGraw-Hill Education. Bab 12.3–12.4: Logic gates; Minimization of circuits.</li>
+</ol>
+
+</article>
+</body>
+</html>

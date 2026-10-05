@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Argumen dan Inferensi · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Discrete mathematics · 02</span>
+<h1>Argumen dan aturan inferensi</h1>
+<p class="lead">Kapan sebuah kesimpulan <b>pasti</b> mengikuti dari premise-nya? Jawabannya selalu bisa dicek dengan satu cara: cari baris yang premise-nya T semua.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/argumen.html">Visualisasi: cek validitas argumen</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Argumen <b>valid</b> = setiap baris yang semua premise-nya T (<b>critical row</b>) punya conclusion T.</li>
+    <li>Valid itu soal <b>bentuk</b>, bukan soal isi benar atau tidak.</li>
+    <li>Aturan inferensi (modus ponens, modus tollens, …) adalah argumen kecil yang sudah terbukti valid. Gabungkan untuk deduksi panjang.</li>
+    <li>Dua jebakan klasik: <b>converse error</b> dan <b>inverse error</b>.</li>
+  </ul>
+</div>
+
+<h2>1. Argumen dan bentuk argumen</h2>
+<p><b>Argumen</b> = beberapa <b>premise</b> diikuti satu <b>conclusion</b> (ditandai <code>∴</code>, "jadi").</p>
+<pre><code>Jika Socrates manusia, maka Socrates fana.    p → q
+Socrates manusia.                             p
+∴ Socrates fana.                              ∴ q</code></pre>
+<p>Ganti kalimatnya dengan variabel, maka didapat <b>bentuk argumen</b>. Validitas hanya bergantung pada bentuk ini. Argumen lain dengan bentuk yang sama, misalnya "Jika hujan maka basah. Hujan. ∴ Basah", otomatis juga valid.</p>
+
+<h2>2. Cara mengecek validitas: critical row</h2>
+<ol>
+  <li>Tentukan premise dan conclusion.</li>
+  <li>Buat truth table yang berisi semua premise dan conclusion.</li>
+  <li>Tandai <b>critical row</b>: baris yang <b>semua</b> premise-nya T.</li>
+  <li>Kalau di <b>setiap</b> critical row conclusion-nya T → <b>valid</b>. Kalau ada <b>satu saja</b> critical row dengan conclusion F → <b>tidak valid</b>.</li>
+</ol>
+<p>Kenapa begitu? Valid artinya "premise benar <b>tidak mungkin</b> menghasilkan conclusion salah". Critical row dengan conclusion F adalah keadaan yang membuktikan hal itu mungkin terjadi.</p>
+<h3>Contoh tidak valid</h3>
+<pre><code>p → q ∨ ~r
+q → p ∧ r
+∴ p → r</code></pre>
+<table>
+  <tr><th>p</th><th>q</th><th>r</th><th>p → q ∨ ~r</th><th>q → p ∧ r</th><th>p → r</th><th></th></tr>
+  <tr><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td><td>critical ✓</td></tr>
+  <tr><td>T</td><td>F</td><td>F</td><td>T</td><td>T</td><td><b>F</b></td><td><b>critical, conclusion F ✗</b></td></tr>
+  <tr><td colspan="7" class="label">… baris lain: ada premise yang F, atau critical dengan conclusion T</td></tr>
+</table>
+<p>Baris p = T, q = F, r = F membuat kedua premise T tapi conclusion F, jadi argumennya <b>tidak valid</b>. Lihat tabel lengkapnya di <a href="viz/argumen.html">visualisasi</a> (preset "Contoh tidak valid").</p>
+<div class="callout"><strong>Valid ≠ benar</strong>"Jika bulan terbuat dari keju, maka aku presiden. Bulan terbuat dari keju. ∴ Aku presiden." Bentuknya modus ponens, jadi <b>valid</b>, walaupun premise dan conclusion-nya salah. Argumen yang valid <b>dan</b> premise-nya benar disebut <b>sound</b>. Hanya argumen sound yang menjamin conclusion benar.</div>
+
+<h2>3. Aturan inferensi: argumen kecil yang sudah pasti valid</h2>
+<p>Setiap aturan di bawah bisa kamu cek sendiri di <a href="viz/argumen.html">visualisasi</a>. Pahami <b>kenapa</b>-nya, maka namanya mudah diingat.</p>
+<table>
+  <tr><th>Nama</th><th>Bentuk</th><th>Kenapa valid</th></tr>
+  <tr><td><b>Modus ponens</b></td><td><code>p → q; p ∴ q</code></td><td>Janji p → q, dan p terjadi, maka q harus terjadi</td></tr>
+  <tr><td><b>Modus tollens</b></td><td><code>p → q; ~q ∴ ~p</code></td><td>Kalau p terjadi, q pasti terjadi. q tidak terjadi, jadi p tidak mungkin terjadi</td></tr>
+  <tr><td>Generalization</td><td><code>p ∴ p ∨ q</code></td><td>Kalau p T, "p atau apa pun" juga T</td></tr>
+  <tr><td>Specialization</td><td><code>p ∧ q ∴ p</code></td><td>Kalau keduanya T, salah satunya pasti T</td></tr>
+  <tr><td>Conjunction</td><td><code>p; q ∴ p ∧ q</code></td><td>Dua-duanya diketahui T</td></tr>
+  <tr><td>Elimination</td><td><code>p ∨ q; ~q ∴ p</code></td><td>Minimal satu T, dan q bukan, jadi pasti p</td></tr>
+  <tr><td>Transitivity</td><td><code>p → q; q → r ∴ p → r</code></td><td>Rantai janji</td></tr>
+  <tr><td>Division into cases</td><td><code>p ∨ q; p → r; q → r ∴ r</code></td><td>Kasus mana pun yang terjadi, r tetap terjadi</td></tr>
+  <tr><td>Contradiction rule</td><td><code>~p → c ∴ p</code></td><td>Kalau menganggap p salah menghasilkan kontradiksi, p pasti benar</td></tr>
+</table>
+
+<h2>4. Dua jebakan klasik</h2>
+<table>
+  <tr><th>Nama</th><th>Bentuk (TIDAK valid)</th><th>Contoh yang menipu</th><th>Critical row yang membongkar</th></tr>
+  <tr><td><b>Converse error</b></td><td><code>p → q; q ∴ p</code></td><td>Jika hujan, jalan basah. Jalan basah. ∴ Hujan.</td><td>p = F, q = T: jalan basah karena disiram, bukan hujan</td></tr>
+  <tr><td><b>Inverse error</b></td><td><code>p → q; ~p ∴ ~q</code></td><td>Jika hujan, jalan basah. Tidak hujan. ∴ Jalan tidak basah.</td><td>p = F, q = T: baris yang sama</td></tr>
+</table>
+<p>Keduanya salah karena menganggap <code>p → q</code> berlaku dua arah. Ingat materi 01: converse dan inverse <b>tidak</b> ekuivalen dengan aslinya.</p>
+
+<h2>5. Deduksi berantai: di mana kacamatanya?</h2>
+<p>Contoh dari slide. Pagi ini kacamatamu hilang, dan semua pernyataan ini benar:</p>
+<table>
+  <tr><th></th><th>Pernyataan</th><th>Simbol</th></tr>
+  <tr><td>a</td><td>Kalau aku membaca koran di dapur, kacamataku di meja dapur.</td><td><code>RK → GK</code></td></tr>
+  <tr><td>b</td><td>Kalau kacamataku di meja dapur, aku melihatnya saat sarapan.</td><td><code>GK → SB</code></td></tr>
+  <tr><td>c</td><td>Aku tidak melihat kacamataku saat sarapan.</td><td><code>~SB</code></td></tr>
+  <tr><td>d</td><td>Aku membaca koran di ruang tamu atau di dapur.</td><td><code>RL ∨ RK</code></td></tr>
+  <tr><td>e</td><td>Kalau aku membaca koran di ruang tamu, kacamataku di meja kopi.</td><td><code>RL → GC</code></td></tr>
+</table>
+<pre><code>1. RK → GK   (a)
+   GK → SB   (b)
+   ∴ RK → SB            transitivity
+2. RK → SB   (langkah 1)
+   ~SB       (c)
+   ∴ ~RK                modus tollens
+3. RL ∨ RK   (d)
+   ~RK       (langkah 2)
+   ∴ RL                 elimination
+4. RL → GC   (e)
+   RL        (langkah 3)
+   ∴ GC                 modus ponens</code></pre>
+<p><b>Kacamatanya di meja kopi.</b> Setiap langkah memakai satu aturan dari tabel di atas. Cara berpikirnya: mulai dari yang pasti (c), lalu cari aturan yang bisa "memakan" fakta itu.</p>
+<div class="callout"><strong>Catatan: slide "The conclusion"</strong>Di slide tertulis <code>GK → SB by (d)</code>. Yang tepat adalah <b>(b)</b>. Pernyataan (d) adalah <code>RL ∨ RK</code>, yang baru dipakai di langkah 3.</div>
+<p>Kelima premise dan conclusion GC bisa dicek sekaligus di <a href="viz/argumen.html">visualisasi</a> (preset "Di mana kacamatanya?"). Hasilnya valid.</p>
+
+<h2>6. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Kenapa salah</th></tr>
+  <tr><td>Menganggap argumen tidak valid karena conclusion-nya salah di dunia nyata</td><td>Validitas soal bentuk. Cek critical row, bukan fakta.</td></tr>
+  <tr><td>Mengecek semua baris, bukan hanya critical row</td><td>Baris dengan premise F tidak relevan: di sana tidak ada yang dijanjikan.</td></tr>
+  <tr><td>Converse error / inverse error</td><td><code>p → q</code> tidak berlaku ke arah sebaliknya</td></tr>
+  <tr><td>Satu critical row conclusion-nya T, lalu disimpulkan valid</td><td><b>Semua</b> critical row harus T</td></tr>
+</table>
+
+<h2>7. Latihan</h2>
+
+<p><b>1.</b> Valid atau tidak? <code>p ∨ q; p → ~q; p → r ∴ r</code></p>
+<details><summary>Jawaban</summary><p><b>Tidak valid.</b> Critical row p = F, q = T, r = F: <code>p ∨ q</code> = T, dan kedua conditional vacuously true karena p F. Tapi conclusion r = F. Masalahnya, argumen ini tidak punya premise <code>q → r</code>.</p></details>
+
+<p><b>2.</b> Tentukan bentuk dan validitasnya: "Jika aku belajar, aku lulus. Aku tidak lulus. ∴ Aku tidak belajar."</p>
+<details><summary>Jawaban</summary><p><code>p → q; ~q ∴ ~p</code>: <b>modus tollens</b>, valid.</p></details>
+
+<p><b>3.</b> Tentukan bentuk dan validitasnya: "Jika program ada bug, test gagal. Test gagal. ∴ Program ada bug."</p>
+<details><summary>Jawaban</summary><p><code>p → q; q ∴ p</code>: <b>converse error</b>, tidak valid. Test bisa gagal karena test-nya sendiri yang salah.</p></details>
+
+<p><b>4.</b> Dari premise <code>p → q</code>, <code>r → s</code>, <code>p ∨ r</code>, tunjukkan bahwa <code>q ∨ s</code> mengikuti.</p>
+<details><summary>Jawaban</summary>
+<p>Pakai <b>division into cases</b> pada <code>p ∨ r</code>.</p>
+<pre><code>Kasus p: p → q dan p  ∴ q (modus ponens)  ∴ q ∨ s (generalization)
+Kasus r: r → s dan r  ∴ s (modus ponens)  ∴ q ∨ s (generalization)
+Kedua kasus menghasilkan q ∨ s  ∴ q ∨ s</code></pre>
+</details>
+
+<p><b>5.</b> Kenapa <code>(p → q) ∧ (q → r) → (p → r)</code> adalah tautology, dan apa hubungannya dengan transitivity?</p>
+<details><summary>Jawaban</summary><p>Argumen <code>P1; P2 ∴ C</code> valid persis ketika <code>(P1 ∧ P2) → C</code> adalah tautology: tidak pernah ada baris dengan premise T dan conclusion F. Jadi setiap aturan inferensi juga bisa ditulis sebagai satu tautology. Cek di <a href="../01-logika-proposisi/viz/tabel-kebenaran.html">visualisasi materi 01</a>.</p></details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Epp, S. S. (2020). <i>Discrete Mathematics with Applications</i> (5th ed.). Cengage. Bab 2.3: Valid and invalid arguments.</li>
+  <li>Rosen, K. H. (2019). <i>Discrete Mathematics and Its Applications</i> (8th ed.). McGraw-Hill Education. Bab 1.6: Rules of inference.</li>
+</ol>
+
+</article>
+</body>
+</html>

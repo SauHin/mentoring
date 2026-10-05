@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cek Validitas Argumen</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .ar-grid { display: grid; gap: 12px; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+    @media (max-width: 700px) { .ar-grid { grid-template-columns: minmax(0, 1fr); } }
+    .ar-grid textarea { width: 100%; font-family: var(--mono); font-size: 1.02rem; resize: vertical; }
+  </style>
+</head>
+<body class="viz">
+
+<h1>Cek validitas argumen</h1>
+<p>Argumen <b>valid</b> kalau <b>setiap</b> baris yang semua premise-nya T (<b>critical row</b>) juga punya conclusion T. Cukup satu critical row dengan conclusion F, argumennya tidak valid.</p>
+
+<div class="lg-presets" id="presets"></div>
+
+<div class="controls ar-grid">
+  <label class="lg-input">Premise (satu per baris)<textarea class="field" id="prem" rows="4" spellcheck="false"></textarea></label>
+  <label class="lg-input">Conclusion (∴)<input class="field" id="conc" spellcheck="false" autocomplete="off"></label>
+</div>
+<div class="controls lg-keys" id="keys"></div>
+<div class="lg-err" id="err"></div>
+<div class="card lg-table-wrap" id="tab"></div>
+<div class="lg-verdict" id="ver"></div>
+
+<script src="../../../_shared/logic.js?v=ca4a35c5"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const cell = (b, cls = '') => `<td class="${TF(b)} ${cls}">${TF(b)}</td>`;
+
+const PRESETS = [
+  ['Modus ponens', ['p → q', 'p'], 'q'],
+  ['Modus tollens', ['p → q', '~q'], '~p'],
+  ['Converse error', ['p → q', 'q'], 'p'],
+  ['Inverse error', ['p → q', '~p'], '~q'],
+  ['Generalization', ['p'], 'p ∨ q'],
+  ['Specialization', ['p ∧ q'], 'p'],
+  ['Elimination', ['p ∨ q', '~q'], 'p'],
+  ['Transitivity', ['p → q', 'q → r'], 'p → r'],
+  ['Division into cases', ['p ∨ q', 'p → r', 'q → r'], 'r'],
+  ['Contoh tidak valid', ['p → q ∨ ~r', 'q → p ∧ r'], 'p → r'],
+  ['Contoh valid', ['p ∨ (q ∨ r)', '~r'], 'p ∨ q'],
+  ['Di mana kacamatanya?', ['RK → GK', 'GK → SB', '~SB', 'RL ∨ RK', 'RL → GC'], 'GC'],
+];
+$('presets').innerHTML = PRESETS.map(([n], i) => `<button class="btn btn-sm" data-i="${i}">${n}</button>`).join('');
+document.querySelectorAll('[data-i]').forEach((b) => (b.onclick = () => load(PRESETS[b.dataset.i])));
+function load([, prem, conc]) { $('prem').value = prem.join('\n'); $('conc').value = conc; check(); }
+
+let lastInput = $('prem');
+[$('prem'), $('conc')].forEach((f) => f.addEventListener('focus', () => (lastInput = f)));
+$('keys').innerHTML = ['~', '∧', '∨', '→', '↔', '(', ')'].map((s) => `<button class="btn btn-sm" data-k="${s}">${s}</button>`).join('');
+document.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
+  const f = lastInput, s = f.selectionStart ?? f.value.length, e = f.selectionEnd ?? s, k = b.dataset.k;
+  const ins = /[∧∨→↔]/.test(k) ? ` ${k} ` : k;
+  f.value = f.value.slice(0, s) + ins + f.value.slice(e);
+  f.focus(); f.selectionStart = f.selectionEnd = s + ins.length;
+  check();
+}));
+
+function check() {
+  $('err').textContent = '';
+  const lines = $('prem').value.split('\n').map((l) => l.trim()).filter(Boolean);
+  let prem, conc;
+  try { prem = lines.map((l, i) => { try { return parseLogic(l); } catch (e) { throw new Error(`Premise ${i + 1}: ${e.message}`); } }); conc = parseLogic($('conc').value); }
+  catch (e) { $('err').textContent = e.message.startsWith('Premise') ? e.message : 'Conclusion: ' + e.message; $('tab').innerHTML = ''; $('ver').className = 'lg-verdict'; $('ver').textContent = ''; return; }
+  if (!prem.length) { $('err').textContent = 'Isi minimal satu premise.'; return; }
+
+  const vars = logicVars(...prem, conc), rows = logicRows(vars);
+  let critical = 0, bad = null;
+  const body = rows.map((env) => {
+    const pv = prem.map((p) => evalLogic(p, env)), cv = evalLogic(conc, env);
+    const crit = pv.every(Boolean);
+    if (crit) critical++;
+    if (crit && !cv && !bad) bad = env;
+    const cls = crit ? (cv ? 'crit' : 'bad') : 'dim';
+    const mark = crit ? (cv ? 'critical row ✓' : 'critical row, conclusion F ✗') : '';
+    return `<tr class="${cls}">${vars.map((v) => cell(env[v], 'var')).join('')}${pv.map((b) => cell(b)).join('')}${cell(cv, 'final')}<td class="mark">${mark}</td></tr>`;
+  }).join('');
+  $('tab').innerHTML = `<table class="lg-table"><tr>${vars.map((v) => `<th class="var">${esc(v)}</th>`).join('')}${prem.map((p) => `<th>${esc(showLogic(p))}</th>`).join('')}<th class="final">∴ ${esc(showLogic(conc))}</th><th></th></tr>${body}</table>`;
+
+  if (bad) {
+    $('ver').className = 'lg-verdict no';
+    $('ver').innerHTML = `<b>Tidak valid.</b> Saat ${vars.map((v) => `${esc(v)} = ${TF(bad[v])}`).join(', ')}, semua premise T tapi conclusion F. Premise yang benar tidak menjamin conclusion benar.`;
+  } else if (!critical) {
+    $('ver').className = 'lg-verdict mid';
+    $('ver').innerHTML = '<b>Valid, tapi tidak ada critical row</b>: premise-nya tidak pernah bisa T bersamaan (saling bertentangan).';
+  } else {
+    $('ver').className = 'lg-verdict yes';
+    $('ver').innerHTML = `<b>Valid.</b> Ada ${critical} critical row dari ${rows.length} baris, dan di semuanya conclusion bernilai T. Baris lain (pudar) tidak perlu dicek, karena di sana ada premise yang F.`;
+  }
+}
+$('prem').oninput = $('conc').oninput = check;
+load(PRESETS[0]);
+</script>
+</body>
+</html>

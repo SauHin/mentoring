@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Argumen dan Inferensi</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=93c84f0c">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Argumen dan aturan inferensi</h1>
+  <p>Discrete mathematics · valid atau tidak, cukup lihat critical row</p>
+</section>
+
+<section class="slide">
+  <h2>Argumen = premise + conclusion</h2>
+  <div class="cols">
+<pre><code>p → q        premise
+p            premise
+∴ q          conclusion</code></pre>
+    <ul>
+      <li><b>Valid</b>: kalau semua premise T, conclusion <b>pasti</b> T.</li>
+      <li>Validitas soal <b>bentuk</b>, bukan isi kalimat.</li>
+      <li>Ganti p, q dengan kalimat apa pun, validitasnya tetap.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Cara mengecek: critical row</h2>
+  <ol>
+    <li>Buat truth table untuk semua premise dan conclusion.</li>
+    <li>Tandai <b>critical row</b>: baris yang <b>semua</b> premise-nya T.</li>
+    <li>Semua critical row punya conclusion T → <b>valid</b>.</li>
+    <li>Ada <b>satu</b> critical row dengan conclusion F → <b>tidak valid</b>.</li>
+  </ol>
+  <p class="label">Baris dengan premise F tidak relevan: di sana tidak ada yang dijanjikan.</p>
+</section>
+
+<section class="slide">
+  <h2>Contoh tidak valid</h2>
+  <div class="cols">
+<pre><code>p → q ∨ ~r
+q → p ∧ r
+∴ p → r</code></pre>
+    <table>
+      <tr><th>p</th><th>q</th><th>r</th><th>prem 1</th><th>prem 2</th><th>concl</th></tr>
+      <tr><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td></tr>
+      <tr><td>T</td><td>F</td><td>F</td><td>T</td><td>T</td><td><b>F</b></td></tr>
+    </table>
+  </div>
+  <p>Baris p = T, q = F, r = F: kedua premise T tapi conclusion F. <b>Satu baris ini cukup</b> untuk membuktikan tidak valid.</p>
+</section>
+
+<section class="slide">
+  <h2>Valid ≠ benar</h2>
+<pre><code>Jika bulan terbuat dari keju, maka aku presiden.
+Bulan terbuat dari keju.
+∴ Aku presiden.</code></pre>
+  <ul>
+    <li>Bentuknya modus ponens, jadi <b>valid</b>.</li>
+    <li>Tapi premise-nya salah, jadi conclusion tidak dijamin benar.</li>
+    <li><b>Sound</b> = valid <b>dan</b> semua premise benar.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Aturan inferensi</h2>
+  <table>
+    <tr><th>Nama</th><th>Bentuk</th><th>Kenapa valid</th></tr>
+    <tr><td><b>Modus ponens</b></td><td><code>p → q; p ∴ q</code></td><td>Janji, dan syaratnya terjadi</td></tr>
+    <tr><td><b>Modus tollens</b></td><td><code>p → q; ~q ∴ ~p</code></td><td>Hasilnya tidak ada, jadi syaratnya tidak terjadi</td></tr>
+    <tr><td>Elimination</td><td><code>p ∨ q; ~q ∴ p</code></td><td>Minimal satu T, dan bukan q</td></tr>
+    <tr><td>Transitivity</td><td><code>p → q; q → r ∴ p → r</code></td><td>Rantai janji</td></tr>
+    <tr><td>Division into cases</td><td><code>p ∨ q; p → r; q → r ∴ r</code></td><td>Kasus mana pun, hasilnya r</td></tr>
+    <tr><td>Generalization / specialization</td><td><code>p ∴ p ∨ q</code> / <code>p ∧ q ∴ p</code></td><td>Langsung dari definisi ∨ dan ∧</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Dua jebakan klasik</h2>
+  <table>
+    <tr><th>Nama</th><th>Bentuk (TIDAK valid)</th><th>Contoh</th></tr>
+    <tr><td><b>Converse error</b></td><td><code>p → q; q ∴ p</code></td><td>Jika hujan, jalan basah. Jalan basah. ∴ Hujan.</td></tr>
+    <tr><td><b>Inverse error</b></td><td><code>p → q; ~p ∴ ~q</code></td><td>Jika hujan, jalan basah. Tidak hujan. ∴ Jalan kering.</td></tr>
+  </table>
+  <p>Keduanya runtuh di baris <b>p = F, q = T</b>: jalan basah karena disiram.</p>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: cek validitas argumen</h2>
+  <iframe src="viz/argumen.html" title="Pengecek validitas argumen dengan critical row"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Di mana kacamatanya?</h2>
+  <div class="cols">
+    <table>
+      <tr><th></th><th>Premise</th></tr>
+      <tr><td>a</td><td><code>RK → GK</code></td></tr>
+      <tr><td>b</td><td><code>GK → SB</code></td></tr>
+      <tr><td>c</td><td><code>~SB</code></td></tr>
+      <tr><td>d</td><td><code>RL ∨ RK</code></td></tr>
+      <tr><td>e</td><td><code>RL → GC</code></td></tr>
+    </table>
+<pre><code>1. a, b    ∴ RK → SB   transitivity
+2. 1, c    ∴ ~RK       modus tollens
+3. d, 2    ∴ RL        elimination
+4. e, 3    ∴ GC        modus ponens</code></pre>
+  </div>
+  <p><b>Di meja kopi.</b> Mulai dari fakta yang pasti (c), lalu cari aturan yang bisa memakainya.</p>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Valid = setiap <b>critical row</b> punya conclusion T.</li>
+    <li>Satu critical row dengan conclusion F → tidak valid.</li>
+    <li>Valid soal bentuk. Sound = valid + premise benar.</li>
+    <li>Modus ponens dan tollens valid. <b>Converse dan inverse error</b> tidak.</li>
+  </ul>
+  <p class="label">Latihan ada di notes.</p>
+</section>
+
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

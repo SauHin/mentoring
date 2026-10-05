@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Karnaugh Map</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=93c84f0c">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .km-wrap { display: grid; gap: 16px; grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+    @media (max-width: 760px) { .km-wrap { grid-template-columns: minmax(0, 1fr); } }
+    .km { border-collapse: separate; border-spacing: 5px; width: auto; }
+    .km th { font-family: var(--mono); font-weight: 600; color: var(--ink-2); padding: 4px 8px; border: 0; text-align: center; }
+    .km td { border: 0; padding: 0; }
+    .km button { width: 58px; height: 58px; border: 0; border-radius: 12px; cursor: pointer; font: 700 1.25rem var(--mono); background: var(--card-2); color: var(--ink-3); position: relative; }
+    .km button.on { color: var(--ink); }
+    .km button .dots { position: absolute; left: 6px; bottom: 5px; display: flex; gap: 3px; }
+    .km button .dots i { width: 7px; height: 7px; border-radius: 99px; }
+    .km.focus button:not(.hl) { opacity: 0.35; }
+    .ov { text-decoration: overline; display: inline-block; margin: 0 0.07em; } /* garis atas per huruf: ȳz̄ ≠ negasi (yz) */
+    .terms { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
+    .term { font: 600 1.05rem var(--mono); padding: 4px 12px; border-radius: 999px; cursor: default; }
+    .km-out h3 { font-size: 1rem; margin: 0 0 4px; }
+    .km-out p { margin: 0 0 10px; color: var(--ink-2); }
+    .km-out .sop { font-family: var(--mono); font-size: 1.05rem; color: var(--ink); word-break: break-word; }
+    .seg { display: flex; gap: 8px; flex-wrap: wrap; }
+    .seg .btn.sel { box-shadow: inset 0 0 0 2px var(--go-ink), 0 4px 0 var(--edge); color: var(--go-ink); }
+  </style>
+</head>
+<body class="viz">
+
+<h1>Karnaugh map (K-map)</h1>
+<p>Klik sel untuk mengubah 0 ↔ 1. K-map adalah truth table yang disusun supaya <b>sel bertetangga hanya berbeda satu variabel</b>, termasuk sel di tepi kiri dan kanan, atau atas dan bawah. Karena itu 1 yang bertetangga bisa digabung: <code>xy + x<span class="ov">y</span> = x</code>.</p>
+
+<div class="controls">
+  <div class="seg" id="nvars"></div>
+  <div class="lg-presets" id="presets"></div>
+</div>
+
+<div class="km-wrap">
+  <div class="card"><div id="map"></div></div>
+  <div class="card km-out" id="out"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+// Susunan baris/kolom seperti buku Rosen: berurutan Gray code, jadi tetangga hanya beda satu variabel.
+const LAYOUT = {
+  2: { vars: ['x', 'y'], rows: [[1], [0]], rowVars: ['x'], cols: [[1], [0]], colVars: ['y'] },
+  3: { vars: ['x', 'y', 'z'], rows: [[1], [0]], rowVars: ['x'], cols: [[1, 1], [1, 0], [0, 0], [0, 1]], colVars: ['y', 'z'] },
+  4: { vars: ['w', 'x', 'y', 'z'], rows: [[1, 1], [1, 0], [0, 0], [0, 1]], rowVars: ['w', 'x'], cols: [[1, 1], [1, 0], [0, 0], [0, 1]], colVars: ['y', 'z'] },
+};
+const COLORS = ['#ff9f43', '#4b7bff', '#ff5a8a', '#12b886', '#8b5cf6', '#e0b400', '#00a3b4', '#a0522d'];
+const PRESETS = {
+  2: [['E = xy + x̄y', [3, 1]], ['Semua kecuali xy', [2, 1, 0]]],
+  3: [['Contoh slide: tabel → DNF', [7, 5, 4]], ['xyz̄ + xȳz̄ + x̄yz + x̄ȳz̄', [6, 4, 3, 0]], ['xȳz + xȳz̄ + x̄yz + x̄ȳz + x̄ȳz̄', [5, 4, 3, 1, 0]], ['Menyambung tepi kiri-kanan', [7, 5, 3, 1]]],
+  4: [['Empat sudut', [15, 13, 7, 5]], ['Satu baris penuh', [12, 13, 14, 15]], ['Campuran', [0, 2, 5, 7, 8, 10, 13, 15]], ['Hampir semua', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]]],
+};
+let n = 3, ones = new Set(PRESETS[3][0][1]);
+
+// Nomor minterm = gabungan bit variabel (variabel pertama = bit paling kiri).
+const indexOf = (rowBits, colBits) => [...rowBits, ...colBits].reduce((acc, b) => acc * 2 + b, 0);
+const lit = (v, on) => (on ? v : `<span class="ov">${v}</span>`);
+function termHTML(t) {
+  const L = LAYOUT[n];
+  const parts = L.vars.map((v, j) => { const bit = 1 << (n - 1 - j); return t.mask & bit ? '' : lit(v, t.value & bit); }).join('');
+  return parts || '1';
+}
+
+/* ---------- Quine–McCluskey: cari bentuk sum-of-products paling sederhana ---------- */
+function minimize(list) {
+  if (!list.length) return [];
+  if (list.length === 2 ** n) return [{ value: 0, mask: 2 ** n - 1, covers: list }];
+  let level = list.map((m) => ({ value: m, mask: 0, covers: [m] }));
+  const primes = new Map();
+  while (level.length) {
+    const next = new Map(), used = new Set();
+    for (let i = 0; i < level.length; i++) for (let j = i + 1; j < level.length; j++) {
+      const a = level[i], b = level[j], diff = a.value ^ b.value;
+      if (a.mask !== b.mask || !diff || diff & (diff - 1)) continue; // harus beda tepat satu bit
+      const t = { value: a.value & ~diff, mask: a.mask | diff, covers: [...new Set([...a.covers, ...b.covers])].sort((x, y) => x - y) };
+      next.set(t.value + '/' + t.mask, t);
+      used.add(i); used.add(j);
+    }
+    level.forEach((t, i) => { if (!used.has(i)) primes.set(t.value + '/' + t.mask, t); });
+    level = [...next.values()];
+  }
+  // Pilih grup sesedikit mungkin yang menutup semua 1 (lalu yang literalnya paling sedikit).
+  const P = [...primes.values()].sort((a, b) => b.covers.length - a.covers.length);
+  const lits = (t) => n - t.mask.toString(2).replace(/0/g, '').length;
+  let best = null;
+  const need = new Set(list);
+  function search(k, start, chosen, covered) {
+    if (chosen.length === k) {
+      if ([...need].every((m) => covered.has(m))) {
+        const cost = chosen.reduce((s, t) => s + lits(t), 0);
+        if (!best || cost < best.cost) best = { cost, terms: [...chosen] };
+      }
+      return;
+    }
+    for (let i = start; i < P.length; i++) {
+      const add = P[i].covers.filter((m) => !covered.has(m));
+      if (!add.length) continue;
+      add.forEach((m) => covered.add(m)); chosen.push(P[i]);
+      search(k, i + 1, chosen, covered);
+      chosen.pop(); add.forEach((m) => covered.delete(m));
+    }
+  }
+  for (let k = 1; k <= P.length && !best; k++) search(k, 0, [], new Set());
+  return best.terms;
+}
+
+function render() {
+  const L = LAYOUT[n];
+  const list = [...ones].sort((a, b) => b - a);
+  const groups = minimize(list);
+  const groupsOf = (m) => groups.map((g, i) => (g.covers.includes(m) ? i : -1)).filter((i) => i >= 0);
+  const head = L.colVars.length ? `<tr><th>${L.rowVars.join('')} \\ ${L.colVars.join('')}</th>${L.cols.map((cb) => `<th>${cb.map((b, k) => lit(L.colVars[k], b)).join('')}</th>`).join('')}</tr>` : '';
+  const body = L.rows.map((rb) => `<tr><th>${rb.map((b, k) => lit(L.rowVars[k], b)).join('')}</th>${L.cols.map((cb) => {
+    const m = indexOf(rb, cb), on = ones.has(m), gs = on ? groupsOf(m) : [];
+    const bg = gs.length ? `background:color-mix(in srgb, ${COLORS[gs[0] % COLORS.length]} 30%, var(--surface))` : '';
+    return `<td><button class="${on ? 'on' : ''}" data-m="${m}" data-g="${gs.join(' ')}" style="${bg}" title="minterm ${m}">${on ? 1 : 0}<span class="dots">${gs.map((g) => `<i style="background:${COLORS[g % COLORS.length]}"></i>`).join('')}</span></button></td>`;
+  }).join('')}</tr>`).join('');
+  $('map').innerHTML = `<table class="km" id="km">${head}${body}</table>`;
+  document.querySelectorAll('#km button').forEach((b) => (b.onclick = () => { const m = +b.dataset.m; ones.has(m) ? ones.delete(m) : ones.add(m); render(); }));
+
+  const dnf = list.map((m) => termHTML({ value: m, mask: 0 })).join(' + ') || '0';
+  const sop = groups.map(termHTML).join(' + ') || '0';
+  $('out').innerHTML = `
+    <h3>1. Dari tabel (sum of minterms)</h3>
+    <p>Satu suku untuk setiap sel bernilai 1: <span class="sop">${dnf}</span> (${list.length} suku)</p>
+    <h3>2. Setelah digabung di K-map</h3>
+    <div class="terms">${groups.map((g, i) => `<span class="term" data-t="${i}" style="background:color-mix(in srgb, ${COLORS[i % COLORS.length]} 30%, var(--surface))">${termHTML(g)}</span>`).join('') || '<span class="label">Tidak ada 1: hasilnya 0.</span>'}</div>
+    <p>Hasil paling sederhana: <span class="sop">${sop}</span></p>
+    <p class="label">Arahkan kursor ke satu suku untuk melihat grupnya. Grup = persegi panjang berisi 1, 2, 4, atau 8 sel (boleh menyambung lewat tepi). Variabel yang <b>berubah</b> di dalam grup hilang, dan yang <b>tetap</b> menjadi suku.</p>`;
+  document.querySelectorAll('[data-t]').forEach((t) => {
+    t.onmouseenter = () => { $('km').classList.add('focus'); document.querySelectorAll('#km button').forEach((b) => b.classList.toggle('hl', b.dataset.g.split(' ').includes(t.dataset.t))); };
+    t.onmouseleave = () => $('km').classList.remove('focus');
+  });
+  window.kmapResult = { n, ones: list, groups }; // untuk tes
+}
+
+function setN(k, preset) {
+  n = k;
+  ones = new Set(preset ?? PRESETS[k][0][1]);
+  $('nvars').innerHTML = [2, 3, 4].map((v) => `<button class="btn btn-sm${v === n ? ' sel' : ''}" data-n="${v}">${v} variabel</button>`).join('');
+  document.querySelectorAll('[data-n]').forEach((b) => (b.onclick = () => setN(+b.dataset.n)));
+  $('presets').innerHTML = PRESETS[n].map(([name], i) => `<button class="btn btn-sm" data-p="${i}">${name}</button>`).join('') + '<button class="btn btn-sm" id="clear">Kosongkan</button>';
+  document.querySelectorAll('[data-p]').forEach((b) => (b.onclick = () => { ones = new Set(PRESETS[n][b.dataset.p][1]); render(); }));
+  $('clear').onclick = () => { ones = new Set(); render(); };
+  render();
+}
+window.kmapSet = (k, list) => setN(k, list); // untuk tes
+setN(3);
+</script>
+</body>
+</html>
