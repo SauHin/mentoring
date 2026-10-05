@@ -182,7 +182,7 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
 a.tool { text-decoration: none; }
 
 /* Breadcrumb ke homepage: Home / Data structure */
-.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--ink-3); margin-bottom: 1.5rem; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--ink-2); margin-bottom: 1.5rem; }
 .crumbs a { color: var(--ink-2); text-decoration: none; background: var(--card); border-radius: 999px; padding: 4px 12px; }
 .crumbs a:hover { background: var(--card-2); color: var(--ink); }
 
