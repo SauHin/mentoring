@@ -73,7 +73,7 @@
   </svg>
   <ul>
     <li><span class="t-prev">prev</span> → node sebelumnya, <span class="t-next">next</span> → node sesudahnya.</li>
-    <li>Di ujung list: <code>head->prev</code> dan <code>tail->next</code> = <code>nullptr</code> (garis miring).</li>
+    <li>Di ujung list: <code>head->prev</code> dan <code>tail->next</code> = <code>NULL</code> (garis miring).</li>
     <li>Simpan <code>head</code> <b>dan</b> <code>tail</code>: dua ujung bisa diakses langsung.</li>
   </ul>
 </section>
@@ -81,19 +81,27 @@
 <section class="slide">
   <h2>Struktur node</h2>
   <div class="cols">
-<pre><code>struct Node {
+<pre><code>typedef struct Node {
     int data;
-    Node* prev;
-    Node* next;
-};
+    struct Node* prev;
+    struct Node* next;
+} Node;
 
-Node* head = nullptr;
-Node* tail = nullptr;
-int size = 0;</code></pre>
+Node* head = NULL;
+Node* tail = NULL;
+int size = 0;
+
+Node* createNode(int x) {
+    Node* n = malloc(sizeof(Node));
+    n->data = x;
+    n->prev = n->next = NULL;
+    return n;
+}</code></pre>
     <ul>
       <li>1 node = data + <b>2 pointer</b></li>
-      <li>List kosong: <code>head == tail == nullptr</code></li>
+      <li>List kosong: <code>head == tail == NULL</code></li>
       <li>List 1 node: <code>head == tail</code></li>
+      <li><code>createNode</code>: <code>malloc</code> + isi <code>prev</code>/<code>next</code> dengan <code>NULL</code></li>
       <li><b>Trade-off:</b> butuh memory 1 pointer ekstra per node</li>
     </ul>
   </div>
@@ -103,8 +111,8 @@ int size = 0;</code></pre>
   <h2><code>insertFront</code></h2>
   <div class="cols">
 <pre><code>void insertFront(int x) {
-    Node* newNode = new Node{x, nullptr, nullptr};
-    if (head == nullptr) {
+    Node* newNode = createNode(x);
+    if (head == NULL) {
         head = tail = newNode;
     } else {
         newNode->next = head;
@@ -128,8 +136,8 @@ int size = 0;</code></pre>
   <h2><code>insertBack</code></h2>
   <div class="cols">
 <pre><code>void insertBack(int x) {
-    Node* newNode = new Node{x, nullptr, nullptr};
-    if (tail == nullptr) {
+    Node* newNode = createNode(x);
+    if (tail == NULL) {
         head = tail = newNode;
     } else {
         newNode->prev = tail;
@@ -152,7 +160,7 @@ int size = 0;</code></pre>
 <pre><code>Node* cur = head;
 for (int i = 0; i < pos; i++)
     cur = cur->next;
-Node* newNode = new Node{x, nullptr, nullptr};
+Node* newNode = createNode(x);
 newNode->next = cur;
 newNode->prev = cur->prev;
 cur->prev->next = newNode;
@@ -172,15 +180,15 @@ cur->prev = newNode;</code></pre>
 <section class="slide">
   <h2><code>deleteAt</code>: bypass dari dua arah</h2>
   <div class="cols">
-<pre><code>if (del->prev != nullptr)
+<pre><code>if (del->prev != NULL)
     del->prev->next = del->next;
 else
     head = del->next;
-if (del->next != nullptr)
+if (del->next != NULL)
     del->next->prev = del->prev;
 else
     tail = del->prev;
-delete del;</code></pre>
+free(del);</code></pre>
     <div>
       <ul>
         <li>Node sebelum <code>del</code>: <span class="t-next">next</span> melompati <code>del</code></li>
@@ -202,7 +210,7 @@ delete del;</code></pre>
   <table>
     <tr><th>Kasus</th><th>Yang harus dicek</th></tr>
     <tr><td>List kosong</td><td>Node baru jadi <code>head</code> <b>dan</b> <code>tail</code></td></tr>
-    <tr><td>List 1 node</td><td>Setelah delete, <code>head</code> <b>dan</b> <code>tail</code> → <code>nullptr</code></td></tr>
+    <tr><td>List 1 node</td><td>Setelah delete, <code>head</code> <b>dan</b> <code>tail</code> → <code>NULL</code></td></tr>
     <tr><td>Delete node pertama</td><td><code>del->prev</code> null → pindahkan <code>head</code></td></tr>
     <tr><td>Delete node terakhir</td><td><code>del->next</code> null → pindahkan <code>tail</code></td></tr>
     <tr><td>Setiap ubah <span class="t-next">next</span></td><td><span class="t-prev">prev</span> pasangannya ikut diubah?</td></tr>
@@ -230,7 +238,7 @@ delete del;</code></pre>
     <li><b>Editor:</b> undo / redo</li>
     <li><b>Playlist:</b> lagu prev / next</li>
     <li><b>LRU cache:</b> pindah & delete node di tengah dalam O(1)</li>
-    <li><b>C++:</b> <code>std::list</code> adalah double linked list</li>
+    <li><b>Linux kernel:</b> <code>struct list_head</code> adalah (circular) double linked list</li>
   </ul>
 </section>
 

@@ -56,20 +56,23 @@
 
 <script>
 // Untuk gambar ini, riwayat cukup disimpan sebagai array + indeks cur.
-// Kode C++ di bawah menunjukkan versi double linked list-nya.
+// Kode C di bawah menunjukkan versi double linked list-nya.
 const CODE = `void back() {
-    if (cur->prev != nullptr) cur = cur->prev;
+    if (cur->prev != NULL) cur = cur->prev;
 }
 void forward() {
-    if (cur->next != nullptr) cur = cur->next;
+    if (cur->next != NULL) cur = cur->next;
 }
-void visit(std::string url) {
-    while (cur->next != nullptr) {    // buang history forward
+void visit(const char* url) {
+    while (cur->next != NULL) {       // buang history forward
         Node* d = cur->next;
         cur->next = d->next;
-        delete d;
+        free(d);
     }
-    Node* n = new Node{url, cur, nullptr};
+    Node* n = malloc(sizeof(Node));
+    n->url = url;
+    n->prev = cur;
+    n->next = NULL;
     cur->next = n;
     cur = n;
 }`.split('\n');

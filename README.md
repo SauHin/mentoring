@@ -47,6 +47,7 @@ Matkul baru: buat folder baru, lalu tambahkan `<section class="matkul" id="nama-
 
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.
 - Singkat. Pakai **bold**, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
+- Bahasa pemrograman per matkul: **data structure pakai C** (`malloc`/`free`, `NULL`, `printf`).
 - Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.
 - Daftar isi dan tombol kembali ke atas dibuat otomatis oleh `notes.js` dari setiap `<h2>`.
 

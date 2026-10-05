@@ -92,18 +92,25 @@
 
 <script>
 const CODE = {
-  struct: `struct Node {
+  struct: `typedef struct Node {
     int data;
-    Node* prev;
-    Node* next;
-};
+    struct Node* prev;
+    struct Node* next;
+} Node;
 
-Node* head = nullptr;
-Node* tail = nullptr;
-int size = 0;`,
+Node* head = NULL;
+Node* tail = NULL;
+int size = 0;
+
+Node* createNode(int x) {
+    Node* n = malloc(sizeof(Node));
+    n->data = x;
+    n->prev = n->next = NULL;
+    return n;
+}`,
   insertFront: `void insertFront(int x) {
-    Node* newNode = new Node{x, nullptr, nullptr};
-    if (head == nullptr) {
+    Node* newNode = createNode(x);
+    if (head == NULL) {
         head = tail = newNode;
     } else {
         newNode->next = head;
@@ -113,8 +120,8 @@ int size = 0;`,
     size++;
 }`,
   insertBack: `void insertBack(int x) {
-    Node* newNode = new Node{x, nullptr, nullptr};
-    if (tail == nullptr) {
+    Node* newNode = createNode(x);
+    if (tail == NULL) {
         head = tail = newNode;
     } else {
         newNode->prev = tail;
@@ -129,7 +136,7 @@ int size = 0;`,
     Node* cur = head;
     for (int i = 0; i < pos; i++)
         cur = cur->next;
-    Node* newNode = new Node{x, nullptr, nullptr};
+    Node* newNode = createNode(x);
     newNode->next = cur;
     newNode->prev = cur->prev;
     cur->prev->next = newNode;
@@ -140,37 +147,37 @@ int size = 0;`,
     Node* del = head;
     for (int i = 0; i < pos; i++)
         del = del->next;
-    if (del->prev != nullptr)
+    if (del->prev != NULL)
         del->prev->next = del->next;
     else
         head = del->next;
-    if (del->next != nullptr)
+    if (del->next != NULL)
         del->next->prev = del->prev;
     else
         tail = del->prev;
-    delete del;
+    free(del);
     size--;
 }`,
   search: `Node* search(int x) {
     Node* cur = head;
-    while (cur != nullptr) {
+    while (cur != NULL) {
         if (cur->data == x)
             return cur;
         cur = cur->next;
     }
-    return nullptr;
+    return NULL;
 }`,
   printForward: `void printForward() {
     Node* cur = head;
-    while (cur != nullptr) {
-        std::cout << cur->data << " ";
+    while (cur != NULL) {
+        printf("%d ", cur->data);
         cur = cur->next;
     }
 }`,
   printBackward: `void printBackward() {
     Node* cur = tail;
-    while (cur != nullptr) {
-        std::cout << cur->data << " ";
+    while (cur != NULL) {
+        printf("%d ", cur->data);
         cur = cur->prev;
     }
 }`,
@@ -208,7 +215,7 @@ function* finishInsert(c, n) {
 function* insertFront(x) {
   const c = 'insertFront';
   const n = make(x, 0);
-  yield step(c, 'new Node', `Buat node baru berisi ${x}. prev dan next masih null.`, ['newNode']);
+  yield step(c, 'createNode', `Buat node baru berisi ${x}. prev dan next masih null.`, ['newNode']);
   if (head === null) {
     head = tail = n.id;
     yield step(c, 'head = tail', 'List kosong, jadi head dan tail sama-sama menunjuk node baru.', ['head', 'tail']);
@@ -226,7 +233,7 @@ function* insertFront(x) {
 function* insertBack(x) {
   const c = 'insertBack';
   const n = make(x, order.length);
-  yield step(c, 'new Node', `Buat node baru berisi ${x}. prev dan next masih null.`, ['newNode']);
+  yield step(c, 'createNode', `Buat node baru berisi ${x}. prev dan next masih null.`, ['newNode']);
   if (tail === null) {
     head = tail = n.id;
     yield step(c, 'head = tail', 'List kosong, jadi head dan tail sama-sama menunjuk node baru.', ['head', 'tail']);
@@ -259,7 +266,7 @@ function* insertAt(pos, x) {
   }
   const cur = nodes[vars.cur];
   const n = make(x, order.indexOf(cur.id));
-  yield step(c, 'new Node', `cur berhenti di posisi ${pos}. Buat node baru berisi ${x}. Node ini akan masuk tepat sebelum cur.`, ['newNode']);
+  yield step(c, 'createNode', `cur berhenti di posisi ${pos}. Buat node baru berisi ${x}. Node ini akan masuk tepat sebelum cur.`, ['newNode']);
   n.next = cur.id;
   yield step(c, 'newNode->next = cur', `next milik node baru menunjuk cur (${cur.val}).`, [n.id + '.next']);
   n.prev = cur.prev;
@@ -296,7 +303,7 @@ function* deleteAt(pos) {
     yield step(c, 'tail = del->prev', 'del adalah node terakhir, jadi tail pindah ke node sebelumnya.', ['tail']);
   }
   d.lifted = true;
-  yield step(c, 'delete del', 'Tidak ada lagi pointer di list yang menunjuk del. Sekarang del aman di-delete dari memory.');
+  yield step(c, 'free(del)', 'Tidak ada lagi pointer di list yang menunjuk del. Sekarang del aman di-free dari memory.');
   order.splice(order.indexOf(d.id), 1);
   delete nodes[d.id];
   delete vars.del;
@@ -319,7 +326,7 @@ function* search(x) {
     yield step(c, 'cur = cur->next', vars.cur === null ? 'cur sekarang null. Semua node sudah dicek.' : 'cur maju satu node.', ['cur']);
   }
   delete vars.cur;
-  yield done(c, 'return nullptr', `${x} tidak ada di list.`);
+  yield done(c, 'return NULL', `${x} tidak ada di list.`);
 }
 
 function* traverse(c, start, dir) {
@@ -328,7 +335,7 @@ function* traverse(c, start, dir) {
   yield step(c, 'Node* cur', `cur mulai dari ${start === head ? 'head' : 'tail'}.`, ['cur']);
   while (vars.cur !== null) {
     output.push(nodes[vars.cur].val);
-    yield step(c, 'std::cout', `Print ${nodes[vars.cur].val}.`);
+    yield step(c, 'printf', `Print ${nodes[vars.cur].val}.`);
     vars.cur = nodes[vars.cur][dir];
     yield step(c, `cur = cur->${dir}`, vars.cur === null ? 'cur sekarang null, jadi loop berhenti.' : `cur pindah lewat pointer ${dir}.`, ['cur']);
   }
