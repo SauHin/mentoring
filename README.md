@@ -86,6 +86,8 @@ Aturan gaya Empur: huruf kalimat biasa (tidak ada teks kapital penuh), tidak ada
 | F | Layar penuh |
 | L | Laser pointer (nyala/mati) |
 | D, atau tombol pena di sebelah Home | Scratch pad: coret-coret di slide atau notes (Esc selesai, Ctrl+Z undo) |
+| Saat mode coret: P / S / E | Pena / pilih (klik coretan atau tarik kotak, lalu geser) / penghapus |
+| Saat ada coretan terpilih | Delete = hapus, klik warna atau ketebalan = ubah coretan itu |
 | T | Tema Siang/Malam |
 | G, atau klik nomor slide | Pilih slide dari daftar judul |
 | Tombol Home (kiri atas, sama di slide dan notes) | Kembali ke homepage |
