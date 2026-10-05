@@ -205,7 +205,7 @@ function cviz({ programs, layout }) {
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const hex = (a) => '0x' + a.toString(16);
   const keys = Object.keys(programs);
-  let prog, m, gen, running = false, guessing = false, timer = null, st = null, hot = new Set();
+  let prog, m, gen, running = false, guessing = false, timer = null, st = null, hot = new Set(), count = 0, input;
   window.cvizMissing = [];                              // dicek oleh tes: langkah yang barisnya tidak ditemukan
 
   document.querySelector('.viz').insertAdjacentHTML('beforeend', `
@@ -216,6 +216,7 @@ function cviz({ programs, layout }) {
     <div class="card cv-cap">
       <p id="cv-caption" aria-live="polite"></p>
       <div class="ops">
+        <button class="btn btn-sm" id="cv-back">Kembali</button>
         <button class="btn btn-go btn-sm" id="cv-next">Langkah berikutnya</button>
         <button class="btn btn-sm" id="cv-play">Putar otomatis</button>
         <button class="btn btn-sm" id="cv-reset">Ulang</button>
@@ -346,8 +347,14 @@ function cviz({ programs, layout }) {
     prog = programs[key];
     document.querySelectorAll('[data-prog]').forEach((b) => b.classList.toggle('sel', b.dataset.prog === key));
     stop();
-    let input = prog.inputEdit ?? prog.input;
+    input = prog.inputEdit ?? prog.input;
     if (input !== undefined && !input.endsWith('\n')) input += '\n'; // Enter terakhir yang diketik
+    restart();
+    render();
+  }
+
+  // Generator tidak bisa mundur, jadi Kembali = jalankan ulang dari awal sampai satu langkah sebelumnya.
+  function restart() {
     m = cvMachine(input);
     m.trace = () => m.rows.push(prog.watch.map((w) => {
       const c = m.cell(w.replace(/\W.*$/, ''));
@@ -357,8 +364,17 @@ function cviz({ programs, layout }) {
       } catch (e) { return '?'; }
     }));
     gen = prog.run(m);
-    st = null; running = true; guessing = false;
+    st = null; running = true; guessing = false; count = 0;
     $('cv-next').disabled = $('cv-play').disabled = false;
+    $('cv-back').disabled = true;
+  }
+  function back() {
+    if (!count) return;
+    stop();
+    const target = count - 1;
+    restart();
+    while (count < target) { st = gen.next().value; count++; }
+    $('cv-back').disabled = !count;
     render();
   }
 
@@ -372,7 +388,8 @@ function cviz({ programs, layout }) {
     guessing = false;
     const r = gen.next();
     if (r.done) return finish();
-    st = r.value;
+    st = r.value; count++;
+    $('cv-back').disabled = false;
     render();
     if (st.final) finish();
   }
@@ -385,6 +402,7 @@ function cviz({ programs, layout }) {
 
   document.querySelectorAll('[data-prog]').forEach((b) => (b.onclick = () => load(b.dataset.prog)));
   $('cv-next').onclick = advance;
+  $('cv-back').onclick = back;
   $('cv-reset').onclick = () => load(keys.find((k) => programs[k] === prog));
   $('cv-play').onclick = () => {
     if (timer) return stop();

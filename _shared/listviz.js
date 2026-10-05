@@ -14,6 +14,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Pointer = id node (angka) atau null.
 let nodes, order, head, tail, vars, found, output, nextId, hl = new Set();
 let running = null, playTimer = null, shown = {}, anim = 0, guessing = false;
+let before, makeOp, count = 0; // keadaan sebelum operasi + pembuat generator, untuk tombol Kembali
 
 const val = (id) => (id === null || id === undefined ? 'NULL' : nodes[id].val);
 const step = (code, find, text, hot = []) => ({ code, line: CODE[code].findIndex((l) => l.includes(find)), text, hl: hot });
@@ -42,12 +43,32 @@ function* finishInsert(c, n) {
 }
 
 /* ---------- Menjalankan langkah ---------- */
-function start(gen) {
-  found = null;
-  output = null;
-  running = gen;
+function start(factory) {
+  before = structuredClone({ nodes, order, head, tail, vars, nextId });
+  makeOp = factory;
+  restart();
   setBusy(true);
   advance();
+}
+
+function restart() {
+  ({ nodes, order, head, tail, vars, nextId } = structuredClone(before));
+  found = output = null;
+  running = makeOp();
+  guessing = false;
+  count = 0;
+}
+
+// Generator tidak bisa mundur, jadi Kembali = ulang operasi dari awal sampai satu langkah sebelumnya.
+function back() {
+  if (count < 2) return;
+  stopPlay();
+  const target = count - 1;
+  let st;
+  restart();
+  while (count < target) { st = running.next().value; count++; }
+  setBusy(true);
+  showStep(st);
 }
 
 // Mode tebak: sebelum langkah berikutnya tampil, pembaca diminta menebak dulu.
@@ -62,6 +83,7 @@ function advance() {
   guessing = false;
   const r = running.next();
   if (r.done) return end();
+  $('back').disabled = ++count < 2;
   showStep(r.value);
   if (r.value.final) end();
 }
@@ -77,6 +99,7 @@ function end() {
 function setBusy(busy) {
   document.querySelectorAll('[data-op]').forEach((b) => (b.disabled = busy));
   $('next').disabled = $('play').disabled = !busy;
+  $('back').disabled = count < 2;
 }
 
 function stopPlay() {
@@ -204,6 +227,7 @@ function reset(values) {
   stopPlay();
   running = null;
   guessing = false;
+  count = 0;
   nodes = {}; order = []; vars = {}; head = tail = found = output = null; nextId = 0;
   let prev = null;
   for (const v of values) {
@@ -240,6 +264,7 @@ function listViz({ doubly, values = [10, 20, 30, 40] }) {
     <p id="vars"></p>
     <p id="output"></p>
     <div class="ops">
+      <button class="btn btn-sm" id="back">Kembali</button>
       <button class="btn btn-go btn-sm" id="next">Langkah berikutnya</button>
       <button class="btn btn-sm" id="play">Putar otomatis</button>
     </div>
@@ -256,9 +281,10 @@ function listViz({ doubly, values = [10, 20, 30, 40] }) {
     const x = Number($('val').value), p = Number($('pos').value), op = b.dataset.op;
     const err = check(op, x, p, order.length);
     if (err) return ($('caption').textContent = err);
-    start(OPS[op](x, p));
+    start(() => OPS[op](x, p));
   }));
   $('next').onclick = advance;
+  $('back').onclick = back;
   $('play').onclick = () => {
     if (playTimer) return stopPlay();
     $('play').textContent = 'Jeda';

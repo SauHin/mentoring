@@ -48,7 +48,7 @@
   </div>
   <div class="lg-err" id="err1"></div>
   <div class="chips" id="chips"></div>
-  <div class="ops"><button class="btn btn-go btn-sm" id="step">Cek elemen berikutnya</button><button class="btn btn-sm" id="all">Cek semua</button><button class="btn btn-sm" id="reset1">Ulang</button></div>
+  <div class="ops"><button class="btn btn-sm" id="back1">Kembali</button><button class="btn btn-go btn-sm" id="step">Cek elemen berikutnya</button><button class="btn btn-sm" id="all">Cek semua</button><button class="btn btn-sm" id="reset1">Ulang</button></div>
   <div class="lg-verdict" id="ver1"></div>
   <div class="q-cols">
     <div class="card"><strong>Di kode C</strong><pre id="code"></pre></div>
@@ -139,8 +139,10 @@ function draw() {
     ? `~(∀x P(x)) ≡ <b>∃x ~P(x)</b>: "tidak semua memenuhi" sama dengan "ada yang tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(false) ? 'BENAR' : 'SALAH'}, selalu kebalikan dari pernyataan aslinya.` : ''}`
     : `~(∃x P(x)) ≡ <b>∀x ~P(x)</b>: "tidak ada yang memenuhi" sama dengan "semua tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(true) ? 'SALAH' : 'BENAR'}.` : ''}`;
   $('step').disabled = !fn || done();
+  $('back1').disabled = !pos;
 }
 $('step').onclick = stepOne;
+$('back1').onclick = () => { if (pos) { pos--; results.pop(); draw(); } };
 $('all').onclick = () => { while (fn && !done()) stepOne(); };
 $('reset1').onclick = reset1;
 $('dom').oninput = $('pred').oninput = reset1;
