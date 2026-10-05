@@ -286,7 +286,7 @@ article.notes { padding-top: 84px; } /* di bawah topbar */
 .notes li + li { margin-top: 0.3em; }
 
 /* Daftar matkul (homepage) dan daftar materi (halaman matkul). */
-.list { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; gap: 12px; }
+.list { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .notes .list li + li { margin-top: 0; }
 .list h2 { font-size: 1.2rem; margin: 0.5rem 0 0.25rem; }
 .list p { margin: 0 0 1rem; color: var(--ink-2); }
@@ -300,6 +300,29 @@ article.notes { padding-top: 84px; } /* di bawah topbar */
   transform: translateY(-50%) rotate(45deg);
 }
 .list-link p { margin-bottom: 0; }
+/* Kartu matkul di home: ikon gradasi warna kapur + latar bergradasi tipis dengan warna yang sama. */
+.course { display: flex; gap: 16px; align-items: flex-start;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--a2) 14%, var(--surface)), var(--card) 70%); }
+.course:hover { background: linear-gradient(135deg, color-mix(in srgb, var(--a2) 22%, var(--surface)), var(--card-2) 70%); }
+.course-icon { flex: none; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--a1), var(--a2)); color: #fff; }
+.course-icon svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.course-body { flex: 1; min-width: 0; }
+/* Chip selalu sejajar baris pertama nama matkul, rata kanan. Kalau sempit, nama yang turun baris, bukan chip. */
+.course-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.course-head h2 { min-width: 0; }
+.course-head .chip { flex: none; white-space: nowrap; }
+@media (max-width: 480px) {
+  .course { padding: 18px 40px 18px 18px; gap: 12px; }
+  .course-icon { width: 40px; height: 40px; border-radius: 12px; }
+  .list-link::after { right: 18px; }
+  .list .course-head h2 { font-size: 1.08rem; }
+}
+.list .course-head h2 { margin: 0; }
+.course-body p { margin-top: 0.35rem; }
+.course .chip { background: var(--surface); color: var(--ink-2); }
+.c-mint { --a1: #b8f5d6; --a2: #12b886; }
+.c-lilac { --a1: #dcc2ff; --a2: #8b5cf6; }
 .empty { margin-top: 2rem; }
 .empty p { margin: 0.3em 0 0; color: var(--ink-2); }
 .notes .tldr { margin: 1.5rem 0; }
