@@ -43,11 +43,19 @@
     const bar = document.body.appendChild(document.createElement('div'));
     bar.className = 'topbar';
     bar.innerHTML = '<a class="tool home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/></svg>Home</a>';
-    bar.firstChild.href = new URL(`index.html${matkul ? '#' + matkul : ''}`, root).href;
-    const crumbs = document.querySelector('.crumbs'); // notes: "/ Data structure" ikut di sebelah Home
-    if (crumbs) bar.append(crumbs);
-    // Scratch pad (coret-coret) untuk slide dan notes.
-    document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js', root).href;
+    bar.firstChild.href = new URL('index.html', root).href;
+    // Breadcrumb "/ Data structure" dari nama folder matkul (data-structure → Data structure), link ke daftar materinya.
+    if (matkul && !matkul.endsWith('.html')) {
+      const crumbs = bar.appendChild(document.createElement('nav'));
+      crumbs.className = 'crumbs';
+      const a = document.createElement('a');
+      a.href = new URL(`${matkul}/index.html`, root).href;
+      a.textContent = matkul.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
+      crumbs.append('/ ', a);
+    }
+    // Scratch pad (coret-coret) hanya untuk slide dan notes materi, bukan halaman daftar matkul.
+    if (document.querySelector('body.deck, script[src*="notes.js"]'))
+      document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js', root).href;
   });
 
   // Event load halaman induk baru jalan setelah semua iframe selesai dimuat.

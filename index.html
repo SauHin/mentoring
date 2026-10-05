@@ -7,46 +7,27 @@
   <link rel="icon" href="_shared/favicon.svg">
   <link rel="stylesheet" href="_shared/style.css">
   <script src="_shared/theme.js"></script>
-  <style>
-    .matkul { margin-top: 2.5rem; scroll-margin-top: 16px; }
-    .matkul > h2 { margin: 0 0 0.75rem; }
-    .materi { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-    .materi h3 { margin: 0.5rem 0 0.25rem; font-size: 1.15rem; }
-    .materi p { margin: 0 0 1rem; color: var(--ink-2); }
-    .materi .links { display: flex; flex-wrap: wrap; gap: 10px; }
-  </style>
 </head>
 <body>
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
 <main class="notes">
   <img src="_shared/logo.svg" alt="" width="56" height="56">
   <h1>Mentoring</h1>
-  <p class="lead">Notes, slide, dan visualisasi interaktif, dikelompokkan per mata kuliah.</p>
+  <p class="lead">Pilih mata kuliah.</p>
 
-  <!-- Satu <section> per matkul. id = nama folder matkul, dipakai tombol home di slide dan notes. -->
-  <section class="matkul" id="data-structure">
-    <h2>Data structure</h2>
-    <ol class="materi">
-      <li class="card">
-        <span class="chip">01</span>
-        <h3>Single linked list</h3>
-        <p>Node, pointer, dan <b>resep 5 langkah</b> untuk menurunkan kode insert dan delete sendiri, tanpa menghafal.</p>
-        <div class="links">
-          <a class="btn btn-go btn-sm" href="data-structure/01-single-linked-list/slides.html">Slide</a>
-          <a class="btn btn-sm" href="data-structure/01-single-linked-list/notes.html">Notes</a>
-        </div>
-      </li>
-      <li class="card">
-        <span class="chip">02</span>
-        <h3>Double linked list</h3>
-        <p>Linked list yang bisa traverse maju <b>dan</b> mundur: struktur node, insert, delete, dan edge case-nya.</p>
-        <div class="links">
-          <a class="btn btn-go btn-sm" href="data-structure/02-double-linked-list/slides.html">Slide</a>
-          <a class="btn btn-sm" href="data-structure/02-double-linked-list/notes.html">Notes</a>
-        </div>
-      </li>
-    </ol>
-  </section>
+  <!-- Satu kartu per matkul. href = folder matkul, yang berisi index.html daftar materinya. -->
+  <ol class="list">
+    <li><a class="card list-link" href="data-structure/index.html">
+      <span class="chip">2 materi</span>
+      <h2>Data structure</h2>
+      <p>Linked list dan struktur data lain dalam C. Fokus: cara menurunkan kode, bukan menghafal.</p>
+    </a></li>
+    <li><a class="card list-link" href="compilation-technique/index.html">
+      <span class="chip">Belum ada materi</span>
+      <h2>Compilation technique</h2>
+      <p>Materi menyusul.</p>
+    </a></li>
+  </ol>
 </main>
 </body>
 </html>

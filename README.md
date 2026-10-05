@@ -11,6 +11,8 @@ Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 
 ## Daftar Materi
 
+Home (`index.html`) berisi daftar mata kuliah. Tiap matkul punya `index.html` sendiri berisi daftar materinya.
+
 ### Data structure
 
 | No | Materi | Notes | Slide |
@@ -18,38 +20,43 @@ Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 | 01 | Single linked list | [notes](data-structure/01-single-linked-list/notes.html) | [slides](data-structure/01-single-linked-list/slides.html) |
 | 02 | Double linked list | [notes](data-structure/02-double-linked-list/notes.html) | [slides](data-structure/02-double-linked-list/slides.html) |
 
+### Compilation technique
+
+Belum ada materi.
+
 ## Struktur
 
 ```
 mentoring/
-├── index.html              homepage: daftar materi per matkul
-├── _shared/                style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, font, logo
+├── index.html                  home: daftar mata kuliah
+├── _shared/                    style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, font, logo
 ├── _template/
-│   └── NN-nama-materi/     salin folder ini untuk materi baru
-│       ├── notes.html
-│       ├── slides.html
-│       ├── viz/            satu file HTML per konsep interaktif
-│       └── assets/         gambar, data, dll.
-└── data-structure/         satu folder per matkul
-    ├── 01-single-linked-list/
-    └── 02-double-linked-list/
+│   └── NN-nama-materi/         salin folder ini untuk materi baru
+├── data-structure/
+│   ├── index.html              daftar materi data structure
+│   ├── 01-single-linked-list/
+│   └── 02-double-linked-list/
+└── compilation-technique/
+    └── index.html              daftar materi (masih kosong)
 ```
 
 ## Membuat Materi Baru
 
-1. Salin `_template/NN-nama-materi` ke folder matkul, misalnya `data-structure/01-single-linked-list`.
-2. Di `notes.html`, ganti `matkul` di breadcrumb dengan nama folder matkul. Tombol Home dibuat otomatis oleh `theme.js`.
-3. Isi `notes.html` dan `slides.html`. Satu `<section class="slide">` = satu slide.
-4. Untuk tiap konsep interaktif, salin `viz/contoh.html` ke nama baru di `viz/`.
-5. Tambahkan kartu di `index.html` (di `<section>` matkul-nya) dan baris di tabel di atas.
+1. Salin `_template/NN-nama-materi` ke folder matkul, misalnya `compilation-technique/01-lexical-analysis`.
+2. Isi `notes.html` dan `slides.html`. Satu `<section class="slide">` = satu slide.
+3. Untuk tiap konsep interaktif, salin `viz/contoh.html` ke nama baru di `viz/`.
+4. Tambahkan kartu materi di `index.html` milik matkul itu, lalu perbarui jumlah materi di kartu matkul di home.
+5. Tambahkan baris di tabel di atas.
 
-Matkul baru: buat folder baru, lalu tambahkan `<section class="matkul" id="nama-folder">` di `index.html`.
+Tombol Home, breadcrumb "/ Nama matkul", dan scratch pad dibuat otomatis oleh `theme.js` dari nama folder.
+
+**Matkul baru:** buat folder (nama pakai tanda hubung, misalnya `operating-system`), salin `compilation-technique/index.html` ke dalamnya, lalu tambahkan kartu di home.
 
 ## Gaya Penulisan
 
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.
 - Singkat. Pakai **bold**, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
-- Bahasa pemrograman per matkul: **data structure pakai C** (`malloc`/`free`, `NULL`, `printf`).
+- Bahasa pemrograman per matkul: **data structure pakai C** (`malloc`/`free`, `NULL`, `printf`), dan harus juga jalan di compiler C++ (cast `(Node*)malloc(...)`).
 - Fokus pada **pemahaman kode**: tiap operasi diturunkan (sebelum → sesudah → panah yang berubah → urutan → edge case → kode), latihan berupa trace, cari bug, dan turunkan sendiri.
 - Visualisasi linked list memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak).
 - Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.
@@ -69,7 +76,7 @@ Matkul baru: buat folder baru, lalu tambahkan `<section class="matkul" id="nama-
 | `.controls` | Wadah slider dan tombol di visualisasi |
 | `.callout`, `.callout.tip`, `.callout.warn` | Kotak catatan biru, tips hijau, peringatan merah |
 | `.card.tldr` | Kotak ringkasan di awal notes |
-| `.crumbs` | Nama matkul di sebelah tombol Home (notes) |
+| `.crumbs` | Nama matkul di sebelah tombol Home (dibuat otomatis) |
 | `ol.refs` | Daftar pustaka |
 
 Warna untuk seri data di visualisasi: `--go-ink`, `--c-jingga`, `--c-biru`, `--c-pink`, `--c-mint`, `--c-lilac`.
@@ -90,7 +97,7 @@ Aturan gaya Empur: huruf kalimat biasa (tidak ada teks kapital penuh), tidak ada
 | Saat ada coretan terpilih | Delete = hapus, klik warna atau ketebalan = ubah coretan itu |
 | T | Tema Siang/Malam |
 | G, atau klik nomor slide | Pilih slide dari daftar judul |
-| Tombol Home (kiri atas, sama di slide dan notes) | Kembali ke homepage |
+| Tombol Home / nama matkul (kiri atas) | Kembali ke home / daftar materi matkul |
 | Ctrl+P | Cetak / simpan PDF (semua slide) |
 
 Selama laser menyala, klik tetap jalan, termasuk di dalam visualisasi.
