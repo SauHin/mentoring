@@ -259,6 +259,37 @@ a.tool { text-decoration: none; }
 .notes .lead { font-size: 1.15rem; color: var(--ink-2); margin-top: 0; }
 .notes li + li { margin-top: 0.3em; }
 .notes .tldr { margin: 1.5rem 0; }
+
+/* Breadcrumb tetap terlihat di atas saat scroll, jadi Home selalu bisa diklik. */
+.notes .crumbs { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 12px 0; margin: -12px 0 1rem; }
+.notes h2 { scroll-margin-top: 64px; }
+
+/* Daftar isi (dibuat notes.js). Layar sempit: kartu di bawah TL;DR. Layar lebar: menempel di kiri. */
+.toc { background: var(--card); border-radius: 20px; padding: 16px 20px; margin: 1.5rem 0; font-size: 0.95rem; }
+.toc ol { list-style: none; margin: 0.4em 0 0; padding: 0; }
+.toc li + li { margin-top: 0.15em; }
+.toc a { display: block; color: var(--ink-2); text-decoration: none; padding: 3px 10px; margin: 0 -10px; border-radius: 10px; }
+.toc a:hover { background: var(--card-2); color: var(--ink); }
+.toc a.on { color: var(--go-ink); font-weight: 600; background: color-mix(in srgb, var(--go) 12%, transparent); }
+@media (min-width: 1200px) {
+  .toc {
+    position: fixed; top: 96px; width: 14rem; margin: 0;
+    left: max(16px, calc(50% - 22rem - 16rem));
+    max-height: calc(100vh - 128px); overflow: hidden auto;
+    background: none; padding: 0 10px;
+  }
+}
+
+/* Tombol kembali ke atas: muncul setelah scroll jauh. */
+.to-top { position: fixed; right: 16px; bottom: 16px; width: 44px; height: 44px; opacity: 0; pointer-events: none; transition: opacity 150ms ease-out; }
+.to-top.show { opacity: 1; pointer-events: auto; }
+.to-top svg { stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Daftar pustaka */
+.refs { padding-left: 1.4em; }
+.refs li { color: var(--ink-2); }
+.refs li + li { margin-top: 0.6em; }
+.refs a { word-break: break-all; }
 .notes .tldr ul { margin: 0.4em 0 0; padding-left: 1.2em; }
 .deck .callout { font-size: 0.85em; color: var(--ink); }
 .deck .callout p { color: var(--ink); }

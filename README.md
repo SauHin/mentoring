@@ -22,7 +22,7 @@ Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 ```
 mentoring/
 ├── index.html              homepage: daftar materi per matkul
-├── _shared/                style.css, theme.js, slides.js, font, logo
+├── _shared/                style.css, theme.js, slides.js, notes.js, font, logo
 ├── _template/
 │   └── NN-nama-materi/     salin folder ini untuk materi baru
 │       ├── notes.html
@@ -47,7 +47,8 @@ Matkul baru: buat folder baru, lalu tambahkan `<section class="matkul" id="nama-
 
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.
 - Singkat. Pakai **bold**, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
-- Notes dibuka dengan kotak TL;DR.
+- Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.
+- Daftar isi dan tombol kembali ke atas dibuat otomatis oleh `notes.js` dari setiap `<h2>`.
 
 ## Kelas Gaya
 
@@ -63,7 +64,8 @@ Matkul baru: buat folder baru, lalu tambahkan `<section class="matkul" id="nama-
 | `.controls` | Wadah slider dan tombol di visualisasi |
 | `.callout`, `.callout.tip`, `.callout.warn` | Kotak catatan biru, tips hijau, peringatan merah |
 | `.card.tldr` | Kotak ringkasan di awal notes |
-| `.crumbs` | Breadcrumb ke homepage |
+| `.crumbs` | Breadcrumb ke homepage (tetap terlihat saat scroll) |
+| `ol.refs` | Daftar pustaka |
 
 Warna untuk seri data di visualisasi: `--go-ink`, `--c-jingga`, `--c-biru`, `--c-pink`, `--c-mint`, `--c-lilac`.
 
