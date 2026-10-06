@@ -4,3 +4,25 @@ Situs statis (GitHub Pages, branch master) berisi notes, slide, dan visualisasi 
 
 - Sebelum setiap commit yang mengubah `_shared/*.css` atau `_shared/*.js`, jalankan `python tools/cachebust.py`. Tanpa ini, browser memakai CSS/JS lama dari cache selama 10 menit dan halaman tampil rusak.
 - Kode C harus jalan di Dev-C++ (compiler C dan C++). Uji full program dengan MinGW gcc dan g++ (Compiler Explorer API), karena tidak ada compiler lokal.
+
+## Membuat materi (matkul apa pun)
+
+**Slide adalah materi utama.** Slide berisi ringkasan pelajaran yang bisa dipahami mentee sendiri, tanpa penjelasan mentor dan tanpa membaca notes. Notes hanya tambahan: penurunan lengkap, contoh lebih banyak, latihan dengan jawaban, dan daftar pustaka.
+
+Aturan slide:
+- Setiap slide punya judul (`<h2>`) dan kalimat pembuka `<p class="sub">` (1–2 kalimat) yang menjelaskan isi slide dan alasannya.
+- Tulis poin sebagai kalimat lengkap yang menjelaskan **kenapa**, bukan rantai panah. Salah: "Lupa & → crash". Benar: "Kalau & lupa ditulis, scanf menulis ke alamat sembarang, dan program bisa crash."
+- Tabel kesalahan memuat penyebab atau perbaikannya, bukan hanya gejala.
+- Fokus pada pemahaman, bukan hafalan. Tunjukkan cara menurunkan konsep atau kode sendiri.
+- Akhiri deck dengan slide Ringkasan. Sisipkan slide `.full` berisi iframe visualisasi kalau ada konsep yang bisa dicoba.
+- Setiap slide harus muat di layar 1280×720. Cek di browser sebelum commit.
+- Contoh deck yang sudah sesuai aturan: `data-structure/01-single-linked-list/slides.html`.
+
+Aturan bahasa:
+- Bahasa Indonesia, tapi **jangan hard translate**. Kalau istilahnya lebih umum dalam bahasa Inggris, pakai istilah Inggris.
+- Contoh pemrograman: valid (bukan sah), garbage value (bukan nilai sampah), return value, newline, loop, node, pointer, edge case.
+- Contoh matematika: term, logic gate, predicate, quantifier, statement, truth table, rules of inference.
+- Kata Indonesia yang wajar tetap dipakai: deklarasi, karakter, variabel, negasi, ekuivalen.
+- Ringkas. Pakai bold, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
+
+Langkah teknis untuk materi baru ada di README, bagian "Membuat Materi Baru". Matkul baru juga butuh kartu di home (`index.html`).
