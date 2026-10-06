@@ -18,6 +18,16 @@ Aturan slide:
 - Setiap slide harus muat di layar 1280×720. Cek di browser sebelum commit.
 - Contoh deck yang sudah sesuai aturan: `data-structure/01-single-linked-list/slides.html`.
 
+Aturan visualisasi (viz):
+- Satu viz untuk satu konsep. Mentee harus langsung tahu apa yang perlu diklik.
+- Pakai mesin bersama kalau cocok: `_shared/cviz.js` (program C), `listviz.js` (linked list), `logic.js` (logika). Mesin ini sudah mengikuti aturan di bawah.
+- Simulasi bertahap selalu punya tombol **Kembali** di sebelah **Langkah berikutnya**.
+- Pilihan contoh lebih dari 4: pakai dropdown (`label.pick` + `select.field`), bukan deretan tombol. Pilihan paling banyak 4: grup tombol `.seg`.
+- Jangan menumpuk kotak. Baris kontrol tanpa latar (`.controls`), paling banyak satu kartu untuk penjelasan langkah dan satu panel untuk state. Jangan ada kartu di dalam kartu.
+- Sembunyikan yang jarang dipakai: ubah input di `<details>`, pengaturan sekunder (mode tebak) sebagai `label.check` kecil di kanan atas.
+- Label input diletakkan di atas kolom, jangan terlipat di sampingnya.
+- Cek di desktop, HP (375px), dan mode gelap sebelum commit. Contoh viz yang sudah sesuai: `algorithm-and-programming/03-repetition/viz/loop.html`.
+
 Aturan bahasa:
 - Bahasa Indonesia, tapi **jangan hard translate**. Kalau istilahnya lebih umum dalam bahasa Inggris, pakai istilah Inggris.
 - Contoh pemrograman: valid (bukan sah), garbage value (bukan nilai sampah), return value, newline, loop, node, pointer, edge case.
