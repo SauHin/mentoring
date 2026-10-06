@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Quantifier Playground</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
-  <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=4323dfa7">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
   <style>
     .q-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
@@ -18,9 +18,8 @@
     .el.yes { background: color-mix(in srgb, var(--go) 22%, var(--surface)); }
     .el.no { background: color-mix(in srgb, var(--stop) 20%, var(--surface)); }
     .el.skip { opacity: 0.45; }
-    .q-cols { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-    @media (max-width: 760px) { .q-cols { grid-template-columns: minmax(0, 1fr); } }
-    .q-cols pre { margin: 0; font-size: 0.85rem; }
+    .q-neg { color: var(--ink-2); margin: 0 0 12px; }
+    .q-code pre { margin: 10px 0 0; font-size: 0.85rem; background: var(--surface); }
     .grid { border-collapse: separate; border-spacing: 4px; width: auto; }
     .grid th { font-size: 0.85rem; color: var(--ink-2); padding: 4px 8px; border: 0; }
     .grid td { width: 54px; height: 40px; text-align: center; border: 0; border-radius: 10px; background: var(--card-2); font-weight: 700; }
@@ -29,7 +28,6 @@
     .grid td.hit { background: color-mix(in srgb, var(--go) 30%, var(--surface)); }
     .grid td.miss { background: color-mix(in srgb, var(--stop) 25%, var(--surface)); }
     .grid tr.rowbad th, .grid th.colbad { color: var(--stop); }
-    .seg .btn.sel { box-shadow: inset 0 0 0 2px var(--go-ink), 0 4px 0 var(--edge); color: var(--go-ink); }
   </style>
 </head>
 <body class="viz">
@@ -38,10 +36,9 @@
 <p><b>∀x P(x)</b> = P benar untuk <b>semua</b> elemen = AND besar. <b>∃x P(x)</b> = P benar untuk <b>minimal satu</b> elemen = OR besar. Di kode, keduanya hanyalah loop.</p>
 
 <section class="lg-section">
-  <h2>1. Satu quantifier</h2>
+  <div class="lg-head"><h2>1. Satu quantifier</h2><label class="pick">Contoh <select class="field" id="pre1"></select></label></div>
   <p>Predicate ditulis seperti kondisi di C, dengan variabel <code>x</code>. Contoh: <code>x*x &gt;= x</code>, <code>x % 2 == 0</code>, <code>8 % x == 0</code>.</p>
-  <div class="lg-presets" id="pre1"></div>
-  <div class="controls q-row">
+  <div class="q-row">
     <div class="seg" id="quant"></div>
     <label class="lg-input">Domain D <input class="field" id="dom" spellcheck="false"></label>
     <label class="lg-input">P(x) <input class="field" id="pred" spellcheck="false"></label>
@@ -50,18 +47,15 @@
   <div class="chips" id="chips"></div>
   <div class="ops"><button class="btn btn-sm" id="back1">Kembali</button><button class="btn btn-go btn-sm" id="step">Cek elemen berikutnya</button><button class="btn btn-sm" id="all">Cek semua</button><button class="btn btn-sm" id="reset1">Ulang</button></div>
   <div class="lg-verdict" id="ver1"></div>
-  <div class="q-cols">
-    <div class="card"><strong>Di kode C</strong><pre id="code"></pre></div>
-    <div class="card"><strong>Negasinya</strong><p id="neg"></p></div>
-  </div>
+  <p class="q-neg" id="neg"></p>
+  <details class="q-code"><summary>Padanan di kode C</summary><pre id="code"></pre></details>
 </section>
 
 <section class="lg-section">
-  <h2>2. Dua quantifier: urutan menentukan arti</h2>
+  <div class="lg-head"><h2>2. Dua quantifier: urutan menentukan arti</h2><label class="pick">Contoh <select class="field" id="pre2"></select></label></div>
   <p>Baris = nilai x, kolom = nilai y. ✓ = P(x, y) benar. Pilih bentuk statement dan lihat bagian tabel mana yang menentukan jawabannya.</p>
-  <div class="lg-presets" id="pre2"></div>
   <div class="seg" id="forms"></div>
-  <div class="card lg-table-wrap" style="margin-top:12px"><table class="grid" id="grid"></table></div>
+  <div class="lg-table-wrap"><table class="grid" id="grid"></table></div>
   <div class="lg-verdict" id="ver2"></div>
 </section>
 
@@ -79,8 +73,8 @@ const P1 = [
   ['Semua genap?', '∀', '2, 4, 6, 7, 8', 'x % 2 == 0'],
 ];
 let q = '∀', pos = 0, results = [], fn = null, D = [];
-$('pre1').innerHTML = P1.map(([n], i) => `<button class="btn btn-sm" data-p1="${i}">${n}</button>`).join('');
-document.querySelectorAll('[data-p1]').forEach((b) => (b.onclick = () => { const [, qq, d, p] = P1[b.dataset.p1]; q = qq; $('dom').value = d; $('pred').value = p; reset1(); }));
+$('pre1').innerHTML = P1.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre1').onchange = (e) => { const [, qq, d, p] = P1[e.target.value]; q = qq; $('dom').value = d; $('pred').value = p; reset1(); };
 $('quant').innerHTML = ['∀', '∃'].map((s) => `<button class="btn btn-sm" data-q="${s}">${s} ${s === '∀' ? 'untuk semua' : 'ada'}</button>`).join('');
 document.querySelectorAll('[data-q]').forEach((b) => (b.onclick = () => { q = b.dataset.q; reset1(); }));
 
@@ -135,9 +129,9 @@ function draw() {
     else { cls += ' no'; text = `<b>∃x ∈ D, P(x) SALAH.</b> Tidak ada satu pun dari ${D.length} elemen yang memenuhi P. Untuk menyatakan ∃ salah, <b>semua</b> elemen harus dicek.`; }
   }
   $('ver1').className = cls; $('ver1').innerHTML = text;
-  $('neg').innerHTML = q === '∀'
+  $('neg').innerHTML = '<b>Negasi:</b> ' + (q === '∀'
     ? `~(∀x P(x)) ≡ <b>∃x ~P(x)</b>: "tidak semua memenuhi" sama dengan "ada yang tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(false) ? 'BENAR' : 'SALAH'}, selalu kebalikan dari statement aslinya.` : ''}`
-    : `~(∃x P(x)) ≡ <b>∀x ~P(x)</b>: "tidak ada yang memenuhi" sama dengan "semua tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(true) ? 'SALAH' : 'BENAR'}.` : ''}`;
+    : `~(∃x P(x)) ≡ <b>∀x ~P(x)</b>: "tidak ada yang memenuhi" sama dengan "semua tidak memenuhi". ${done() && fn ? `Di sini negasinya ${results.includes(true) ? 'SALAH' : 'BENAR'}.` : ''}`);
   $('step').disabled = !fn || done();
   $('back1').disabled = !pos;
 }
@@ -158,8 +152,8 @@ const P2 = [
 ];
 const FORMS = ['∀x∀y', '∃x∃y', '∀x∃y', '∃x∀y', '∀y∃x', '∃y∀x'];
 let pr = P2[0], form = '∀x∃y';
-$('pre2').innerHTML = P2.map((p, i) => `<button class="btn btn-sm" data-p2="${i}">${p.name}</button>`).join('');
-document.querySelectorAll('[data-p2]').forEach((b) => (b.onclick = () => { pr = P2[b.dataset.p2]; grid(); }));
+$('pre2').innerHTML = P2.map((p, i) => `<option value="${i}">${p.name}</option>`).join('');
+$('pre2').onchange = (e) => { pr = P2[e.target.value]; grid(); };
 
 function grid() {
   const val = (r, c) => (pr.f ? pr.f(r, c) : pr.on[r].includes(c));

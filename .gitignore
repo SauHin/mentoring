@@ -1,1 +1,4 @@
 .impeccable/hook.cache.json
+
+# Screenshot dan snapshot dari Playwright MCP
+.playwright-mcp/

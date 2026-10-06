@@ -205,11 +205,15 @@ function cviz({ programs, layout }) {
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const hex = (a) => '0x' + a.toString(16);
   const keys = Object.keys(programs);
-  let prog, m, gen, running = false, guessing = false, timer = null, st = null, hot = new Set(), count = 0, input;
+  let prog, m, gen, running = false, guessing = false, timer = null, st = null, hot = new Set(), count = 0, input, inputOpen = false;
   window.cvizMissing = [];                              // dicek oleh tes: langkah yang barisnya tidak ditemukan
 
+  // Satu kartu untuk langkah (penjelasan + tombol), satu panel untuk state program. Tidak ada kartu di dalam kartu.
   document.querySelector('.viz').insertAdjacentHTML('beforeend', `
-<div class="controls cv-progs">${keys.map((k) => `<button class="btn btn-sm" data-prog="${k}">${esc(programs[k].title)}</button>`).join('')}</div>
+<div class="controls">
+  <label class="pick">Program <select class="field" id="cv-prog">${keys.map((k) => `<option value="${k}">${esc(programs[k].title)}</option>`).join('')}</select></label>
+  <label class="check push" title="Sebelum langkah berikutnya tampil, tebak dulu baris mana yang jalan dan apa yang berubah"><input type="checkbox" id="cv-guess"> Mode tebak</label>
+</div>
 <div class="cv-main${layout === 'wide' ? ' wide' : ''}">
   <div class="cv-panes" id="cv-panes"></div>
   <div class="cv-side">
@@ -221,11 +225,12 @@ function cviz({ programs, layout }) {
         <button class="btn btn-sm" id="cv-play">Putar otomatis</button>
         <button class="btn btn-sm" id="cv-reset">Ulang</button>
       </div>
-      <label class="guess"><input type="checkbox" id="cv-guess"> Mode tebak: tebak dulu tiap langkah</label>
     </div>
-    <div class="panel cv-mem-wrap"><div class="cv-title">Memory</div><div class="cv-mem" id="cv-mem"></div><svg class="cv-arrows" id="cv-arrows"></svg></div>
-    <div class="cv-io" id="cv-io"></div>
-    <div class="cv-trace" id="cv-trace"></div>
+    <div class="panel cv-state">
+      <section class="cv-sec cv-mem-wrap"><div class="cv-title">Memory</div><div class="cv-mem" id="cv-mem"></div><svg class="cv-arrows" id="cv-arrows"></svg></section>
+      <div id="cv-io"></div>
+      <div class="cv-trace" id="cv-trace"></div>
+    </div>
   </div>
 </div>`);
 
@@ -264,6 +269,8 @@ function cviz({ programs, layout }) {
       return `<div class="cv-var${c.dims.length ? ' arr' : ''}"><div class="cv-name">${esc(c.name)} <span>${esc(typeLabel(c))}</span></div>${body}</div>`;
     }).join('');
     $('cv-mem').innerHTML = html || '<p class="label">Belum ada variabel.</p>';
+    $('cv-mem').classList.toggle('empty', !html);
+    $('cv-mem').classList.toggle('ptrs', m.cells.some((c) => c.type.endsWith('*'))); // ruang untuk lengkung panah
     requestAnimationFrame(drawArrows);
   }
 
@@ -288,7 +295,7 @@ function cviz({ programs, layout }) {
         let y1, y2, c1, c2;
         if (b.top > a.bottom) { y1 = a.bottom - base.top; y2 = b.top - base.top - 2; c1 = y1 + dip; c2 = y2 - dip; }
         else if (b.bottom < a.top) { y1 = a.top - base.top; y2 = b.bottom - base.top + 2; c1 = y1 - dip; c2 = y2 + dip; }
-        else { const up = Math.max(48, Math.abs(x2 - x1) * 0.3); y1 = a.top - base.top; y2 = b.top - base.top - 2; c1 = y1 - up; c2 = y2 - up; } // lengkung di atas label nama
+        else { const up = Math.max(64, Math.abs(x2 - x1) * 0.3); y1 = a.top - base.top; y2 = b.top - base.top - 2; c1 = y1 - up; c2 = y2 - up; } // lengkung di atas label nama
         s += `<path class="cv-arrow" d="M${x1} ${y1} C${x1} ${c1} ${x2} ${c2} ${x2} ${y2}" marker-end="url(#cv-tip)"/>`;
       });
     }
@@ -304,31 +311,38 @@ function cviz({ programs, layout }) {
         const label = ch === '\n' ? '↵' : ch === ' ' ? '␣' : esc(ch);
         return `<span class="cv-ch ${cls}">${label}</span>`;
       }).join('');
-      parts.push(`<div class="card cv-buf-card"><div class="cv-title">Buffer keyboard <span class="label">(↵ = Enter, ␣ = spasi)</span></div>
+      // Kolom untuk mengubah input jarang dipakai, jadi disembunyikan di balik "Ubah input".
+      parts.push(`<section class="cv-sec"><div class="cv-title">Buffer keyboard <span class="label">↵ = Enter, ␣ = spasi</span></div>
         <div class="cv-buf">${chars || '<span class="label">kosong</span>'}</div>
-        <label class="cv-input"><span class="label">Isi keyboard (ubah, lalu tekan Ulang):</span><textarea id="cv-stdin" rows="2" spellcheck="false">${esc(prog.inputEdit ?? prog.input)}</textarea></label></div>`);
+        <details class="cv-input"${inputOpen ? ' open' : ''}><summary>Ubah input</summary>
+          <textarea class="field" id="cv-stdin" rows="2" spellcheck="false" aria-label="Isi keyboard">${esc(prog.inputEdit ?? prog.input)}</textarea>
+          <button class="btn btn-sm" id="cv-apply">Jalankan dengan input ini</button></details></section>`);
     }
-    parts.push(`<div class="card cv-out-card"><div class="cv-title">Output layar</div><pre class="cv-out">${esc(m.out)}<span class="cv-caret"></span></pre></div>`);
+    parts.push(`<section class="cv-sec"><div class="cv-title">Output layar</div><pre class="cv-out">${esc(m.out)}<span class="cv-caret"></span></pre></section>`);
     $('cv-io').innerHTML = parts.join('');
     const ta = $('cv-stdin');
-    if (ta) ta.oninput = () => (prog.inputEdit = ta.value);
+    if (ta) {
+      ta.oninput = () => (prog.inputEdit = ta.value);
+      ta.closest('details').ontoggle = (e) => (inputOpen = e.target.open);
+      $('cv-apply').onclick = () => load(keys.find((k) => programs[k] === prog));
+    }
   }
 
   function renderTrace() {
     if (!prog.watch) { $('cv-trace').innerHTML = ''; return; }
     const rows = m.rows.map((r, i) => `<tr${i === m.rows.length - 1 ? ' class="last"' : ''}><td>${i + 1}</td>${r.map((v) => `<td>${v}</td>`).join('')}</tr>`).join('');
-    $('cv-trace').innerHTML = `<div class="card"><div class="cv-title">Trace table</div><table><tr><th>#</th>${prog.watch.map((w) => `<th><code>${esc(w)}</code></th>`).join('')}</tr>${rows || `<tr><td colspan="${prog.watch.length + 1}" class="label">Baris baru ditambahkan setiap iterasi.</td></tr>`}</table></div>`;
+    $('cv-trace').innerHTML = `<section class="cv-sec"><div class="cv-title">Trace table <span class="label">satu baris per putaran</span></div><table><tr><th>#</th>${prog.watch.map((w) => `<th>${esc(w)}</th>`).join('')}</tr>${rows}</table></section>`;
   }
 
   function renderPanes() {
     const panes = prog.panes || { C: prog.code };
     const find = !st ? {} : typeof st.find === 'string' ? { [Object.keys(panes).find((k) => k !== 'Flowchart')]: st.find } : st.find || {};
     $('cv-panes').innerHTML = Object.entries(panes).map(([name, src]) => {
-      if (name === 'Flowchart') return `<div class="card cv-pane"><div class="cv-title">${name}</div><div class="cv-flow">${src}</div></div>`;
+      if (name === 'Flowchart') return `<div class="cv-pane"><div class="cv-title">${name}</div><div class="cv-flow">${src}</div></div>`;
       const lines = src.split('\n');
       const on = find[name] ? lines.findIndex((l) => l.includes(find[name])) : -1;
       if (find[name] && on < 0) window.cvizMissing.push(`${prog.title} / ${name}: ${find[name]}`);
-      return `<div class="card cv-pane"><div class="cv-title">${name}</div><pre class="cv-code">${lines.map((l, i) => `<span class="ln${i === on ? ' on' : ''}">${esc(l) || ' '}</span>`).join('')}</pre></div>`;
+      return `<div class="cv-pane"><div class="cv-title">${name}</div><pre class="cv-code">${lines.map((l, i) => `<span class="ln${i === on ? ' on' : ''}">${esc(l) || ' '}</span>`).join('')}</pre></div>`;
     }).join('');
     if (find.Flowchart) {
       const node = $('cv-panes').querySelector(`[data-id="${find.Flowchart}"]`);
@@ -345,7 +359,7 @@ function cviz({ programs, layout }) {
 
   function load(key) {
     prog = programs[key];
-    document.querySelectorAll('[data-prog]').forEach((b) => b.classList.toggle('sel', b.dataset.prog === key));
+    $('cv-prog').value = key;
     stop();
     input = prog.inputEdit ?? prog.input;
     if (input !== undefined && !input.endsWith('\n')) input += '\n'; // Enter terakhir yang diketik
@@ -400,7 +414,7 @@ function cviz({ programs, layout }) {
   }
   function stop() { clearInterval(timer); timer = null; $('cv-play').textContent = 'Putar otomatis'; }
 
-  document.querySelectorAll('[data-prog]').forEach((b) => (b.onclick = () => load(b.dataset.prog)));
+  $('cv-prog').onchange = (e) => load(e.target.value);
   $('cv-next').onclick = advance;
   $('cv-back').onclick = back;
   $('cv-reset').onclick = () => load(keys.find((k) => programs[k] === prog));

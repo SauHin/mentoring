@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Truth Table dan Equivalence</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
-  <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=4323dfa7">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
 </head>
 <body class="viz">
@@ -14,30 +14,26 @@
 <h1>Truth table dan equivalence</h1>
 <p>Truth table adalah "hakim" di logika proposisi: hukum apa pun bisa dicek di sini, jadi tidak perlu dihafal. Ketik pakai simbol atau ASCII: <code>~ ! &amp; | -&gt; &lt;-&gt;</code>.</p>
 
-<div class="controls lg-keys" id="keys"></div>
+<div class="lg-keys" id="keys" role="group" aria-label="Sisipkan simbol"></div>
 
 <section class="lg-section">
-  <h2>1. Truth table satu ekspresi</h2>
+  <div class="lg-head"><h2>1. Truth table satu ekspresi</h2><label class="pick">Contoh <select class="field" id="pre1"></select></label></div>
   <p>Setiap sub-ekspresi jadi satu kolom, dikerjakan dari dalam ke luar. Kolom kuning = hasil akhir.</p>
-  <div class="controls">
-    <label class="lg-input">Ekspresi <input class="field" id="e1" value="~(p ∧ q)" spellcheck="false" autocomplete="off"></label>
-  </div>
-  <div class="lg-presets" id="pre1"></div>
+  <label class="lg-input">Ekspresi <input class="field" id="e1" value="~(p ∧ q)" spellcheck="false" autocomplete="off"></label>
   <div class="lg-err" id="err1"></div>
-  <div class="card lg-table-wrap" id="tab1"></div>
+  <div class="lg-table-wrap" id="tab1"></div>
   <div class="lg-verdict" id="ver1"></div>
 </section>
 
 <section class="lg-section">
-  <h2>2. Cek equivalence</h2>
+  <div class="lg-head"><h2>2. Cek equivalence</h2><label class="pick">Contoh <select class="field" id="pre2"></select></label></div>
   <p>Dua ekspresi <b>ekuivalen</b> (≡) kalau nilainya sama di <b>setiap</b> baris. Satu baris berbeda saja sudah cukup sebagai bukti tidak ekuivalen.</p>
-  <div class="controls">
+  <div class="lg-row">
     <label class="lg-input">Kiri <input class="field" id="a" value="~(p ∧ q)" spellcheck="false" autocomplete="off"></label>
     <label class="lg-input">Kanan <input class="field" id="b" value="~p ∨ ~q" spellcheck="false" autocomplete="off"></label>
   </div>
-  <div class="lg-presets" id="pre2"></div>
   <div class="lg-err" id="err2"></div>
-  <div class="card lg-table-wrap" id="tab2"></div>
+  <div class="lg-table-wrap" id="tab2"></div>
   <div class="lg-verdict" id="ver2"></div>
 </section>
 
@@ -50,7 +46,7 @@ const cell = (b, cls = '') => `<td class="${TF(b)} ${cls}">${TF(b)}</td>`;
 // Tombol simbol: menyisipkan ke kolom input yang terakhir disentuh (berguna di HP).
 let lastInput = $('e1');
 document.querySelectorAll('.field').forEach((f) => f.addEventListener('focus', () => (lastInput = f)));
-$('keys').innerHTML = ['~', '∧', '∨', '→', '↔', '⊕', '(', ')'].map((s) => `<button class="btn btn-sm" data-k="${s}">${s}</button>`).join('');
+$('keys').innerHTML = '<span class="label">Sisipkan simbol</span>' + ['~', '∧', '∨', '→', '↔', '⊕', '(', ')'].map((s) => `<button class="btn btn-sm" data-k="${s}">${s}</button>`).join('');
 document.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
   const f = lastInput, s = f.selectionStart ?? f.value.length, e = f.selectionEnd ?? s, k = b.dataset.k;
   const ins = /[∧∨→↔⊕]/.test(k) ? ` ${k} ` : k;
@@ -61,8 +57,8 @@ document.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
 
 /* ---------- 1. Truth table ---------- */
 const P1 = ['~(p ∧ q)', 'p → q', 'p ↔ q', 'p ⊕ q', 'p ∨ ~p', 'p ∧ ~p', '(p → q) ∧ (q → r) → (p → r)', '~(~p ∧ q) ∧ (p ∨ q)'];
-$('pre1').innerHTML = P1.map((p) => `<button class="btn btn-sm" data-p1="${esc(p)}">${esc(p)}</button>`).join('');
-document.querySelectorAll('[data-p1]').forEach((b) => (b.onclick = () => { $('e1').value = b.dataset.p1; table1(); }));
+$('pre1').innerHTML = P1.map((p) => `<option>${esc(p)}</option>`).join('');
+$('pre1').onchange = (e) => { $('e1').value = e.target.value; table1(); };
 
 function table1() {
   $('err1').textContent = '';
@@ -100,8 +96,8 @@ const P2 = [
   ['Absorption', 'p ∨ (p ∧ q)', 'p'],
   ['Contoh slide', '~(~p ∧ q) ∧ (p ∨ q)', 'p'],
 ];
-$('pre2').innerHTML = P2.map(([n, a, b], i) => `<button class="btn btn-sm" data-p2="${i}">${n}</button>`).join('');
-document.querySelectorAll('[data-p2]').forEach((b) => (b.onclick = () => { const [, x, y] = P2[b.dataset.p2]; $('a').value = x; $('b').value = y; table2(); }));
+$('pre2').innerHTML = P2.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre2').onchange = (e) => { const [, x, y] = P2[e.target.value]; $('a').value = x; $('b').value = y; table2(); };
 
 function table2() {
   $('err2').textContent = '';

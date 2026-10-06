@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Printf Playground</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
   <style>
     .viz { max-width: 860px; }
     .pf-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .pf-grid label { display: grid; gap: 4px; }
     .pf-grid .field { width: 100%; font-family: var(--mono); }
-    .presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-    .presets .btn { font-family: var(--mono); }
-    .pf-out { margin-top: 12px; }
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 16px; }
+    .presets .label { margin-right: 4px; }
+    .presets .btn { font-family: var(--mono); padding: 0.25rem 0.65rem; font-size: 0.88rem; box-shadow: 0 3px 0 var(--edge); }
+    /* Satu kartu: hasil di atas, arti tiap bagian di bawah garis tipis. */
+    .pf-out { border-radius: 22px; }
+    .pf-out .parts { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
     .ruler, .result { font-family: var(--mono); font-size: 1.15rem; white-space: pre; margin: 0; line-height: 1.6; }
     .ruler { color: var(--ink-3); font-size: 0.85rem; }
     .result span { background: color-mix(in srgb, var(--hot) 25%, var(--surface)); border-radius: 3px; }
@@ -37,16 +40,13 @@
 <div class="presets" id="presets"></div>
 
 <div class="card pf-out">
-  <div class="label">Output (kotak oranye = karakter yang dicetak, biru = spasi tambahan dari width)</div>
+  <div class="label">Output: oranye = karakter yang dicetak, biru = spasi tambahan dari width</div>
   <pre class="ruler" id="ruler"></pre>
   <pre class="result" id="result"></pre>
-</div>
-<div class="card pf-out">
-  <strong>Arti tiap bagian</strong>
-  <ul class="parts" id="parts"></ul>
+  <ul class="parts" id="parts" aria-label="Arti tiap bagian"></ul>
 </div>
 
-<script src="../../../_shared/cviz.js?v=e22d6926"></script>
+<script src="../../../_shared/cviz.js?v=bf27ea59"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -56,7 +56,7 @@ const PRESETS = [
   ['%c', '65'], ['%s', 'BINUS'], ['%10s', 'BINUS'], ['%-10s', 'BINUS'], ['%.3s', 'BINUS'],
   ['%x', '255'], ['%o', '8'], ['%%', ''],
 ];
-$('presets').innerHTML = PRESETS.map(([f, v]) => `<button class="btn btn-sm" data-f="${esc(f)}" data-v="${esc(v)}">${esc(f)}</button>`).join('');
+$('presets').innerHTML = '<span class="label">Coba:</span>' + PRESETS.map(([f, v]) => `<button class="btn btn-sm" data-f="${esc(f)}" data-v="${esc(v)}">${esc(f)}</button>`).join('');
 document.querySelectorAll('[data-f]').forEach((b) => (b.onclick = () => { $('fmt').value = b.dataset.f; $('val').value = b.dataset.v; update(); }));
 
 const TYPES = {

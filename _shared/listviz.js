@@ -251,12 +251,18 @@ function listViz({ doubly, values = [10, 20, 30, 40] }) {
 <div class="controls">
   <label>Nilai <input class="field" id="val" type="number" value="25"></label>
   <label>Posisi <input class="field" id="pos" type="number" value="2" min="0"></label>
-  <div class="ops">
-    ${ops.map((op) => `<button class="btn btn-sm" data-op="${op}">${op}</button>`).join('')}
-    <button class="btn btn-sm" id="reset">Reset</button>
-  </div>
+  <label class="check push" title="Sebelum langkah berikutnya tampil, tebak dulu baris kode dan pointer yang berubah"><input type="checkbox" id="guess"> Mode tebak</label>
+  <button class="btn btn-sm" id="reset">Reset list</button>
 </div>
-<svg id="stage" viewBox="0 0 ${VBW} 330" role="img" aria-label="Gambar ${doubly ? 'double' : 'single'} linked list"></svg>
+<div class="controls ops">${ops.map((op) => `<button class="btn btn-sm" data-op="${op}">${op}</button>`).join('')}</div>
+<div class="stage-wrap">
+  <svg id="stage" viewBox="0 0 ${VBW} 330" role="img" aria-label="Gambar ${doubly ? 'double' : 'single'} linked list"></svg>
+  <p class="label legend">
+    <span style="--c: var(--go-ink)">next</span>
+    ${doubly ? '<span style="--c: var(--focus)">prev</span>' : ''}
+    <span style="--c: var(--hot)">baru berubah</span>
+  </p>
+</div>
 <div class="bottom">
   <pre class="code" id="code"></pre>
   <div class="card side">
@@ -268,12 +274,6 @@ function listViz({ doubly, values = [10, 20, 30, 40] }) {
       <button class="btn btn-go btn-sm" id="next">Langkah berikutnya</button>
       <button class="btn btn-sm" id="play">Putar otomatis</button>
     </div>
-    <label class="guess"><input type="checkbox" id="guess"> Mode tebak: tebak dulu tiap langkah sebelum ditampilkan</label>
-    <p class="label legend">
-      <span style="--c: var(--go-ink)">next</span>
-      ${doubly ? '<span style="--c: var(--focus)">prev</span>' : ''}
-      <span style="--c: var(--hot)">baru berubah</span>
-    </p>
   </div>
 </div>`);
 

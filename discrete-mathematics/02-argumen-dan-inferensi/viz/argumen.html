@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cek Validitas Argumen</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=355bf4fa">
-  <link rel="stylesheet" href="../../../_shared/logic.css?v=847bedc8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=4323dfa7">
   <script src="../../../_shared/theme.js?v=7b53acb8"></script>
   <style>
-    .ar-grid { display: grid; gap: 12px; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+    .ar-grid { display: grid; gap: 12px 16px; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
     @media (max-width: 700px) { .ar-grid { grid-template-columns: minmax(0, 1fr); } }
     .ar-grid textarea { width: 100%; font-family: var(--mono); font-size: 1.02rem; resize: vertical; }
   </style>
@@ -19,15 +19,15 @@
 <h1>Cek validitas argumen</h1>
 <p>Argumen <b>valid</b> kalau <b>setiap</b> baris yang semua premise-nya T (<b>critical row</b>) juga punya conclusion T. Cukup satu critical row dengan conclusion F, argumennya tidak valid.</p>
 
-<div class="lg-presets" id="presets"></div>
+<div class="controls"><label class="pick">Contoh <select class="field" id="presets"></select></label></div>
 
-<div class="controls ar-grid">
+<div class="ar-grid">
   <label class="lg-input">Premise (satu per baris)<textarea class="field" id="prem" rows="4" spellcheck="false"></textarea></label>
   <label class="lg-input">Conclusion (∴)<input class="field" id="conc" spellcheck="false" autocomplete="off"></label>
 </div>
-<div class="controls lg-keys" id="keys"></div>
+<div class="lg-keys" id="keys" role="group" aria-label="Sisipkan simbol"></div>
 <div class="lg-err" id="err"></div>
-<div class="card lg-table-wrap" id="tab"></div>
+<div class="lg-table-wrap" id="tab"></div>
 <div class="lg-verdict" id="ver"></div>
 
 <script src="../../../_shared/logic.js?v=ca4a35c5"></script>
@@ -50,13 +50,13 @@ const PRESETS = [
   ['Contoh valid', ['p ∨ (q ∨ r)', '~r'], 'p ∨ q'],
   ['Di mana kacamatanya?', ['RK → GK', 'GK → SB', '~SB', 'RL ∨ RK', 'RL → GC'], 'GC'],
 ];
-$('presets').innerHTML = PRESETS.map(([n], i) => `<button class="btn btn-sm" data-i="${i}">${n}</button>`).join('');
-document.querySelectorAll('[data-i]').forEach((b) => (b.onclick = () => load(PRESETS[b.dataset.i])));
+$('presets').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('presets').onchange = (e) => load(PRESETS[e.target.value]);
 function load([, prem, conc]) { $('prem').value = prem.join('\n'); $('conc').value = conc; check(); }
 
 let lastInput = $('prem');
 [$('prem'), $('conc')].forEach((f) => f.addEventListener('focus', () => (lastInput = f)));
-$('keys').innerHTML = ['~', '∧', '∨', '→', '↔', '(', ')'].map((s) => `<button class="btn btn-sm" data-k="${s}">${s}</button>`).join('');
+$('keys').innerHTML = '<span class="label">Sisipkan simbol</span>' + ['~', '∧', '∨', '→', '↔', '(', ')'].map((s) => `<button class="btn btn-sm" data-k="${s}">${s}</button>`).join('');
 document.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
   const f = lastInput, s = f.selectionStart ?? f.value.length, e = f.selectionEnd ?? s, k = b.dataset.k;
   const ins = /[∧∨→↔]/.test(k) ? ` ${k} ` : k;

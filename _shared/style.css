@@ -126,7 +126,7 @@ th { font-weight: 600; color: var(--ink-2); }
 }
 .btn:hover { filter: brightness(1.04); }
 .btn:active { transform: translateY(5px); box-shadow: 0 0 0 var(--edge); }
-:where(.card, .controls) .btn { --edge: var(--btn-edge); background: var(--btn-bg); }
+:where(.card) .btn { --edge: var(--btn-edge); background: var(--btn-bg); }
 .card .chip, .card :not(pre) > code { background: var(--surface); }
 .btn-go { --edge: var(--go-edge); background: var(--go); color: #fff; }
 .btn-stop { --edge: var(--stop-edge); background: var(--stop); color: #fff; }
@@ -385,10 +385,21 @@ article.notes { padding-top: 84px; } /* di bawah topbar */
 
 /* ---------- Visualisasi ---------- */
 .viz { max-width: 900px; margin: 0 auto; padding: 16px; }
-.viz h1 { font-size: 1.4rem; margin: 0 0 0.2em; }
+.viz h1 { font-size: 1.55rem; margin: 0 0 0.2em; }
 .viz > p { color: var(--ink-2); margin-top: 0; }
-.viz .controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; background: var(--card); border-radius: 20px; padding: 12px 16px; margin-bottom: 12px; }
+/* Baris kontrol tanpa kotak: kontrol dikelompokkan dengan jarak, bukan dengan kartu. */
+.viz .controls { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; margin: 0 0 16px; }
 .viz label { display: flex; align-items: center; gap: 0.6em; }
+/* Pilihan contoh: lebih dari 4 pilihan memakai dropdown, supaya tidak memenuhi beberapa baris tombol. */
+.pick { position: relative; color: var(--ink-2); font-size: 0.95rem; }
+.pick select { appearance: none; font: 600 0.95rem var(--font); color: var(--ink); padding: 0.45rem 2.4rem 0.45rem 0.9rem; max-width: min(100%, 26rem); cursor: pointer; }
+.pick::after { content: ''; position: absolute; right: 15px; top: 50%; width: 7px; height: 7px; border: solid var(--ink-2); border-width: 0 2px 2px 0; transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+/* Grup tombol pilihan (maksimal 4): yang aktif diberi garis hijau. */
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.viz .btn.sel { box-shadow: inset 0 0 0 2px var(--go-ink), 0 4px 0 var(--edge); color: var(--go-ink); }
+/* Pengaturan sekunder (mode tebak): kecil dan tenang. */
+.check { gap: 8px; font-size: 0.92rem; color: var(--ink-2); cursor: pointer; }
+.viz .push { margin-left: auto; }
 .viz output { min-width: 2ch; font-weight: 600; font-variant-numeric: tabular-nums; }
 .viz > canvas, .viz > svg { display: block; width: 100%; height: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
 

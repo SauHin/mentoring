@@ -110,7 +110,10 @@ Jalankan `python tools/cachebust.py`. Script ini menambahkan `?v=<hash>` ke seti
 | `.panel` | Kartu putih dengan garis tipis |
 | `.btn`, `.btn-go`, `.btn-stop` | Tombol pil biasa, hijau, merah |
 | `.chip`, `.label` | Pil kecil, teks kecil abu |
-| `.controls` | Wadah slider dan tombol di visualisasi |
+| `.controls` | Baris kontrol di visualisasi, tanpa kotak |
+| `label.pick` + `select.field` | Dropdown "Contoh"/"Program" untuk lebih dari 4 pilihan |
+| `.seg` + `.btn.sel` | Grup tombol pilihan (maksimal 4), yang aktif bergaris hijau |
+| `label.check` | Pengaturan sekunder kecil, misalnya mode tebak |
 | `.callout`, `.callout.tip`, `.callout.warn` | Kotak catatan biru, tips hijau, peringatan merah |
 | `.card.tldr` | Kotak ringkasan di awal notes |
 | `.crumbs` | Nama matkul di sebelah tombol Home (dibuat otomatis) |
