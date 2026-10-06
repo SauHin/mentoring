@@ -13,13 +13,91 @@
 <article class="notes">
   <span class="chip">Mata kuliah</span>
   <h1>Compilation technique</h1>
-  <p class="lead">Materi untuk mata kuliah ini sedang disiapkan.</p>
+  <p class="lead">Satu materi untuk setiap <b>tipe soal</b>: RE, Thompson, subset construction, followpos, minimisasi, RE → CFG, derivation, left factoring, dan left recursion. Setiap visualisasi bisa mengerjakan soal milikmu sendiri langkah demi langkah.</p>
 
-  <!-- Tambahkan materi sebagai <li class="card"> di dalam <ol class="list">, seperti di data-structure/index.html. -->
-  <div class="card empty">
-    <strong>Belum ada materi</strong>
-    <p>Materi pertama akan muncul di sini.</p>
-  </div>
+  <ol class="list">
+    <li class="card">
+      <span class="chip">01</span>
+      <h2>Regular expression</h2>
+      <p>Membaca RE dan menulis RE untuk sebuah language: diawali, diakhiri, memuat, posisi ke-k, "dan", "atau".</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="01-regular-expression/slides.html">Slide</a>
+        <a class="btn btn-sm" href="01-regular-expression/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">02</span>
+      <h2>RE → ε-NFA (Thompson)</h2>
+      <p>Empat pola fragment (simbol, union, concatenation, star) dirakit dari dalam ke luar.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="02-re-ke-nfa-thompson/slides.html">Slide</a>
+        <a class="btn btn-sm" href="02-re-ke-nfa-thompson/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">03</span>
+      <h2>NFA → DFA (subset construction)</h2>
+      <p>ECLOSE, menjalankan string pada ε-NFA, dan mengubah NFA atau ε-NFA menjadi tabel DFA.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="03-nfa-ke-dfa/slides.html">Slide</a>
+        <a class="btn btn-sm" href="03-nfa-ke-dfa/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">04</span>
+      <h2>RE → DFA langsung (followpos)</h2>
+      <p>Syntax tree, nullable, firstpos, lastpos, followpos, lalu DFA tanpa ε-NFA.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="04-re-ke-dfa-langsung/slides.html">Slide</a>
+        <a class="btn btn-sm" href="04-re-ke-dfa-langsung/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">05</span>
+      <h2>Minimisasi DFA</h2>
+      <p>Table-filling dan partition: cari pasangan state yang pasti berbeda, gabungkan sisanya.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="05-minimisasi-dfa/slides.html">Slide</a>
+        <a class="btn btn-sm" href="05-minimisasi-dfa/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">06</span>
+      <h2>Context-free grammar dan RE → CFG</h2>
+      <p>G = (V, T, P, S), Chomsky hierarchy, mengubah RE menjadi CFG, dan menentukan L(G).</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="06-re-ke-cfg/slides.html">Slide</a>
+        <a class="btn btn-sm" href="06-re-ke-cfg/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">07</span>
+      <h2>Derivation, parse tree, dan ambiguity</h2>
+      <p>Leftmost dan rightmost derivation, parse tree, membuktikan ambiguity, dan grammar dengan prioritas operator.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="07-derivation-dan-ambiguity/slides.html">Slide</a>
+        <a class="btn btn-sm" href="07-derivation-dan-ambiguity/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">08</span>
+      <h2>Left factoring</h2>
+      <p>Keluarkan awalan bersama terpanjang supaya parser top-down cukup melihat satu token.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="08-left-factoring/slides.html">Slide</a>
+        <a class="btn btn-sm" href="08-left-factoring/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">09</span>
+      <h2>Eliminasi left recursion</h2>
+      <p>Immediate dan tidak langsung, dengan urutan variabel seperti di soal dosen.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="09-left-recursion/slides.html">Slide</a>
+        <a class="btn btn-sm" href="09-left-recursion/notes.html">Notes</a>
+      </div>
+    </li>
+  </ol>
 </article>
 </body>
 </html>

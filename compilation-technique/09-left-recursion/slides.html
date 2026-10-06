@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eliminasi Left Recursion</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+    .steps li::marker { font-weight: 700; color: var(--go-ink); }
+    .x { color: var(--hot); font-weight: 700; }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Eliminasi left recursion</h1>
+  <p>Compilation technique · soal "lakukan left recursion elimination", baik yang langsung (immediate) maupun yang tidak langsung, dengan urutan variabel tertentu.</p>
+</section>
+
+<section class="slide">
+  <h2>Masalahnya: recursive descent tidak pernah berhenti</h2>
+  <p class="sub">Grammar <b>left recursive</b> kalau sebuah variabel bisa menurunkan dirinya sendiri di posisi <b>paling kiri</b>. Parser top-down yang ditulis langsung dari grammar seperti itu akan memanggil dirinya terus tanpa membaca token.</p>
+  <div class="cols">
+<pre><code>// E → E + T | T
+void E() {
+    E();          // belum ada token yang dibaca
+    match('+');
+    T();
+}</code></pre>
+    <ul>
+      <li>Panggilan <code>E()</code> pertama langsung memanggil <code>E()</code> lagi, lalu lagi, sampai stack overflow.</li>
+      <li>Bottom-up parser tidak bermasalah dengan left recursion. Eliminasi ini hanya dibutuhkan untuk <b>top-down</b> parsing.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Immediate left recursion: rumusnya</h2>
+  <p class="sub"><code>A → Aα | β</code> (β tidak diawali A). Lihat string yang dihasilkan A: selalu satu β di depan, lalu α nol kali atau lebih.</p>
+  <div class="cols">
+<pre><code>A ⇒ Aα ⇒ Aαα ⇒ βαα
+
+Jadi L(A) = β α*
+
+A  → β A'
+A' → α A' | ε</code></pre>
+    <ul>
+      <li><b>β</b> (alternatif yang tidak diawali A) ditaruh di depan, diikuti A'.</li>
+      <li><b>A'</b> menghasilkan α berulang, lalu berhenti dengan ε. Rekursinya sekarang di <b>kanan</b>, jadi parser selalu membaca token dulu sebelum memanggil A' lagi.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Contoh: grammar ekspresi</h2>
+  <p class="sub">E dan T masing-masing punya immediate left recursion. F tidak, jadi tetap.</p>
+  <div class="cols">
+<pre><code>E → E + T | T
+T → T * F | F
+F → id | ( E )</code></pre>
+<pre><code>E  → T E'           (β = T, α = + T)
+E' → + T E' | ε
+T  → F T'           (β = F, α = * F)
+T' → * F T' | ε
+F  → id | ( E )</code></pre>
+  </div>
+  <p>Bentuk umum dengan banyak α dan β: <code>A → Aα₁ | … | Aαₘ | β₁ | … | βₙ</code> menjadi <code>A → β₁A' | … | βₙA'</code> dan <code>A' → α₁A' | … | αₘA' | ε</code>.</p>
+</section>
+
+<section class="slide">
+  <h2>Contoh slide: banyak α dan β</h2>
+  <p class="sub"><code>A → Aab | Aba | aB | a</code> dan <code>B → b | Bba</code>. Pisahkan dulu alternatif yang diawali variabel itu sendiri.</p>
+  <table>
+    <tr><th>Variabel</th><th>α (setelah A atau B dibuang)</th><th>β</th><th>Hasil</th></tr>
+    <tr><td>A</td><td><code>ab</code>, <code>ba</code></td><td><code>aB</code>, <code>a</code></td><td><code>A → aBA' | aA'</code><br><code>A' → abA' | baA' | ε</code></td></tr>
+    <tr><td>B</td><td><code>ba</code></td><td><code>b</code></td><td><code>B → bB'</code><br><code>B' → baB' | ε</code></td></tr>
+  </table>
+  <div class="callout warn"><strong>Catatan slide</strong>Slide menulis baris terakhir <code>B → baB' | ε</code>. Yang dimaksud adalah <code>B' → baB' | ε</code>: tanda petiknya hilang.</div>
+</section>
+
+<section class="slide">
+  <h2>Left recursion yang tidak langsung</h2>
+  <p class="sub">Grammar bisa left recursive walaupun tidak ada produksi <code>A → A…</code>. Rekursinya tersembunyi lewat variabel lain.</p>
+  <div class="cols">
+<pre><code>S → Aa | b
+A → Sc | d
+
+S ⇒ <span class="x">A</span>a ⇒ <span class="x">S</span>ca     (S kembali ke kiri)
+A ⇒ <span class="x">S</span>c ⇒ <span class="x">A</span>ac</code></pre>
+    <ul>
+      <li>Menghapus immediate left recursion saja tidak cukup, karena di sini tidak ada yang immediate.</li>
+      <li>Caranya: <b>substitusi</b> dulu supaya rekursi tersembunyi menjadi immediate, lalu hapus dengan rumus tadi.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Algoritma umum (urutan A₁ … Aₙ)</h2>
+  <p class="sub">Variabel diproses satu per satu sesuai urutan. Setelah Aᵢ selesai, tidak ada alternatif Aᵢ yang diawali variabel yang lebih awal atau dirinya sendiri.</p>
+  <div class="cols">
+<pre><code>for i = 1 to n:
+    for j = 1 to i − 1:
+        ganti setiap Aᵢ → Aⱼγ
+        dengan Aᵢ → δ₁γ | … | δₖγ
+        (Aⱼ → δ₁ | … | δₖ)
+    hapus immediate left recursion di Aᵢ</code></pre>
+    <ol class="steps">
+      <li>Variabel pertama: tidak ada substitusi, langsung cek immediate.</li>
+      <li>Variabel berikutnya: kalau ada alternatif yang diawali variabel yang <b>sudah</b> diproses, substitusikan semua alternatif variabel itu.</li>
+      <li>Lalu hapus immediate left recursion di variabel ini.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Contoh slide: urutan S, A</h2>
+  <p class="sub">Grammar: <code>S → Aa | b</code> dan <code>A → Ac | Sd | f</code>.</p>
+<pre><code>S (i = 1): tidak ada substitusi, tidak ada immediate → S → Aa | b tetap
+
+A (i = 2): A → Sd diawali S (sudah diproses) → substitusi S:
+           A → Ac | Aad | bd | f
+           immediate: α = c, ad   β = bd, f
+           A  → bdA' | fA'
+           A' → cA' | adA' | ε</code></pre>
+  <p class="label">Dengan urutan A, S hasilnya berbeda tetapi sama benarnya: <code>S → fA'aS' | bS'</code>, <code>S' → dA'aS' | ε</code>, <code>A → SdA' | fA'</code>, <code>A' → cA' | ε</code>. Ikuti urutan yang diminta soal.</p>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: eliminasi left recursion</h2>
+  <iframe src="viz/left-recursion.html" title="Visualisasi eliminasi left recursion"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Kesalahan yang sering muncul</h2>
+  <p class="sub">Kebanyakan kesalahan membuat language berubah, atau menyisakan left recursion yang tersembunyi.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Akibatnya</th><th>Perbaikan</th></tr>
+    <tr><td><code>A' → αA'</code> tanpa <code>| ε</code></td><td>A' tidak pernah berhenti, jadi tidak ada string yang dihasilkan</td><td>Selalu tambahkan ε di A'</td></tr>
+    <tr><td>α dan β tertukar: <code>A → αA'</code></td><td>Language berubah, misalnya <code>+T</code> di depan</td><td>β (yang tidak diawali A) di depan</td></tr>
+    <tr><td>β lupa diikuti A'</td><td>Hanya β yang dihasilkan, α tidak pernah muncul</td><td>Setiap β menjadi βA'</td></tr>
+    <tr><td>Hanya menghapus immediate</td><td>Left recursion tidak langsung masih ada</td><td>Substitusi variabel yang lebih awal dulu</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Left recursion membuat parser top-down memanggil dirinya terus tanpa membaca token.</li>
+    <li>Immediate: <code>A → Aα | β</code> menjadi <code>A → βA'</code>, <code>A' → αA' | ε</code>.</li>
+    <li>Tidak langsung: proses variabel sesuai urutan. Substitusi variabel yang sudah diproses kalau muncul di depan, lalu hapus immediate left recursion.</li>
+    <li>Untuk parser top-down, grammar biasanya perlu dua transformasi: <b>eliminasi left recursion</b> dan <b>left factoring</b>.</li>
+  </ul>
+  <p class="label">Jawaban empat latihan dosen ada di notes.</p>
+</section>
+
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RE ke ε-NFA (Thompson) · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=45a95657">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Compilation technique · 02</span>
+<h1>RE → ε-NFA (Thompson)</h1>
+<p class="lead">Thompson's construction mengubah RE apa pun menjadi ε-NFA dengan cara mekanis: buat fragment kecil untuk setiap simbol, lalu sambungkan dengan pola union, concatenation, dan star.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/thompson.html">Visualisasi: Thompson langkah demi langkah</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Setiap fragment punya <b>satu start dan satu final</b>, jadi bisa disambung tanpa melihat isinya.</li>
+    <li>Simbol: 2 state. Union: start dan final baru, cabang ε. Concatenation: final kiri → ε → start kanan. Star: start dan final baru, 4 ε (masuk, ulangi, lewati, keluar).</li>
+    <li>Kerjakan dari dalam ke luar: star, lalu concatenation, lalu union.</li>
+    <li>Cek: jumlah state = 2 × (simbol + union + star).</li>
+  </ul>
+</div>
+
+<h2>1. NFA dan ε-NFA</h2>
+<p>Finite automaton (FA) adalah mesin yang membaca string simbol demi simbol, lalu menjawab <b>accepted</b> atau <b>rejected</b>. Secara formal M = (Q, Σ, δ, q₀, F):</p>
+<table>
+  <tr><th>Komponen</th><th>Arti</th></tr>
+  <tr><td>Q</td><td>himpunan state yang terbatas</td></tr>
+  <tr><td>Σ</td><td>alphabet input</td></tr>
+  <tr><td>δ</td><td>fungsi transisi. Di NFA, δ(q, a) adalah <b>himpunan</b> state (boleh kosong, boleh lebih dari satu).</td></tr>
+  <tr><td>q₀</td><td>start state</td></tr>
+  <tr><td>F</td><td>himpunan final (accepting) state</td></tr>
+</table>
+<p><b>ε-NFA</b> adalah NFA yang juga boleh punya transisi berlabel ε: pindah state tanpa membaca input. String x diterima kalau <b>ada minimal satu jalur</b> dari start ke final yang label-labelnya (tanpa ε) membentuk x.</p>
+<div class="au-fig" data-auto="NFA untuk (a|b)*abb">a b
+→0 {0,1} {0}
+1 - {2}
+2 - {3}
+*3 - -</div>
+<p>NFA di atas menerima <code>(a|b)*abb</code>. Input <code>aabb</code> diterima lewat jalur 0 →a 0 →a 1 →b 2 →b 3. Jalur lain, misalnya 0 →a 0 →a 0 →b 0 →b 0, berakhir di state bukan final, tetapi itu tidak masalah: satu jalur yang berhasil sudah cukup.</p>
+
+<h2>2. Empat pola Thompson</h2>
+<p>Teorema: untuk setiap RE R ada ε-NFA M dengan L(M) = L(R). Buktinya sekaligus menjadi cara membuatnya, yaitu induksi pada struktur RE.</p>
+<h3>Simbol a (dan ε)</h3>
+<div class="au-fig" data-thompson="a"></div>
+<p>Dua state dan satu transisi. Untuk ε, labelnya ε. Untuk ∅, dua state tanpa transisi (tidak ada jalur ke final).</p>
+<h3>Union R | S</h3>
+<div class="au-fig" data-thompson="a|b"></div>
+<p>Start baru bercabang ε ke start R dan start S, karena string boleh mengikuti salah satunya. Final R dan final S masing-masing ε ke final baru, supaya fragment hasilnya tetap punya satu final.</p>
+<h3>Concatenation RS</h3>
+<div class="au-fig" data-thompson="ab"></div>
+<p>Final R disambung ε ke start S. Start hasil = start R, final hasil = final S. Final R tidak lagi final.</p>
+<h3>Star R*</h3>
+<div class="au-fig" data-thompson="a*"></div>
+<table>
+  <tr><th>ε-transition</th><th>Di gambar</th><th>Fungsinya</th></tr>
+  <tr><td>masuk</td><td>0 → 1</td><td>mulai satu putaran R</td></tr>
+  <tr><td>ulangi</td><td>2 → 1</td><td>setelah R selesai, boleh membaca R lagi</td></tr>
+  <tr><td>lewati</td><td>0 → 3</td><td>nol kali: ε diterima</td></tr>
+  <tr><td>keluar</td><td>2 → 3</td><td>berhenti mengulang</td></tr>
+</table>
+
+<h2>3. Resep mengerjakan soal</h2>
+<ol>
+  <li><b>Pecah RE sesuai prioritas.</b> Star mengikat paling kuat, lalu concatenation, lalu union. Contoh: <code>(a|b)*abb</code> = <code>(a|b)*</code> · <code>a</code> · <code>b</code> · <code>b</code>.</li>
+  <li><b>Buat fragment simbol</b>, satu untuk setiap kemunculan simbol.</li>
+  <li><b>Gabungkan dari dalam ke luar.</b> Untuk <code>(a|b)*abb</code>: a, b → a|b → (a|b)* → sambung a → sambung b → sambung b.</li>
+  <li><b>Beri nomor</b> state dari kiri ke kanan (cabang atas lebih dulu dari cabang bawah).</li>
+  <li><b>Cek</b> jumlah state: 2 × (simbol + union + star). Hanya ada satu start dan satu final.</li>
+</ol>
+<h3>Contoh: (a|b)*a</h3>
+<div class="au-fig" data-thompson="(a|b)*a"></div>
+<p>3 simbol + 1 union + 1 star → 10 state. String terpendek yang diterima: <code>a</code> (jalur 0 → 7 → 8 → 9 lewat ε "lewati").</p>
+<h3>Contoh slide: (0+1)*1(0+1)</h3>
+<div class="au-fig" data-thompson="(0+1)*1(0+1)"></div>
+<p>5 simbol + 2 union + 1 star → 16 state.</p>
+<div class="callout"><strong>Gaya Aho: concatenation tanpa ε</strong>Di buku Aho (dan slide dosen sesi DFA &amp; NFA), final R langsung digabung dengan start S menjadi satu state. Hasilnya satu state lebih sedikit untuk setiap concatenation. Contoh: <code>(a|b)*a</code> menjadi 9 state (0 sampai 8). Kedua gaya benar karena ε di antara keduanya tidak membaca apa pun. Kalau soal tidak menyebut gaya, pakai gaya slide Thompson dosen (dengan ε).</div>
+
+<h2>4. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+  <tr><td>Star tanpa ε "lewati"</td><td>ε ditolak, padahal R* boleh nol kali</td><td>Tambahkan start baru → final baru</td></tr>
+  <tr><td>Star tanpa ε "ulangi"</td><td>R hanya bisa dibaca sekali</td><td>Tambahkan final dalam → start dalam</td></tr>
+  <tr><td>Union tanpa final baru</td><td>Fragment punya dua final, jadi pola lain tidak bisa dipasang</td><td>Kedua final → ε → final baru</td></tr>
+  <tr><td><code>ab*</code> dibangun sebagai <code>(ab)*</code></td><td>Language berbeda</td><td>Star hanya mengikat simbol atau kurung tepat di kirinya</td></tr>
+  <tr><td>Final fragment dalam tetap ditandai final</td><td>NFA menerima string yang belum selesai</td><td>Hanya final fragment terluar yang final</td></tr>
+</table>
+
+<h2>5. Latihan</h2>
+<p>Gambar ε-NFA-nya di kertas, hitung jumlah state, lalu cocokkan di <a href="viz/thompson.html">visualisasi</a> (menu "Ubah RE").</p>
+<p><b>1.</b> <code>(a|b)*abb</code></p>
+<details><summary>Jawaban</summary><p>Simbol: a dan b di dalam star, lalu a, b, b. Jadi 5 simbol + 1 union + 1 star = 7 → <b>14 state</b>.</p></details>
+<p><b>2.</b> <code>aa*|bb*</code> (contoh slide NFA)</p>
+<details><summary>Jawaban</summary><p>4 simbol + 1 union + 2 star = 7 → <b>14 state</b>. Struktur: union dari (<code>a</code> lalu <code>a*</code>) dan (<code>b</code> lalu <code>b*</code>).</p></details>
+<p><b>3.</b> <code>(a|b)*(ab|bb)a*</code> (RE dari latihan sesi RE to DFA)</p>
+<details><summary>Jawaban</summary><p>Simbol: a, b, a, b, b, b, a = 7. Union: 2 (<code>a|b</code> dan <code>ab|bb</code>). Star: 2. Total 11 → <b>22 state</b>.</p></details>
+<p><b>4.</b> <code>(a|ε)bc*</code></p>
+<details><summary>Jawaban</summary><p>ε diperlakukan seperti simbol (2 state, transisi ε). Simbol + ε: a, ε, b, c = 4. Union 1, star 1. Total 6 → <b>12 state</b>.</p></details>
+<p><b>5.</b> Kenapa union butuh start dan final baru, sedangkan concatenation tidak?</p>
+<details><summary>Jawaban</summary><p>Hasil setiap pola harus punya tepat satu start dan satu final. Concatenation sudah punya satu start (milik R) dan satu final (milik S). Union punya dua start dan dua final, jadi butuh start baru yang bercabang ke keduanya dan final baru tempat keduanya bertemu.</p></details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Addison-Wesley. Bab 2.5 dan 3.2.</li>
+  <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 3.7.4.</li>
+  <li>Nasari, M. (2025). <i>RE to DFA</i> dan <i>DFA &amp; NFA</i> [slide kuliah COMP6062 Compilation Techniques, sesi 4–5].</li>
+</ol>
+
+</article>
+<script src="../../_shared/automata.js?v=9b7b4edb"></script>
+<script>renderFigures();</script>
+</body>
+</html>

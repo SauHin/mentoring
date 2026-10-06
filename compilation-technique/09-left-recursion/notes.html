@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eliminasi Left Recursion · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Compilation technique · 09</span>
+<h1>Eliminasi left recursion</h1>
+<p class="lead">Grammar left recursive membuat parser top-down memanggil dirinya sendiri tanpa henti. Eliminasi left recursion menulis ulang grammar supaya rekursinya pindah ke kanan, tanpa mengubah language.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/left-recursion.html">Visualisasi: eliminasi left recursion</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Immediate: <code>A → Aα₁ | … | Aαₘ | β₁ | … | βₙ</code> menjadi <code>A → β₁A' | … | βₙA'</code>, <code>A' → α₁A' | … | αₘA' | ε</code>.</li>
+    <li>Tidak langsung: urutkan variabel A₁…Aₙ. Untuk setiap Aᵢ, substitusi Aⱼ (j &lt; i) yang muncul di depan, lalu hapus immediate left recursion di Aᵢ.</li>
+    <li>Jangan lupa ε di A', dan β selalu di depan.</li>
+  </ul>
+</div>
+
+<h2>1. Left recursion dan masalahnya</h2>
+<p>Grammar <b>left recursive</b> kalau ada variabel A dengan A ⇒⁺ Aα untuk suatu α. Kalau langsung terlihat dari satu produksi (<code>A → Aα</code>), disebut <b>immediate</b>. Kalau lewat variabel lain, disebut tidak langsung.</p>
+<pre><code>Expr → Expr + Term | Term
+
+void Expr() { Expr(); match('+'); Term(); }    // Expr() → Expr() → Expr() → …</code></pre>
+<p>Recursive descent parser memanggil <code>Expr()</code> lagi sebelum membaca token apa pun, jadi tidak pernah maju. Parser bottom-up (LR) tidak punya masalah ini.</p>
+
+<h2>2. Immediate left recursion</h2>
+<p><code>A → Aα | β</code> menghasilkan β, βα, βαα, …: satu β diikuti α nol kali atau lebih. Grammar yang setara tanpa left recursion:</p>
+<pre><code>A  → β A'
+A' → α A' | ε</code></pre>
+<p>Contoh 1 (slide):</p>
+<pre><code>E → E+T | T          E  → TE'
+T → T*F | F    →     E' → +TE' | ε
+F → id | (E)         T  → FT'
+                     T' → *FT' | ε
+                     F  → id | (E)</code></pre>
+<p>Contoh 2 (slide):</p>
+<pre><code>A → Aab | Aba | aB | a        A  → aBA' | aA'
+B → b | Bba             →     A' → abA' | baA' | ε
+                              B  → bB'
+                              B' → baB' | ε</code></pre>
+<div class="callout">Slide menulis baris terakhir sebagai <code>B → baB' | ε</code>. Yang benar <code>B' → baB' | ε</code>.</div>
+
+<h2>3. Left recursion tidak langsung</h2>
+<pre><code>S → Aa | b
+A → Sc | d          S ⇒ Aa ⇒ Sca      (S muncul lagi di paling kiri)</code></pre>
+<p>Algoritma umum, dengan urutan variabel A₁, …, Aₙ:</p>
+<pre><code>for i = 1 to n:
+    for j = 1 to i − 1:
+        ganti setiap produksi Aᵢ → Aⱼγ
+        dengan Aᵢ → δ₁γ | … | δₖγ, di mana Aⱼ → δ₁ | … | δₖ (produksi Aⱼ saat ini)
+    hapus immediate left recursion di Aᵢ</code></pre>
+<p>Setelah iterasi ke-i, setiap alternatif Aᵢ yang diawali variabel pasti diawali variabel yang <b>lebih belakang</b> di urutan. Karena itu rekursi tidak bisa kembali ke kiri. Algoritma ini dijamin benar untuk grammar tanpa cycle (A ⇒⁺ A) dan tanpa ε-production.</p>
+<h3>Contoh slide: S → Aa | b, A → Ac | Sd | f, urutan S, A</h3>
+<pre><code>S: tidak ada substitusi, tidak ada immediate left recursion.
+A: A → Sd diawali S → substitusi: A → Ac | Aad | bd | f
+   hapus immediate: A  → bdA' | fA'
+                    A' → cA' | adA' | ε
+Hasil: S → Aa | b,  A → bdA' | fA',  A' → cA' | adA' | ε</code></pre>
+<h3>Contoh slide: grammar yang sama, urutan A, S</h3>
+<pre><code>A: hapus immediate: A → SdA' | fA',  A' → cA' | ε
+S: S → Aa diawali A → substitusi: S → SdA'a | fA'a | b
+   hapus immediate: S  → fA'aS' | bS'
+                    S' → dA'aS' | ε
+Hasil: S → fA'aS' | bS',  S' → dA'aS' | ε,  A → SdA' | fA',  A' → cA' | ε</code></pre>
+
+<h2>4. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Perbaikan</th></tr>
+  <tr><td>A' tanpa ε</td><td><code>A' → αA' | ε</code>, supaya A' bisa berhenti</td></tr>
+  <tr><td>α ditaruh di A, β di A'</td><td>β (yang tidak diawali A) selalu di depan: <code>A → βA'</code></td></tr>
+  <tr><td>Hanya menghapus immediate left recursion</td><td>Substitusi variabel yang lebih awal dulu, sesuai urutan</td></tr>
+  <tr><td>Substitusi variabel yang lebih belakang di urutan</td><td>Hanya Aⱼ dengan j &lt; i</td></tr>
+  <tr><td>Substitusi memakai produksi Aⱼ yang lama</td><td>Pakai produksi Aⱼ yang sudah diproses</td></tr>
+</table>
+
+<h2>5. Latihan (dari slide dosen)</h2>
+<p>Cek setiap langkah di <a href="viz/left-recursion.html">visualisasi</a> (pilih "Latihan 1/3/4").</p>
+<p><b>1.</b> <code>Q → QED | q</code>, <code>E → ε</code>, <code>D → NFA | d</code>, <code>N → DFA | n</code>, <code>F → f</code>, <code>A → a</code>.</p>
+<details><summary>Jawaban (urutan Q, E, D, N, F, A)</summary>
+<pre><code>Q  → qQ'
+Q' → EDQ' | ε
+E  → ε
+D  → NFA | d
+N  → dFAN' | nN'
+N' → FAFAN' | ε
+F  → f
+A  → a</code></pre>
+<p>Q punya immediate left recursion (α = ED, β = q). D → NFA dan N → DFA membentuk left recursion tidak langsung: saat memproses N, substitusi D menghasilkan <code>N → NFAFA | dFA | n</code>, lalu immediate-nya dihapus. Karena E → ε, Q' boleh juga ditulis <code>Q' → DQ' | ε</code>.</p>
+</details>
+<p><b>2.</b> (Left factoring dari slide yang sama, lihat materi 08.)</p>
+<p><b>3.</b> <code>S → Ra | Aa | a</code>, <code>R → ab</code>, <code>A → AR | AT | b</code>, <code>T → Tb | a</code>.</p>
+<details><summary>Jawaban (urutan S, R, A, T)</summary>
+<pre><code>S  → Ra | Aa | a
+R  → ab
+A  → bA'
+A' → RA' | TA' | ε
+T  → aT'
+T' → bT' | ε</code></pre>
+<p>Tidak ada left recursion tidak langsung, karena alternatif A dan T tidak diawali S atau R. Cukup hapus immediate left recursion di A (α = R, T; β = b) dan T (α = b; β = a).</p>
+</details>
+<p><b>4.</b> <code>S → AA | 0</code>, <code>A → SS | 1</code>, dengan urutan S, A.</p>
+<details><summary>Jawaban</summary>
+<pre><code>S: tidak ada substitusi dan tidak ada immediate → S → AA | 0
+A: A → SS diawali S → substitusi: A → AAS | 0S | 1
+   hapus immediate (α = AS; β = 0S, 1):
+   A  → 0SA' | 1A'
+   A' → ASA' | ε
+
+Hasil: S → AA | 0,  A → 0SA' | 1A',  A' → ASA' | ε</code></pre>
+</details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 4.3.3.</li>
+  <li>Nasari, M. (2025). <i>Syntax analysis: parsing fundamentals</i> [slide kuliah COMP6062 Compilation Techniques, sesi 8].</li>
+</ol>
+
+</article>
+</body>
+</html>

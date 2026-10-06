@@ -20,7 +20,8 @@ Aturan slide:
 
 Aturan visualisasi (viz):
 - Satu viz untuk satu konsep. Mentee harus langsung tahu apa yang perlu diklik.
-- Pakai mesin bersama kalau cocok: `_shared/cviz.js` (program C), `listviz.js` (linked list), `logic.js` (logika). Mesin ini sudah mengikuti aturan di bawah.
+- Pakai mesin bersama kalau cocok: `_shared/cviz.js` (program C), `listviz.js` (linked list), `logic.js` (logika), `automata.js` dan `grammar.js` (automata dan grammar). Mesin ini sudah mengikuti aturan di bawah.
+- Setelah mengubah `automata.js` atau `grammar.js`, jalankan `node tools/check-engines.js`. Script ini mencocokkan hasil mesin dengan jawaban di slide dosen.
 - Simulasi bertahap selalu punya tombol **Kembali** di sebelah **Langkah berikutnya**.
 - Pilihan contoh lebih dari 4: pakai dropdown (`label.pick` + `select.field`), bukan deretan tombol. Pilihan paling banyak 4: grup tombol `.seg`.
 - Jangan menumpuk kotak. Baris kontrol tanpa latar (`.controls`), paling banyak satu kartu untuk penjelasan langkah dan satu panel untuk state. Jangan ada kartu di dalam kartu.

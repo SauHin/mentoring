@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Left Factoring · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Compilation technique · 08</span>
+<h1>Left factoring</h1>
+<p class="lead">Left factoring menulis ulang grammar supaya tidak ada dua alternatif dari variabel yang sama yang diawali simbol yang sama. Dengan begitu, parser top-down bisa memilih alternatif hanya dengan melihat satu token.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/left-factoring.html">Visualisasi: left factoring</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li><code>A → αβ₁ | αβ₂ | γ</code> menjadi <code>A → αA' | γ</code> dan <code>A' → β₁ | β₂</code>.</li>
+    <li>α = awalan bersama <b>terpanjang</b> dari satu kelompok alternatif. Sisa yang kosong ditulis ε.</li>
+    <li>Ulangi pada A dan setiap variabel baru sampai tidak ada lagi awalan bersama.</li>
+  </ul>
+</div>
+
+<h2>1. Kenapa perlu left factoring</h2>
+<p>Parser top-down (recursive descent, LL(1)) harus memilih produksi untuk sebuah variabel dengan melihat token berikutnya. Kalau <code>A → αβ₁ | αβ₂</code> dan input diawali α, kedua alternatif sama-sama cocok. Parser tidak bisa memilih tanpa membaca lebih jauh (backtracking), dan itu lambat.</p>
+<p>Left factoring menunda keputusan: parser membaca α dulu lewat <code>A → αA'</code>, lalu baru memilih β₁ atau β₂ di A', saat token-nya sudah berbeda.</p>
+
+<h2>2. Algoritma</h2>
+<p>Untuk setiap variabel A yang punya dua alternatif atau lebih dengan awalan bersama yang tidak kosong:</p>
+<pre><code>A → αβ₁ | … | αβₙ | γ₁ | … | γₘ      (γ tidak diawali α)
+
+menjadi
+
+A  → αA' | γ₁ | … | γₘ
+A' → β₁ | … | βₙ</code></pre>
+<ol>
+  <li>Kelompokkan alternatif A berdasarkan simbol pertamanya.</li>
+  <li>Untuk kelompok pertama yang berisi dua alternatif atau lebih, cari awalan bersama terpanjang α.</li>
+  <li>Terapkan rumus di atas dengan variabel baru (A', A'', … yang belum dipakai). Sisa yang kosong = ε.</li>
+  <li>Ulangi untuk kelompok berikutnya di A, lalu untuk setiap variabel baru.</li>
+</ol>
+
+<h2>3. Contoh dari slide</h2>
+<h3>Contoh 1</h3>
+<pre><code>A → abB | aB | cdg | cdeB | cdfB | h
+
+A  → aA' | cdg | cdeB | cdfB | h       (kelompok a, α = a)
+A' → bB | B
+
+A  → aA' | cdA'' | h                   (kelompok c, α = cd)
+A' → bB | B
+A''→ g | eB | fB</code></pre>
+<h3>Contoh 2</h3>
+<pre><code>A → bB | b | Bac | Bb | c | cB | h
+B → b
+
+A → bX | BY | cZ | h
+X → B | ε
+Y → ac | b
+Z → ε | B
+B → b</code></pre>
+<p>Slide menamai variabel baru X, Y, Z. Visualisasi menamainya A', A'', A'''. Namanya bebas, asalkan belum dipakai.</p>
+<div class="callout">Perhatikan <code>bB</code> dan <code>Bb</code>. Karena B → b, keduanya sama-sama diawali b setelah B diturunkan. Left factoring biasa hanya melihat simbol yang tertulis, jadi keduanya tetap dianggap berbeda awalan (b dan B), sama seperti di slide.</div>
+<h3>Contoh 3</h3>
+<pre><code>A → ad | a | ab | abc | b
+
+A  → aA' | b
+A' → d | ε | b | bc
+
+A  → aA' | b
+A' → d | ε | bA''
+A''→ ε | c</code></pre>
+
+<h2>4. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Perbaikan</th></tr>
+  <tr><td>Lupa ε ketika alternatif sama persis dengan awalannya</td><td><code>A → a | ab</code> menjadi <code>A → aA'</code>, <code>A' → ε | b</code></td></tr>
+  <tr><td>Tidak mengecek variabel baru</td><td>A' bisa punya awalan bersama sendiri (contoh 3)</td></tr>
+  <tr><td>Memindahkan alternatif lain ke A'</td><td>Hanya kelompok yang diawali α yang pindah</td></tr>
+  <tr><td>Satu variabel baru untuk dua kelompok</td><td>Setiap kelompok mendapat variabel baru sendiri</td></tr>
+</table>
+
+<h2>5. Latihan</h2>
+<p>Cek setiap jawaban di <a href="viz/left-factoring.html">visualisasi</a> (menu "Ubah grammar").</p>
+<p><b>1.</b> (Latihan dosen) <code>E → T + E | T</code>, <code>T → int | int * T | ( E )</code>.</p>
+<details><summary>Jawaban</summary>
+<pre><code>E  → T E'
+E' → + E | ε
+T  → int T' | ( E )
+T' → ε | * T</code></pre>
+</details>
+<p><b>2.</b> <code>S → iEtS | iEtSeS | a</code>, <code>E → b</code> (if-then-else, i = if, t = then, e = else).</p>
+<details><summary>Jawaban</summary>
+<pre><code>S  → iEtSS' | a
+S' → ε | eS
+E  → b</code></pre>
+<p>Awalan bersama terpanjang = <code>iEtS</code>. Sisa: kosong dan <code>eS</code>.</p>
+</details>
+<p><b>3.</b> <code>A → aAB | aBc | aAc</code></p>
+<details><summary>Jawaban</summary>
+<pre><code>A   → aA'
+A'  → AA'' | Bc
+A'' → B | c</code></pre>
+<p>Langkah 1: awalan a, sisa <code>AB</code>, <code>Bc</code>, <code>Ac</code>. Langkah 2: di A', <code>AB</code> dan <code>Ac</code> diawali A.</p>
+</details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 4.3.4.</li>
+  <li>Nasari, M. (2025). <i>Syntax analysis: parsing fundamentals</i> [slide kuliah COMP6062 Compilation Techniques, sesi 8].</li>
+</ol>
+
+</article>
+</body>
+</html>

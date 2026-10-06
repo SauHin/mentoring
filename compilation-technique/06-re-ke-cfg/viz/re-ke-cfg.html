@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RE ke CFG</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>RE → CFG</h1>
+<p>Mulai dari <b>S</b> = seluruh RE, lalu pecah dari luar ke dalam. Concatenation ditulis berdampingan, union menjadi alternatif <code>|</code>, dan setiap star mendapat variabel baru <code>X → (isi)X | ε</code>.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu produksinya"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah RE</summary>
+  <div class="row">
+    <label class="au-field">RE (union: | atau +, star: *)<input class="field" id="re" spellcheck="false" autocomplete="off"></label>
+    <div class="au-keys"><button class="btn btn-sm" id="eps">ε</button></div>
+  </div>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <section><div class="au-title">RE</div><code id="whole"></code></section>
+    <section class="au-sec"><div class="au-title">Grammar <span class="label">oranye = produksi yang baru ditulis</span></div><div class="au-gram" id="gram"></div></section>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/grammar.js?v=8fdcf09f"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['(ab+ba)*(abb)*, slide', '(ab+ba)*(abb)*'],
+  ['a*b*(a|c)*, latihan 1', 'a*b*(a|c)*'],
+  ['(a|c)*ba, latihan 2', '(a|c)*ba'],
+  ['Latihan 3', '((00+01)*01)+(101(0+10)*)'],
+  ['(a|b)*abb', '(a|b)*abb'],
+  ['(a|ε)bc*', '(a|ε)bc*'],
+];
+let C, steps;
+const st = stepper($('step'), (s, i) => {
+  $('gram').innerHTML = C.steps.slice(0, i + 1).map((d) => `<div class="${d === s.def ? 'hot' : ''}"><b>${d.X}</b> → ${escHTML(C.g.P.get(d.X).map((a) => showAlt(C.g, a)).join(' | '))}</div>`).join('');
+}, $('guess'));
+
+function load() {
+  const src = $('re').value;
+  try {
+    const u = src.includes('+') ? '+' : '|';
+    C = reToCFG(parseRE(src), u);
+    $('whole').textContent = showRE(parseRE(src), u);
+    steps = C.steps.map((d, i) => ({
+      def: d,
+      ask: `${d.X} mewakili <code>${escHTML(d.re)}</code>. Produksi apa untuk ${d.X}?`,
+      text: `${d.X} mewakili <code>${escHTML(d.re)}</code>. ${d.why} Hasil: <code>${d.X} → ${escHTML(C.g.P.get(d.X).map((a) => showAlt(C.g, a)).join(' | '))}</code>.${i === C.steps.length - 1 ? ` <b>Selesai</b>: semua variabel sudah punya produksi. G = (V, T, P, S) dengan V = {${C.g.order.join(', ')}} dan T = {${[...new Set(reSymbols(parseRE(src)))].join(', ')}}.` : ''}`,
+    }));
+    $('err').textContent = '';
+    st.load(steps);
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { $('re').value = PRESETS[e.target.value][1]; load(); };
+$('re').oninput = load;
+$('eps').onclick = () => { const f = $('re'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; load(); };
+$('re').value = PRESETS[0][1];
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Context-Free Grammar dan RE ke CFG · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Compilation technique · 06</span>
+<h1>Context-free grammar dan RE → CFG</h1>
+<p class="lead">Context-free grammar (CFG) menghasilkan string dengan mengganti variabel satu per satu. CFG lebih kuat dari RE, jadi setiap RE bisa ditulis ulang sebagai CFG dengan beberapa aturan sederhana.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/re-ke-cfg.html">Visualisasi: RE → CFG</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>G = (V, T, P, S): variabel, terminal, produksi <code>A → α</code>, start symbol.</li>
+    <li>RE → CFG: concatenation = ditulis berdampingan, union = alternatif <code>|</code>, star = variabel baru <code>X → rX | ε</code>.</li>
+    <li>Setiap star butuh variabel sendiri, supaya urutan bagian-bagian RE tetap terjaga.</li>
+    <li>L(G): tulis string terpendek, lalu cari produksi yang bisa diulang.</li>
+  </ul>
+</div>
+
+<h2>1. Definisi CFG</h2>
+<p>G = (V, T, P, S) dengan:</p>
+<ul>
+  <li><b>V</b>: himpunan variabel (non-terminal), ditulis huruf besar.</li>
+  <li><b>T</b>: himpunan terminal. V dan T tidak beririsan.</li>
+  <li><b>P</b>: himpunan produksi <code>A → α</code>, dengan A ∈ V dan α ∈ (V ∪ T)*. Alternatif <code>A → α₁, A → α₂</code> boleh ditulis <code>A → α₁ | α₂</code>.</li>
+  <li><b>S</b>: start symbol, salah satu variabel.</li>
+</ul>
+<p>Konvensi penulisan di slide: A, B, C, D, E, S = variabel. Huruf kecil dan digit = terminal. X, Y, Z = terminal atau variabel. u, v, w, x, y, z = string terminal. α, β, γ = sentential form (campuran variabel dan terminal).</p>
+<p>CFG dipakai untuk mendefinisikan bahasa pemrograman (dalam notasi BNF), format dokumen seperti DTD di XML, dan ekspresi matematika. Mesin yang mengenali tepat semua context-free language adalah <b>pushdown automaton</b> (PDA).</p>
+
+<h2>2. Derivation dan language</h2>
+<p><code>αAβ ⇒ αγβ</code> kalau ada produksi <code>A → γ</code>. <code>⇒*</code> berarti nol langkah atau lebih. Language dari G:</p>
+<pre><code>L(G) = { w | w ∈ T* dan S ⇒* w }</code></pre>
+<p>L disebut <b>context-free language</b> kalau ada CFG G dengan L = L(G).</p>
+<table>
+  <tr><th>Grammar</th><th>String terpendek</th><th>L(G)</th></tr>
+  <tr><td><code>S → aSb | ab</code></td><td>ab, aabb, aaabbb</td><td>{aⁿbⁿ | n ≥ 1}</td></tr>
+  <tr><td><code>S → aAa</code>, <code>A → aAa | b</code></td><td>aba, aabaa</td><td>{aⁿbaⁿ | n ≥ 1}</td></tr>
+  <tr><td><code>E → E+E | E*E | (E) | a | b | c | d</code></td><td>a, a+b, (a+b)*c</td><td>ekspresi aritmetika</td></tr>
+</table>
+<div class="callout"><strong>Catatan slide</strong>Slide menulis <code>P = {S → aAa, A → aAa, A → a}</code>, tetapi derivation-nya menghasilkan <code>aba</code>. Supaya cocok dengan derivation itu, produksi terakhir seharusnya <code>A → b</code>. Dengan <code>A → a</code>, language-nya menjadi string a dengan panjang ganjil minimal 3.</div>
+
+<h2>3. Chomsky hierarchy</h2>
+<table>
+  <tr><th>Type</th><th>Grammar</th><th>Mesin</th><th>Produksi</th></tr>
+  <tr><td>0</td><td>Unrestricted</td><td>Turing machine</td><td>α → β</td></tr>
+  <tr><td>1</td><td>Context-sensitive</td><td>Linear-bounded automaton</td><td>α → β, |α| ≤ |β|</td></tr>
+  <tr><td>2</td><td>Context-free</td><td>Pushdown automaton</td><td>A → β, A ∈ V, β ∈ (V ∪ T)*</td></tr>
+  <tr><td>3</td><td>Regular</td><td>Finite automaton</td><td>A → aB | a (right-linear) atau A → Ba | a (left-linear)</td></tr>
+</table>
+<p>Setiap type mencakup type di bawahnya. Semua regular language juga context-free, tetapi {aⁿbⁿ} context-free dan tidak regular.</p>
+
+<h2>4. Aturan RE → CFG</h2>
+<table>
+  <tr><th>RE</th><th>Produksi</th></tr>
+  <tr><td>∅</td><td>S → S (S tidak pernah menghasilkan string terminal)</td></tr>
+  <tr><td>ε</td><td>S → ε</td></tr>
+  <tr><td>a</td><td>S → a</td></tr>
+  <tr><td>a + b</td><td>S → a | b</td></tr>
+  <tr><td>a.b</td><td>S → ab</td></tr>
+  <tr><td>a*</td><td>S → aS | ε</td></tr>
+  <tr><td>a⁺</td><td>S → aS | a</td></tr>
+</table>
+<p>Untuk RE yang lebih besar, pecah dari luar ke dalam:</p>
+<ol>
+  <li>S mewakili seluruh RE.</li>
+  <li><b>Concatenation</b> r·s: tulis bentuk r lalu bentuk s berdampingan. String terminal ditulis langsung. Bagian berupa union atau star diganti variabel baru.</li>
+  <li><b>Union</b> r|s: setiap alternatif menjadi alternatif produksi.</li>
+  <li><b>Star</b> r*: variabel baru X dengan <code>X → rX | ε</code>. Kalau r = r₁|r₂, boleh langsung <code>X → r₁X | r₂X | ε</code>.</li>
+  <li>Ulangi untuk setiap variabel baru. Terakhir, tulis V, T, P, S.</li>
+</ol>
+<h3>Contoh slide: (ab + ba)*(abb)*</h3>
+<pre><code>Versi dosen:          Versi ringkas:
+S → AB                S → AB
+A → CA | ε            A → abA | baA | ε
+C → ab | ba           B → abbB | ε
+B → DB | ε
+D → abb</code></pre>
+<p>Keduanya benar. Versi dosen membuat variabel untuk isi setiap star, versi ringkas langsung memasukkan isinya.</p>
+
+<h2>5. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Perbaikan</th></tr>
+  <tr><td>Star tanpa ε (<code>A → aA</code>)</td><td><code>A → aA | ε</code>, supaya derivation bisa berhenti dan nol kali diizinkan</td></tr>
+  <tr><td>Satu variabel untuk beberapa star berurutan</td><td>Satu variabel per star, lalu gabungkan dengan concatenation di S</td></tr>
+  <tr><td><code>(a|b)c</code> ditulis <code>S → a | bc</code></td><td>Union di dalam concatenation butuh variabel: <code>S → Ac</code>, <code>A → a | b</code></td></tr>
+  <tr><td>Untuk a⁺ menulis <code>S → aS | ε</code></td><td>Itu a*. Untuk a⁺: <code>S → aS | a</code></td></tr>
+</table>
+
+<h2>6. Latihan</h2>
+<p>Soal 1–3 dari slide dosen ("Construct a CFG for RE below"). Cek di <a href="viz/re-ke-cfg.html">visualisasi</a>.</p>
+<p><b>1.</b> <code>a* b* (a|c)*</code></p>
+<details><summary>Jawaban</summary>
+<pre><code>S → ABC
+A → aA | ε
+B → bB | ε
+C → aC | cC | ε</code></pre>
+<p>G = ({S, A, B, C}, {a, b, c}, P, S). Versi dengan variabel untuk isi star: <code>C → DC | ε</code>, <code>D → a | c</code>.</p>
+</details>
+<p><b>2.</b> <code>(a|c)* ba</code></p>
+<details><summary>Jawaban</summary>
+<pre><code>S → Aba
+A → aA | cA | ε</code></pre>
+<p>Bagian <code>ba</code> adalah string terminal biasa, jadi ditulis langsung di belakang A.</p>
+</details>
+<p><b>3.</b> <code>((00 + 01)* 01) + (101 (0 + 10)*)</code></p>
+<details><summary>Jawaban</summary>
+<pre><code>S → A01 | 101B
+A → 00A | 01A | ε
+B → 0B | 10B | ε</code></pre>
+<p>Bagian terluar adalah union, jadi S punya dua alternatif. Alternatif kiri = A lalu 01, alternatif kanan = 101 lalu B.</p>
+</details>
+<p><b>4.</b> Tentukan L(G) untuk <code>S → aSbb | abb</code>.</p>
+<details><summary>Jawaban</summary><p>Setiap langkah menambah satu a di kiri dan dua b di kanan. L(G) = {aⁿb²ⁿ | n ≥ 1}: abb, aabbbb, …</p></details>
+<p><b>5.</b> Apakah <code>S → aS | bS | ε</code> benar untuk RE <code>a*b*</code>? Kalau tidak, perbaiki.</p>
+<details><summary>Jawaban</summary><p>Tidak. Grammar itu menghasilkan <code>ba</code>, yang tidak ada di <code>a*b*</code>. Perbaikan: <code>S → AB</code>, <code>A → aA | ε</code>, <code>B → bB | ε</code>.</p></details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Addison-Wesley. Bab 5.1–5.2.</li>
+  <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 4.2.</li>
+  <li>Nasari, M. (2025). <i>Context-free grammar</i> [slide kuliah COMP6062 Compilation Techniques, sesi 7].</li>
+</ol>
+
+</article>
+</body>
+</html>

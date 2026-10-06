@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RE ke DFA Langsung (followpos) · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=45a95657">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+  <style>.t td, .t th { font-family: var(--mono); white-space: nowrap; }</style>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+<span class="chip">Compilation technique · 04</span>
+<h1>RE → DFA langsung (followpos)</h1>
+<p class="lead">Metode ini membuat DFA langsung dari RE, tanpa ε-NFA. Setiap simbol di RE diberi nomor posisi, dan state DFA adalah himpunan posisi yang boleh dibaca berikutnya.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/followpos.html">Visualisasi: empat tahap followpos</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Kerjakan <code>(r)#</code>. Buat syntax tree, beri nomor posisi pada setiap leaf simbol (bukan ε).</li>
+    <li>Hitung nullable, firstpos, lastpos dari bawah ke atas. Aturan <code>·</code>: firstpos ikut kanan kalau kiri nullable, lastpos ikut kiri kalau kanan nullable.</li>
+    <li>followpos: node <code>c₁·c₂</code> → lastpos(c₁) disusul firstpos(c₂). Node <code>c*</code> → lastpos(c) disusul firstpos(c).</li>
+    <li>DFA: start = firstpos(root). Dari S dengan a: gabungkan followpos posisi a di S. Final = memuat posisi #.</li>
+  </ul>
+</div>
+
+<h2>1. Augmented RE dan syntax tree</h2>
+<p>RE r ditambah simbol khusus <code>#</code> di akhir: <code>(r)#</code>. Lalu buat syntax tree: leaf = simbol, node dalam = operator. Setiap leaf simbol (termasuk #) diberi nomor posisi dari kiri ke kanan. Leaf ε tidak diberi nomor.</p>
+<div class="au-fig" data-tree="(a|b)*abb" data-plain></div>
+
+<h2>2. nullable, firstpos, lastpos</h2>
+<table>
+  <tr><th>Node n</th><th>nullable(n)</th><th>firstpos(n)</th><th>lastpos(n)</th></tr>
+  <tr><td>leaf ε</td><td>T</td><td>∅</td><td>∅</td></tr>
+  <tr><td>leaf posisi i</td><td>F</td><td>{i}</td><td>{i}</td></tr>
+  <tr><td>c₁ | c₂</td><td>nullable(c₁) or nullable(c₂)</td><td>firstpos(c₁) ∪ firstpos(c₂)</td><td>lastpos(c₁) ∪ lastpos(c₂)</td></tr>
+  <tr><td>c₁ · c₂</td><td>nullable(c₁) and nullable(c₂)</td><td>kalau nullable(c₁): firstpos(c₁) ∪ firstpos(c₂), kalau tidak: firstpos(c₁)</td><td>kalau nullable(c₂): lastpos(c₁) ∪ lastpos(c₂), kalau tidak: lastpos(c₂)</td></tr>
+  <tr><td>c₁*</td><td>T</td><td>firstpos(c₁)</td><td>lastpos(c₁)</td></tr>
+</table>
+<p>Hasilnya untuk <code>(a|b)*abb#</code> (biru = firstpos, hijau = lastpos, di atas node = nullable):</p>
+<div class="au-fig" data-tree="(a|b)*abb"></div>
+
+<h2>3. followpos</h2>
+<p>followpos(i) = himpunan posisi j sehingga ada string di language dengan j tepat setelah i. Dua aturan, dikerjakan untuk setiap node:</p>
+<ol>
+  <li><b>Node c₁ · c₂</b>: setiap i ∈ lastpos(c₁) mendapat firstpos(c₂).</li>
+  <li><b>Node c*</b>: setiap i ∈ lastpos(c) mendapat firstpos(c).</li>
+</ol>
+<p>Node <code>|</code> tidak menambah followpos, karena union hanya memilih satu cabang dan tidak menyambung dua bagian.</p>
+<table class="t">
+  <tr><th>Posisi</th><th>Simbol</th><th>followpos</th><th>Asal</th></tr>
+  <tr><td>1</td><td>a</td><td>{1,2,3}</td><td>star: {1,2}; · dengan a: {3}</td></tr>
+  <tr><td>2</td><td>b</td><td>{1,2,3}</td><td>sama dengan posisi 1</td></tr>
+  <tr><td>3</td><td>a</td><td>{4}</td><td>· dengan b</td></tr>
+  <tr><td>4</td><td>b</td><td>{5}</td><td>· dengan b</td></tr>
+  <tr><td>5</td><td>b</td><td>{6}</td><td>· dengan #</td></tr>
+  <tr><td>6</td><td>#</td><td>∅</td><td></td></tr>
+</table>
+
+<h2>4. Membangun DFA</h2>
+<pre><code>Dstates = { firstpos(root) }, belum ditandai
+while ada S yang belum ditandai:
+    tandai S
+    for setiap simbol a:
+        U = gabungan followpos(p) untuk setiap p ∈ S yang simbolnya a
+        if U tidak kosong dan belum ada di Dstates: tambahkan U
+        Dtran[S, a] = U
+start = firstpos(root), final = setiap S yang memuat posisi #</code></pre>
+<table class="t">
+  <tr><th>DFA</th><th>Posisi</th><th>a</th><th>b</th></tr>
+  <tr><td>→A</td><td>{1,2,3}</td><td>fp(1) ∪ fp(3) = {1,2,3,4} = B</td><td>fp(2) = {1,2,3} = A</td></tr>
+  <tr><td>B</td><td>{1,2,3,4}</td><td>B</td><td>fp(2) ∪ fp(4) = {1,2,3,5} = C</td></tr>
+  <tr><td>C</td><td>{1,2,3,5}</td><td>B</td><td>fp(2) ∪ fp(5) = {1,2,3,6} = D</td></tr>
+  <tr><td>*D</td><td>{1,2,3,6}</td><td>B</td><td>A</td></tr>
+</table>
+<div class="au-fig" data-auto="DFA untuk (a|b)*abb">a b
+→A B A
+B B C
+C B D
+*D B A</div>
+<p>Bandingkan dengan subset construction dari ε-NFA Thompson: hasil metode followpos biasanya punya state lebih sedikit, dan tidak perlu menghitung ECLOSE.</p>
+
+<h3>Contoh slide: (a|b)*a</h3>
+<p>Posisi a = 1, b = 2, a = 3, # = 4. followpos(1) = followpos(2) = {1,2,3}, followpos(3) = {4}. DFA: A = {1,2,3} dengan a → {1,2,3,4} = B, dengan b → A. B dengan a → B, dengan b → A. B final karena memuat 4.</p>
+
+<h3>Contoh slide: (a|ε)bc*</h3>
+<p>Posisi a = 1, b = 2, c = 3, # = 4. <code>(a|ε)</code> nullable, jadi firstpos(root) = {1,2}: string boleh diawali a atau b. followpos(1) = {2}, followpos(2) = {3,4}, followpos(3) = {3,4}. DFA: A = {1,2}: a → B = {2}, b → C = {3,4}; B: b → C; C (final): c → C.</p>
+
+<h2>5. Kesalahan yang sering muncul</h2>
+<table>
+  <tr><th>Kesalahan</th><th>Perbaikan</th></tr>
+  <tr><td>Lupa #, sehingga tidak tahu state final</td><td>Selalu kerjakan (r)#</td></tr>
+  <tr><td>firstpos(c₁·c₂) = firstpos(c₁) walaupun c₁ nullable</td><td>Cek nullable(c₁). Contoh: firstpos((a|b)*·a) = {1,2,3}</td></tr>
+  <tr><td>lastpos(c₁·c₂) = lastpos(c₂) walaupun c₂ nullable</td><td>Cek nullable(c₂). Contoh: lastpos(b·c*) = {2,3}</td></tr>
+  <tr><td>Node | menambah followpos</td><td>Hanya node · dan *</td></tr>
+  <tr><td>Saat membangun DFA, followpos semua posisi di S digabung</td><td>Hanya posisi yang simbolnya sama dengan input</td></tr>
+</table>
+
+<h2>6. Latihan (dari slide dosen)</h2>
+<p><b>Soal.</b> RE <code>(a|b)*(ab|bb)a*</code>. (a) Buat syntax tree. (b) Hitung firstpos, lastpos, followpos. (c) Buat dan gambar DFA-nya.</p>
+<details><summary>Jawaban (a): syntax tree beranotasi</summary>
+<p>Posisi: a = 1, b = 2 (di dalam star pertama), a = 3, b = 4 (ab), b = 5, b = 6 (bb), a = 7 (a*), # = 8.</p>
+<div class="au-fig" data-tree="(a|b)*(ab|bb)a*"></div>
+</details>
+<details><summary>Jawaban (b): followpos</summary>
+<table class="t">
+  <tr><th>Posisi</th><th>Simbol</th><th>followpos</th></tr>
+  <tr><td>1</td><td>a</td><td>{1,2,3,5}</td></tr>
+  <tr><td>2</td><td>b</td><td>{1,2,3,5}</td></tr>
+  <tr><td>3</td><td>a</td><td>{4}</td></tr>
+  <tr><td>4</td><td>b</td><td>{7,8}</td></tr>
+  <tr><td>5</td><td>b</td><td>{6}</td></tr>
+  <tr><td>6</td><td>b</td><td>{7,8}</td></tr>
+  <tr><td>7</td><td>a</td><td>{7,8}</td></tr>
+  <tr><td>8</td><td>#</td><td>∅</td></tr>
+</table>
+<p>Posisi 4 dan 6 mendapat {7,8} karena <code>a*</code> nullable: setelah <code>ab</code> atau <code>bb</code>, string boleh lanjut ke a (posisi 7) atau langsung selesai (posisi 8).</p>
+</details>
+<details><summary>Jawaban (c): DFA</summary>
+<table class="t">
+  <tr><th>DFA</th><th>Posisi</th><th>a</th><th>b</th></tr>
+  <tr><td>→A</td><td>{1,2,3,5}</td><td>B</td><td>C</td></tr>
+  <tr><td>B</td><td>{1,2,3,4,5}</td><td>B</td><td>D</td></tr>
+  <tr><td>C</td><td>{1,2,3,5,6}</td><td>B</td><td>D</td></tr>
+  <tr><td>*D</td><td>{1,2,3,5,6,7,8}</td><td>E</td><td>D</td></tr>
+  <tr><td>*E</td><td>{1,2,3,4,5,7,8}</td><td>E</td><td>D</td></tr>
+</table>
+<div class="au-fig" data-auto="DFA untuk latihan">a b
+→A B C
+B B D
+C B D
+*D E D
+*E E D</div>
+<p>Contoh sel B dengan b: posisi b di B adalah 2, 4, 5 → {1,2,3,5} ∪ {7,8} ∪ {6} = {1,2,3,5,6,7,8} = D.</p>
+<p>DFA ini <b>belum minimum</b>: B dan C punya baris yang sama, begitu juga D dan E. Hasil minimisasinya 3 state: {A}, {B,C}, {D,E}. Coba buktikan di materi 05.</p>
+</details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 3.9.1–3.9.5.</li>
+  <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Addison-Wesley. Bab 3.2.</li>
+  <li>Nasari, M. (2025). <i>RE to DFA</i> [slide kuliah COMP6062 Compilation Techniques, sesi 5].</li>
+</ol>
+
+</article>
+<script src="../../_shared/automata.js?v=9b7b4edb"></script>
+<script>renderFigures();</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RE ke ε-NFA (Thompson)</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>RE → ε-NFA (Thompson)</h1>
+<p>ε-NFA dibangun dari bagian RE yang <b>paling dalam</b> ke luar. Simbol, union, concatenation, dan star masing-masing punya pola fragment. Kotak putus-putus = fragment yang baru dibuat, panah oranye = bagian yang baru ditambahkan.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum langkah berikutnya tampil, tebak dulu bentuk fragment-nya"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah RE</summary>
+  <div class="row">
+    <label class="au-field">RE (union: | atau +, star: *)<input class="field" id="re" spellcheck="false" autocomplete="off"></label>
+    <div class="au-keys"><button class="btn btn-sm" id="eps">ε</button></div>
+  </div>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main stack">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <div class="au-scroll" id="graph"></div>
+    <div class="au-sec" id="tab" hidden></div>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['(0+1)*1(0+1), slide', '(0+1)*1(0+1)'],
+  ['(a|b)*a, slide', '(a|b)*a'],
+  ['(a|b)*abb', '(a|b)*abb'],
+  ['aa*|bb*, slide', 'aa*|bb*'],
+  ['(a|b)*(ab|bb)a*, latihan', '(a|b)*(ab|bb)a*'],
+  ['(a|ε)bc*', '(a|ε)bc*'],
+];
+let T;
+const st = stepper($('step'), (s) => {
+  $('graph').innerHTML = drawAuto(T.geo, { shown: s.shown, shownEdges: s.shownEdges, hot: s.hot, hotEdges: s.hotEdges, box: s.box, startOverride: s.start, finalOverride: s.final, label: 'Diagram ε-NFA' });
+  $('tab').hidden = !s.done;
+  if (s.done) $('tab').innerHTML = `<div class="au-title">Tabel transisi ε-NFA <span class="label">dipakai untuk subset construction (materi 03)</span></div><div class="au-scroll">${tableHTML(T.A, { braces: true })}</div>`;
+}, $('guess'));
+
+function load() {
+  const src = $('re').value;
+  try {
+    T = thompson(parseRE(src), src.includes('+') ? '+' : '|');
+    $('err').textContent = '';
+    st.load(T.steps);
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { $('re').value = PRESETS[e.target.value][1]; load(); };
+$('re').oninput = load;
+$('eps').onclick = () => { const f = $('re'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; load(); };
+$('re').value = PRESETS[0][1];
+load();
+</script>
+</body>
+</html>

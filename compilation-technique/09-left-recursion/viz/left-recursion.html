@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eliminasi Left Recursion</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Eliminasi left recursion</h1>
+<p>Proses variabel satu per satu sesuai urutan. Untuk setiap variabel: <b>substitusi</b> variabel yang lebih awal kalau muncul di depan, lalu hapus <b>immediate left recursion</b>: <code>A → Aα | β</code> menjadi <code>A → βA'</code> dan <code>A' → αA' | ε</code>.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu hasilnya"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah grammar dan urutan</summary>
+  <p class="hint">Satu baris per variabel: <code>S → Aa | b</code>. Variabel = huruf besar, ε untuk string kosong. Urutan kosong = urutan baris.</p>
+  <div class="row">
+    <label class="au-field">Grammar<textarea id="src" rows="5" spellcheck="false"></textarea></label>
+    <label class="au-field">Urutan variabel (pisahkan koma)<input class="field" id="ord" spellcheck="false" autocomplete="off"></label>
+  </div>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <section><div class="au-title">Grammar sekarang <span class="label">oranye = produksi yang baru berubah</span></div><div class="au-gram" id="now"></div></section>
+    <section class="au-sec"><div class="au-title">Grammar awal</div><div class="au-gram" id="orig"></div></section>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/grammar.js?v=8fdcf09f"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['Immediate: E → E+T | T', 'E → E+T | T\nT → T*F | F\nF → id | (E)', ''],
+  ['Immediate, banyak α', 'A → Aab | Aba | aB | a\nB → b | Bba', ''],
+  ['Slide: urutan S, A', 'S → Aa | b\nA → Ac | Sd | f', 'S, A'],
+  ['Slide: urutan A, S', 'S → Aa | b\nA → Ac | Sd | f', 'A, S'],
+  ['Latihan 1', 'Q → QED | q\nE → ε\nD → NFA | d\nN → DFA | n\nF → f\nA → a', ''],
+  ['Latihan 3', 'S → Ra | Aa | a\nR → ab\nA → AR | AT | b\nT → Tb | a', ''],
+  ['Latihan 4, urutan S, A', 'S → AA | 0\nA → SS | 1', 'S, A'],
+];
+const gramHTML = (g, hot = {}) => showGrammar(g, hot).map((r) => `<div class="${r.hot ? 'hot' : ''}"><b>${escHTML(r.A)}</b> → ${escHTML(r.alts.join(' | '))}</div>`).join('');
+const st = stepper($('step'), (s) => { $('now').innerHTML = gramHTML(s.g, s.hot); }, $('guess'));
+function load() {
+  try {
+    const G0 = parseGrammar($('src').value);
+    const order = $('ord').value.split(/[\s,]+/).filter(Boolean);
+    const bad = order.find((A) => !G0.P.has(A));
+    if (bad) throw new Error(`Variabel ${bad} di urutan tidak ada di grammar.`);
+    if (order.length && order.length !== G0.order.length) throw new Error(`Urutan harus memuat semua variabel: ${G0.order.join(', ')}.`);
+    $('orig').innerHTML = gramHTML(G0);
+    $('err').textContent = '';
+    st.load(leftRecursionSteps(G0, order));
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { const [, g, o] = PRESETS[e.target.value]; $('src').value = g; $('ord').value = o; load(); };
+$('src').oninput = $('ord').oninput = load;
+$('pre').onchange({ target: { value: 0 } });
+</script>
+</body>
+</html>

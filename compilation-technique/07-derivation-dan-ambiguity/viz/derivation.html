@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Derivation dan Parse Tree</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Derivation dan parse tree</h1>
+<p>Setiap langkah derivation mengganti <b>satu variabel</b> dengan salah satu alternatifnya. <b>LMD</b> selalu mengganti variabel paling kiri, <b>RMD</b> paling kanan. Keduanya menghasilkan parse tree yang sama. Kalau satu string punya <b>dua parse tree</b>, grammar-nya ambiguous.</p>
+
+<div class="controls">
+  <div class="seg" id="mode"></div>
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu variabel mana yang diganti"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah grammar dan string</summary>
+  <p class="hint">Satu baris per variabel: <code>E → E+T | T</code>. Variabel = huruf besar. Kalau terminal lebih dari satu huruf (<code>int</code>), pisahkan semua simbol dengan spasi, termasuk di string.</p>
+  <div class="row">
+    <label class="au-field">Grammar<textarea id="gsrc" rows="5" spellcheck="false"></textarea></label>
+    <label class="au-field">String<input class="field" id="str" spellcheck="false" autocomplete="off"></label>
+  </div>
+</details>
+<div class="au-err" id="err"></div>
+<p class="au-verdict" id="verdict" hidden></p>
+
+<div class="au-main">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <div class="au-two">
+      <section><div class="au-title" id="dTitle"></div><ol class="au-derive" id="der"></ol></section>
+      <section class="au-sec"><div class="au-title">Parse tree <span class="seg" id="which"></span></div><div class="au-scroll" id="tree"></div></section>
+    </div>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/grammar.js?v=8fdcf09f"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const EXPR = 'E → E+T | T\nT → T*F | F\nF → (E) | id';
+const PRESETS = [
+  ['Latihan: id+id*id', EXPR, 'id+id*id'],
+  ['Ambiguous: id+id*id', 'E → E+E | E*E | (E) | id', 'id+id*id'],
+  ['Slide: (a+b)*c', 'E → E+E | E*E | (E) | a | b | c | d', '(a+b)*c'],
+  ['Slide: S → AB', 'S → AB\nA → a\nB → b', 'ab'],
+  ['L(G) = aⁿbⁿ: aaabbb', 'S → aSb | ab', 'aaabbb'],
+  ['L(G) = aⁿbaⁿ: aabaa', 'S → aAa\nA → aAa | b', 'aabaa'],
+  ['Inherently ambiguous', 'S → AB | C\nA → aAb | ab\nB → cBd | cd\nC → aCd | aDd\nD → bDc | bc', 'aabbccdd'],
+  ['Terminal int (berspasi)', 'E → T + E | T\nT → int | int * T | ( E )', 'int * int + int'],
+];
+let G, trees = [], tree = 0, rightmost = false;
+
+function seg(el, items, cur, on) {
+  el.innerHTML = items.map(([v, n]) => `<button class="btn btn-sm${v === cur ? ' sel' : ''}" data-v="${v}">${n}</button>`).join('');
+  el.querySelectorAll('button').forEach((b) => (b.onclick = () => on(b.dataset.v)));
+}
+const sep = () => (G.spaced ? ' ' : '');
+function formHTML(f, cur) {
+  return f.syms.map((x, i) => {
+    const cls = cur && i === f.exp ? 'x' : i >= f.at && i < f.at + f.len ? 'n' : '';
+    return cls ? `<span class="${cls}">${escHTML(x)}</span>` : escHTML(x);
+  }).join(sep()) || 'ε';
+}
+
+const st = stepper($('step'), (s, i) => {
+  $('der').innerHTML = s.forms.slice(0, i + 1).map((f, k) => `<li class="${k === i ? 'cur' : ''}">${k ? '⇒ ' : ''}${formHTML(f, k === i && !s.done)}</li>`).join('');
+  const shown = new Set(s.order.slice(0, i).map((n) => n.id));
+  const visible = (n) => n === s.root || (n.parent && shown.has(n.parent.id));
+  $('tree').innerHTML = drawTree(s.root, {
+    kids: (n) => n.kids, dx: 54, side: 20,
+    label: (n) => n.sym,
+    show: visible,
+    cls: (n) => (G.P.has(n.sym) ? '' : 'term'),
+    hot: (n) => !s.done && s.order[i] === n,
+    aria: 'Parse tree',
+  });
+}, $('guess'));
+
+function steps() {
+  const root = trees[tree];
+  (function link(n) { n.kids.forEach((k) => { k.parent = n; link(k); }); })(root);
+  const { order, forms } = derivation(G, root, rightmost);
+  const side = rightmost ? 'paling kanan' : 'paling kiri';
+  // Langkah i mengganti order[i - 1]. Mode tebak menanyakan alternatifnya sebelum hasilnya tampil.
+  return forms.map((f, i) => ({
+    root, order, forms, done: i === forms.length - 1,
+    ask: i ? `Variabel ${side} sekarang adalah <b>${escHTML(order[i - 1].sym)}</b>. Diganti dengan alternatif apa?` : null,
+    text: !i
+      ? `Mulai dari start symbol <b>${escHTML(G.order[0])}</b>. Di setiap langkah, ganti variabel <b>${side}</b> (bergaris bawah) dengan alternatif yang cocok dengan string.`
+      : `Ganti <b>${escHTML(order[i - 1].sym)}</b> dengan <code>${escHTML(order[i - 1].kids.map((k) => k.sym).join(sep()))}</code> (hijau).${i === forms.length - 1 ? ` <b>Selesai</b>: semua simbol sudah terminal dan sama dengan string. ${rightmost ? 'RMD' : 'LMD'} ini butuh ${forms.length - 1} langkah.` : ''}`,
+  }));
+}
+function render() {
+  seg($('mode'), [['lmd', 'Leftmost (LMD)'], ['rmd', 'Rightmost (RMD)']], rightmost ? 'rmd' : 'lmd', (v) => { rightmost = v === 'rmd'; render(); });
+  $('dTitle').textContent = rightmost ? 'Rightmost derivation' : 'Leftmost derivation';
+  $('which').innerHTML = '';
+  if (trees.length > 1) seg($('which'), [['0', 'Tree 1'], ['1', 'Tree 2']], String(tree), (v) => { tree = +v; render(); });
+  st.load(steps());
+}
+function load() {
+  try {
+    G = parseGrammar($('gsrc').value);
+    const raw = $('str').value.trim();
+    const tokens = tokenize(G, raw);
+    const r = findTrees(G, G.order[0], tokens);
+    trees = r.trees; tree = 0;
+    const v = $('verdict');
+    v.hidden = false;
+    if (!trees.length) {
+      v.className = 'au-verdict no';
+      v.innerHTML = r.exhausted ? 'String terlalu panjang untuk dicari. Coba string yang lebih pendek.' : `<b>String tidak bisa diturunkan</b> dari ${escHTML(G.order[0])}: string ini bukan anggota L(G).`;
+      $('step').innerHTML = ''; $('der').innerHTML = ''; $('tree').innerHTML = ''; $('which').innerHTML = '';
+      $('err').textContent = '';
+      return;
+    }
+    v.className = `au-verdict ${trees.length > 1 ? 'no' : 'yes'}`;
+    v.innerHTML = trees.length > 1
+      ? '<b>Ambiguous</b>: string ini punya <b>2 parse tree</b> yang berbeda (pilih Tree 1 / Tree 2). Satu string seperti ini sudah cukup untuk membuktikan grammar-nya ambiguous.'
+      : 'Hanya ada <b>1 parse tree</b> untuk string ini. Ini belum membuktikan grammar-nya unambiguous, karena string lain bisa saja punya 2 tree.';
+    $('err').textContent = '';
+    render();
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { const [, g, s] = PRESETS[e.target.value]; $('gsrc').value = g; $('str').value = s; load(); };
+$('gsrc').oninput = $('str').oninput = load;
+$('pre').onchange({ target: { value: 0 } });
+</script>
+</body>
+</html>

@@ -45,14 +45,28 @@ Notasi mengikuti Epp: negasi `~`, nilai T/F, dan 1/0 untuk circuit. Visualisasi 
 
 ### Compilation technique
 
-Belum ada materi.
+Satu materi untuk setiap tipe soal ujian, bukan mengikuti urutan sesi dosen. Visualisasi memakai mesin bersama `_shared/automata.js` (RE, Thompson, subset construction, followpos, minimisasi, gambar diagram) dan `_shared/grammar.js` (RE → CFG, derivation, left factoring, left recursion), dengan gaya `automata.css`. Setiap viz menerima soal buatan sendiri (menu "Ubah …") dan punya mode tebak. Slide dan notes menggambar diagram dengan mesin yang sama (`renderFigures`, `renderParseTrees`).
+
+Jawaban di mesin dicek terhadap contoh dan latihan di slide dosen: `node tools/check-engines.js` (tidak ada output = benar).
+
+| No | Materi | Notes | Slide |
+|----|--------|-------|-------|
+| 01 | Regular expression | [notes](compilation-technique/01-regular-expression/notes.html) | [slides](compilation-technique/01-regular-expression/slides.html) |
+| 02 | RE → ε-NFA (Thompson) | [notes](compilation-technique/02-re-ke-nfa-thompson/notes.html) | [slides](compilation-technique/02-re-ke-nfa-thompson/slides.html) |
+| 03 | NFA → DFA (subset construction) | [notes](compilation-technique/03-nfa-ke-dfa/notes.html) | [slides](compilation-technique/03-nfa-ke-dfa/slides.html) |
+| 04 | RE → DFA langsung (followpos) | [notes](compilation-technique/04-re-ke-dfa-langsung/notes.html) | [slides](compilation-technique/04-re-ke-dfa-langsung/slides.html) |
+| 05 | Minimisasi DFA | [notes](compilation-technique/05-minimisasi-dfa/notes.html) | [slides](compilation-technique/05-minimisasi-dfa/slides.html) |
+| 06 | Context-free grammar dan RE → CFG | [notes](compilation-technique/06-re-ke-cfg/notes.html) | [slides](compilation-technique/06-re-ke-cfg/slides.html) |
+| 07 | Derivation, parse tree, dan ambiguity | [notes](compilation-technique/07-derivation-dan-ambiguity/notes.html) | [slides](compilation-technique/07-derivation-dan-ambiguity/slides.html) |
+| 08 | Left factoring | [notes](compilation-technique/08-left-factoring/notes.html) | [slides](compilation-technique/08-left-factoring/slides.html) |
+| 09 | Eliminasi left recursion | [notes](compilation-technique/09-left-recursion/notes.html) | [slides](compilation-technique/09-left-recursion/slides.html) |
 
 ## Struktur
 
 ```
 mentoring/
 ├── index.html                  home: daftar mata kuliah
-├── _shared/                    style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, cviz.js/css, logic.js/css, font, logo
+├── _shared/                    style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, cviz.js/css, logic.js/css, automata.js/css, grammar.js, font, logo
 ├── _template/
 │   └── NN-nama-materi/         salin folder ini untuk materi baru
 ├── algorithm-and-programming/
@@ -65,8 +79,10 @@ mentoring/
 ├── discrete-mathematics/
 │   ├── index.html
 │   └── 01-… sampai 05-…
-└── compilation-technique/
-    └── index.html              daftar materi (masih kosong)
+├── compilation-technique/
+│   ├── index.html
+│   └── 01-… sampai 09-…        satu materi per tipe soal
+└── tools/                      cachebust.py, check-engines.js
 ```
 
 ## Membuat Materi Baru

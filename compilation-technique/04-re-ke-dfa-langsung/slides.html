@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RE ke DFA Langsung (followpos)</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=45a95657">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+    .steps li::marker { font-weight: 700; color: var(--go-ink); }
+    .t td, .t th { font-family: var(--mono); padding: 0.3em 0.7em; }
+    .fp { color: var(--fp-ink); font-weight: 600; }
+    .lp { color: var(--go-ink); font-weight: 600; }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>RE → DFA langsung (followpos)</h1>
+  <p>Compilation technique · soal "buat syntax tree, hitung firstpos, lastpos, followpos, lalu gambar DFA-nya". Tanpa ε-NFA.</p>
+</section>
+
+<section class="slide">
+  <h2>Ide: beri nomor pada setiap simbol</h2>
+  <p class="sub">Setiap kemunculan simbol di RE diberi nomor <mark>posisi</mark>. State DFA adalah <b>himpunan posisi yang boleh dibaca berikutnya</b>. Tidak perlu ε-NFA, jadi langkahnya lebih sedikit.</p>
+  <pre><code>(a | b)* a b b #
+ 1   2   3 4 5 6</code></pre>
+  <ul>
+    <li>Simbol yang sama di tempat berbeda mendapat nomor berbeda: <code>a</code> di posisi 1 dan 3 adalah dua posisi.</li>
+    <li><code>#</code> ditambahkan di akhir (<b>augmented RE</b>). Kalau posisi <code>#</code> bisa dibaca berikutnya, string boleh berhenti di situ. Jadi state yang memuat posisi <code>#</code> adalah <b>final</b>.</li>
+    <li>Untuk menentukan "posisi mana yang boleh menyusul posisi i", kita butuh <b>followpos</b>. Followpos dihitung dari syntax tree.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Langkah 1: syntax tree dari (r)#</h2>
+  <p class="sub">Leaf = simbol (diberi nomor posisi), node dalam = operator: <code>·</code> concatenation, <code>|</code> union, <code>*</code> star. Concatenation dibaca dari kiri, jadi pohonnya condong ke kiri.</p>
+  <div class="cols">
+    <div class="au-fig xtall" data-tree="(a|b)*abb" data-plain></div>
+    <ul>
+      <li>Root = concatenation terakhir, yaitu dengan <code>#</code>.</li>
+      <li>Leaf ε tidak diberi nomor, karena ε tidak membaca simbol.</li>
+      <li>Nomor posisi ditulis urut dari kiri ke kanan, sesuai urutan di RE.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Langkah 2: nullable, firstpos, lastpos</h2>
+  <p class="sub">Dihitung dari leaf ke root. <b>nullable</b> = node bisa menghasilkan ε. <b class="fp">firstpos</b> = posisi yang bisa menjadi simbol <b>pertama</b>. <b class="lp">lastpos</b> = posisi yang bisa menjadi simbol <b>terakhir</b>.</p>
+  <table>
+    <tr><th>Node</th><th>nullable</th><th class="fp">firstpos</th><th class="lp">lastpos</th></tr>
+    <tr><td>leaf posisi i</td><td>F</td><td>{i}</td><td>{i}</td></tr>
+    <tr><td>leaf ε</td><td>T</td><td>∅</td><td>∅</td></tr>
+    <tr><td>c₁ | c₂</td><td>nullable(c₁) OR nullable(c₂)</td><td>first(c₁) ∪ first(c₂)</td><td>last(c₁) ∪ last(c₂)</td></tr>
+    <tr><td>c₁ · c₂</td><td>nullable(c₁) AND nullable(c₂)</td><td>first(c₁), ditambah first(c₂) <b>kalau c₁ nullable</b></td><td>last(c₂), ditambah last(c₁) <b>kalau c₂ nullable</b></td></tr>
+    <tr><td>c₁*</td><td>T</td><td>first(c₁)</td><td>last(c₁)</td></tr>
+  </table>
+  <p class="label">Kenapa aturan ·: kalau c₁ bisa kosong, simbol pertama string bisa berasal dari c₂. Contoh: <code>(a|b)*a</code> boleh diawali posisi 3.</p>
+</section>
+
+<section class="slide">
+  <h2>Hasil langkah 2 untuk (a|b)*abb#</h2>
+  <p class="sub">Kiri node = <span class="fp">firstpos</span>, kanan = <span class="lp">lastpos</span>, di atas = nullable. Perhatikan node <code>·</code> terbawah: firstpos-nya {1,2,3}, bukan {1,2}, karena <code>(a|b)*</code> nullable.</p>
+  <div class="au-fig xtall" data-tree="(a|b)*abb"></div>
+</section>
+
+<section class="slide">
+  <h2>Langkah 3: followpos punya dua aturan</h2>
+  <p class="sub">followpos(i) = posisi yang bisa <b>langsung menyusul</b> posisi i. Hanya node <code>·</code> dan <code>*</code> yang menambah followpos. Node <code>|</code> tidak menambah apa pun.</p>
+  <div class="cols">
+    <ol class="steps">
+      <li><b>Node c₁ · c₂</b>: untuk setiap i di <span class="lp">lastpos(c₁)</span>, tambahkan <span class="fp">firstpos(c₂)</span> ke followpos(i). Setelah c₁ selesai, c₂ dimulai.</li>
+      <li><b>Node c*</b>: untuk setiap i di <span class="lp">lastpos(c)</span>, tambahkan <span class="fp">firstpos(c)</span> ke followpos(i). Setelah satu putaran selesai, putaran berikutnya bisa dimulai.</li>
+    </ol>
+    <table class="t">
+      <tr><th>Posisi</th><th>Simbol</th><th>followpos</th></tr>
+      <tr><td>1</td><td>a</td><td>{1,2,3}</td></tr>
+      <tr><td>2</td><td>b</td><td>{1,2,3}</td></tr>
+      <tr><td>3</td><td>a</td><td>{4}</td></tr>
+      <tr><td>4</td><td>b</td><td>{5}</td></tr>
+      <tr><td>5</td><td>b</td><td>{6}</td></tr>
+      <tr><td>6</td><td>#</td><td>∅</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Langkah 4: bangun DFA</h2>
+  <p class="sub">Mirip subset construction, tetapi isi himpunannya posisi. Dari himpunan S dengan simbol a: ambil posisi di S yang simbolnya a, lalu gabungkan followpos-nya.</p>
+  <table class="t">
+    <tr><th>DFA</th><th>Posisi</th><th>a</th><th>b</th></tr>
+    <tr><td>→A</td><td>{1,2,3}</td><td>fp(1) ∪ fp(3) = {1,2,3,4} = B</td><td>fp(2) = A</td></tr>
+    <tr><td>B</td><td>{1,2,3,4}</td><td>fp(1) ∪ fp(3) = B</td><td>fp(2) ∪ fp(4) = {1,2,3,5} = C</td></tr>
+    <tr><td>C</td><td>{1,2,3,5}</td><td>B</td><td>fp(2) ∪ fp(5) = {1,2,3,6} = D</td></tr>
+    <tr><td>*D</td><td>{1,2,3,6}</td><td>B</td><td>A</td></tr>
+  </table>
+  <div class="cols">
+    <div class="au-fig short" data-auto="DFA untuk (a|b)*abb">a b
+→A B A
+B B C
+C B D
+*D B A</div>
+    <p class="label">Start = firstpos(root) = {1,2,3}. Final = himpunan yang memuat posisi 6 (#), yaitu D.</p>
+  </div>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: empat tahap followpos</h2>
+  <iframe src="viz/followpos.html" title="Visualisasi RE ke DFA langsung"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Contoh slide dengan ε: (a|ε)bc*</h2>
+  <p class="sub">Posisi: a = 1, b = 2, c = 3, # = 4. ε tidak diberi nomor, tetapi membuat <code>(a|ε)</code> nullable, sehingga string boleh diawali b.</p>
+  <table class="t">
+    <tr><th>Posisi</th><th>followpos</th><th>Dari aturan</th></tr>
+    <tr><td>1 (a)</td><td>{2}</td><td>· antara (a|ε) dan b</td></tr>
+    <tr><td>2 (b)</td><td>{3,4}</td><td>· dengan c*, lalu c* nullable jadi # ikut</td></tr>
+    <tr><td>3 (c)</td><td>{3,4}</td><td>* (ulangi c) dan · dengan #</td></tr>
+  </table>
+  <table class="t">
+    <tr><th>DFA</th><th>Posisi</th><th>a</th><th>b</th><th>c</th></tr>
+    <tr><td>→A</td><td>{1,2}</td><td>B</td><td>C</td><td>∅</td></tr>
+    <tr><td>B</td><td>{2}</td><td>∅</td><td>C</td><td>∅</td></tr>
+    <tr><td>*C</td><td>{3,4}</td><td>∅</td><td>∅</td><td>C</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Kesalahan yang sering muncul</h2>
+  <p class="sub">Kesalahan paling sering ada di aturan concatenation, karena aturannya bergantung pada nullable.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Akibatnya</th><th>Perbaikan</th></tr>
+    <tr><td>Lupa menambahkan <code>#</code></td><td>Tidak tahu state mana yang final</td><td>Selalu kerjakan <code>(r)#</code></td></tr>
+    <tr><td>firstpos(c₁·c₂) = firstpos(c₁) saja, walaupun c₁ nullable</td><td>Start state kurang posisi, DFA menolak string seperti <code>abb</code></td><td>Cek nullable(c₁) dulu</td></tr>
+    <tr><td>Node <code>|</code> menambah followpos</td><td>followpos terlalu besar</td><td>Hanya <code>·</code> dan <code>*</code></td></tr>
+    <tr><td>Memberi nomor pada ε</td><td>Ada posisi yang tidak pernah dibaca</td><td>Hanya simbol dan # yang diberi nomor</td></tr>
+    <tr><td>Menggabungkan followpos semua posisi di S, tanpa melihat simbolnya</td><td>Transisi a dan b tercampur</td><td>Ambil hanya posisi yang simbolnya a</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Tambahkan <code>#</code>, buat syntax tree, dan beri nomor posisi pada setiap simbol.</li>
+    <li>Hitung <b>nullable, firstpos, lastpos</b> dari leaf ke root. Aturan <code>·</code> bergantung pada nullable anak kiri (firstpos) dan anak kanan (lastpos).</li>
+    <li><b>followpos</b> hanya dari node <code>·</code> (lastpos kiri → firstpos kanan) dan <code>*</code> (lastpos → firstpos dirinya).</li>
+    <li>DFA: start = firstpos(root). Dari S dengan a, gabungkan followpos posisi a di S. Final = memuat posisi #.</li>
+  </ul>
+  <p class="label">Jawaban latihan dosen <code>(a|b)*(ab|bb)a*</code> ada di notes. Materi berikutnya: minimisasi DFA.</p>
+</section>
+
+<script src="../../_shared/automata.js?v=9b7b4edb"></script>
+<script>renderFigures();</script>
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

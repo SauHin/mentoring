@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cek RE</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Cek RE kamu</h1>
+<p>Pilih soal, tulis RE-mu, lalu lihat apakah RE itu menerima string yang <b>tepat</b>: semua string yang seharusnya masuk, dan tidak satu pun yang seharusnya ditolak. Pengecekan memakai semua string sampai panjang tertentu.</p>
+
+<div class="controls">
+  <label class="pick">Soal <select class="field" id="pre"></select></label>
+</div>
+<p id="q"></p>
+<div class="au-input" style="display:grid">
+  <div class="row">
+    <label class="au-field">RE kamu (union: | atau +, star: *)<input class="field" id="re" spellcheck="false" autocomplete="off" placeholder="contoh: (a|b)*abb"></label>
+    <div class="au-keys"><button class="btn btn-sm" id="eps">ε</button></div>
+  </div>
+</div>
+<div class="au-err" id="err"></div>
+
+<div class="panel au-panel">
+  <p class="au-verdict" id="verdict"></p>
+  <section class="au-sec" id="wrongSec"><div class="au-title">String yang salah</div><div class="au-strs" id="wrong"></div></section>
+  <section class="au-sec"><div class="au-title">String terpendek yang diterima RE kamu</div><div class="au-strs" id="acc"></div></section>
+  <details id="model"><summary>Lihat contoh jawaban</summary><p><code id="ans"></code></p><p class="label" id="why"></p></details>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+// Soal latihan di slide dosen. ok(s) = apakah string s seharusnya diterima.
+const PRESETS = [
+  { name: 'Latihan 1', q: 'String di atas {a, b, c} yang memuat minimal satu a dan satu b.', sigma: 'abc', len: 6, ok: (s) => s.includes('a') && s.includes('b'),
+    ans: '(a|b|c)*a(a|b|c)*b(a|b|c)* | (a|b|c)*b(a|b|c)*a(a|b|c)*', why: 'a bisa muncul sebelum atau sesudah b, jadi ada dua urutan yang digabung dengan union.' },
+  { name: 'Latihan 2', q: 'String di atas {0, 1} yang simbol ketiganya dari kanan adalah 1.', sigma: '01', len: 8, ok: (s) => s.length >= 3 && s[s.length - 3] === '1',
+    ans: '(0|1)*1(0|1)(0|1)', why: 'Bebas di depan, lalu 1, lalu tepat dua simbol apa saja di belakang.' },
+  { name: 'Latihan 3', q: 'String di atas {a, b} yang diawali abb.', sigma: 'ab', len: 8, ok: (s) => s.startsWith('abb'),
+    ans: 'abb(a|b)*', why: 'abb harus di depan, sisanya bebas.' },
+  { name: 'Latihan 4', q: 'String di atas {0, 1} yang memuat substring 011.', sigma: '01', len: 8, ok: (s) => s.includes('011'),
+    ans: '(0|1)*011(0|1)*', why: 'Bebas di depan dan di belakang, 011 di tengah.' },
+  { name: 'Latihan 5', q: 'String di atas {0, 1} yang diawali atau diakhiri (atau keduanya) dengan 01.', sigma: '01', len: 8, ok: (s) => s.startsWith('01') || s.endsWith('01'),
+    ans: '01(0|1)* | (0|1)*01', why: '"atau" = union dari dua RE. String yang diawali dan diakhiri 01 sekaligus tetap diterima.' },
+  { name: 'Slide: memuat 00', q: 'String di atas {0, 1} yang memuat substring 00.', sigma: '01', len: 8, ok: (s) => s.includes('00'), ans: '(0|1)*00(0|1)*', why: 'Pola substring.' },
+  { name: 'Slide: diakhiri 011', q: 'String di atas {0, 1} yang diakhiri 011.', sigma: '01', len: 8, ok: (s) => s.endsWith('011'), ans: '(0|1)*011', why: 'Pola akhiran.' },
+  { name: 'Slide: panjang genap', q: 'String di atas {a, b} yang panjangnya genap.', sigma: 'ab', len: 8, ok: (s) => s.length % 2 === 0, ans: '(aa|ab|ba|bb)*', why: 'Setiap putaran star menambah tepat 2 simbol.' },
+  { name: 'Slide: panjang minimal 3', q: 'String di atas {a, b} yang panjangnya minimal 3.', sigma: 'ab', len: 7, ok: (s) => s.length >= 3, ans: '(a|b)(a|b)(a|b)(a|b)*', why: 'Tiga simbol wajib, lalu bebas.' },
+  { name: 'Bebas (tanpa soal)', q: 'Tulis RE apa saja untuk melihat string yang diterimanya.', sigma: null },
+];
+let P = PRESETS[0];
+
+// Semua string di atas alfabet sampai panjang n, urut dari yang terpendek.
+function* strings(sigma, n) { let level = ['']; for (let k = 0; k <= n; k++) { yield* level; level = level.flatMap((s) => [...sigma].map((c) => s + c)); } }
+const show = (s) => (s === '' ? 'ε' : s);
+
+function check() {
+  const src = $('re').value.trim();
+  $('q').innerHTML = `<b>Soal:</b> ${escHTML(P.q)}`;
+  $('model').hidden = !P.sigma;
+  if (P.sigma) { $('ans').textContent = P.ans; $('why').textContent = P.why; }
+  if (!src) { $('err').textContent = ''; $('verdict').className = 'au-verdict'; $('verdict').textContent = 'Tulis RE di atas.'; $('wrong').innerHTML = $('acc').innerHTML = ''; $('wrongSec').hidden = true; return; }
+  let A, ast;
+  try { ast = parseRE(src); A = thompson(ast).A; $('err').textContent = ''; }
+  catch (e) { $('err').textContent = e.message; return; }
+  const sigma = P.sigma || reSymbols(ast).join('');
+  const acc = [];
+  for (const s of strings(sigma, P.sigma ? P.len : 5)) { if (accepts(A, s)) acc.push(s); if (acc.length >= 24) break; }
+  $('acc').innerHTML = acc.map((s) => `<span>${escHTML(show(s))}</span>`).join('') || '<span class="label">Tidak ada (sampai panjang 5)</span>';
+  if (!P.sigma) { $('verdict').className = 'au-verdict'; $('verdict').innerHTML = 'Mode bebas: tidak ada kunci jawaban, jadi yang tampil hanya string yang diterima RE kamu.'; $('wrongSec').hidden = true; return; }
+  const extra = reSymbols(ast).filter((c) => !P.sigma.includes(c));
+  const wrong = [];
+  let total = 0;
+  for (const s of strings(P.sigma, P.len)) {
+    total++;
+    const got = accepts(A, s), want = P.ok(s);
+    if (got !== want) wrong.push({ s, got });
+    if (wrong.length >= 12) break;
+  }
+  $('wrongSec').hidden = !wrong.length;
+  $('wrong').innerHTML = wrong.map(({ s, got }) => `<span class="${got ? 'bad' : 'ok'}" title="${got ? 'diterima, padahal seharusnya ditolak' : 'ditolak, padahal seharusnya diterima'}">${escHTML(show(s))} ${got ? '✗ diterima' : '✓ seharusnya diterima'}</span>`).join('');
+  $('verdict').className = `au-verdict ${wrong.length ? 'no' : 'yes'}`;
+  $('verdict').innerHTML = wrong.length
+    ? `<b>Belum tepat.</b> Merah = RE kamu menerima string yang seharusnya ditolak. Hijau = RE kamu menolak string yang seharusnya diterima.${extra.length ? ` RE kamu memakai simbol di luar alfabet: ${extra.map(escHTML).join(', ')}.` : ''}`
+    : `<b>Tepat</b> untuk semua ${total} string sampai panjang ${P.len}. Ingat: satu bahasa bisa ditulis dengan banyak RE yang berbeda.`;
+}
+$('pre').innerHTML = PRESETS.map((p, i) => `<option value="${i}">${p.name}</option>`).join('');
+$('pre').onchange = (e) => { P = PRESETS[e.target.value]; $('re').value = ''; check(); $('re').focus(); };
+$('re').oninput = check;
+$('eps').onclick = () => { const f = $('re'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; check(); };
+$('re').value = '(a|b|c)*a(a|b|c)*b(a|b|c)*';
+check();
+</script>
+</body>
+</html>

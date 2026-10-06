@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minimisasi DFA</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Minimisasi DFA</h1>
+<p>Dua state boleh digabung kalau <b>tidak ada string</b> yang membedakan keduanya. Kedua metode mencari pasangan yang pasti beda, mulai dari final vs bukan final. Pilih metode, lalu jalankan langkah demi langkah.</p>
+
+<div class="controls">
+  <div class="seg" id="method"></div>
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu jawabannya"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah tabel DFA</summary>
+  <p class="hint">Baris pertama: simbol input. Setiap baris berikutnya: nama state (→ = start, * = final), lalu satu state tujuan per simbol.</p>
+  <textarea id="src" rows="8" spellcheck="false"></textarea>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main stack">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <div class="au-two">
+      <section><div class="au-title">Tabel DFA</div><div class="au-scroll" id="tab"></div></section>
+      <section class="au-sec"><div class="au-title" id="workTitle"></div><div class="au-scroll" id="work"></div></section>
+    </div>
+    <section class="au-sec"><div class="au-title" id="graphTitle"></div><div class="au-scroll" id="graph"></div></section>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['Slide: A sampai H', `0 1
+→A B F
+B G C
+*C A C
+D C G
+E H F
+F C G
+G G E
+H G C`],
+  ['Slide: 3 state', `a b
+→1 2 3
+*2 2 3
+3 2 3`],
+  ['Slide: 4 state', `a b
+→1 2 3
+2 2 3
+3 4 3
+*4 2 3`],
+  ['Latihan 1 (A–I)', `0 1
+→A B E
+B C F
+*C D H
+D E H
+E F I
+*F G B
+G H B
+H I C
+*I A E`],
+  ['Latihan 2 (A–G)', `0 1
+→A B C
+B A C
+C D E
+D B F
+E G C
+*F G E
+G A F`],
+  ['DFA latihan materi 04', `a b
+→A B C
+B B D
+C B D
+*D E D
+*E E D`],
+];
+let method = 'table', R, origGeo;
+const COLORS = ['var(--c-biru)', 'var(--c-jingga)', 'var(--c-mint)', 'var(--c-pink)', 'var(--c-lilac)', '#e0b400', '#00a3b4', '#a0522d', 'var(--ink-3)'];
+
+function triangle(s) {
+  const Q = R.A.states, hot = new Set(s.hot || []);
+  const k = (p, q) => `${p}|${q}`;
+  let html = '<table class="au-tri">';
+  Q.slice(1).forEach((q, i) => {
+    html += `<tr><th>${escHTML(q)}</th>`;
+    Q.slice(0, i + 1).forEach((p) => {
+      const m = s.marks.get(k(p, q));
+      const cls = [m ? 'x' : s.phase === 'done' ? 'o' : '', hot.has(k(p, q)) ? 'hot' : '', s.via === k(p, q) ? 'via' : ''].join(' ');
+      html += `<td class="${cls}" title="(${escHTML(p)},${escHTML(q)})${m ? ': ' + escHTML(m.why) : ''}">${m ? `X<sub>${m.pass}</sub>` : s.phase === 'done' ? 'O' : ''}</td>`;
+    });
+    html += `${'<td class="blank"></td>'.repeat(Q.length - 2 - i)}</tr>`;
+  });
+  html += `<tr><th></th>${Q.slice(0, -1).map((p) => `<th>${escHTML(p)}</th>`).join('')}</tr></table>`;
+  return html;
+}
+function partition(s) {
+  const P = s.P || [], syms = R.A.symbols;
+  const pill = (g, i) => `<span class="au-group" style="background:color-mix(in srgb, ${COLORS[i % COLORS.length]} 30%, var(--surface))">G${i + 1} = {${g.map(escHTML).join(',')}}</span>`;
+  let html = `<div class="au-groups">${P.map(pill).join('')}</div>`;
+  if (s.sig) {
+    html += `<table class="au-table" style="margin-top:12px"><tr><th>Grup</th><th>State</th>${syms.map((a) => `<th>${escHTML(a)} → grup</th>`).join('')}</tr>`;
+    P.forEach((g, gi) => g.forEach((q) => {
+      html += `<tr><td>G${gi + 1}</td><td class="st">${escHTML(q)}</td>${s.sig.get(q).map((t) => `<td>G${t + 1}</td>`).join('')}</tr>`;
+    }));
+    html += '</table>';
+  }
+  return html;
+}
+
+const st = stepper($('step'), (s) => {
+  const pair = s.hot && s.hot.length === 1 ? s.hot[0].split('|') : [];
+  $('tab').innerHTML = tableHTML(R.A, { braces: false, hotRow: pair[0] });
+  if (method === 'table') {
+    $('workTitle').innerHTML = 'Tabel pasangan <span class="label">X<sub>n</sub> = ditandai di putaran n, O = ekuivalen</span>';
+    $('work').innerHTML = s.marks ? triangle(s) : '';
+  } else {
+    $('workTitle').innerHTML = 'Partisi <span class="label">state dalam satu grup = dianggap sama</span>';
+    $('work').innerHTML = partition(s);
+  }
+  if (s.phase === 'done') {
+    $('graphTitle').textContent = 'DFA minimum';
+    $('graph').innerHTML = drawAuto(layoutAuto(s.M), { label: 'Diagram DFA minimum' });
+  } else {
+    $('graphTitle').innerHTML = 'DFA awal <span class="label">oranye = pasangan yang sedang dicek</span>';
+    $('graph').innerHTML = drawAuto(origGeo, { hot: new Set(pair), label: 'Diagram DFA awal' });
+  }
+}, $('guess'));
+
+function load() {
+  try {
+    const D = parseTable($('src').value);
+    if (!isDFA(D)) throw new Error('Ini bukan DFA: ada sel dengan lebih dari satu state tujuan, atau ada ε. Ubah dulu ke DFA (materi 03).');
+    R = minimizeSteps(D, method);
+    origGeo = layoutAuto(R.A);
+    $('err').textContent = '';
+    st.load(R.steps);
+  } catch (e) { $('err').textContent = e.message; }
+}
+function setMethod(m) {
+  method = m;
+  $('method').innerHTML = [['table', 'Table-filling'], ['part', 'Partition']].map(([v, n]) => `<button class="btn btn-sm${v === m ? ' sel' : ''}" data-m="${v}">${n}</button>`).join('');
+  document.querySelectorAll('[data-m]').forEach((b) => (b.onclick = () => setMethod(b.dataset.m)));
+  load();
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { $('src').value = PRESETS[e.target.value][1]; load(); };
+$('src').oninput = load;
+$('src').value = PRESETS[0][1];
+setMethod('table');
+</script>
+</body>
+</html>

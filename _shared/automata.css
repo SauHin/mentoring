@@ -1,0 +1,145 @@
+/* Gaya visualisasi Compilation technique (dipakai bersama automata.js dan grammar.js). */
+.viz { max-width: 1240px; }
+/* Biru untuk teks firstpos: --c-biru terlalu terang di atas putih (kontras < 4.5:1). */
+:root { --fp-ink: #2c56d1; --x-ink: #b42318; }
+[data-theme='dark'] { --fp-ink: #7b9cff; --x-ink: #ff7a6e; }
+.ops { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Input: label di atas kolom, disembunyikan di <details> karena jarang diubah. */
+.au-input { background: none; padding: 0; margin: 0 0 14px; }
+.au-input summary { font-size: 0.92rem; color: var(--go-ink); width: max-content; }
+.au-input[open] { display: grid; gap: 10px; }
+.au-input .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.au-field { display: grid; gap: 6px; flex: 1 1 260px; }
+.viz label.au-field { display: grid; align-items: start; }
+.au-field .field, .au-input textarea { width: 100%; font-family: var(--mono); font-size: 1rem; }
+.au-input textarea { resize: vertical; border: 1.5px solid var(--line); border-radius: 12px; padding: 8px 10px; background: var(--surface); color: var(--ink); }
+.au-input .hint { margin: 0; font-size: 0.85rem; color: var(--ink-2); }
+.au-keys { display: flex; flex-wrap: wrap; gap: 6px; }
+.au-keys .btn { font-family: var(--mono); padding: 0.3rem 0.8rem; }
+.au-err { color: var(--stop); font-weight: 600; margin: 0 0 12px; }
+.au-err:empty { display: none; }
+
+/* Satu kartu untuk penjelasan langkah, satu panel untuk state. Di HP kartu langkah di atas;
+   di layar lebar panel di kiri dan kartu langkah menempel di kanan saat di-scroll. .stack = selalu satu kolom. */
+.au-main { display: grid; gap: 16px; align-items: start; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) {
+  .au-main:not(.stack) { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+  .au-main:not(.stack) > .au-step { grid-column: 2; grid-row: 1; position: sticky; top: 12px; }
+  .au-main:not(.stack) > .au-panel { grid-column: 1; grid-row: 1; }
+}
+.au-step { padding: 18px 20px; border-radius: 22px; }
+.au-cap { margin: 0 0 14px; min-height: 3.3em; font-size: 1rem; }
+.au-cap code { background: var(--surface); }
+.au-count { margin: 10px 0 0; }
+.au-panel { padding: 16px 18px; border-radius: 22px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+/* Dua bagian berdampingan di dalam panel (misalnya tabel dan diagram), satu kolom di HP. */
+.au-two { display: grid; gap: 14px 24px; align-items: start; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .au-two { grid-template-columns: auto minmax(0, 1fr); } }
+.au-two > .au-sec + .au-sec { border-top: 0; padding-top: 0; }
+.au-sec + .au-sec { border-top: 1px solid var(--line); padding-top: 14px; }
+.au-title { font-weight: 600; font-size: 0.9rem; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.au-title .label { font-weight: 400; font-size: 0.8rem; }
+.au-scroll { overflow-x: auto; }
+.au-verdict { border-radius: 14px; padding: 10px 14px; margin: 0; }
+.au-verdict.yes { background: color-mix(in srgb, var(--go) 14%, var(--surface)); }
+.au-verdict.no { background: color-mix(in srgb, var(--stop) 13%, var(--surface)); }
+
+/* Diagram transisi */
+.au-svg { display: block; max-width: 100%; height: auto; margin: 0 auto; font-family: var(--mono); }
+.au-node circle, .au-node rect { fill: var(--card-2); stroke: var(--ink-3); stroke-width: 1.5; }
+.au-node .ring { fill: none; }
+.au-node text { fill: var(--ink); font-size: 15px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.au-node.hot circle, .au-node.hot rect { fill: color-mix(in srgb, var(--hot) 32%, var(--surface)); stroke: var(--hot); stroke-width: 2.2; }
+.au-node.hot .ring { fill: none; }
+.au-node.dim { opacity: 0.35; }
+.au-edge path { fill: none; stroke: var(--ink-3); stroke-width: 1.6; }
+.au-edge polygon { fill: var(--ink-3); }
+.au-edge text { fill: var(--ink-2); font-size: 14px; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+.au-edge.eps text { font-style: italic; }
+.au-edge.hot path { stroke: var(--hot); stroke-width: 2.4; }
+.au-edge.hot polygon { fill: var(--hot); }
+.au-edge.hot text { fill: var(--hot); font-weight: 700; }
+.au-start path { stroke: var(--ink-2); stroke-width: 1.6; }
+.au-start polygon { fill: var(--ink-2); }
+.au-box { fill: color-mix(in srgb, var(--focus) 6%, transparent); stroke: var(--focus); stroke-width: 1.5; stroke-dasharray: 6 5; }
+
+/* Pohon: syntax tree dan parse tree */
+.au-tl { stroke: var(--ink-3); stroke-width: 1.5; }
+.au-tn circle, .au-tn rect { fill: var(--card-2); stroke: var(--ink-3); stroke-width: 1.2; }
+.au-tn text { fill: var(--ink); font-size: 15px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.au-tn.term circle, .au-tn.term rect { fill: var(--surface); stroke-dasharray: 3 3; }
+.au-tn.hot circle, .au-tn.hot rect { fill: color-mix(in srgb, var(--hot) 32%, var(--surface)); stroke: var(--hot); stroke-width: 2.2; }
+.au-tn text.au-fp { fill: var(--fp-ink); text-anchor: end; font-size: 13px; }
+.au-tn text.au-lp { fill: var(--go-ink); text-anchor: start; font-size: 13px; }
+.au-tn text.au-nl { fill: var(--ink-3); font-size: 12px; font-weight: 700; }
+.au-tn text.au-pos { fill: var(--ink-2); font-size: 12px; font-weight: 700; }
+.au-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--ink-2); margin: 6px 0 0; }
+.au-legend .fp { color: var(--fp-ink); font-weight: 600; }
+.au-legend .lp { color: var(--go-ink); font-weight: 600; }
+
+/* Tabel transisi, followpos, dan langkah */
+.au-table { width: auto; font-family: var(--mono); font-size: 0.92rem; }
+.au-table th, .au-table td { text-align: center; padding: 5px 10px; white-space: nowrap; }
+.au-table th { color: var(--ink-2); }
+.au-table td.st { font-weight: 700; text-align: left; }
+.au-table td.set { color: var(--ink-2); text-align: left; }
+.au-table td.hot { background: color-mix(in srgb, var(--hot) 26%, transparent); font-weight: 700; }
+.au-table tr.cur td { background: color-mix(in srgb, var(--marker) 70%, transparent); }
+.au-table tr.cur td.hot { background: color-mix(in srgb, var(--hot) 30%, transparent); }
+.au-table td.new { color: var(--hot); font-weight: 700; }
+.au-table td.mut { color: var(--ink-3); }
+
+/* Tabel segitiga (table-filling) */
+.au-tri { border-collapse: separate; border-spacing: 3px; width: auto; font-family: var(--mono); }
+.au-tri th { border: 0; padding: 2px 6px; color: var(--ink-2); font-size: 0.85rem; text-align: center; }
+.au-tri td { border: 0; width: 38px; height: 34px; padding: 0; text-align: center; border-radius: 8px; background: var(--card); font-weight: 700; font-size: 0.95rem; }
+.au-tri td.x { color: var(--x-ink); }
+.au-tri td.o { color: var(--go-ink); background: color-mix(in srgb, var(--go) 14%, var(--surface)); }
+.au-tri td.hot { background: color-mix(in srgb, var(--hot) 32%, var(--surface)); color: var(--ink); }
+.au-tri td.via { box-shadow: inset 0 0 0 2px var(--focus); }
+.au-tri td.blank { background: none; }
+.au-tri sub { font-size: 0.7em; color: var(--ink-2); font-weight: 400; }
+
+/* Partisi: grup sebagai pil berwarna */
+.au-groups { display: flex; flex-wrap: wrap; gap: 8px; }
+.au-group { font-family: var(--mono); font-weight: 600; padding: 4px 12px; border-radius: 999px; background: var(--card-2); }
+
+/* Grammar */
+.au-gram { font-family: var(--mono); font-size: 1rem; margin: 0; display: grid; gap: 4px; }
+.au-gram div { padding: 2px 8px; border-radius: 8px; }
+.au-gram div.hot { background: color-mix(in srgb, var(--hot) 22%, transparent); }
+.au-gram b { font-weight: 700; }
+.au-derive { font-family: var(--mono); font-size: 1rem; margin: 0; padding-left: 0; list-style: none; display: grid; gap: 2px; }
+.au-derive li { padding: 2px 8px; border-radius: 8px; color: var(--ink-2); }
+.au-derive li.cur { background: color-mix(in srgb, var(--marker) 70%, transparent); color: var(--ink); }
+.au-derive .x { color: var(--hot); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.au-derive .n { color: var(--go-ink); font-weight: 700; }
+
+/* Input string: simbol yang sudah dibaca dicoret, yang sedang dibaca disorot. */
+.au-tape { display: flex; flex-wrap: wrap; gap: 3px; font-family: var(--mono); font-size: 1.05rem; }
+.au-tape span { min-width: 28px; padding: 4px 8px; text-align: center; border-radius: 8px; background: var(--card); }
+.au-tape span.done { color: var(--ink-3); text-decoration: line-through; background: transparent; }
+.au-tape span.now { background: color-mix(in srgb, var(--hot) 30%, var(--surface)); font-weight: 700; }
+
+/* Hasil cek RE: string diterima/ditolak */
+.au-strs { display: flex; flex-wrap: wrap; gap: 6px; font-family: var(--mono); }
+.au-strs span { padding: 3px 10px; border-radius: 999px; background: var(--card); }
+.au-strs span.ok { background: color-mix(in srgb, var(--go) 16%, var(--surface)); }
+.au-strs span.bad { background: color-mix(in srgb, var(--stop) 16%, var(--surface)); }
+
+/* Gambar di slide dan notes (renderFigures): tidak di-scroll, cukup diperkecil supaya muat. */
+.au-fig { margin: 0.4em 0; }
+.au-fig .au-svg { min-width: 0 !important; width: auto; }
+.deck .au-fig .au-svg { max-height: 34vh; }
+.deck .au-fig.tall .au-svg { max-height: 46vh; }
+.deck .au-fig.xtall .au-svg { max-height: 64vh; }
+.deck .au-fig.short .au-svg { max-height: 22vh; }
+.notes .au-fig { overflow-x: auto; }
+.au-figs { display: grid; gap: 0.6em 1.5em; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: end; }
+.au-figs figcaption { text-align: center; font-size: 0.8em; color: var(--ink-2); }
+.au-figs figure { margin: 0; }
+/* Tabel kerja di slide dan notes (state, himpunan, followpos): selebar isinya saja. */
+table.t { width: auto; }
+.t td, .t th { font-family: var(--mono); white-space: nowrap; }
+table.t + table.t { margin-top: 0.8em; }

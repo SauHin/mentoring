@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subset Construction</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>NFA → DFA (subset construction)</h1>
+<p>Setiap state DFA adalah <b>himpunan</b> state NFA yang mungkin aktif. Proses satu baris tabel DFA untuk setiap simbol, sampai tidak ada himpunan baru. State NFA yang disorot = himpunan hasil langkah ini.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu himpunan tujuannya"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah tabel NFA</summary>
+  <p class="hint">Baris pertama: simbol input (tulis ε untuk ε-transition). Setiap baris berikutnya: nama state (→ = start, * = final), lalu satu sel per simbol: <code>{p,q}</code>, atau <code>-</code> kalau kosong.</p>
+  <textarea id="src" rows="7" spellcheck="false"></textarea>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main stack">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <section><div class="au-title">NFA</div><div class="au-scroll" id="nfa"></div></section>
+    <div class="au-two au-sec">
+      <section><div class="au-title">Tabel DFA <span class="label">→ = start, * = final</span></div><div class="au-scroll" id="tab"></div></section>
+      <section class="au-sec"><div class="au-title">Diagram DFA <span class="label">tumbuh setiap kali satu sel terisi</span></div><div class="au-scroll" id="dfa"></div></section>
+    </div>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['Slide: NFA q0, q1', `0 1
+→q0 {q0,q1} {q1}
+*q1 - {q0,q1}`],
+  ['Slide: NFA q0, q1, q2', `0 1
+→q0 {q0,q1} {q2}
+q1 {q0} {q1}
+*q2 {q1} {q0,q1}`],
+  ['Slide: NFA (a|b)*abb', `a b
+→0 {0,1} {0}
+1 - {2}
+2 - {3}
+*3 - -`],
+  ['Slide: ε-NFA (a|b)*a', `ε a b
+→0 {1,7} - -
+1 {2,4} - -
+2 - {3} -
+3 {6} - -
+4 - - {5}
+5 {6} - -
+6 {1,7} - -
+7 - {8} -
+*8 - - -`],
+  ['Slide: ε-NFA desimal', `ε + - . d
+→q0 {q1} {q1} {q1} - -
+q1 - - - {q2} {q1,q4}
+q2 - - - - {q3}
+q3 {q5} - - - {q3}
+q4 - - - {q3} -
+*q5 - - - - -`],
+  ['Latihan 1', `0 1
+→p {p,q} {p}
+q {r} {r}
+r {s} -
+*s {s} {s}`],
+  ['Latihan 2', `0 1
+→p {p,q} {p}
+q {r,s} {t}
+r {p,r} {t}
+*s - -
+*t - -`],
+  ['Latihan 3 (ε-NFA)', `ε a b c
+→P - {P} {Q} {R}
+Q {P} {Q} {R} -
+*R {Q} {R} - {P}`],
+];
+let N, R, nfaGeo, dfaGeo;
+
+// Tabel DFA sampai langkah ini. Sel yang baru diisi disorot, dan nama state baru diberi warna oranye.
+function dfaTable(s) {
+  const syms = N.symbols.filter((a) => a !== EPS);
+  const head = `<tr><th>State</th><th>Set NFA</th>${syms.map((a) => `<th>${escHTML(a)}</th>`).join('')}</tr>`;
+  const body = s.rows.map((r, i) => `<tr class="${i === s.cur && !s.done ? 'cur' : ''}"><td class="st">${i === 0 ? '→' : ''}${r.final ? '*' : ''}${r.name}</td><td class="set">${escHTML(showSet(r.set))}</td>${syms.map((a) => {
+    const v = r.trans[a], hot = i === s.cur && a === s.sym;
+    return `<td class="${hot ? 'hot' : ''}${v === '∅' ? ' mut' : ''}">${v || ''}</td>`;
+  }).join('')}</tr>`).join('');
+  return `<table class="au-table">${head}${body}</table>`;
+}
+// Diagram DFA parsial: posisi dari DFA akhir, edge hanya untuk sel yang sudah terisi.
+function dfaPartial(s) {
+  const filled = new Set();
+  s.rows.forEach((r) => Object.entries(r.trans).forEach(([a, t]) => t !== '∅' && filled.add(`${r.name}|${a}|${t}`)));
+  const edges = dfaGeo.edges.map((e) => ({ ...e, label: e.label.split(',').filter((a) => filled.has(`${e.from}|${a}|${e.to}`)).join(',') })).filter((e) => e.label);
+  const nodes = dfaGeo.nodes.map((n) => ({ ...n, final: s.rows.some((r) => r.name === n.id && r.final) }));
+  const hot = s.cur !== undefined && s.sym ? new Set([s.rows[s.cur].trans[s.sym]]) : new Set();
+  return drawAuto({ nodes, edges }, { shown: new Set(s.rows.map((r) => r.name)), hot, extent: dfaGeo.nodes.map((n) => [n.x, n.y]), label: 'Diagram DFA' });
+}
+
+const st = stepper($('step'), (s) => {
+  $('nfa').innerHTML = drawAuto(nfaGeo, { hot: new Set(s.hotNFA), label: 'Diagram NFA' });
+  $('tab').innerHTML = dfaTable(s);
+  $('dfa').innerHTML = dfaPartial(s);
+}, $('guess'));
+
+function load() {
+  try {
+    N = parseTable($('src').value);
+    R = subsetSteps(N);
+    nfaGeo = layoutAuto(N);
+    dfaGeo = layoutAuto(R.dfa);
+    $('err').textContent = '';
+    st.load(R.steps);
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { $('src').value = PRESETS[e.target.value][1]; load(); };
+$('src').oninput = load;
+$('src').value = PRESETS[0][1];
+load();
+</script>
+</body>
+</html>

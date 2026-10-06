@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RE ke DFA Langsung (followpos)</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>RE → DFA langsung (followpos)</h1>
+<p>Empat tahap: syntax tree dengan nomor posisi, lalu <b>nullable / firstpos / lastpos</b> dari bawah ke atas, lalu <b>followpos</b>, lalu DFA. State DFA = himpunan posisi yang boleh dibaca berikutnya.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu jawabannya"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah RE</summary>
+  <div class="row">
+    <label class="au-field">RE (union: | atau +, star: *)<input class="field" id="re" spellcheck="false" autocomplete="off"></label>
+    <div class="au-keys"><button class="btn btn-sm" id="eps">ε</button></div>
+  </div>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main stack">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <section>
+      <div class="au-title">Syntax tree <span class="label">· = concatenation</span></div>
+      <div class="au-scroll" id="tree"></div>
+      <p class="au-legend"><span><span class="fp">kiri</span> = firstpos</span><span><span class="lp">kanan</span> = lastpos</span><span><b>T/F</b> di atas = nullable</span><span>angka di bawah leaf = posisi</span></p>
+    </section>
+    <div class="au-two au-sec">
+      <section><div class="au-title">followpos</div><div id="fol"></div></section>
+      <section id="dfaSec"><div class="au-title">DFA</div><div class="au-scroll" id="dtab"></div><div class="au-scroll" id="dfa"></div></section>
+    </div>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['(a|b)*abb, slide', '(a|b)*abb'],
+  ['(a|b)*a, slide', '(a|b)*a'],
+  ['(a|ε)bc*, slide', '(a|ε)bc*'],
+  ['(a|b)*(ab|bb)a*, latihan', '(a|b)*(ab|bb)a*'],
+  ['(0+1)*1(0+1)', '(0+1)*1(0+1)'],
+];
+let F, dfaGeo, post;
+const S = (set) => `{${[...set].sort((a, b) => a - b).join(',')}}`;
+const OP = { cat: '·', alt: '|', star: '*', eps: 'ε' };
+
+const st = stepper($('step'), (s) => {
+  const done = new Set(post.slice(0, s.k));
+  const hotPos = new Set(s.hotPos || []);
+  $('tree').innerHTML = drawTree(F.root, {
+    dx: 98, side: 50,
+    label: (n) => (n.t === 'sym' ? n.c : OP[n.t]),
+    cls: (n) => (n.t === 'sym' || n.t === 'eps' ? 'term' : ''),
+    hot: (n) => n === s.hotNode || (n.pos && hotPos.has(n.pos)),
+    annot: (n) => ({
+      below: n.pos ? String(n.pos) : '',
+      ...(done.has(n) ? { left: S(n.first), right: S(n.last), top: n.nullable ? 'T' : 'F' } : {}),
+    }),
+    aria: 'Syntax tree',
+  });
+  const followShown = s.phase === 'follow' || s.phase === 'dfa';
+  $('fol').innerHTML = `<table class="au-table"><tr><th>Posisi</th><th>Simbol</th><th>followpos</th></tr>${F.leaves.map((l) => `<tr class="${hotPos.has(l.pos) ? 'cur' : ''}"><td>${l.pos}</td><td>${escHTML(l.c)}</td><td>${followShown ? (s.fol[l.pos - 1].length ? S(s.fol[l.pos - 1]) : '∅') : ''}</td></tr>`).join('')}</table>`;
+  $('dfaSec').hidden = s.phase !== 'dfa';
+  if (s.phase === 'dfa') {
+    const syms = F.dfa.symbols;
+    $('dtab').innerHTML = `<table class="au-table"><tr><th>State</th><th>Posisi</th>${syms.map((a) => `<th>${escHTML(a)}</th>`).join('')}</tr>${s.rows.map((r, i) => `<tr class="${i === s.cur && !s.done ? 'cur' : ''}"><td class="st">${i === 0 ? '→' : ''}${r.final ? '*' : ''}${r.name}</td><td class="set">${S(r.set)}</td>${syms.map((a) => `<td class="${i === s.cur && a === s.sym ? 'hot' : ''}${r.trans[a] === '∅' ? ' mut' : ''}">${r.trans[a] || ''}</td>`).join('')}</tr>`).join('')}</table>`;
+    $('dfa').innerHTML = s.done ? drawAuto(dfaGeo, { label: 'Diagram DFA' }) : '';
+  }
+}, $('guess'));
+
+function load() {
+  const src = $('re').value;
+  try {
+    F = followposSteps(parseRE(src), src.includes('+') ? '+' : '|');
+    post = [];
+    (function walk(n) { if (n.a) walk(n.a); if (n.b) walk(n.b); post.push(n); })(F.root);
+    dfaGeo = layoutAuto(F.dfa);
+    $('err').textContent = '';
+    st.load(F.steps);
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { $('re').value = PRESETS[e.target.value][1]; load(); };
+$('re').oninput = load;
+$('eps').onclick = () => { const f = $('re'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; load(); };
+$('re').value = PRESETS[0][1];
+load();
+</script>
+</body>
+</html>

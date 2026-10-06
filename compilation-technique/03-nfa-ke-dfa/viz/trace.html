@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jalankan String pada NFA</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Jalankan string pada NFA</h1>
+<p>NFA bisa berada di <b>beberapa state sekaligus</b>. Baca satu simbol, pindahkan semua state aktif, lalu tambahkan yang bisa dicapai lewat ε. String <b>accepted</b> kalau setelah input habis ada final state yang aktif.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="pick">String <input class="field" id="str" size="10" spellcheck="false" autocomplete="off"></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu state mana yang aktif"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah tabel NFA</summary>
+  <p class="hint">Format sama dengan viz subset construction. Simbol <code>d</code> berarti digit apa saja, jadi string boleh ditulis <code>5.6</code>.</p>
+  <textarea id="src" rows="7" spellcheck="false"></textarea>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main stack">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <section><div class="au-title">Input</div><div class="au-tape" id="tape"></div></section>
+    <section class="au-sec"><div class="au-title">NFA <span class="label">oranye = state aktif</span></div><div class="au-scroll" id="graph"></div></section>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const DEC = `ε + - . d
+→q0 {q1} {q1} {q1} - -
+q1 - - - {q2} {q1,q4}
+q2 - - - - {q3}
+q3 {q5} - - - {q3}
+q4 - - - {q3} -
+*q5 - - - - -`;
+const ABB = `a b
+→0 {0,1} {0}
+1 - {2}
+2 - {3}
+*3 - -`;
+const PRESETS = [
+  ['Desimal: 5.6', DEC, '5.6'],
+  ['Desimal: +.12', DEC, '+.12'],
+  ['Desimal: -31', DEC, '-31'],
+  ['(a|b)*abb: aabb', ABB, 'aabb'],
+  ['(a|b)*abb: abab', ABB, 'abab'],
+  ['aa*|bb*: aaa', `ε a b
+→0 {1,3} - -
+1 - {2} -
+*2 - {2} -
+3 - - {4}
+*4 - - {4}`, 'aaa'],
+];
+let N, geo, str = '';
+const st = stepper($('step'), (s) => {
+  $('tape').innerHTML = [...str].map((c, i) => `<span class="${i < s.read - 1 ? 'done' : i === s.read - 1 ? 'now' : ''}">${escHTML(c)}</span>`).join('') || '<span class="label">(string kosong)</span>';
+  $('graph').innerHTML = drawAuto(geo, { hot: new Set(s.cur), label: 'Diagram NFA' });
+}, $('guess'));
+
+function load() {
+  try {
+    N = parseTable($('src').value);
+    geo = layoutAuto(N);
+    str = $('str').value.trim();
+    // d = digit apa saja: simbol input yang tidak ada di tabel dipetakan ke d kalau berupa angka.
+    const sym = (c) => (N.symbols.includes(c) ? c : /\d/.test(c) && N.symbols.includes('d') ? 'd' : c);
+    $('err').textContent = '';
+    st.load(traceSteps(N, [...str].map(sym)));
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { const [, t, s] = PRESETS[e.target.value]; $('src').value = t; $('str').value = s; load(); };
+$('src').oninput = $('str').oninput = load;
+$('pre').onchange({ target: { value: 0 } });
+</script>
+</body>
+</html>
