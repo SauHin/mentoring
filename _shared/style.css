@@ -374,6 +374,22 @@ article.notes { padding-top: 84px; } /* di bawah topbar */
 .to-top.show { opacity: 1; pointer-events: auto; }
 .to-top svg { stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
+/* Full code bertahap (notes.js): baris pertama setiap blok tampil sebagai soal, isinya dibuka satu per satu. */
+.reveal-bar { position: sticky; top: 68px; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0.75rem 0; padding: 8px 0; background: var(--card); }
+.reveal-bar .btn:not(.btn-go) { --edge: var(--btn-edge); background: var(--btn-bg); }
+.reveal-bar .btn.sel { box-shadow: inset 0 0 0 2px var(--go-ink), 0 4px 0 var(--edge); color: var(--go-ink); }
+.reveal-bar .label { flex-basis: 100%; margin: 0; }
+.reveal-bar .label:empty { display: none; }
+.reveal-bar .push { margin-left: auto; }
+.reveal-bar [hidden] { display: none; }
+.blk:not(.open) > .body, .blk.open > .ph { display: none; }
+.blk > .ph { color: var(--ink-3); font-style: italic; }
+.blk.now > .head { background: var(--marker); border-radius: 4px; }
+@media print {
+  .reveal-bar, .blk > .ph { display: none !important; }
+  .blk > .body { display: inline !important; }
+}
+
 /* Daftar pustaka */
 .refs { padding-left: 1.4em; }
 .refs li { color: var(--ink-2); }

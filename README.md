@@ -116,6 +116,7 @@ Jalankan `python tools/cachebust.py`. Script ini menambahkan `?v=<hash>` ke seti
 - Visualisasi linked list, stack, queue, dan priority queue memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak). Opsi `head`, `tail`, `pos`, `tag`, dan `noun` di `listViz()` mengatur nama pointer, input posisi, dan label di bawah node.
 - Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.
 - Daftar isi dan tombol kembali ke atas dibuat otomatis oleh `notes.js` dari setiap `<h2>`.
+- Setiap `<details>` yang judulnya memuat "full code" otomatis punya pilihan **Tampil semua** atau **Bertahap** (`notes.js`). Mode bertahap memotong kode di baris kosong menjadi blok, menampilkan baris pertama tiap blok sebagai soal, dan membuka isinya satu per satu. Jadi pisahkan fungsi dan bagian `main` dengan baris kosong.
 
 ## Kelas Gaya
 

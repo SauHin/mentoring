@@ -62,3 +62,86 @@
     });
   }, { passive: true });
 })();
+
+// Full code bertahap: setiap <details> yang judulnya memuat "full code" bisa dibuka sekaligus
+// atau per blok. Blok = potongan kode yang dipisah baris kosong (satu fungsi, satu bagian main).
+// Baris pertama blok (plus komentar di sekitarnya) tetap tampil sebagai soal, dan isinya
+// disembunyikan, supaya pembaca mencoba menulisnya sendiri sebelum membuka jawabannya.
+(function () {
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const isComment = (l) => /^\s*(\/\/|\/\*)/.test(l);
+  // Panjang "soal" sebuah blok: komentar di atas + baris kode pertama + komentar tepat sesudahnya.
+  function promptLen(b) {
+    let i = 0;
+    while (i < b.length - 1 && isComment(b[i])) i++;
+    i++;
+    while (i < b.length && isComment(b[i])) i++;
+    return i;
+  }
+
+  document.querySelectorAll('.notes details').forEach((d) => {
+    const code = d.querySelector('pre > code');
+    if (!code || !/full code/i.test(d.querySelector('summary')?.textContent || '')) return;
+    const pre = code.parentElement;
+
+    const blocks = [];
+    let cur = [];
+    for (const line of code.textContent.replace(/\n+$/, '').split('\n')) {
+      if (line.trim()) cur.push(line);
+      else if (cur.length) { blocks.push(cur); cur = []; }
+    }
+    if (cur.length) blocks.push(cur);
+
+    code.innerHTML = blocks.map((b) => {
+      const k = promptLen(b);
+      const head = esc(b.slice(0, k).join('\n'));
+      if (k === b.length) return `<span class="blk open">${head}</span>`;
+      const indent = b[k].match(/^\s*/)[0];
+      return `<span class="blk" data-step><span class="head">${head}</span>\n` +
+        `<span class="body">${esc(b.slice(k).join('\n'))}</span>` +
+        `<span class="ph">${indent}... ${b.length - k} baris: tulis sendiri dulu</span></span>`;
+    }).join('\n\n');
+
+    const steps = [...code.querySelectorAll('[data-step]')];
+    const bar = document.createElement('div');
+    bar.className = 'reveal-bar';
+    bar.innerHTML = `<div class="seg">
+        <button class="btn btn-sm sel" data-mode="all">Tampil semua</button>
+        <button class="btn btn-sm" data-mode="step">Bertahap</button>
+      </div>
+      <button class="btn btn-sm push" data-back hidden>Kembali</button>
+      <button class="btn btn-go btn-sm" data-next hidden>Langkah berikutnya</button>
+      <p class="label" aria-live="polite"></p>`;
+    pre.before(bar);
+    const [allBtn, stepBtn] = bar.querySelectorAll('[data-mode]');
+    const back = bar.querySelector('[data-back]'), next = bar.querySelector('[data-next]');
+    const label = bar.querySelector('.label');
+    let stepwise = false, at = 0;
+
+    function render(scroll) {
+      steps.forEach((s, i) => {
+        s.classList.toggle('open', !stepwise || i < at);
+        s.classList.toggle('now', stepwise && i === at);
+      });
+      allBtn.classList.toggle('sel', !stepwise);
+      stepBtn.classList.toggle('sel', stepwise);
+      back.hidden = next.hidden = !stepwise;
+      back.disabled = at === 0;
+      next.disabled = at === steps.length;
+      label.textContent = !stepwise ? ''
+        : at < steps.length ? `Blok ${at + 1} dari ${steps.length}: tulis isi blok yang disorot sendiri, lalu cocokkan.`
+        : `Semua ${steps.length} blok sudah tampil. Bandingkan dengan tulisanmu.`;
+      // Blok yang disorot harus terlihat, tapi halaman hanya digeser kalau blok itu keluar layar.
+      const now = code.querySelector('.now > .head');
+      if (scroll && now) {
+        const r = now.getBoundingClientRect();
+        if (r.top < bar.getBoundingClientRect().bottom + 8 || r.bottom > innerHeight - 24) now.scrollIntoView({ block: 'center' });
+      }
+    }
+    allBtn.onclick = () => { stepwise = false; render(); };
+    stepBtn.onclick = () => { stepwise = true; at = 0; render(true); };
+    back.onclick = () => { at--; render(true); };
+    next.onclick = () => { at++; render(true); };
+    render();
+  });
+})();
