@@ -374,7 +374,7 @@ int main() {
 </ul>
 
 <h2>7. Latihan soal kasus</h2>
-<p>Kerjakan dengan resep 6 langkah. Buka petunjuk hanya kalau macet, dan bandingkan jawabanmu dengan full code setelah selesai. Semua jawaban sudah diuji dengan MinGW gcc (C) dan g++ (C++98).</p>
+<p>Kerjakan dengan resep 6 langkah. Buka petunjuk hanya kalau macet, dan bandingkan jawabanmu dengan full code setelah selesai. Latihan 5 dan 6 adalah soal tugas dan quiz yang pernah diberikan. Semua jawaban sudah diuji dengan MinGW gcc (C) dan g++ (C++98).</p>
 
 <h3>Latihan 1: tanda kurung (stack)</h3>
 <p>Diberikan T string berisi karakter <code>( ) [ ] { }</code>, tanpa spasi, panjang paling banyak 100. Untuk setiap string, cetak <code>YES</code> kalau semua kurung berpasangan dengan benar, dan <code>NO</code> kalau tidak.</p>
@@ -717,6 +717,228 @@ int main() {
         printf("%d", dequeue(&amp;q));
         printf(q.head != NULL ? " " : "\n");
     }
+    return 0;
+}</code></pre>
+</details>
+
+<h3>Latihan 5: menggabungkan dua double linked list (soal ASG)</h3>
+<p>Diberikan dua double linked list, A berisi N bilangan dan B berisi M bilangan. Gabungkan B ke belakang A, sehingga A berisi N + M bilangan dan B menjadi kosong. Cetak isi A setelah digabung dalam satu baris.</p>
+<p>Input: baris 1 berisi N dan M (positif), baris 2 berisi N bilangan untuk A, baris 3 berisi M bilangan untuk B. Wajib: masukkan bilangan ke A dan B sesuai urutan, lalu benar-benar gabungkan list-nya. Mencetak bilangan tanpa menggabungkan list dianggap salah, karena kode dicek manual.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>3 5
+4 1 2
+2 1 5 2 3</code></pre></td><td><pre><code>4 1 2 2 1 5 2 3</code></pre></td></tr>
+</table>
+<details>
+  <summary>Petunjuk</summary>
+  <p>Ini contoh 2 (sambung playlist) tanpa cetak mundur. Pakai <code>append</code>: satu sambungan dua arah antara tail A dan head B, lalu B dikosongkan.</p>
+</details>
+<details>
+  <summary>Full code</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Node {
+    int data;
+    struct Node* prev;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} DList;
+
+Node* createNode(int x) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n-&gt;data = x;
+    n-&gt;prev = n-&gt;next = NULL;
+    return n;
+}
+
+void insertBack(DList* l, int x) {
+    Node* newNode = createNode(x);
+    if (l-&gt;tail == NULL) {
+        l-&gt;head = l-&gt;tail = newNode;
+    } else {
+        newNode-&gt;prev = l-&gt;tail;
+        l-&gt;tail-&gt;next = newNode;
+        l-&gt;tail = newNode;
+    }
+}
+
+void append(DList* a, DList* b) {         // pindahkan semua node B ke belakang A
+    if (b-&gt;head == NULL) return;          // B kosong: A tidak berubah
+    if (a-&gt;head == NULL) {
+        a-&gt;head = b-&gt;head;                // A kosong: A langsung jadi B
+    } else {
+        a-&gt;tail-&gt;next = b-&gt;head;          // sambungan dua arah
+        b-&gt;head-&gt;prev = a-&gt;tail;
+    }
+    a-&gt;tail = b-&gt;tail;
+    b-&gt;head = b-&gt;tail = NULL;             // B kosong, node-nya sekarang milik A
+}
+
+void printForward(DList* l) {
+    for (Node* cur = l-&gt;head; cur != NULL; cur = cur-&gt;next) {
+        if (cur != l-&gt;head) printf(" ");
+        printf("%d", cur-&gt;data);
+    }
+    printf("\n");
+}
+
+
+void freeList(DList* l) {
+    while (l-&gt;head != NULL) {
+        Node* del = l-&gt;head;
+        l-&gt;head = del-&gt;next;
+        free(del);
+    }
+    l-&gt;tail = NULL;
+}
+
+int main() {
+    DList a = {NULL, NULL}, b = {NULL, NULL};
+    int n, m, x;
+
+    scanf("%d %d", &amp;n, &amp;m);
+    for (int i = 0; i &lt; n; i++) {
+        scanf("%d", &amp;x);
+        insertBack(&amp;a, x);
+    }
+    for (int i = 0; i &lt; m; i++) {
+        scanf("%d", &amp;x);
+        insertBack(&amp;b, x);
+    }
+
+    append(&amp;a, &amp;b);
+    printForward(&amp;a);       // b sekarang kosong: b.head == NULL
+
+    freeList(&amp;a);
+    return 0;
+}</code></pre>
+</details>
+
+<h3>Latihan 6: fair waiting list (soal quiz)</h3>
+<p>Restoran punya dua daftar tunggu: N pelanggan reservasi online dan M pelanggan walk-in, masing-masing dengan id unik. Pelanggan dilayani bergantian antara kedua daftar, mulai dari online, dengan first come first serve di tiap daftar. Kalau satu daftar habis, sisa daftar lain dilayani berurutan. L pelanggan membatalkan antrean (L paling banyak N + M - 1, dan id-nya pasti ada). Cetak urutan layanan tanpa pelanggan yang membatalkan.</p>
+<p>Input: baris 1 berisi N dan M, baris 2 berisi id online, baris 3 berisi id walk-in, baris 4 berisi L, baris 5 berisi L id yang membatalkan (kosong kalau L = 0). Wajib memakai single linked list untuk: (a) enqueue id ke dua queue terpisah, (b) enqueue bergantian dari dua queue itu ke queue baru, (c) delete id tertentu dari queue baru, (d) mencetak queue baru.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>2 2
+10 15
+20 13
+0</code></pre></td><td><pre><code>10 20 15 13</code></pre></td></tr>
+  <tr><td><pre><code>3 5
+1 5 3
+9 8 10 19 18
+2
+5 10</code></pre></td><td><pre><code>1 9 8 3 19 18</code></pre></td></tr>
+  <tr><td><pre><code>6 3
+10 8 9 20 19 16
+34 27 11
+3
+10 16 11</code></pre></td><td><pre><code>34 8 27 9 20 19</code></pre></td></tr>
+</table>
+<details>
+  <summary>Petunjuk</summary>
+  <p>Polanya sama dengan contoh 1 (lajur tol): queue online dan walk-in, gabung bergantian ke queue baru, lalu <code>cancel</code> setiap id. Sample ketiga menghapus node pertama (10) dan node terakhir (16), jadi head dan tail sama-sama diuji.</p>
+</details>
+<details>
+  <summary>Full code</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} Queue;
+
+Node* createNode(int x) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n-&gt;data = x;
+    n-&gt;next = NULL;
+    return n;
+}
+
+void enqueue(Queue* q, int x) {
+    Node* newNode = createNode(x);
+    if (q-&gt;tail == NULL) {
+        q-&gt;head = q-&gt;tail = newNode;
+    } else {
+        q-&gt;tail-&gt;next = newNode;
+        q-&gt;tail = newNode;
+    }
+}
+
+int dequeue(Queue* q) {              // syarat: q-&gt;head != NULL
+    Node* del = q-&gt;head;
+    int x = del-&gt;data;
+    q-&gt;head = del-&gt;next;
+    if (q-&gt;head == NULL)
+        q-&gt;tail = NULL;
+    free(del);
+    return x;
+}
+
+void cancel(Queue* q, int x) {
+    Node* prev = NULL;
+    Node* cur = q-&gt;head;
+    while (cur != NULL &amp;&amp; cur-&gt;data != x) {
+        prev = cur;
+        cur = cur-&gt;next;
+    }
+    if (cur == NULL) return;
+    if (prev == NULL)
+        q-&gt;head = cur-&gt;next;
+    else
+        prev-&gt;next = cur-&gt;next;
+    if (cur == q-&gt;tail)
+        q-&gt;tail = prev;
+    free(cur);
+}
+
+void printQueue(Queue* q) {
+    for (Node* cur = q-&gt;head; cur != NULL; cur = cur-&gt;next) {
+        if (cur != q-&gt;head) printf(" ");
+        printf("%d", cur-&gt;data);
+    }
+    printf("\n");
+}
+
+int main() {
+    Queue online = {NULL, NULL}, walkIn = {NULL, NULL}, merged = {NULL, NULL};
+    int n, m, l, x;
+
+    scanf("%d %d", &amp;n, &amp;m);
+    for (int i = 0; i &lt; n; i++) {
+        scanf("%d", &amp;x);
+        enqueue(&amp;online, x);
+    }
+    for (int i = 0; i &lt; m; i++) {
+        scanf("%d", &amp;x);
+        enqueue(&amp;walkIn, x);
+    }
+
+    while (online.head != NULL || walkIn.head != NULL) {     // bergantian, mulai dari online
+        if (online.head != NULL) enqueue(&amp;merged, dequeue(&amp;online));
+        if (walkIn.head != NULL) enqueue(&amp;merged, dequeue(&amp;walkIn));
+    }
+
+    scanf("%d", &amp;l);
+    for (int i = 0; i &lt; l; i++) {
+        scanf("%d", &amp;x);
+        cancel(&amp;merged, x);
+    }
+
+    printQueue(&amp;merged);
+    while (merged.head != NULL)
+        dequeue(&amp;merged);
     return 0;
 }</code></pre>
 </details>
