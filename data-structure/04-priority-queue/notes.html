@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Priority Queue · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+
+<span class="chip">Data structure · 04</span>
+<h1>Priority queue</h1>
+<p class="lead">Antrean yang melayani berdasarkan <b>prioritas</b>. Untuk prioritas yang sama, yang datang duluan dilayani duluan.</p>
+<p><a href="slides.html">Slide</a> · <a href="viz/priority-queue.html">Visualisasi priority queue</a> · Lanjut: <a href="../05-soal-kasus/notes.html">Mengerjakan soal kasus</a></p>
+<div class="callout"><strong>Prasyarat</strong>Queue dan struct dari <a href="../03-stack-dan-queue/notes.html">materi 03</a>, serta insertAt (pola C dan D) dari <a href="../01-single-linked-list/notes.html">single linked list</a>.</div>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Simpan list <b>selalu terurut</b> dari prioritas tertinggi. pqPop cukup mengambil head: <b>O(1)</b>. pqPush mencari posisi sisip: O(n).</li>
+    <li>pqPush = kasus head berubah + pola insertAt (cari node sebelum posisi, sambung dulu, putus kemudian).</li>
+    <li>Supaya pasien dengan prioritas sama tidak saling menyalip: loop memakai <code>&gt;=</code>, kasus head memakai <code>&gt;</code>.</li>
+    <li>Aturan berlapis ditulis di satu fungsi <code>higher(a, b)</code>. String disalin dengan <code>strcpy</code>, termasuk sebelum free.</li>
+  </ul>
+</div>
+
+<h2>1. Kapan queue biasa tidak cukup</h2>
+<p>Queue biasa hanya melihat urutan datang. Di banyak situasi, ada yang harus didahulukan: pasien kritis di IGD, penumpang first class, atau tugas sistem yang mendesak.</p>
+<table>
+  <tr><th>Datang ke-</th><th>Pasien</th><th>Prioritas</th></tr>
+  <tr><td>1</td><td>Ana</td><td>2</td></tr>
+  <tr><td>2</td><td>Budi</td><td>5</td></tr>
+  <tr><td>3</td><td>Cici</td><td>3</td></tr>
+  <tr><td>4</td><td>Dodi</td><td>5</td></tr>
+</table>
+<ul>
+  <li><b>Queue biasa:</b> Ana, Budi, Cici, Dodi.</li>
+  <li><b>Priority queue</b> (angka besar didahulukan): Budi, Dodi, Cici, Ana. Budi dan Dodi sama-sama 5, dan Budi datang duluan.</li>
+</ul>
+<div class="callout"><strong>Kata kunci di soal</strong>"prioritas", "didahulukan", "paling parah/tinggi/tua dulu", "VIP". Baca juga aturan seri: hampir selalu "kalau sama, yang datang duluan dilayani duluan". Cek juga arah angkanya: apakah angka <b>besar</b> atau angka <b>kecil</b> yang didahulukan.</div>
+
+<h2>2. Ide: jaga list selalu terurut</h2>
+<pre><code>head → [Budi 5] → [Dodi 5] → [Cici 3] → [Ana 2] → NULL</code></pre>
+<p>Kalau list selalu terurut, pasien berikutnya selalu ada di head, jadi pqPop O(1). Harganya, setiap pqPush harus mencari posisi yang tepat.</p>
+<table>
+  <tr><th>Cara menyimpan</th><th>pqPush</th><th>pqPop</th><th>Catatan</th></tr>
+  <tr><td>List tidak terurut</td><td>O(1)</td><td>O(n)</td><td>pqPop mencari prioritas tertinggi (latihan 4)</td></tr>
+  <tr><td><b>List terurut</b></td><td>O(n)</td><td><b>O(1)</b></td><td>Materi ini. Paling sering diminta di soal linked list.</td></tr>
+  <tr><td>Heap</td><td>O(log n)</td><td>O(log n)</td><td>Materi lanjutan, memakai array berbentuk tree</td></tr>
+</table>
+
+<h2>3. Node dengan nama dan prioritas</h2>
+<pre><code>#include &lt;string.h&gt;        // strcpy, strcmp
+
+typedef struct Node {
+    char name[21];          // 20 huruf + '\0'
+    int prio;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+} PQueue;
+
+Node* createNode(char name[], int prio) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    strcpy(n->name, name);  // array tidak bisa di-assign dengan =
+    n->prio = prio;
+    n->next = NULL;
+    return n;
+}</code></pre>
+<table>
+  <tr><th>Kode</th><th>Kenapa</th></tr>
+  <tr><td><code>char name[21]</code></td><td>String di C diakhiri karakter <code>'\0'</code>. Nama 20 huruf butuh 21 byte. Sesuaikan dengan batas di soal.</td></tr>
+  <tr><td><code>strcpy(n-&gt;name, name)</code></td><td><code>n-&gt;name = name</code> error, karena array tidak bisa di-assign. strcpy menyalin isinya huruf demi huruf.</td></tr>
+  <tr><td>Hanya <code>head</code>, tanpa tail</td><td>Node baru bisa masuk di mana saja sesuai prioritas, jadi pointer ke node terakhir jarang membantu.</td></tr>
+</table>
+
+<h2>4. Menurunkan <code>pqPush</code></h2>
+<p>Contoh: Eka (3) datang ke antrean <code>Budi 5 → Dodi 5 → Cici 3 → Ana 2</code>. Eka harus masuk setelah Cici, karena Cici juga 3 dan datang lebih dulu.</p>
+<ol>
+  <li><b>Gambar sebelum dan sesudah.</b> Sesudah: <code>Budi 5 → Dodi 5 → Cici 3 → Eka 3 → Ana 2</code>.</li>
+  <li><b>Panah yang berubah:</b> Cici → Ana diganti Cici → Eka dan Eka → Ana.</li>
+  <li><b>Pemilik panah:</b> Cici, yaitu node terakhir yang prioritasnya &gt;= 3. Jadi <code>cur</code> maju selama node <b>sesudah</b> cur masih &gt;= prioritas baru.</li>
+  <li><b>Urutan:</b> <code>newNode-&gt;next = cur-&gt;next</code> dulu, baru <code>cur-&gt;next = newNode</code> (pola D).</li>
+  <li><b>Edge case:</b> antrean kosong, atau node baru lebih penting dari head. Di dua kasus ini tidak ada node sebelum posisi sisip, dan head berubah. Tangani sebelum loop, seperti <code>pos == 0</code> di insertAt.</li>
+</ol>
+<pre><code>void pqPush(PQueue* pq, char name[], int prio) {
+    Node* newNode = createNode(name, prio);
+    if (pq->head == NULL || prio > pq->head->prio) {
+        newNode->next = pq->head;           // masuk paling depan
+        pq->head = newNode;
+        return;
+    }
+    Node* cur = pq->head;
+    while (cur->next != NULL &amp;&amp; cur->next->prio >= prio)
+        cur = cur->next;                    // lewati yang sama atau lebih penting
+    newNode->next = cur->next;              // sambung dulu
+    cur->next = newNode;                    // putus kemudian
+}</code></pre>
+<ul>
+  <li><code>pq-&gt;head == NULL ||</code> ditulis lebih dulu. Kalau bernilai true, bagian kanan <code>||</code> tidak dijalankan, jadi <code>pq-&gt;head-&gt;prio</code> tidak dibaca saat head NULL.</li>
+  <li>Loop membandingkan <code>cur-&gt;next-&gt;prio</code>, bukan <code>cur-&gt;prio</code>. Node baru masuk <b>setelah</b> cur, jadi yang menentukan adalah node sesudah cur.</li>
+  <li>Kalau semua node &gt;= prioritas baru, loop berhenti karena <code>cur-&gt;next == NULL</code>, dan node baru masuk paling belakang. Tidak perlu kasus terpisah.</li>
+</ul>
+
+<h2>5. <code>&gt;</code> atau <code>&gt;=</code>: menentukan siapa duluan saat seri</h2>
+<table>
+  <tr><th>Kondisi loop</th><th>cur berhenti di</th><th>Hasil</th></tr>
+  <tr><td><code>cur-&gt;next-&gt;prio &gt;= prio</code></td><td>Cici</td><td>Budi, Dodi, Cici, <b>Eka</b>, Ana (benar)</td></tr>
+  <tr><td><code>cur-&gt;next-&gt;prio &gt; prio</code></td><td>Dodi</td><td>Budi, Dodi, <b>Eka</b>, Cici, Ana (Eka menyalip Cici)</td></tr>
+</table>
+<p>Aturannya: node baru <b>melewati</b> semua node yang sama atau lebih penting. Karena itu loop memakai <code>&gt;=</code>.</p>
+<p>Kasus head memakai kebalikannya: <code>prio &gt; pq-&gt;head-&gt;prio</code>. Node baru hanya menggeser head kalau benar-benar lebih penting. Kalau ditulis <code>&gt;=</code>, pasien baru yang setara dengan head langsung menyalip.</p>
+<table>
+  <tr><th>Aturan di soal</th><th>Kasus head</th><th>Kondisi loop</th></tr>
+  <tr><td>Angka besar didahulukan</td><td><code>prio &gt; pq-&gt;head-&gt;prio</code></td><td><code>cur-&gt;next-&gt;prio &gt;= prio</code></td></tr>
+  <tr><td>Angka kecil didahulukan</td><td><code>prio &lt; pq-&gt;head-&gt;prio</code></td><td><code>cur-&gt;next-&gt;prio &lt;= prio</code></td></tr>
+</table>
+<div class="callout tip"><strong>Cara cek cepat</strong>Masukkan dua pasien dengan prioritas sama, lalu panggil pqPop. Yang keluar harus pasien pertama. Coba di <a href="viz/priority-queue.html">visualisasi</a>: masukkan prioritas 3 dua kali.</div>
+
+<h2>6. <code>pqPop</code> dan peek</h2>
+<pre><code>void pqPop(PQueue* pq, char out[]) {    // syarat: pq->head != NULL
+    Node* del = pq->head;
+    strcpy(out, del->name);              // salin sebelum free
+    pq->head = del->next;
+    free(del);
+}
+
+// pemakaian
+char name[21];
+if (pq.head != NULL) {
+    pqPop(&amp;pq, name);
+    printf("%s\n", name);
+}</code></pre>
+<ul>
+  <li>Sama dengan dequeue di materi 03, tanpa tail.</li>
+  <li><code>out</code> adalah alamat array <code>name</code> milik main. Array selalu dikirim ke fungsi sebagai alamat elemen pertamanya (parameter <code>char out[]</code> sama dengan <code>char* out</code>). Jadi strcpy mengisi array di main, sama seperti <code>scanf("%s", name)</code> yang tidak butuh <code>&amp;</code>.</li>
+  <li>Kenapa tidak <code>char* name = del-&gt;name; return name;</code>? Baris itu hanya menyalin <b>alamat</b> array di dalam node, bukan huruf-hurufnya. Setelah <code>free(del)</code>, memory node boleh dipakai ulang oleh malloc berikutnya. Diuji di MinGW: nama masih terbaca benar tepat setelah free, tapi berubah menjadi nama pasien baru setelah pqPush berikutnya. Bug seperti ini lolos tes sederhana.</li>
+  <li>Bandingkan dengan dequeue di materi 03: <code>int x = del-&gt;data; return x;</code> aman, karena <code>int</code> disalin nilainya. Array tidak bisa disalin dengan <code>=</code> atau di-return, jadi isinya harus disalin dengan strcpy ke array yang tetap hidup setelah fungsi selesai, yaitu milik pemanggil.</li>
+  <li><b>peek:</b> baca <code>pq.head-&gt;name</code> dan <code>pq.head-&gt;prio</code> tanpa mengeluarkan node.</li>
+</ul>
+
+<h2>7. Aturan berlapis: fungsi <code>higher()</code></h2>
+<p>Soal sering punya lebih dari satu aturan, misalnya: "prioritas tertinggi dulu; kalau sama, yang lebih tua dulu; kalau masih sama, yang datang duluan". Kumpulkan semua aturan di satu fungsi.</p>
+<pre><code>// return 1 kalau a harus dilayani sebelum b
+int higher(Node* a, Node* b) {
+    if (a->prio != b->prio)
+        return a->prio > b->prio;    // aturan 1
+    if (a->age != b->age)
+        return a->age > b->age;      // aturan 2, hanya kalau aturan 1 seri
+    return 0;                        // seri total: urutan datang
+}
+
+void pqPush(PQueue* pq, Node* newNode) {
+    if (pq->head == NULL || higher(newNode, pq->head)) {
+        newNode->next = pq->head;
+        pq->head = newNode;
+        return;
+    }
+    Node* cur = pq->head;
+    while (cur->next != NULL &amp;&amp; !higher(newNode, cur->next))
+        cur = cur->next;
+    newNode->next = cur->next;
+    cur->next = newNode;
+}</code></pre>
+<ul>
+  <li>Aturan "datang duluan" tidak perlu ditulis. <code>return 0</code> membuat node baru berjalan melewati node yang setara, jadi ia masuk di belakangnya.</li>
+  <li><code>!higher(newNode, cur-&gt;next)</code> artinya "node sesudah cur sama atau lebih penting". Ini versi umum dari <code>&gt;=</code>.</li>
+  <li>pqPush versi ini menerima node yang sudah dibuat, jadi struct boleh punya field apa saja tanpa mengubah pqPush.</li>
+</ul>
+<table>
+  <tr><th>Aturan di soal</th><th>Baris di <code>higher</code></th></tr>
+  <tr><td>Nama urut alfabet</td><td><code>return strcmp(a-&gt;name, b-&gt;name) &lt; 0;</code></td></tr>
+  <tr><td>Member VIP duluan (<code>vip</code> = 1 atau 0)</td><td><code>if (a-&gt;vip != b-&gt;vip) return a-&gt;vip;</code></td></tr>
+  <tr><td>Waktu tunggu terlama duluan</td><td><code>return a-&gt;arrive &lt; b-&gt;arrive;</code></td></tr>
+</table>
+
+<h2>8. Full program: antrean IGD</h2>
+<p><b>Soal.</b> Ada Q perintah. <code>DATANG nama p</code>: pasien datang dengan prioritas p (makin besar makin parah). <code>PANGGIL</code>: cetak nama pasien yang dilayani, atau <code>Tidak ada pasien</code> kalau antrean kosong. Prioritas sama dilayani sesuai urutan datang.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>9
+DATANG Ana 2
+DATANG Budi 5
+DATANG Cici 3
+PANGGIL
+DATANG Dodi 3
+DATANG Eka 5
+PANGGIL
+PANGGIL
+PANGGIL</code></pre></td><td><pre><code>Budi
+Eka
+Cici
+Dodi</code></pre></td></tr>
+</table>
+<p>PANGGIL ketiga mengeluarkan Cici, bukan Dodi: keduanya 3, dan Cici datang duluan.</p>
+<details>
+  <summary>Lihat full code</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct Node {
+    char name[21];
+    int prio;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+} PQueue;
+
+Node* createNode(char name[], int prio) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    strcpy(n->name, name);
+    n->prio = prio;
+    n->next = NULL;
+    return n;
+}
+
+void pqPush(PQueue* pq, char name[], int prio) {
+    Node* newNode = createNode(name, prio);
+    if (pq->head == NULL || prio > pq->head->prio) {
+        newNode->next = pq->head;
+        pq->head = newNode;
+        return;
+    }
+    Node* cur = pq->head;
+    while (cur->next != NULL &amp;&amp; cur->next->prio >= prio)
+        cur = cur->next;
+    newNode->next = cur->next;
+    cur->next = newNode;
+}
+
+void pqPop(PQueue* pq, char out[]) {     // syarat: pq->head != NULL
+    Node* del = pq->head;
+    strcpy(out, del->name);
+    pq->head = del->next;
+    free(del);
+}
+
+int main() {
+    PQueue igd = {NULL};
+    int q, prio;
+    char cmd[10], name[21];
+
+    scanf("%d", &amp;q);
+    for (int i = 0; i &lt; q; i++) {
+        scanf("%s", cmd);
+        if (strcmp(cmd, "DATANG") == 0) {
+            scanf("%s %d", name, &amp;prio);
+            pqPush(&amp;igd, name, prio);
+        } else if (igd.head == NULL) {          // PANGGIL saat kosong
+            printf("Tidak ada pasien\n");
+        } else {
+            pqPop(&amp;igd, name);
+            printf("%s\n", name);
+        }
+    }
+
+    while (igd.head != NULL)                    // free pasien yang tersisa
+        pqPop(&amp;igd, name);
+    return 0;
+}</code></pre>
+</details>
+<ul>
+  <li><code>scanf("%s", name)</code> tanpa <code>&amp;</code>, karena nama array sudah berupa alamat.</li>
+  <li>Perintah dibandingkan dengan <code>strcmp(cmd, "DATANG") == 0</code>. Operator <code>==</code> pada dua string membandingkan alamat, bukan isi.</li>
+  <li>Sudah diuji dengan MinGW gcc (C) dan g++ (C++98).</li>
+</ul>
+
+<h2>9. Bug yang sering muncul</h2>
+<table>
+  <tr><th>Bug</th><th>Akibat</th><th>Perbaikan</th></tr>
+  <tr><td>Loop memakai <code>&gt;</code></td><td>Pasien baru menyalip pasien dengan prioritas sama</td><td><code>cur-&gt;next-&gt;prio &gt;= prio</code></td></tr>
+  <tr><td>Kasus head memakai <code>&gt;=</code></td><td>Pasien baru menyalip head yang setara</td><td><code>prio &gt; pq-&gt;head-&gt;prio</code></td></tr>
+  <tr><td>Kasus head tidak ada</td><td>Pasien paling penting masuk setelah head. Kalau antrean kosong, crash.</td><td>Tangani head sebelum loop</td></tr>
+  <tr><td>Loop membandingkan <code>cur-&gt;prio</code></td><td>cur berhenti satu node terlalu jauh, node baru masuk satu posisi terlalu belakang</td><td>Bandingkan <code>cur-&gt;next-&gt;prio</code></td></tr>
+  <tr><td><code>n-&gt;name = name;</code></td><td>Error compile</td><td><code>strcpy(n-&gt;name, name);</code></td></tr>
+  <tr><td><code>if (cmd == "DATANG")</code></td><td>Selalu false</td><td><code>strcmp(cmd, "DATANG") == 0</code></td></tr>
+  <tr><td>Return <code>del-&gt;name</code> setelah free</td><td>Nama bisa berubah menjadi nama pasien lain</td><td>Salin dengan strcpy sebelum free</td></tr>
+</table>
+
+<h2>10. Latihan</h2>
+
+<p><b>1.</b> Mulai dari antrean kosong (angka besar didahulukan): A 2, B 4, C 2, D 4, E 1. Tulis isi list setelah semua masuk.</p>
+<details>
+  <summary>Jawaban</summary>
+  <p><b>B 4, D 4, A 2, C 2, E 1.</b> Di dalam prioritas yang sama, urutannya tetap urutan datang: B sebelum D, A sebelum C.</p>
+</details>
+
+<p><b>2. Temukan bug.</b> Kondisi loop pqPush diganti menjadi <code>cur-&gt;next-&gt;prio &gt; prio</code>. Ulangi latihan 1. Lalu jalankan contoh IGD di bagian 8. Apa yang aneh?</p>
+<details>
+  <summary>Jawaban</summary>
+  <p>Latihan 1 menjadi <b>B 4, D 4, C 2, A 2, E 1</b>: C menyalip A. Tapi contoh IGD tetap mencetak Budi, Eka, Cici, Dodi, sama dengan versi benar. Di contoh itu, pasien setara selalu bertemu di <b>head</b>, dan kasus head memakai <code>&gt;</code> yang benar, jadi loop tidak pernah diuji.</p>
+  <p>Pelajarannya: lolos sample output belum berarti benar. Buat sendiri input dengan prioritas seri <b>di tengah</b> antrean.</p>
+</details>
+
+<p><b>3. Turunkan sendiri.</b> Ubah pqPush untuk soal "prioritas 1 paling penting, lalu 2, lalu 3", dengan aturan seri tetap urutan datang.</p>
+<details>
+  <summary>Jawaban</summary>
+<pre><code>if (pq->head == NULL || prio &lt; pq->head->prio) { ... }
+while (cur->next != NULL &amp;&amp; cur->next->prio &lt;= prio)
+    cur = cur->next;</code></pre>
+  <p>Kedua perbandingan dibalik. Loop tetap memakai versi "sama atau lebih penting" (<code>&lt;=</code>), dan kasus head tetap versi "benar-benar lebih penting" (<code>&lt;</code>).</p>
+</details>
+
+<p><b>4. Turunkan sendiri.</b> Buat priority queue dengan <b>list tidak terurut</b>: pqPush memakai enqueue dari materi 03 (O(1)), dan pqPop mencari prioritas tertinggi (O(n)). Pasien setara tetap dilayani sesuai urutan datang.</p>
+<details>
+  <summary>Jawaban</summary>
+<pre><code>typedef struct {
+    Node* head;
+    Node* tail;
+} PQueue;
+
+void pqPop(PQueue* pq, char out[]) {        // syarat: pq->head != NULL
+    Node* bestPrev = NULL;
+    Node* best = pq->head;
+    Node* prev = pq->head;
+    for (Node* cur = pq->head->next; cur != NULL; cur = cur->next) {
+        if (cur->prio > best->prio) {       // &gt;, bukan &gt;=
+            best = cur;
+            bestPrev = prev;
+        }
+        prev = cur;
+    }
+    strcpy(out, best->name);
+    if (bestPrev == NULL)
+        pq->head = best->next;
+    else
+        bestPrev->next = best->next;
+    if (best == pq->tail)
+        pq->tail = bestPrev;
+    free(best);
+}</code></pre>
+  <p>Pencarian memakai <code>&gt;</code>, jadi kalau ada yang setara, pasien yang ditemukan pertama (datang duluan) tetap terpilih. Bagian delete sama dengan <code>cancel</code> di materi 03, termasuk memindah tail. Dengan input contoh IGD, outputnya sama: Budi, Eka, Cici, Dodi.</p>
+</details>
+
+<p><b>5. Turunkan sendiri.</b> Tulis <code>higher()</code> untuk aturan: "prioritas tinggi dulu; kalau sama, nama urut alfabet".</p>
+<details>
+  <summary>Jawaban</summary>
+<pre><code>int higher(Node* a, Node* b) {
+    if (a->prio != b->prio)
+        return a->prio > b->prio;
+    return strcmp(a->name, b->name) &lt; 0;
+}</code></pre>
+  <p><code>strcmp</code> mengembalikan angka negatif kalau string pertama lebih dulu di urutan alfabet.</p>
+</details>
+
+<p><b>6. Temukan bug.</b> Kenapa fungsi ini kadang mencetak nama yang aneh?</p>
+<pre><code>char* pqPop(PQueue* pq) {
+    Node* del = pq->head;
+    pq->head = del->next;
+    free(del);
+    return del->name;
+}</code></pre>
+<details>
+  <summary>Jawaban</summary>
+  <p><code>del-&gt;name</code> dibaca setelah <code>free(del)</code> (<b>use-after-free</b>). Memory itu sudah dilepas, jadi bisa dipakai ulang oleh malloc berikutnya. Kalau pqPush berikutnya mendapat memory yang sama, nama yang di-return berubah menjadi nama pasien baru. Salin nama ke array milik pemanggil dengan <code>strcpy</code> sebelum free.</p>
+</details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2022). <i>Introduction to Algorithms</i> (4th ed.). MIT Press. Bab 6.5: Priority queues.</li>
+  <li>Weiss, M. A. (1997). <i>Data Structures and Algorithm Analysis in C</i> (2nd ed.). Addison-Wesley. Bab 6: Priority queues (heaps), bagian 6.2 untuk implementasi sederhana dengan linked list.</li>
+  <li>Kernighan, B. W., &amp; Ritchie, D. M. (1988). <i>The C Programming Language</i> (2nd ed.). Prentice Hall. Bab 5.5: Character pointers and functions, dan lampiran B3 untuk <code>&lt;string.h&gt;</code>.</li>
+</ol>
+
+</article>
+</body>
+</html>

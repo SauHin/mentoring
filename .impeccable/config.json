@@ -371,6 +371,87 @@
         ],
         "createdAt": "2026-10-05T17:29:37.084Z",
         "reason": "Glow comes from the shared .laser-dot in _shared/style.css; laser pointer imitates real laser light, requested by user"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/03-stack-dan-queue/viz/stack.html"
+        ],
+        "createdAt": "2026-10-07T02:25:33.019Z",
+        "reason": "Claude: page has no shadows of its own; the only zero-offset colored shadow is the shared .field:focus-visible focus ring in _shared/style.css, an accessibility indicator used on every viz page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/03-stack-dan-queue/viz/queue.html"
+        ],
+        "createdAt": "2026-10-07T02:25:33.266Z",
+        "reason": "Claude: page has no shadows of its own; the only zero-offset colored shadow is the shared .field:focus-visible focus ring in _shared/style.css, an accessibility indicator used on every viz page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/03-stack-dan-queue/slides.html"
+        ],
+        "createdAt": "2026-10-07T02:40:27.577Z",
+        "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/03-stack-dan-queue/notes.html"
+        ],
+        "createdAt": "2026-10-07T02:40:27.824Z",
+        "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/04-priority-queue/slides.html"
+        ],
+        "createdAt": "2026-10-07T02:40:28.072Z",
+        "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/04-priority-queue/notes.html"
+        ],
+        "createdAt": "2026-10-07T02:40:28.315Z",
+        "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/04-priority-queue/viz/priority-queue.html"
+        ],
+        "createdAt": "2026-10-07T02:40:28.573Z",
+        "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/05-soal-kasus/slides.html"
+        ],
+        "createdAt": "2026-10-07T02:40:28.812Z",
+        "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "data-structure/05-soal-kasus/notes.html"
+        ],
+        "createdAt": "2026-10-07T02:40:29.065Z",
+        "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
       }
     ]
   }

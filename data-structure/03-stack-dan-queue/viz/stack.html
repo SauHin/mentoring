@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stack dengan Linked List</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Stack dengan linked list</h1>
+<p>Push dan pop sama-sama terjadi di <b>top</b>, yaitu node pertama. Jalankan step by step dan perhatikan: node yang terakhir di-push selalu yang pertama di-pop.</p>
+
+<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script>
+const CODE = {
+  struct: `typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* top;
+} Stack;
+
+Stack s = {NULL};   // stack kosong`,
+  push: `void push(Stack* s, int x) {
+    Node* newNode = createNode(x);
+    newNode->next = s->top;
+    s->top = newNode;
+}`,
+  pop: `int pop(Stack* s) {
+    Node* del = s->top;
+    int x = del->data;
+    s->top = del->next;
+    free(del);
+    return x;
+}`,
+};
+for (const k in CODE) CODE[k] = CODE[k].split('\n');
+
+/* ---------- Operasi: setiap yield adalah satu langkah. Caption menjelaskan KENAPA, bukan cuma APA. ---------- */
+function* push(x) {
+  const c = 'push';
+  const n = make(x, 0);
+  yield step(c, 'createNode', `Buat node baru berisi ${x}. next-nya masih NULL, jadi node ini belum masuk stack.`, ['newNode']);
+  n.next = head;
+  yield step(c, 'newNode->next = s->top', head === null
+    ? 'Stack kosong, jadi top masih NULL. Node baru akan menjadi satu-satunya node.'
+    : `Sambungkan node baru ke top lama (${val(head)}) DULU. Alamat node ${val(head)} masih tersimpan di top, jadi belum ada yang hilang.`, [n.id + '.next']);
+  head = n.id;
+  yield step(c, 's->top = newNode', 'Baru top pindah ke node baru. Kalau dua baris ini ditukar, alamat top lama tertimpa dan seluruh isi stack hilang.', ['top']);
+  n.lifted = false;
+  delete vars.newNode;
+  yield done(c, 's->top = newNode', `Selesai: ${x} ada di top. Push tidak memakai loop, jadi selalu O(1).`);
+}
+
+function* pop() {
+  const c = 'pop';
+  const d = nodes[head];
+  vars.del = head;
+  yield step(c, 'Node* del = s->top', `Pop selalu mengambil node di top (${d.val}). Simpan alamatnya di del, supaya node ini masih bisa di-free setelah top pindah.`, ['del']);
+  yield step(c, 'int x = del->data', `Salin data ke x (x = ${d.val}) sekarang. Setelah free, del->data tidak boleh dibaca lagi.`);
+  head = d.next;
+  yield step(c, 's->top = del->next', head === null
+    ? 'top pindah ke del->next, yaitu NULL. Stack sekarang kosong.'
+    : `top pindah ke node berikutnya (${val(head)}). del sudah terlepas dari stack.`, ['top']);
+  d.lifted = true;
+  yield step(c, 'free(del)', 'Tidak ada pointer di stack yang menunjuk del lagi, jadi aman di-free.');
+  remove(d.id);
+  delete vars.del;
+  yield done(c, 'return x', `pop() mengembalikan ${d.val}. Node yang terakhir masuk keluar duluan (LIFO).`);
+}
+
+const OPS = {
+  push: (x) => push(x),
+  pop: () => pop(),
+};
+const check = checkCommon;
+listViz({ doubly: false, values: [30, 20, 10], head: 'top', pos: false, noun: 'Stack' });
+</script>
+</body>
+</html>

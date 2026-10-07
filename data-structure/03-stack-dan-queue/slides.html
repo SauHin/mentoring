@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stack dan Queue</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .d { width: 100%; max-width: 760px; height: auto; }
+    .d .box { fill: var(--card-2); }
+    .d .sep { stroke: var(--bg); stroke-width: 3; }
+    .d .val { fill: var(--ink); font-size: 22px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+    .d .lbl { fill: var(--ink-2); font-size: 17px; text-anchor: middle; }
+    .d .cell { fill: var(--ink-3); font-size: 14px; text-anchor: middle; }
+    .d .ar { fill: none; stroke-width: 2.5; stroke: var(--go-ink); marker-end: url(#d-n); }
+    .d .ptr { stroke: var(--ink-3); stroke-width: 1.5; }
+    .d .null { stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round; }
+    .d .io { fill: none; stroke: var(--hot); stroke-width: 2.5; marker-end: url(#d-h); }
+    .d .io-t { fill: var(--hot); font-size: 15px; font-weight: 600; text-anchor: middle; }
+    .deck .slide.full { padding-bottom: 3vh; }
+    .deck .slide.full h2 { margin-bottom: 0.3em; }
+    .deck .slide.full iframe { min-height: 0; }
+    .tight td, .tight th { padding: 0.35em 0.7em; }
+    .cols.code2 { align-items: start; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20em), 1fr)); }
+    .cols.code2 pre + pre { margin-top: 0; }
+    @media (min-width: 900px) { .cols.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); } }
+  </style>
+</head>
+<body class="deck">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="d-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--go-ink)"/></marker>
+    <marker id="d-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--hot)"/></marker>
+  </defs>
+</svg>
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Stack dan queue</h1>
+  <p>Data structure · linked list dengan aturan: data hanya boleh masuk dan keluar di <b>ujung tertentu</b>.</p>
+  <p class="label">Prasyarat: single linked list (insertFront, delete node pertama) dan pointer tail dari double linked list.</p>
+</section>
+
+<section class="slide">
+  <h2>Dua aturan antre: LIFO dan FIFO</h2>
+  <p class="sub">Stack dan queue menyimpan data seperti linked list biasa. Bedanya, keduanya membatasi di mana data boleh masuk dan keluar.</p>
+  <table>
+    <tr><th></th><th>Stack</th><th>Queue</th></tr>
+    <tr><td>Aturan</td><td><b>LIFO</b> (last in, first out): yang terakhir masuk keluar duluan</td><td><b>FIFO</b> (first in, first out): yang pertama masuk keluar duluan</td></tr>
+    <tr><td>Contoh</td><td>Tumpukan piring, tombol back, undo</td><td>Antrean kasir, printer, "first come first serve"</td></tr>
+    <tr><td>Masuk</td><td><code>push</code>: taruh di top</td><td><code>enqueue</code>: masuk di belakang</td></tr>
+    <tr><td>Keluar</td><td><code>pop</code>: ambil dari top</td><td><code>dequeue</code>: ambil dari depan</td></tr>
+  </table>
+  <div class="callout tip"><strong>Kenapa aksesnya dibatasi?</strong>Kalau soal hanya butuh "yang terbaru" atau "yang paling lama menunggu", cukup ujung list yang dipakai. Semua operasinya jadi O(1), tanpa traverse.</div>
+</section>
+
+<section class="slide">
+  <h2>Satu struct = satu stack atau queue</h2>
+  <p class="sub">Dengan <code>head</code> global (materi 01 dan 02), program hanya punya satu list. Soal kasus sering butuh beberapa antrean sekaligus, jadi pointer ujungnya dibungkus dalam struct.</p>
+  <div class="cols flip">
+<pre><code>typedef struct {
+    Node* top;
+} Stack;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} Queue;
+
+Queue a = {NULL, NULL}, b = {NULL, NULL};
+enqueue(&amp;a, 10);   // kirim alamat a</code></pre>
+    <ul>
+      <li>Satu variabel = satu antrean. Butuh tiga antrean? Buat tiga variabel <code>Queue</code>.</li>
+      <li>Fungsi menerima <code>Queue* q</code> dan dipanggil dengan <code>&amp;a</code>. Kalau parameternya <code>Queue q</code>, fungsi mengubah <b>salinan</b>, dan <code>a.head</code> di main tetap NULL.</li>
+      <li>Di dalam fungsi, tulis <code>q-&gt;head</code>, karena <code>q</code> berisi alamat struct.</li>
+      <li>Kosong berarti <code>a.head == NULL</code> (queue) atau <code>s.top == NULL</code> (stack).</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Stack: top diletakkan di head</h2>
+  <p class="sub">Di single linked list, insert dan delete di depan sama-sama O(1). Karena itu top stack adalah node pertama.</p>
+  <svg class="d" viewBox="0 0 660 150" role="img" aria-label="Stack dengan tiga node: 30 di top, lalu 20, lalu 10. Push dan pop terjadi di top.">
+    <text class="lbl" x="67" y="20">top</text><line class="ptr" x1="67" y1="28" x2="67" y2="46"/>
+    <g transform="translate(30 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">30</text></g>
+    <g transform="translate(230 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">20</text></g>
+    <g transform="translate(430 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">10</text></g>
+    <path class="ar" d="M122 78H226"/><path class="ar" d="M322 78H426"/><path class="ar" d="M522 78H580"/>
+    <text class="cell" x="610" y="83">NULL</text>
+    <text class="io-t" x="85" y="136">push dan pop di sini</text>
+  </svg>
+  <ul>
+    <li><b>push = insertFront</b> dan <b>pop = delete node pertama</b>. Kodenya sudah kamu turunkan di materi 01.</li>
+    <li>Top tidak diletakkan di node terakhir. Pop di sana harus mengubah <code>next</code> milik node sebelumnya, dan node itu harus dicari dari head: O(n).</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Kode stack: push dan pop</h2>
+  <p class="sub">Push memakai pola "sambung dulu, putus kemudian". Pop menyimpan alamat dan data node dulu, baru memindahkan top dan free.</p>
+  <div class="cols">
+<pre><code>void push(Stack* s, int x) {
+    Node* newNode = createNode(x);
+    newNode->next = s->top;   // sambung dulu
+    s->top = newNode;         // baru pindah
+}
+
+int pop(Stack* s) {           // syarat: s->top != NULL
+    Node* del = s->top;
+    int x = del->data;
+    s->top = del->next;
+    free(del);
+    return x;
+}</code></pre>
+    <ul>
+      <li><code>pop</code> mengembalikan data, karena soal hampir selalu butuh nilai yang keluar: dicetak atau dipindah ke struktur lain.</li>
+      <li>Data disalin ke <code>x</code> sebelum free. Setelah free, <code>del-&gt;data</code> berisi garbage value.</li>
+      <li>Pop dari stack kosong membaca <code>NULL-&gt;data</code> dan crash (<b>stack underflow</b>). Cek dulu: <code>while (s.top != NULL)</code>.</li>
+      <li><code>peek</code> cukup <code>s.top-&gt;data</code>, tanpa mengeluarkan node.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: push dan pop</h2>
+  <iframe src="viz/stack.html" title="Visualisasi stack dengan linked list"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Queue: masuk di tail, keluar di head</h2>
+  <p class="sub">Queue memakai dua ujung, satu untuk masuk dan satu untuk keluar. Arahnya dipilih supaya keduanya O(1) di single linked list.</p>
+  <svg class="d" viewBox="0 0 700 150" role="img" aria-label="Queue dengan tiga node: 10, 20, 30. Head di 10 untuk dequeue, tail di 30 untuk enqueue.">
+    <text class="lbl" x="117" y="20">head</text><line class="ptr" x1="117" y1="28" x2="117" y2="46"/>
+    <text class="lbl" x="517" y="20">tail</text><line class="ptr" x1="517" y1="28" x2="517" y2="46"/>
+    <g transform="translate(80 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">10</text></g>
+    <g transform="translate(280 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">20</text></g>
+    <g transform="translate(480 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">30</text><line class="null" x1="84" y1="44" x2="100" y2="12"/></g>
+    <path class="ar" d="M172 78H276"/><path class="ar" d="M372 78H476"/>
+    <path class="io" d="M70 78H14"/><text class="io-t" x="117" y="136">dequeue: keluar di sini</text>
+    <path class="io" d="M690 78H600"/><text class="io-t" x="535" y="136">enqueue: masuk di sini</text>
+  </svg>
+  <table class="tight">
+    <tr><th>Pilihan arah</th><th>enqueue</th><th>dequeue</th></tr>
+    <tr><td><b>Masuk di tail, keluar di head</b></td><td>O(1): <code>tail-&gt;next</code> = node baru</td><td>O(1): head pindah ke <code>head-&gt;next</code></td></tr>
+    <tr><td>Masuk di head, keluar di tail</td><td>O(1)</td><td>O(n): tail baru = node sebelum tail, harus dicari dari head</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Kode queue: enqueue dan dequeue</h2>
+  <p class="sub">Enqueue = insertBack dengan tail (materi 02, tanpa prev). Dequeue = pop, ditambah satu edge case: kalau antrean menjadi kosong, tail juga harus NULL.</p>
+  <div class="cols code2">
+<pre><code>void enqueue(Queue* q, int x) {
+    Node* newNode = createNode(x);
+    if (q->tail == NULL) {
+        q->head = q->tail = newNode;
+    } else {
+        q->tail->next = newNode;
+        q->tail = newNode;
+    }
+}</code></pre>
+<pre><code>int dequeue(Queue* q) {
+    Node* del = q->head;
+    int x = del->data;
+    q->head = del->next;
+    if (q->head == NULL)
+        q->tail = NULL;
+    free(del);
+    return x;
+}</code></pre>
+  </div>
+  <ul>
+    <li>Kalau antrean kosong, tidak ada node terakhir untuk disambung. Node baru langsung menjadi head <b>dan</b> tail.</li>
+    <li>Kalau node terakhir keluar tanpa <code>tail = NULL</code>, tail menunjuk node yang sudah di-free. Enqueue berikutnya menulis ke memory itu, dan data baru hilang.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Cancel: keluar dari tengah antrean</h2>
+  <p class="sub">Soal antrean sering punya pelanggan yang membatalkan. Ini delete berdasarkan <b>nilai</b>, dan butuh dua pointer yang berjalan beriringan: <code>prev</code> dan <code>cur</code>.</p>
+  <div class="cols">
+<pre><code>void cancel(Queue* q, int x) {
+    Node* prev = NULL;
+    Node* cur = q->head;
+    while (cur != NULL &amp;&amp; cur->data != x) {
+        prev = cur;
+        cur = cur->next;
+    }
+    if (cur == NULL) return;        // x tidak ada
+    if (prev == NULL)
+        q->head = cur->next;        // cur node pertama
+    else
+        prev->next = cur->next;
+    if (cur == q->tail)
+        q->tail = prev;             // cur node terakhir
+    free(cur);
+}</code></pre>
+    <ul>
+      <li><code>prev</code> selalu satu langkah di belakang <code>cur</code>. Saat x ketemu, <code>prev</code> adalah node yang <code>next</code>-nya harus diubah (pemilik panah).</li>
+      <li><code>cur != NULL</code> dicek lebih dulu, supaya <code>cur-&gt;data</code> tidak dibaca saat cur NULL.</li>
+      <li>Kalau cur node terakhir, tail mundur ke prev. Kalau satu-satunya node, prev NULL, jadi head dan tail sama-sama NULL.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: enqueue, dequeue, cancel</h2>
+  <iframe src="viz/queue.html" title="Visualisasi queue dengan linked list"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Pola queue: gabung dua antrean bergantian</h2>
+  <p class="sub">Soal sering meminta dua antrean dilayani bergantian. Ambil satu dari tiap antrean secara bergiliran, lalu masukkan ke antrean baru.</p>
+  <div class="cols">
+    <div>
+<pre><code>// a = 4 7,  b = 2 6 8 9
+while (a.head != NULL || b.head != NULL) {
+    if (a.head != NULL) enqueue(&amp;c, dequeue(&amp;a));
+    if (b.head != NULL) enqueue(&amp;c, dequeue(&amp;b));
+}
+// c = 4 2 7 6 8 9</code></pre>
+      <ul>
+        <li>Loop jalan selama salah satu antrean masih berisi. Kalau <code>a</code> habis duluan, if pertama bernilai false, jadi sisa <code>b</code> masuk berurutan.</li>
+        <li>Setelah loop, <code>a</code> dan <code>b</code> kosong.</li>
+      </ul>
+    </div>
+    <table class="tight">
+      <tr><th>Putaran</th><th>a</th><th>b</th><th>c</th></tr>
+      <tr><td>awal</td><td>4 7</td><td>2 6 8 9</td><td>-</td></tr>
+      <tr><td>1</td><td>7</td><td>6 8 9</td><td>4 2</td></tr>
+      <tr><td>2</td><td>-</td><td>8 9</td><td>4 2 7 6</td></tr>
+      <tr><td>3</td><td>-</td><td>9</td><td>4 2 7 6 8</td></tr>
+      <tr><td>4</td><td>-</td><td>-</td><td>4 2 7 6 8 9</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Pola stack: proses yang paling baru dulu</h2>
+  <p class="sub">Kalau soal meminta sesuatu dibalik atau dibatalkan, yang diproses duluan adalah yang paling baru masuk. Itu LIFO, jadi pakai stack.</p>
+  <div class="cols">
+<pre><code>// Balik urutan: push semua, lalu pop semua
+for (int i = 0; i &lt; n; i++) {
+    scanf("%d", &amp;x);
+    push(&amp;s, x);
+}
+while (s.top != NULL)
+    printf("%d ", pop(&amp;s));    // input 1 2 3, output 3 2 1</code></pre>
+    <ul>
+      <li><b>Undo:</b> setiap aksi di-push. Undo = pop aksi terakhir.</li>
+      <li><b>Tombol back:</b> setiap halaman yang ditinggalkan di-push. Back = pop.</li>
+      <li><b>Tanda kurung:</b> kurung yang terakhir dibuka harus ditutup duluan. Latihannya ada di materi 05.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Bug yang sering muncul</h2>
+  <p class="sub">Hampir semua bug stack dan queue terjadi saat struktur kosong, saat node terakhir keluar, atau saat struct dikirim tanpa alamat.</p>
+  <table class="tight">
+    <tr><th>Bug</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>Parameter <code>Queue q</code>, bukan <code>Queue* q</code></td><td>Fungsi mengubah salinan, jadi queue di main tetap kosong</td><td>Terima <code>Queue* q</code>, panggil dengan <code>&amp;a</code></td></tr>
+    <tr><td>Pop atau dequeue saat kosong</td><td>Membaca <code>NULL-&gt;data</code>, program crash</td><td>Cek <code>s.top != NULL</code> atau <code>q.head != NULL</code> dulu</td></tr>
+    <tr><td>Dequeue node terakhir tanpa <code>tail = NULL</code></td><td>Enqueue berikutnya menulis ke node yang sudah di-free</td><td>Kalau head menjadi NULL, set tail = NULL</td></tr>
+    <tr><td>Cancel node terakhir tanpa memindah tail</td><td>Node baru disambung ke node yang sudah di-free dan tidak pernah tercetak</td><td><code>if (cur == q-&gt;tail) q-&gt;tail = prev;</code></td></tr>
+    <tr><td>Membaca <code>del-&gt;data</code> setelah free</td><td>Garbage value</td><td>Salin data ke variabel dulu, baru free</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Time complexity</h2>
+  <p class="sub">Stack dan queue cepat karena setiap operasi utamanya hanya menyentuh ujung list.</p>
+  <table>
+    <tr><th>Operasi</th><th>Kompleksitas</th><th>Alasan</th></tr>
+    <tr><td><code>push</code>, <code>pop</code>, <code>peek</code></td><td><b>O(1)</b></td><td>Hanya menyentuh top</td></tr>
+    <tr><td><code>enqueue</code>, <code>dequeue</code></td><td><b>O(1)</b></td><td>Head dan tail langsung tersedia</td></tr>
+    <tr><td><code>cancel(x)</code></td><td>O(n)</td><td>x harus dicari dari head</td></tr>
+    <tr><td>Gabung bergantian</td><td>O(n + m)</td><td>Setiap node dipindah tepat satu kali</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Stack (<b>LIFO</b>) dan queue (<b>FIFO</b>) adalah linked list yang hanya boleh diakses di ujung tertentu.</li>
+    <li>Stack: push dan pop di top (head). Queue: enqueue di tail, dequeue di head. Semuanya <b>O(1)</b>.</li>
+    <li>Bungkus pointer ujung dalam struct, lalu kirim alamatnya (<code>&amp;a</code>) ke fungsi. Dengan begitu satu program bisa punya banyak stack dan queue.</li>
+    <li>Edge case: mengambil dari struktur kosong, dequeue node terakhir (<code>tail = NULL</code>), dan cancel node pertama atau terakhir.</li>
+  </ul>
+  <p class="label">Latihan dan full code ada di notes. Materi berikutnya: priority queue.</p>
+</section>
+
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

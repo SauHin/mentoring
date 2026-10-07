@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mengerjakan Soal Kasus</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <style>
+    .tight td, .tight th { padding: 0.35em 0.7em; }
+    .steps li::marker { font-weight: 700; color: var(--go-ink); }
+    .io pre { font-size: 0.74em; }
+    .io td { vertical-align: top; }
+    @media (min-width: 900px) { .cols.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); } }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Mengerjakan soal kasus</h1>
+  <p>Data structure · dari soal cerita ke program C lengkap dengan linked list, stack, queue, dan priority queue.</p>
+  <p class="label">Prasyarat: materi 01 sampai 04. Fungsi di sini diambil dari materi itu, jadi fokusnya ada di cara berpikir dan <code>main</code>.</p>
+</section>
+
+<section class="slide">
+  <h2>Resep 6 langkah</h2>
+  <p class="sub">Soal kasus jarang menyebut operasi secara langsung. Enam langkah ini mengubah cerita menjadi daftar operasi, lalu menjadi program.</p>
+  <ol class="steps">
+    <li><b>Baca format input dan output.</b> Tulis sample input di kertas, lalu tandai arti setiap angka.</li>
+    <li><b>Pilih struktur</b> dengan bertanya: siapa yang keluar atau dilayani duluan?</li>
+    <li><b>Petakan setiap kalimat soal</b> ke satu operasi (satu fungsi).</li>
+    <li><b>Tulis kerangka:</b> struct, createNode, fungsi operasi, lalu main.</li>
+    <li><b>Trace sample input</b> dengan tangan, lalu cocokkan dengan sample output.</li>
+    <li><b>Cek edge case dan aturan soal</b>, misalnya "wajib memakai linked list" atau "list B harus kosong".</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2>Langkah 2: pilih struktur dari kalimat soal</h2>
+  <p class="sub">Cari kalimat yang menjelaskan urutan keluar atau dilayani. Kalimat itu menentukan struktur dan operasinya.</p>
+  <table class="tight">
+    <tr><th>Kalimat di soal</th><th>Struktur</th><th>Operasi</th></tr>
+    <tr><td>"first come first serve", "sesuai urutan datang", antrean</td><td>Queue</td><td>enqueue, dequeue</td></tr>
+    <tr><td>"undo", "kembali ke sebelumnya", "dibalik", kurung berpasangan</td><td>Stack</td><td>push, pop</td></tr>
+    <tr><td>"prioritas", "didahulukan", "paling parah dulu"</td><td>Priority queue</td><td>pqPush terurut, pqPop</td></tr>
+    <tr><td>"maju dan mundur", "sambungkan B ke belakang A"</td><td>Double linked list</td><td>insertBack, append</td></tr>
+    <tr><td>"sisipkan di posisi ke-k"</td><td>Linked list</td><td>insertAt, deleteAt</td></tr>
+    <tr><td>"membatalkan", "keluar dari antrean", "hapus id x"</td><td>Struktur apa pun</td><td>cancel (delete berdasarkan nilai)</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Contoh soal: lajur tol menyempit</h2>
+  <p class="sub">Dua lajur, A (N mobil) dan B (M mobil), menyatu menjadi satu. Mobil masuk bergantian mulai dari A, sesuai urutan di lajurnya. Kalau satu lajur habis, sisa lajur lain masuk berurutan. Lalu L mobil keluar lewat exit. Cetak urutan mobil di lajur gabungan. Wajib memakai queue dengan single linked list.</p>
+  <div class="cols">
+    <table class="tight io">
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre><code>3 4
+11 12 13
+21 22 23 24
+2
+12 24</code></pre></td><td><pre><code>11 21 22 13 23</code></pre></td></tr>
+    </table>
+    <ul>
+      <li>Baris 1: N dan M. Baris 2 dan 3: nomor mobil di lajur A dan B.</li>
+      <li>Baris 4: L. Baris 5: nomor mobil yang keluar.</li>
+      <li>"Bergantian", "sesuai urutan" = <b>queue</b>. "Keluar" = <b>cancel</b>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Langkah 3: setiap kalimat menjadi satu operasi</h2>
+  <p class="sub">Tulis daftar ini sebelum menulis kode. Kalau semua kalimat soal sudah punya operasi, main tinggal menyusunnya.</p>
+  <table class="tight">
+    <tr><th>Kalimat soal</th><th>Kode</th></tr>
+    <tr><td>Lajur A berisi N mobil, lajur B berisi M mobil</td><td><code>enqueue(&amp;a, x)</code> N kali, <code>enqueue(&amp;b, x)</code> M kali</td></tr>
+    <tr><td>Masuk bergantian mulai dari A, sisa lajur masuk berurutan</td><td>Pola gabung bergantian dari materi 03</td></tr>
+    <tr><td>L mobil keluar lewat exit</td><td><code>cancel(&amp;merged, x)</code> L kali</td></tr>
+    <tr><td>Cetak urutan</td><td><code>printQueue(&amp;merged)</code></td></tr>
+  </table>
+  <div class="callout tip"><strong>Tiga queue sekaligus</strong>Karena itu <code>head</code> dan <code>tail</code> dibungkus dalam <code>struct Queue</code>, lalu fungsi menerima <code>Queue*</code> (materi 03).</div>
+</section>
+
+<section class="slide">
+  <h2>Langkah 4: kerangka program</h2>
+  <p class="sub">Fungsi operasi diambil dari materi sebelumnya. Main hanya memanggil fungsi sesuai urutan soal.</p>
+  <div class="cols">
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+typedef struct Node {...} Node;
+typedef struct {...} Queue;
+Node* createNode(int x) {...}
+void enqueue(Queue* q, int x) {...}
+int dequeue(Queue* q) {...}
+void cancel(Queue* q, int x) {...}
+void printQueue(Queue* q) {...}
+
+int main() {
+    // 1. baca input, masukkan ke struktur
+    // 2. jalankan operasi sesuai soal
+    // 3. cetak sesuai format output
+    // 4. free semua node
+    return 0;
+}</code></pre>
+    <ul>
+      <li>Tulis fungsi dulu, lalu uji satu per satu. Kalau enqueue dan printQueue sudah benar, bug di main lebih mudah dicari.</li>
+      <li>Butuh string? Tambahkan <code>#include &lt;string.h&gt;</code> untuk <code>strcpy</code> dan <code>strcmp</code>.</li>
+      <li>Langkah 4 (free) sering lupa. Di soal yang dicek manual, memory leak bisa mengurangi nilai.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2><code>main</code>: urutannya sama dengan soal</h2>
+  <p class="sub">Setiap blok di main adalah satu baris di daftar langkah 3.</p>
+<pre><code>int main() {
+    Queue a = {NULL, NULL}, b = {NULL, NULL}, merged = {NULL, NULL};
+    int n, m, l, x;
+    scanf("%d %d", &amp;n, &amp;m);
+    for (int i = 0; i &lt; n; i++) { scanf("%d", &amp;x); enqueue(&amp;a, x); }
+    for (int i = 0; i &lt; m; i++) { scanf("%d", &amp;x); enqueue(&amp;b, x); }
+    while (a.head != NULL || b.head != NULL) {          // gabung bergantian
+        if (a.head != NULL) enqueue(&amp;merged, dequeue(&amp;a));
+        if (b.head != NULL) enqueue(&amp;merged, dequeue(&amp;b));
+    }
+    scanf("%d", &amp;l);
+    for (int i = 0; i &lt; l; i++) { scanf("%d", &amp;x); cancel(&amp;merged, x); }
+    printQueue(&amp;merged);
+    while (merged.head != NULL) dequeue(&amp;merged);       // free semua node
+    return 0;
+}</code></pre>
+</section>
+
+<section class="slide">
+  <h2>Membaca input dengan <code>scanf</code></h2>
+  <p class="sub">Hampir semua soal memberi jumlah data dulu, lalu datanya. Baca jumlahnya, lalu loop sebanyak itu.</p>
+  <table class="tight">
+    <tr><th>Situasi</th><th>Cara</th><th>Kenapa</th></tr>
+    <tr><td>Angka dipisah spasi atau newline</td><td><code>scanf("%d", &amp;x)</code> di dalam loop</td><td><code>%d</code> melewati spasi dan newline, jadi pembagian baris tidak berpengaruh</td></tr>
+    <tr><td>L = 0, baris berikutnya kosong</td><td>Tidak perlu if</td><td>Loop jalan 0 kali, jadi tidak ada yang dibaca</td></tr>
+    <tr><td>Kata tanpa spasi</td><td><code>scanf("%s", name)</code>, tanpa <code>&amp;</code></td><td>Nama array sudah berupa alamat</td></tr>
+    <tr><td>Nama dengan spasi</td><td><code>scanf(" %[^\n]", name)</code></td><td><code>%s</code> berhenti di spasi. Spasi di depan format melewati newline sisa baris sebelumnya.</td></tr>
+    <tr><td>Perintah seperti <code>ADD</code></td><td><code>strcmp(cmd, "ADD") == 0</code></td><td><code>==</code> pada string membandingkan alamat, bukan isi</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Mencetak sesuai format output</h2>
+  <p class="sub">Output dibandingkan dengan jawaban huruf demi huruf. Cetak persis seperti sample output, tanpa teks tambahan.</p>
+  <div class="cols">
+<pre><code>void printQueue(Queue* q) {
+    for (Node* cur = q->head; cur != NULL; cur = cur->next) {
+        if (cur != q->head) printf(" ");
+        printf("%d", cur->data);
+    }
+    printf("\n");
+}</code></pre>
+    <ul>
+      <li>Spasi dicetak <b>sebelum</b> setiap angka kecuali yang pertama. Dengan begitu tidak ada spasi di akhir baris, yang di sebagian judge dianggap salah.</li>
+      <li>Jangan mencetak "Output:", "Hasil:", atau prompt seperti "Masukkan N:".</li>
+      <li>Akhiri baris dengan <code>\n</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Langkah 5: trace sample input</h2>
+  <p class="sub">Isi tabel ini dengan tangan sebelum menjalankan program. Kalau hasil trace cocok dengan sample output, pemetaan langkah 3 sudah benar.</p>
+  <table class="tight">
+    <tr><th>Tahap</th><th>a</th><th>b</th><th>merged</th></tr>
+    <tr><td>Setelah input</td><td>11 12 13</td><td>21 22 23 24</td><td>-</td></tr>
+    <tr><td>Setelah gabung bergantian</td><td>-</td><td>-</td><td>11 21 12 22 13 23 24</td></tr>
+    <tr><td>cancel 12 (di tengah)</td><td>-</td><td>-</td><td>11 21 22 13 23 24</td></tr>
+    <tr><td>cancel 24 (node terakhir, tail mundur)</td><td>-</td><td>-</td><td><b>11 21 22 13 23</b></td></tr>
+  </table>
+  <p>Hasil akhir cocok dengan sample output. Cancel 24 menghapus node terakhir, jadi tail harus mundur ke 23. Output sample tidak bisa menunjukkan bug ini, karena tidak ada enqueue setelah cancel.</p>
+</section>
+
+<section class="slide">
+  <h2>Langkah 6: aturan soal dan edge case</h2>
+  <p class="sub">Soal kasus biasanya dicek manual. Output yang benar belum cukup kalau kode tidak memakai struktur yang diminta.</p>
+  <ul>
+    <li><b>"Wajib memakai linked list" atau "jangan hanya mencetak":</b> semua data harus masuk ke struktur dan diproses lewat operasinya. Program yang langsung mencetak angka dari input dianggap salah, walaupun output-nya cocok.</li>
+    <li><b>"List B harus kosong":</b> di akhir, <code>b.head</code> dan <code>b.tail</code> harus benar-benar NULL.</li>
+    <li><b>Buat input sendiri untuk edge case</b>, karena sample jarang mengujinya: struktur kosong (N = 0, L = 0), panjang tidak sama, hapus node pertama, terakhir, atau satu-satunya, dan prioritas seri di tengah antrean.</li>
+    <li><b>Free semua node</b> sebelum <code>return 0</code>.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Contoh 2: sambung list B ke belakang A</h2>
+  <p class="sub">Soal double linked list sering meminta dua list digabung. Dengan tail, cukup satu sambungan dua arah antara tail A dan head B. Tidak ada node yang dipindah satu per satu.</p>
+  <div class="cols">
+<pre><code>void append(DList* a, DList* b) {
+    if (b->head == NULL) return;    // B kosong
+    if (a->head == NULL) {
+        a->head = b->head;          // A kosong: A = B
+    } else {
+        a->tail->next = b->head;    // sambungan dua arah
+        b->head->prev = a->tail;
+    }
+    a->tail = b->tail;
+    b->head = b->tail = NULL;       // B jadi kosong
+}</code></pre>
+    <ul>
+      <li>Gabungan ini <b>O(1)</b>, berapa pun panjang list-nya.</li>
+      <li>Setelah digabung, node B milik A. B harus dikosongkan. Kalau tidak, free B nanti melepas node yang masih dipakai A (<b>double free</b>).</li>
+      <li>Cetak hasilnya maju <b>dan</b> mundur. Kalau hasil mundur tidak terbalik, ada <code>prev</code> yang lupa disambung.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Bug yang sering muncul di soal kasus</h2>
+  <p class="sub">Bug ini membuat jawaban salah walaupun fungsi struktur datanya sudah benar.</p>
+  <table class="tight">
+    <tr><th>Bug</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td><code>scanf("%d", x)</code> tanpa <code>&amp;</code></td><td>scanf menulis ke alamat sembarang, program bisa crash</td><td><code>scanf("%d", &amp;x)</code></td></tr>
+    <tr><td>Mencetak teks tambahan atau spasi di akhir</td><td>Output tidak sama persis dengan jawaban</td><td>Cetak persis seperti sample output</td></tr>
+    <tr><td>Struct dikirim tanpa <code>&amp;</code></td><td>Struktur di main tetap kosong</td><td>Fungsi menerima pointer, panggil dengan <code>&amp;a</code></td></tr>
+    <tr><td>Langsung mencetak input tanpa struktur</td><td>Melanggar aturan soal, nilai dipotong</td><td>Simpan ke struktur, proses lewat operasi</td></tr>
+    <tr><td>Hanya mengetes sample</td><td>Bug edge case tidak ketahuan</td><td>Buat input edge case sendiri (langkah 6)</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <ul>
+    <li>Ikuti resep: format I/O, pilih struktur, petakan kalimat ke operasi, kerangka, trace, lalu edge case.</li>
+    <li>Struktur dipilih dari kalimat yang menjelaskan siapa yang keluar duluan: urutan datang (queue), yang terbaru (stack), atau prioritas (priority queue).</li>
+    <li>Fungsi operasi diambil dari materi 01 sampai 04. Main hanya menyusun pemanggilan fungsi sesuai urutan soal.</li>
+    <li>Cetak persis sesuai format, uji edge case dengan input sendiri, dan free semua node.</li>
+  </ul>
+  <p class="label">Full code kedua contoh dan empat soal latihan (stack, queue, priority queue) dengan jawaban ada di notes.</p>
+</section>
+
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

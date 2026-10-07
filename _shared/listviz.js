@@ -3,12 +3,17 @@
 //   CODE  : { namaOperasi: `kode C` }  (plus CODE.struct untuk tampilan awal)
 //   OPS   : { namaOperasi: (x, pos) => generator }  setiap `yield` = satu langkah
 //   check : (op, x, pos, n) => pesan error atau ''
-// lalu memanggil listViz({ doubly, title, values }).
+// lalu memanggil listViz({ doubly, values, head, tail, pos, valueLabel, tag, noun }).
+//   head       : nama pointer pertama di gambar ('top' untuk stack)
+//   tail       : tampilkan pointer tail (default: hanya double linked list)
+//   pos        : false = sembunyikan input posisi (stack, queue)
+//   tag(id)    : teks di bawah node pengganti index, misalnya nama pasien
+//   noun       : kata untuk list kosong ('Stack', 'Queue', ...)
 // Generator memakai state global di bawah (nodes, head, tail, vars, ...) dan helper step/done/make.
 
 const $ = (id) => document.getElementById(id);
 const MAX = 7, VBW = 1270, TOP = 90, LIFT = 140, H = 50, STRIDE = 170;
-let W = 120, DOUBLY = true;
+let W = 120, DOUBLY = true, HEAD = 'head', TAIL = true, TAG = null, NOUN = 'List';
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Pointer = id node (angka) atau null.
@@ -16,7 +21,7 @@ let nodes, order, head, tail, vars, found, output, nextId, hl = new Set();
 let running = null, playTimer = null, shown = {}, anim = 0, guessing = false;
 let before, makeOp, count = 0; // keadaan sebelum operasi + pembuat generator, untuk tombol Kembali
 
-const val = (id) => (id === null || id === undefined ? 'NULL' : nodes[id].val);
+const val = (id) => (id === null || id === undefined ? 'NULL' : TAG ? `${TAG(id)} (${nodes[id].val})` : nodes[id].val);
 const step = (code, find, text, hot = []) => ({ code, line: CODE[code].findIndex((l) => l.includes(find)), text, hl: hot });
 const done = (code, find, text) => ({ ...step(code, find, text), final: true });
 const size = () => order.length;
@@ -118,14 +123,14 @@ function checkList() {
     ids.push(id);
     prev = id;
   }
-  if (DOUBLY) console.assert(tail === prev, 'tail tidak menunjuk node terakhir');
+  if (TAIL) console.assert(tail === prev, 'tail tidak menunjuk node terakhir');
   console.assert(ids.join() === order.join(), 'urutan gambar berbeda dengan urutan list');
 }
 
 /* ---------- Gambar ---------- */
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const ptrNames = () => ['head', ...(DOUBLY ? ['tail'] : []), ...Object.keys(vars)];
-const ptrValue = (name) => (name === 'head' ? head : name === 'tail' ? tail : vars[name]);
+const ptrNames = () => [HEAD, ...(TAIL ? ['tail'] : []), ...Object.keys(vars)];
+const ptrValue = (name) => (name === HEAD ? head : TAIL && name === 'tail' ? tail : vars[name]);
 
 function showStep(st) {
   hl = new Set(st.hl || []);
@@ -188,14 +193,14 @@ function render(pos) {
   const s = ['<defs>' + ['next', 'prev', 'hot'].map((k) =>
     `<marker id="tip-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path class="tip ${k}" d="M0 0L10 5L0 10z"/></marker>`).join('') + '</defs>'];
 
-  if (!order.length) s.push(`<text class="empty" x="${VBW / 2}" y="${TOP + H / 2}">List kosong: head = NULL${DOUBLY ? ', tail = NULL' : ''}</text>`);
+  if (!order.length) s.push(`<text class="empty" x="${VBW / 2}" y="${TOP + H / 2}">${NOUN} kosong: ${HEAD} = NULL${TAIL ? ', tail = NULL' : ''}</text>`);
 
   let idx = 0;
   for (const id of order) {
     const n = nodes[id], p = pos[id];
     const st = vars.del === id ? 'del' : vars.newNode === id ? 'new' : found === id ? 'found' : Object.values(vars).includes(id) ? 'cur' : '';
     s.push(nodeSvg(n, p, st));
-    if (!n.lifted) s.push(`<text class="idx" x="${p.x + W / 2}" y="${p.y + H + 24}">[${idx++}]</text>`);
+    if (!n.lifted) s.push(`<text class="idx" x="${p.x + W / 2}" y="${p.y + H + 24}">${TAG ? TAG(id) : `[${idx++}]`}</text>`);
 
     // Label pointer (head, tail, cur, ...) di atas node, atau di bawah node yang sedang turun.
     const names = ptrNames().filter((k) => ptrValue(k) === id);
@@ -243,14 +248,15 @@ function reset(values) {
   setBusy(false);
 }
 
-function listViz({ doubly, values = [10, 20, 30, 40] }) {
+function listViz({ doubly, values = [10, 20, 30, 40], head = 'head', tail = doubly, pos = true, valueLabel = 'Nilai', tag = null, noun = 'List' }) {
   DOUBLY = doubly;
+  HEAD = head; TAIL = tail; TAG = tag; NOUN = noun;
   W = doubly ? 120 : 100;
   const ops = Object.keys(OPS);
   document.querySelector('.viz').insertAdjacentHTML('beforeend', `
 <div class="controls">
-  <label>Nilai <input class="field" id="val" type="number" value="25"></label>
-  <label>Posisi <input class="field" id="pos" type="number" value="2" min="0"></label>
+  <label>${valueLabel} <input class="field" id="val" type="number" value="25"></label>
+  <label${pos ? '' : ' style="display: none"'}>Posisi <input class="field" id="pos" type="number" value="2" min="0"></label>
   <label class="check push" title="Sebelum langkah berikutnya tampil, tebak dulu baris kode dan pointer yang berubah"><input type="checkbox" id="guess"> Mode tebak</label>
   <button class="btn btn-sm" id="reset">Reset list</button>
 </div>
@@ -297,10 +303,11 @@ function listViz({ doubly, values = [10, 20, 30, 40] }) {
 
 // Pesan error yang sama untuk kedua jenis list.
 function checkCommon(op, x, p, n) {
-  if (/insert|search/.test(op) && !(Number.isInteger(x) && Math.abs(x) <= 999)) return 'Isi nilai dengan bilangan bulat dari -999 sampai 999.';
-  if (op.startsWith('insert') && n >= MAX) return `List sudah berisi ${MAX} node, batas gambar ini. Delete satu node dulu.`;
+  const ins = /insert|push|enqueue/i.test(op), del = /delete|pop|dequeue|cancel/i.test(op);
+  if ((ins || /search|cancel/.test(op)) && !(Number.isInteger(x) && Math.abs(x) <= 999)) return 'Isi nilai dengan bilangan bulat dari -999 sampai 999.';
+  if (ins && n >= MAX) return `${NOUN} sudah berisi ${MAX} node, batas gambar ini. Keluarkan satu node dulu.`;
   if (op === 'insertAt' && !(Number.isInteger(p) && p >= 0 && p <= n)) return `Posisi insertAt harus 0 sampai ${n}.`;
-  if (op.startsWith('delete') && n === 0) return 'List kosong, tidak ada node yang bisa di-delete.';
+  if (del && n === 0) return `${NOUN} kosong, tidak ada node yang bisa dikeluarkan.`;
   if (op === 'deleteAt' && !(Number.isInteger(p) && p >= 0 && p < n)) return `Posisi deleteAt harus 0 sampai ${n - 1}.`;
   return '';
 }

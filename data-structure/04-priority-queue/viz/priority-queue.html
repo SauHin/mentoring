@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Priority Queue dengan Linked List</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Priority queue dengan linked list</h1>
+<p>Angka di node adalah <b>prioritas</b> (makin besar makin didahulukan), nama di bawahnya adalah pasien. Masukkan prioritas yang <b>sama</b> dengan pasien yang sudah ada, lalu lihat kenapa pasien baru tidak menyalip.</p>
+
+<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script>
+const NAMES = ['Ana', 'Budi', 'Cici', 'Dodi', 'Eka', 'Fani', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kiki', 'Lala', 'Mira', 'Nino', 'Oki', 'Putu', 'Rina', 'Sari', 'Tono', 'Umi'];
+const who = (id) => NAMES[id % NAMES.length];
+
+const CODE = {
+  struct: `typedef struct Node {
+    char name[21];
+    int prio;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+} PQueue;
+
+PQueue pq = {NULL};   // antrean kosong`,
+  pqPush: `void pqPush(PQueue* pq, char name[], int prio) {
+    Node* newNode = createNode(name, prio);
+    if (pq->head == NULL || prio > pq->head->prio) {
+        newNode->next = pq->head;
+        pq->head = newNode;
+        return;
+    }
+    Node* cur = pq->head;
+    while (cur->next != NULL && cur->next->prio >= prio)
+        cur = cur->next;
+    newNode->next = cur->next;
+    cur->next = newNode;
+}`,
+  pqPop: `void pqPop(PQueue* pq, char out[]) {
+    Node* del = pq->head;
+    strcpy(out, del->name);
+    pq->head = del->next;
+    free(del);
+}`,
+};
+for (const k in CODE) CODE[k] = CODE[k].split('\n');
+
+// Node baru (yang masih turun) digambar tepat setelah cur: celah di list = posisi calon sisipan.
+function moveAfter(id, afterId) {
+  order.splice(order.indexOf(id), 1);
+  order.splice(order.indexOf(afterId) + 1, 0, id);
+}
+const queueText = () => order.map((id) => `${who(id)} (${nodes[id].val})`).join(', ');
+
+/* ---------- Operasi: setiap yield adalah satu langkah. Caption menjelaskan KENAPA, bukan cuma APA. ---------- */
+function* pqPush(p) {
+  const c = 'pqPush';
+  const n = make(p, 0);
+  const name = who(n.id);
+  yield step(c, 'createNode', `Pasien baru: ${name}, prioritas ${p}. Node dibuat dulu, lalu dicari posisinya.`, ['newNode']);
+  const h = head === null ? null : nodes[head];
+  if (h === null || p > h.val) {
+    yield step(c, 'if (pq->head == NULL', h === null
+      ? 'Antrean kosong, jadi node baru langsung menjadi head.'
+      : `${p} > ${h.val}: ${name} lebih penting dari ${who(h.id)} (head), jadi masuk paling depan. Head berubah, karena itu kasus ini ditangani terpisah.`);
+    n.next = head;
+    yield step(c, 'newNode->next = pq->head', 'Sambung dulu ke head lama, supaya alamatnya tidak hilang.', [n.id + '.next']);
+    head = n.id;
+    yield step(c, 'pq->head = newNode', 'Baru head pindah ke node baru.', ['head']);
+    n.lifted = false;
+    delete vars.newNode;
+    return yield done(c, 'return;', `Selesai. Urutan layanan: ${queueText()}.`);
+  }
+  yield step(c, 'if (pq->head == NULL', p === h.val
+    ? `${p} tidak lebih besar dari ${h.val}. Prioritasnya sama dengan ${who(h.id)} (head), tapi ${who(h.id)} datang duluan. Jadi ${name} tidak boleh menggeser head.`
+    : `${p} < ${h.val}: ${name} tidak masuk paling depan. Cari posisinya.`);
+  vars.cur = head;
+  moveAfter(n.id, head);
+  yield step(c, 'Node* cur = pq->head', 'cur mulai dari head. Node baru akan disisipkan tepat setelah cur, jadi cur harus berhenti di node terakhir yang prioritasnya >= prioritas baru.', ['cur']);
+  for (;;) {
+    const cur = nodes[vars.cur];
+    const nx = cur.next === null ? null : nodes[cur.next];
+    if (nx === null) {
+      yield step(c, 'while', 'cur->next == NULL: cur sudah node terakhir. Node baru masuk di paling belakang.');
+      break;
+    }
+    if (nx.val < p) {
+      yield step(c, 'while', `${nx.val} < ${p}: ${who(nx.id)} kurang penting. Berhenti, node baru masuk di antara ${who(cur.id)} dan ${who(nx.id)}.`);
+      break;
+    }
+    yield step(c, 'while', nx.val === p
+      ? `${nx.val} >= ${p}: prioritasnya sama, dan ${who(nx.id)} datang lebih dulu. ${name} harus di belakangnya, jadi cur maju.`
+      : `${nx.val} >= ${p}: ${who(nx.id)} lebih penting, jadi cur maju.`);
+    vars.cur = nx.id;
+    moveAfter(n.id, nx.id);
+    yield step(c, 'cur = cur->next', `cur sekarang di ${who(nx.id)} (${nx.val}).`, ['cur']);
+  }
+  const cur = nodes[vars.cur];
+  n.next = cur.next;
+  yield step(c, 'newNode->next = cur->next', `Sambung dulu: node baru menunjuk ${cur.next === null ? 'NULL' : who(cur.next)}. Alamat itu masih tersimpan di cur->next.`, [n.id + '.next']);
+  cur.next = n.id;
+  yield step(c, 'cur->next = newNode', 'Baru cur menunjuk node baru. Dua baris ini sama dengan insertAt di single linked list.', [cur.id + '.next']);
+  delete vars.cur;
+  n.lifted = false;
+  delete vars.newNode;
+  yield done(c, 'cur->next = newNode', `Selesai. Urutan layanan: ${queueText()}.`);
+}
+
+function* pqPop() {
+  const c = 'pqPop';
+  const d = nodes[head];
+  vars.del = head;
+  yield step(c, 'Node* del = pq->head', `List selalu terurut, jadi pasien paling penting selalu di head: ${who(d.id)} (${d.val}). Tidak perlu mencari.`, ['del']);
+  yield step(c, 'strcpy(out, del->name)', `Salin nama "${who(d.id)}" ke out sebelum free. Jangan return del->name, karena memory-nya akan di-free.`);
+  head = d.next;
+  yield step(c, 'pq->head = del->next', head === null ? 'head pindah ke NULL. Antrean sekarang kosong.' : `head pindah ke ${who(head)}.`, ['head']);
+  d.lifted = true;
+  yield step(c, 'free(del)', 'Node sudah terlepas dari antrean, jadi aman di-free.');
+  remove(d.id);
+  delete vars.del;
+  yield done(c, 'free(del)', `${who(d.id)} dilayani. pqPop selalu O(1).${order.length ? ` Sisa: ${queueText()}.` : ''}`);
+}
+
+const OPS = {
+  pqPush: (x) => pqPush(x),
+  pqPop: () => pqPop(),
+};
+const check = checkCommon;
+listViz({ doubly: false, values: [5, 3, 3, 1], pos: false, valueLabel: 'Prioritas', tag: who, noun: 'Antrean' });
+document.getElementById('val').value = 3;
+</script>
+</body>
+</html>

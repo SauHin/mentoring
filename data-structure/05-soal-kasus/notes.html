@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mengerjakan Soal Kasus · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/style.css?v=b91585de">
+  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <script src="../../_shared/notes.js?v=59415f79" defer></script>
+</head>
+<body>
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+<article class="notes">
+
+
+<span class="chip">Data structure · 05</span>
+<h1>Mengerjakan soal kasus</h1>
+<p class="lead">Cara mengubah soal cerita menjadi program C lengkap yang memakai linked list, stack, queue, atau priority queue.</p>
+<p><a href="slides.html">Slide</a> · Materi yang dipakai: <a href="../01-single-linked-list/notes.html">01</a>, <a href="../02-double-linked-list/notes.html">02</a>, <a href="../03-stack-dan-queue/notes.html">03</a>, <a href="../04-priority-queue/notes.html">04</a></p>
+
+<div class="card tldr">
+  <strong>TL;DR</strong>
+  <ul>
+    <li>Resep: <b>format I/O → pilih struktur → petakan kalimat ke operasi → kerangka → trace sample → edge case</b>.</li>
+    <li>Struktur dipilih dari pertanyaan "siapa yang keluar duluan?": urutan datang (queue), yang terbaru (stack), atau prioritas (priority queue).</li>
+    <li>Fungsi operasi diambil dari materi 01 sampai 04. <code>main</code> hanya membaca input, memanggil fungsi sesuai urutan soal, dan mencetak.</li>
+    <li>Soal biasanya dicek manual: data harus benar-benar diproses lewat struktur yang diminta, bukan langsung dicetak.</li>
+  </ul>
+</div>
+
+<h2>1. Resep 6 langkah</h2>
+<ol>
+  <li><b>Baca format input dan output.</b> Tulis sample input di kertas, lalu tandai arti setiap angka.</li>
+  <li><b>Pilih struktur</b> dengan bertanya: siapa yang keluar atau dilayani duluan?</li>
+  <li><b>Petakan setiap kalimat soal</b> ke satu operasi (satu fungsi).</li>
+  <li><b>Tulis kerangka:</b> struct, createNode, fungsi operasi, lalu main.</li>
+  <li><b>Trace sample input</b> dengan tangan, lalu cocokkan dengan sample output.</li>
+  <li><b>Cek edge case dan aturan soal</b>, misalnya "wajib memakai linked list" atau "list B harus kosong".</li>
+</ol>
+<p>Langkah 1 sampai 3 dikerjakan <b>sebelum</b> menulis kode. Kalau ketiganya jelas, menulis kodenya tinggal menyusun fungsi yang sudah kamu kenal.</p>
+
+<h2>2. Pilih struktur dari kalimat soal</h2>
+<table>
+  <tr><th>Kalimat di soal</th><th>Struktur</th><th>Operasi</th></tr>
+  <tr><td>"first come first serve", "sesuai urutan datang", antrean, "bergantian"</td><td>Queue</td><td>enqueue, dequeue</td></tr>
+  <tr><td>"undo", "kembali ke sebelumnya", "dibalik", kurung berpasangan</td><td>Stack</td><td>push, pop</td></tr>
+  <tr><td>"prioritas", "didahulukan", "paling parah/tua dulu", VIP</td><td>Priority queue</td><td>pqPush terurut, pqPop</td></tr>
+  <tr><td>"maju dan mundur", "sambungkan B ke belakang A", "cetak dari belakang"</td><td>Double linked list</td><td>insertBack, append, print mundur</td></tr>
+  <tr><td>"sisipkan di posisi ke-k", "hapus elemen ke-k"</td><td>Linked list</td><td>insertAt, deleteAt</td></tr>
+  <tr><td>"membatalkan", "keluar dari antrean", "hapus id x"</td><td>Struktur apa pun</td><td>cancel (delete berdasarkan nilai)</td></tr>
+</table>
+<div class="callout"><strong>Kalau soal sudah menyebut strukturnya</strong>Misalnya "gunakan single linked list untuk enqueue ke dua queue". Ikuti persis, termasuk jumlah struktur yang diminta. Soal seperti ini biasanya dicek manual.</div>
+
+<h2>3. Contoh 1: lajur tol menyempit</h2>
+<p><b>Soal.</b> Dua lajur tol, A dan B, menyatu menjadi satu lajur. Lajur A berisi N mobil dan lajur B berisi M mobil, masing-masing dengan nomor unik. Mobil masuk ke lajur gabungan secara bergantian mulai dari lajur A, sesuai urutan di lajurnya. Kalau satu lajur habis, sisa mobil di lajur lain masuk berurutan. Lalu L mobil keluar lewat exit tol. Cetak urutan mobil di lajur gabungan. Wajib memakai queue dengan single linked list.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>3 4
+11 12 13
+21 22 23 24
+2
+12 24</code></pre></td><td><pre><code>11 21 22 13 23</code></pre></td></tr>
+</table>
+
+<h3>Langkah 1: arti setiap baris input</h3>
+<table>
+  <tr><th>Baris</th><th>Isi</th><th>Cara membaca</th></tr>
+  <tr><td>1</td><td>N dan M</td><td><code>scanf("%d %d", &amp;n, &amp;m)</code></td></tr>
+  <tr><td>2</td><td>N nomor mobil lajur A</td><td>Loop N kali</td></tr>
+  <tr><td>3</td><td>M nomor mobil lajur B</td><td>Loop M kali</td></tr>
+  <tr><td>4</td><td>L</td><td><code>scanf("%d", &amp;l)</code></td></tr>
+  <tr><td>5</td><td>L nomor mobil yang keluar (kosong kalau L = 0)</td><td>Loop L kali</td></tr>
+</table>
+
+<h3>Langkah 2 dan 3: struktur dan operasi</h3>
+<table>
+  <tr><th>Kalimat soal</th><th>Operasi</th></tr>
+  <tr><td>Lajur A berisi N mobil, lajur B berisi M mobil</td><td><code>enqueue(&amp;a, x)</code> N kali, <code>enqueue(&amp;b, x)</code> M kali</td></tr>
+  <tr><td>Masuk bergantian mulai dari A, sisa lajur masuk berurutan</td><td>Pola gabung bergantian (materi 03)</td></tr>
+  <tr><td>L mobil keluar lewat exit</td><td><code>cancel(&amp;merged, x)</code> L kali</td></tr>
+  <tr><td>Cetak urutan</td><td><code>printQueue(&amp;merged)</code></td></tr>
+</table>
+<p>Ada tiga queue sekaligus (a, b, merged), jadi <code>head</code> dan <code>tail</code> dibungkus dalam <code>struct Queue</code>, dan setiap fungsi menerima <code>Queue*</code>.</p>
+
+<h3>Langkah 4: kerangka dan main</h3>
+<pre><code>int main() {
+    // 1. baca input, masukkan ke struktur
+    // 2. jalankan operasi sesuai soal
+    // 3. cetak sesuai format output
+    // 4. free semua node
+    return 0;
+}</code></pre>
+<p>Isi setiap komentar dengan operasi dari langkah 3. Full code ada di bawah.</p>
+
+<h3>Langkah 5: trace sample input</h3>
+<table>
+  <tr><th>Tahap</th><th>a</th><th>b</th><th>merged</th></tr>
+  <tr><td>Setelah input</td><td>11 12 13</td><td>21 22 23 24</td><td>-</td></tr>
+  <tr><td>Setelah gabung bergantian</td><td>-</td><td>-</td><td>11 21 12 22 13 23 24</td></tr>
+  <tr><td>cancel 12 (di tengah)</td><td>-</td><td>-</td><td>11 21 22 13 23 24</td></tr>
+  <tr><td>cancel 24 (node terakhir, tail mundur)</td><td>-</td><td>-</td><td><b>11 21 22 13 23</b></td></tr>
+</table>
+
+<h3>Langkah 6: edge case yang diuji sendiri</h3>
+<table>
+  <tr><th>Input</th><th>Output</th><th>Yang diuji</th></tr>
+  <tr><td><code>1 3 / 5 / 6 7 8 / 0</code></td><td><code>5 6 7 8</code></td><td>Lajur tidak sama panjang, L = 0 (baris 5 kosong)</td></tr>
+  <tr><td><code>2 1 / 1 2 / 3 / 2 / 1 2</code></td><td><code>3</code></td><td>Cancel node pertama, lalu node terakhir, sampai tersisa satu node</td></tr>
+</table>
+<p class="label">Tanda <code>/</code> di tabel memisahkan baris input.</p>
+
+<details>
+  <summary>Lihat full code contoh 1</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} Queue;
+
+Node* createNode(int x) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n-&gt;data = x;
+    n-&gt;next = NULL;
+    return n;
+}
+
+void enqueue(Queue* q, int x) {
+    Node* newNode = createNode(x);
+    if (q-&gt;tail == NULL) {
+        q-&gt;head = q-&gt;tail = newNode;
+    } else {
+        q-&gt;tail-&gt;next = newNode;
+        q-&gt;tail = newNode;
+    }
+}
+
+int dequeue(Queue* q) {              // syarat: q-&gt;head != NULL
+    Node* del = q-&gt;head;
+    int x = del-&gt;data;
+    q-&gt;head = del-&gt;next;
+    if (q-&gt;head == NULL)
+        q-&gt;tail = NULL;
+    free(del);
+    return x;
+}
+
+void cancel(Queue* q, int x) {
+    Node* prev = NULL;
+    Node* cur = q-&gt;head;
+    while (cur != NULL &amp;&amp; cur-&gt;data != x) {
+        prev = cur;
+        cur = cur-&gt;next;
+    }
+    if (cur == NULL) return;
+    if (prev == NULL)
+        q-&gt;head = cur-&gt;next;
+    else
+        prev-&gt;next = cur-&gt;next;
+    if (cur == q-&gt;tail)
+        q-&gt;tail = prev;
+    free(cur);
+}
+
+void printQueue(Queue* q) {
+    for (Node* cur = q-&gt;head; cur != NULL; cur = cur-&gt;next) {
+        if (cur != q-&gt;head) printf(" ");
+        printf("%d", cur-&gt;data);
+    }
+    printf("\n");
+}
+
+int main() {
+    Queue a = {NULL, NULL}, b = {NULL, NULL}, merged = {NULL, NULL};
+    int n, m, l, x;
+
+    scanf("%d %d", &amp;n, &amp;m);
+    for (int i = 0; i &lt; n; i++) {
+        scanf("%d", &amp;x);
+        enqueue(&amp;a, x);
+    }
+    for (int i = 0; i &lt; m; i++) {
+        scanf("%d", &amp;x);
+        enqueue(&amp;b, x);
+    }
+
+    while (a.head != NULL || b.head != NULL) {     // bergantian, mulai dari A
+        if (a.head != NULL) enqueue(&amp;merged, dequeue(&amp;a));
+        if (b.head != NULL) enqueue(&amp;merged, dequeue(&amp;b));
+    }
+
+    scanf("%d", &amp;l);
+    for (int i = 0; i &lt; l; i++) {
+        scanf("%d", &amp;x);
+        cancel(&amp;merged, x);
+    }
+
+    printQueue(&amp;merged);
+    while (merged.head != NULL)
+        dequeue(&amp;merged);
+    return 0;
+}</code></pre>
+</details>
+
+<h2>4. Membaca input dan mencetak output</h2>
+<h3>Membaca input</h3>
+<table>
+  <tr><th>Situasi</th><th>Cara</th><th>Kenapa</th></tr>
+  <tr><td>Angka dipisah spasi atau newline</td><td><code>scanf("%d", &amp;x)</code> di dalam loop</td><td><code>%d</code> melewati spasi dan newline, jadi pembagian baris tidak berpengaruh</td></tr>
+  <tr><td>Jumlah data diberikan dulu</td><td>Baca jumlahnya, lalu loop sebanyak itu</td><td>Loop tahu kapan berhenti</td></tr>
+  <tr><td>Jumlah 0, baris berikutnya kosong</td><td>Tidak perlu if</td><td>Loop jalan 0 kali</td></tr>
+  <tr><td>Kata tanpa spasi</td><td><code>scanf("%s", name)</code>, tanpa <code>&amp;</code></td><td>Nama array sudah berupa alamat</td></tr>
+  <tr><td>Nama dengan spasi</td><td><code>scanf(" %[^\n]", name)</code></td><td><code>%s</code> berhenti di spasi. Spasi di depan format melewati newline sisa baris sebelumnya.</td></tr>
+  <tr><td>Perintah seperti <code>ADD</code></td><td><code>strcmp(cmd, "ADD") == 0</code></td><td><code>==</code> pada string membandingkan alamat, bukan isi</td></tr>
+  <tr><td>Jumlah perintah tidak diberikan</td><td><code>while (scanf("%s", cmd) == 1)</code></td><td>scanf mengembalikan jumlah data yang berhasil dibaca, dan berhenti di akhir input</td></tr>
+</table>
+
+<h3>Mencetak output</h3>
+<pre><code>void printQueue(Queue* q) {
+    for (Node* cur = q->head; cur != NULL; cur = cur->next) {
+        if (cur != q->head) printf(" ");   // spasi sebelum, kecuali node pertama
+        printf("%d", cur->data);
+    }
+    printf("\n");
+}</code></pre>
+<ul>
+  <li>Output dibandingkan dengan jawaban huruf demi huruf. Cetak persis seperti sample output.</li>
+  <li>Pola "spasi sebelum, kecuali yang pertama" tidak meninggalkan spasi di akhir baris, yang di sebagian judge dianggap salah.</li>
+  <li>Jangan mencetak "Output:", "Hasil:", atau prompt seperti "Masukkan N:".</li>
+</ul>
+
+<h2>5. Contoh 2: sambung playlist (double linked list)</h2>
+<p><b>Soal.</b> Playlist A berisi N lagu dan playlist B berisi M lagu (nomor lagu, N dan M boleh 0). Pindahkan semua lagu B ke belakang A, sehingga B menjadi kosong. Cetak A dari depan, lalu dari belakang. Wajib memakai double linked list.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>3 2
+4 1 2
+7 9</code></pre></td><td><pre><code>4 1 2 7 9
+9 7 2 1 4</code></pre></td></tr>
+</table>
+
+<h3>Menurunkan <code>append</code> dengan resep materi 01</h3>
+<ol>
+  <li><b>Gambar.</b> A: <code>[4] ⇄ [1] ⇄ [2]</code>, B: <code>[7] ⇄ [9]</code>. Sesudah: <code>[4] ⇄ [1] ⇄ [2] ⇄ [7] ⇄ [9]</code>, B kosong.</li>
+  <li><b>Panah baru:</b> satu sambungan dua arah <code>[2] ⇄ [7]</code>, jadi 2 baris. Pointer list juga berubah: <code>a-&gt;tail</code> pindah ke [9], dan B menjadi kosong.</li>
+  <li><b>Pemilik panah:</b> [2] adalah <code>a-&gt;tail</code> dan [7] adalah <code>b-&gt;head</code>. Keduanya langsung tersedia, jadi tidak perlu traverse: <b>O(1)</b>.</li>
+  <li><b>Urutan:</b> <code>a-&gt;tail</code> dipakai untuk menyambung dulu, baru dipindah ke <code>b-&gt;tail</code>.</li>
+  <li><b>Edge case:</b> B kosong (tidak ada yang berubah), A kosong (tidak ada <code>a-&gt;tail</code>, jadi A langsung memakai head B).</li>
+</ol>
+<pre><code>void append(DList* a, DList* b) {         // pindahkan semua node B ke belakang A
+    if (b->head == NULL) return;          // B kosong: A tidak berubah
+    if (a->head == NULL) {
+        a->head = b->head;                // A kosong: A langsung jadi B
+    } else {
+        a->tail->next = b->head;          // sambungan dua arah
+        b->head->prev = a->tail;
+    }
+    a->tail = b->tail;
+    b->head = b->tail = NULL;             // B kosong, node-nya sekarang milik A
+}</code></pre>
+<ul>
+  <li>Kenapa B wajib dikosongkan? Node B sekarang milik A. Kalau B masih menunjuk node itu, free B nanti melepas node yang masih dipakai A (<b>double free</b>).</li>
+  <li>Cetak maju dan mundur. Kalau hasil mundur tidak terbalik, ada <code>prev</code> yang lupa disambung.</li>
+</ul>
+<details>
+  <summary>Lihat full code contoh 2</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Node {
+    int data;
+    struct Node* prev;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} DList;
+
+Node* createNode(int x) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n-&gt;data = x;
+    n-&gt;prev = n-&gt;next = NULL;
+    return n;
+}
+
+void insertBack(DList* l, int x) {
+    Node* newNode = createNode(x);
+    if (l-&gt;tail == NULL) {
+        l-&gt;head = l-&gt;tail = newNode;
+    } else {
+        newNode-&gt;prev = l-&gt;tail;
+        l-&gt;tail-&gt;next = newNode;
+        l-&gt;tail = newNode;
+    }
+}
+
+void append(DList* a, DList* b) {         // pindahkan semua node B ke belakang A
+    if (b-&gt;head == NULL) return;          // B kosong: A tidak berubah
+    if (a-&gt;head == NULL) {
+        a-&gt;head = b-&gt;head;                // A kosong: A langsung jadi B
+    } else {
+        a-&gt;tail-&gt;next = b-&gt;head;          // sambungan dua arah
+        b-&gt;head-&gt;prev = a-&gt;tail;
+    }
+    a-&gt;tail = b-&gt;tail;
+    b-&gt;head = b-&gt;tail = NULL;             // B kosong, node-nya sekarang milik A
+}
+
+void printForward(DList* l) {
+    for (Node* cur = l-&gt;head; cur != NULL; cur = cur-&gt;next) {
+        if (cur != l-&gt;head) printf(" ");
+        printf("%d", cur-&gt;data);
+    }
+    printf("\n");
+}
+
+void printBackward(DList* l) {
+    for (Node* cur = l-&gt;tail; cur != NULL; cur = cur-&gt;prev) {
+        if (cur != l-&gt;tail) printf(" ");
+        printf("%d", cur-&gt;data);
+    }
+    printf("\n");
+}
+
+void freeList(DList* l) {
+    while (l-&gt;head != NULL) {
+        Node* del = l-&gt;head;
+        l-&gt;head = del-&gt;next;
+        free(del);
+    }
+    l-&gt;tail = NULL;
+}
+
+int main() {
+    DList a = {NULL, NULL}, b = {NULL, NULL};
+    int n, m, x;
+
+    scanf("%d %d", &amp;n, &amp;m);
+    for (int i = 0; i &lt; n; i++) {
+        scanf("%d", &amp;x);
+        insertBack(&amp;a, x);
+    }
+    for (int i = 0; i &lt; m; i++) {
+        scanf("%d", &amp;x);
+        insertBack(&amp;b, x);
+    }
+
+    append(&amp;a, &amp;b);
+    printForward(&amp;a);
+    printBackward(&amp;a);       // kalau ada prev yang salah, baris ini tidak terbalik
+
+    freeList(&amp;a);
+    return 0;
+}</code></pre>
+</details>
+
+<h2>6. Checklist sebelum submit</h2>
+<ul>
+  <li>Program di-compile tanpa error dan warning di Dev-C++.</li>
+  <li>Output sample cocok persis, termasuk spasi dan newline.</li>
+  <li>Sudah diuji dengan input edge case buatan sendiri: struktur kosong, panjang tidak sama, hapus node pertama, terakhir, atau satu-satunya, prioritas seri di tengah.</li>
+  <li>Semua data disimpan dan diproses lewat struktur yang diminta. Tidak ada jalan pintas "langsung print dari input".</li>
+  <li>Tidak ada printf tambahan (prompt atau debug).</li>
+  <li>Semua node di-free sebelum <code>return 0</code>.</li>
+</ul>
+
+<h2>7. Latihan soal kasus</h2>
+<p>Kerjakan dengan resep 6 langkah. Buka petunjuk hanya kalau macet, dan bandingkan jawabanmu dengan full code setelah selesai. Semua jawaban sudah diuji dengan MinGW gcc (C) dan g++ (C++98).</p>
+
+<h3>Latihan 1: tanda kurung (stack)</h3>
+<p>Diberikan T string berisi karakter <code>( ) [ ] { }</code>, tanpa spasi, panjang paling banyak 100. Untuk setiap string, cetak <code>YES</code> kalau semua kurung berpasangan dengan benar, dan <code>NO</code> kalau tidak.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>5
+([]{})
+([)]
+((
+)(
+{[()()]}</code></pre></td><td><pre><code>YES
+NO
+NO
+NO
+YES</code></pre></td></tr>
+</table>
+<details>
+  <summary>Petunjuk</summary>
+  <p>Kurung yang terakhir dibuka harus ditutup duluan, jadi pakai stack. Kurung buka: push. Kurung tutup: stack tidak boleh kosong, dan hasil pop harus pasangannya. Di akhir, stack harus kosong. Tiga sample NO menguji tiga kegagalan berbeda.</p>
+</details>
+<details>
+  <summary>Full code</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* top;
+} Stack;
+
+Node* createNode(int x) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n-&gt;data = x;
+    n-&gt;next = NULL;
+    return n;
+}
+
+void push(Stack* s, int x) {
+    Node* newNode = createNode(x);
+    newNode-&gt;next = s-&gt;top;
+    s-&gt;top = newNode;
+}
+
+int pop(Stack* s) {
+    Node* del = s-&gt;top;
+    int x = del-&gt;data;
+    s-&gt;top = del-&gt;next;
+    free(del);
+    return x;
+}
+
+char openOf(char close) {            // pasangan buka dari sebuah kurung tutup
+    if (close == ')') return '(';
+    if (close == ']') return '[';
+    return '{';
+}
+
+int balanced(char str[]) {
+    Stack s = {NULL};
+    int ok = 1;
+    for (int i = 0; str[i] != '\0' &amp;&amp; ok; i++) {
+        char c = str[i];
+        if (c == '(' || c == '[' || c == '{')
+            push(&amp;s, c);
+        else if (s.top == NULL || pop(&amp;s) != openOf(c))
+            ok = 0;                  // tutup tanpa pasangan, atau pasangannya salah
+    }
+    if (s.top != NULL) ok = 0;       // masih ada kurung buka yang belum ditutup
+    while (s.top != NULL)            // free sisa node
+        pop(&amp;s);
+    return ok;
+}
+
+int main() {
+    int t;
+    char str[101];
+    scanf("%d", &amp;t);
+    for (int i = 0; i &lt; t; i++) {
+        scanf("%s", str);
+        printf("%s\n", balanced(str) ? "YES" : "NO");
+    }
+    return 0;
+}</code></pre>
+</details>
+
+<h3>Latihan 2: hitung sampai K (queue)</h3>
+<p>N anak bernomor 1 sampai N duduk melingkar. Mulai dari anak 1, mereka berhitung 1, 2, ..., K. Anak yang menyebut K keluar, lalu anak sesudahnya mulai berhitung lagi dari 1. Cetak urutan anak yang keluar.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>5 2</code></pre></td><td><pre><code>2 4 1 5 3</code></pre></td></tr>
+  <tr><td><pre><code>7 3</code></pre></td><td><pre><code>3 6 2 7 5 1 4</code></pre></td></tr>
+</table>
+<details>
+  <summary>Petunjuk</summary>
+  <p>Lingkaran bisa disimulasikan dengan queue: anak yang tidak keluar pindah dari depan ke belakang dengan <code>enqueue(&amp;q, dequeue(&amp;q))</code>. Ulangi K - 1 kali, lalu dequeue anak ke-K dan cetak.</p>
+</details>
+<details>
+  <summary>Full code</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} Queue;
+
+Node* createNode(int x) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n-&gt;data = x;
+    n-&gt;next = NULL;
+    return n;
+}
+
+void enqueue(Queue* q, int x) {
+    Node* newNode = createNode(x);
+    if (q-&gt;tail == NULL) {
+        q-&gt;head = q-&gt;tail = newNode;
+    } else {
+        q-&gt;tail-&gt;next = newNode;
+        q-&gt;tail = newNode;
+    }
+}
+
+int dequeue(Queue* q) {
+    Node* del = q-&gt;head;
+    int x = del-&gt;data;
+    q-&gt;head = del-&gt;next;
+    if (q-&gt;head == NULL)
+        q-&gt;tail = NULL;
+    free(del);
+    return x;
+}
+
+int main() {
+    Queue q = {NULL, NULL};
+    int n, k;
+    scanf("%d %d", &amp;n, &amp;k);
+    for (int i = 1; i &lt;= n; i++)
+        enqueue(&amp;q, i);
+
+    int first = 1;
+    while (q.head != NULL) {
+        for (int i = 0; i &lt; k - 1; i++)          // k-1 anak pindah ke belakang
+            enqueue(&amp;q, dequeue(&amp;q));
+        if (!first) printf(" ");
+        printf("%d", dequeue(&amp;q));              // anak ke-k keluar
+        first = 0;
+    }
+    printf("\n");
+    return 0;
+}</code></pre>
+</details>
+
+<h3>Latihan 3: antrean vaksin (priority queue dengan aturan berlapis)</h3>
+<p>N orang datang berurutan, masing-masing dengan nama dan umur. Lansia (umur 60 ke atas) dilayani lebih dulu. Sesama lansia, yang lebih tua dilayani lebih dulu, dan kalau umurnya sama, yang datang duluan. Yang bukan lansia dilayani sesuai urutan datang. Cetak urutan layanan.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>6
+Ana 25
+Budi 70
+Cici 65
+Dodi 30
+Eka 70
+Fani 61</code></pre></td><td><pre><code>Budi
+Eka
+Cici
+Fani
+Ana
+Dodi</code></pre></td></tr>
+</table>
+<details>
+  <summary>Petunjuk</summary>
+  <p>Tulis <code>higher(a, b)</code> dari materi 04. Aturan 1: lansia sebelum bukan lansia. Aturan 2: sesama lansia, umur lebih besar duluan. Selain itu <code>return 0</code>, supaya urutan datang dipertahankan.</p>
+</details>
+<details>
+  <summary>Full code</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct Node {
+    char name[21];
+    int age;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+} PQueue;
+
+Node* createNode(char name[], int age) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    strcpy(n-&gt;name, name);
+    n-&gt;age = age;
+    n-&gt;next = NULL;
+    return n;
+}
+
+// return 1 kalau a harus dilayani sebelum b
+int higher(Node* a, Node* b) {
+    int oldA = a-&gt;age &gt;= 60, oldB = b-&gt;age &gt;= 60;
+    if (oldA != oldB) return oldA;          // lansia duluan
+    if (oldA &amp;&amp; a-&gt;age != b-&gt;age)
+        return a-&gt;age &gt; b-&gt;age;             // sesama lansia: yang lebih tua duluan
+    return 0;                               // selain itu: urutan datang
+}
+
+void pqPush(PQueue* pq, Node* newNode) {
+    if (pq-&gt;head == NULL || higher(newNode, pq-&gt;head)) {
+        newNode-&gt;next = pq-&gt;head;
+        pq-&gt;head = newNode;
+        return;
+    }
+    Node* cur = pq-&gt;head;
+    while (cur-&gt;next != NULL &amp;&amp; !higher(newNode, cur-&gt;next))
+        cur = cur-&gt;next;
+    newNode-&gt;next = cur-&gt;next;
+    cur-&gt;next = newNode;
+}
+
+int main() {
+    PQueue pq = {NULL};
+    int n, age;
+    char name[21];
+    scanf("%d", &amp;n);
+    for (int i = 0; i &lt; n; i++) {
+        scanf("%s %d", name, &amp;age);
+        pqPush(&amp;pq, createNode(name, age));
+    }
+    while (pq.head != NULL) {
+        Node* del = pq.head;
+        printf("%s\n", del-&gt;name);
+        pq.head = del-&gt;next;
+        free(del);
+    }
+    return 0;
+}</code></pre>
+</details>
+
+<h3>Latihan 4: balik K angka pertama (queue dan stack)</h3>
+<p>Diberikan antrean berisi N angka. Balik urutan K angka pertama, sisanya tetap. Wajib memakai queue dan stack dengan linked list.</p>
+<table>
+  <tr><th>Input</th><th>Output</th></tr>
+  <tr><td><pre><code>5 3
+1 2 3 4 5</code></pre></td><td><pre><code>3 2 1 4 5</code></pre></td></tr>
+</table>
+<details>
+  <summary>Petunjuk</summary>
+  <p>Tiga langkah: (1) dequeue K angka dan push ke stack, (2) pop semua dan enqueue kembali, sehingga K angka terbalik ada di belakang, (3) pindahkan N - K angka yang ada di depan ke belakang. Trace dengan sample: 1 2 3 4 5, lalu 4 5 3 2 1, lalu 3 2 1 4 5.</p>
+</details>
+<details>
+  <summary>Full code</summary>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* top;
+} Stack;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} Queue;
+
+Node* createNode(int x) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n-&gt;data = x;
+    n-&gt;next = NULL;
+    return n;
+}
+
+/* ---------- Stack: masuk dan keluar di top ---------- */
+void push(Stack* s, int x) {
+    Node* newNode = createNode(x);
+    newNode-&gt;next = s-&gt;top;
+    s-&gt;top = newNode;
+}
+
+int pop(Stack* s) {                  // syarat: s-&gt;top != NULL
+    Node* del = s-&gt;top;
+    int x = del-&gt;data;
+    s-&gt;top = del-&gt;next;
+    free(del);
+    return x;
+}
+
+/* ---------- Queue: masuk di tail, keluar di head ---------- */
+void enqueue(Queue* q, int x) {
+    Node* newNode = createNode(x);
+    if (q-&gt;tail == NULL) {
+        q-&gt;head = q-&gt;tail = newNode;
+    } else {
+        q-&gt;tail-&gt;next = newNode;
+        q-&gt;tail = newNode;
+    }
+}
+
+int dequeue(Queue* q) {              // syarat: q-&gt;head != NULL
+    Node* del = q-&gt;head;
+    int x = del-&gt;data;
+    q-&gt;head = del-&gt;next;
+    if (q-&gt;head == NULL)
+        q-&gt;tail = NULL;
+    free(del);
+    return x;
+}
+
+int main() {
+    Queue q = {NULL, NULL};
+    Stack s = {NULL};
+    int n, k, x;
+    scanf("%d %d", &amp;n, &amp;k);
+    for (int i = 0; i &lt; n; i++) {
+        scanf("%d", &amp;x);
+        enqueue(&amp;q, x);
+    }
+
+    for (int i = 0; i &lt; k; i++)          // 1. k elemen pertama masuk stack
+        push(&amp;s, dequeue(&amp;q));
+    while (s.top != NULL)                // 2. keluar dari stack dalam urutan terbalik,
+        enqueue(&amp;q, pop(&amp;s));            //    masuk ke belakang queue
+    for (int i = 0; i &lt; n - k; i++)      // 3. n-k elemen sisanya pindah ke belakang
+        enqueue(&amp;q, dequeue(&amp;q));
+
+    while (q.head != NULL) {
+        printf("%d", dequeue(&amp;q));
+        printf(q.head != NULL ? " " : "\n");
+    }
+    return 0;
+}</code></pre>
+</details>
+
+<h2>Daftar pustaka</h2>
+<ol class="refs">
+  <li>Kernighan, B. W., &amp; Ritchie, D. M. (1988). <i>The C Programming Language</i> (2nd ed.). Prentice Hall. Bab 7.4: Formatted input (scanf), dan lampiran B1.3 untuk format <code>%[...]</code>.</li>
+  <li>Weiss, M. A. (1997). <i>Data Structures and Algorithm Analysis in C</i> (2nd ed.). Addison-Wesley. Bab 3.3.3: Applications (balancing symbols dengan stack).</li>
+  <li>Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2022). <i>Introduction to Algorithms</i> (4th ed.). MIT Press. Bab 10: Elementary data structures.</li>
+</ol>
+
+</article>
+</body>
+</html>

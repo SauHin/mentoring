@@ -30,6 +30,9 @@ Semua kode C untuk Dev-C++. Visualisasi memakai mesin bersama `_shared/cviz.js` 
 |----|--------|-------|-------|
 | 01 | Single linked list | [notes](data-structure/01-single-linked-list/notes.html) | [slides](data-structure/01-single-linked-list/slides.html) |
 | 02 | Double linked list | [notes](data-structure/02-double-linked-list/notes.html) | [slides](data-structure/02-double-linked-list/slides.html) |
+| 03 | Stack dan queue | [notes](data-structure/03-stack-dan-queue/notes.html) | [slides](data-structure/03-stack-dan-queue/slides.html) |
+| 04 | Priority queue | [notes](data-structure/04-priority-queue/notes.html) | [slides](data-structure/04-priority-queue/slides.html) |
+| 05 | Mengerjakan soal kasus | [notes](data-structure/05-soal-kasus/notes.html) | [slides](data-structure/05-soal-kasus/slides.html) |
 
 ### Discrete mathematics
 
@@ -74,8 +77,7 @@ mentoring/
 │   └── 01-… sampai 04-…
 ├── data-structure/
 │   ├── index.html              daftar materi data structure
-│   ├── 01-single-linked-list/
-│   └── 02-double-linked-list/
+│   └── 01-… sampai 05-…        05 = cara mengerjakan soal kasus
 ├── discrete-mathematics/
 │   ├── index.html
 │   └── 01-… sampai 05-…
@@ -111,7 +113,7 @@ Jalankan `python tools/cachebust.py`. Script ini menambahkan `?v=<hash>` ke seti
 - Pakai istilah Inggris kalau padanan Indonesianya terdengar janggal. Contoh: valid (bukan sah), garbage value (bukan nilai sampah), return value, newline, term, logic gate, predicate, quantifier, truth table.
 - Bahasa pemrograman per matkul: **algorithm and programming dan data structure pakai C** untuk Dev-C++. Kode harus jalan di compiler C dan C++. Data structure memakai (`malloc`/`free`, `NULL`, `printf`), dan harus juga jalan di compiler C++ (cast `(Node*)malloc(...)`).
 - Fokus pada **pemahaman kode**: tiap operasi diturunkan (sebelum → sesudah → panah yang berubah → urutan → edge case → kode), latihan berupa trace, cari bug, dan turunkan sendiri.
-- Visualisasi linked list memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak).
+- Visualisasi linked list, stack, queue, dan priority queue memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak). Opsi `head`, `tail`, `pos`, `tag`, dan `noun` di `listViz()` mengatur nama pointer, input posisi, dan label di bawah node.
 - Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.
 - Daftar isi dan tombol kembali ke atas dibuat otomatis oleh `notes.js` dari setiap `<h2>`.
 

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Queue dengan Linked List</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=b91585de">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
+  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+</head>
+<body class="viz">
+
+<h1>Queue dengan linked list</h1>
+<p><b>Enqueue</b> masuk di tail, <b>dequeue</b> keluar dari head, dan <b>cancel</b> mengeluarkan nilai tertentu dari tengah antrean. Perhatikan kapan <code>tail</code> ikut berubah.</p>
+
+<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script>
+const CODE = {
+  struct: `typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} Queue;
+
+Queue q = {NULL, NULL};   // queue kosong`,
+  enqueue: `void enqueue(Queue* q, int x) {
+    Node* newNode = createNode(x);
+    if (q->tail == NULL) {
+        q->head = q->tail = newNode;
+    } else {
+        q->tail->next = newNode;
+        q->tail = newNode;
+    }
+}`,
+  dequeue: `int dequeue(Queue* q) {
+    Node* del = q->head;
+    int x = del->data;
+    q->head = del->next;
+    if (q->head == NULL)
+        q->tail = NULL;
+    free(del);
+    return x;
+}`,
+  cancel: `void cancel(Queue* q, int x) {
+    Node* prev = NULL;
+    Node* cur = q->head;
+    while (cur != NULL && cur->data != x) {
+        prev = cur;
+        cur = cur->next;
+    }
+    if (cur == NULL) return;
+    if (prev == NULL)
+        q->head = cur->next;
+    else
+        prev->next = cur->next;
+    if (cur == q->tail)
+        q->tail = prev;
+    free(cur);
+}`,
+};
+for (const k in CODE) CODE[k] = CODE[k].split('\n');
+
+/* ---------- Operasi: setiap yield adalah satu langkah. Caption menjelaskan KENAPA, bukan cuma APA. ---------- */
+function* enqueue(x) {
+  const c = 'enqueue';
+  const n = make(x, order.length);
+  yield step(c, 'createNode', `Buat node baru berisi ${x}. Node ini akan masuk di belakang antrean.`, ['newNode']);
+  let last;
+  if (tail === null) {
+    head = tail = n.id;
+    last = 'q->head = q->tail = newNode';
+    yield step(c, last, 'Queue kosong: node baru menjadi node pertama sekaligus terakhir, jadi head dan tail menunjuk node yang sama.', ['head', 'tail']);
+  } else {
+    nodes[tail].next = n.id;
+    yield step(c, 'q->tail->next = newNode', `Node terakhir (${val(tail)}) menunjuk node baru. Alamat node terakhir sudah ada di tail, jadi tidak perlu traverse.`, [tail + '.next']);
+    tail = n.id;
+    last = 'q->tail = newNode';
+    yield step(c, last, 'tail pindah ke node baru, karena node baru sekarang node terakhir.', ['tail']);
+  }
+  n.lifted = false;
+  delete vars.newNode;
+  yield done(c, last, `Selesai: ${x} masuk di belakang. Enqueue tidak memakai loop, jadi selalu O(1).`);
+}
+
+function* dequeue() {
+  const c = 'dequeue';
+  const d = nodes[head];
+  vars.del = head;
+  yield step(c, 'Node* del = q->head', `Yang keluar selalu node paling depan (${d.val}), karena dia yang paling lama menunggu. Simpan alamatnya di del.`, ['del']);
+  yield step(c, 'int x = del->data', `Salin data ke x (x = ${d.val}) sebelum node di-free.`);
+  head = d.next;
+  yield step(c, 'q->head = del->next', head === null
+    ? 'head pindah ke del->next, yaitu NULL. del adalah satu-satunya node.'
+    : `head pindah ke node berikutnya (${val(head)}).`, ['head']);
+  if (head === null) {
+    tail = null;
+    yield step(c, 'q->tail = NULL', 'head NULL berarti queue kosong, jadi tail juga harus NULL. Kalau lupa, tail masih menunjuk node yang akan di-free, dan enqueue berikutnya menulis ke memory itu.', ['tail']);
+  } else {
+    yield step(c, 'if (q->head == NULL)', 'head tidak NULL: queue masih berisi node lain, jadi tail tidak berubah.');
+  }
+  d.lifted = true;
+  yield step(c, 'free(del)', 'Node sudah terlepas dari queue, jadi aman di-free.');
+  remove(d.id);
+  delete vars.del;
+  yield done(c, 'return x', `dequeue() mengembalikan ${d.val}. Node yang pertama masuk keluar duluan (FIFO).`);
+}
+
+function* cancel(x) {
+  const c = 'cancel';
+  vars.prev = null;
+  vars.cur = head;
+  yield step(c, 'Node* cur = q->head', 'prev mulai dari NULL dan cur dari head. prev selalu satu langkah di belakang cur, karena untuk melepas cur kita harus mengubah next milik node sebelumnya.', ['prev', 'cur']);
+  while (vars.cur !== null && nodes[vars.cur].val !== x) {
+    yield step(c, 'while', `${nodes[vars.cur].val} != ${x}, jadi lanjut mencari.`);
+    vars.prev = vars.cur;
+    vars.cur = nodes[vars.cur].next;
+    yield step(c, 'cur = cur->next', vars.cur === null
+      ? `prev maju ke ${val(vars.prev)}, cur menjadi NULL: semua node sudah dicek.`
+      : `prev maju ke ${val(vars.prev)}, cur maju ke ${val(vars.cur)}.`, ['prev', 'cur']);
+  }
+  if (vars.cur === null) {
+    yield step(c, 'while', 'cur == NULL, jadi loop berhenti.');
+    delete vars.cur;
+    delete vars.prev;
+    return yield done(c, 'if (cur == NULL) return', `${x} tidak ada di queue. Tidak ada pointer yang diubah.`);
+  }
+  const d = nodes[vars.cur];
+  yield step(c, 'while', `${d.val} == ${x}: ketemu. Loop berhenti dengan cur di node ini dan prev di node sebelumnya.`);
+  if (vars.prev === null) {
+    head = d.next;
+    yield step(c, 'q->head = cur->next', 'prev NULL berarti cur node pertama. Tidak ada node sebelumnya, jadi yang pindah adalah head.', ['head']);
+  } else {
+    nodes[vars.prev].next = d.next;
+    yield step(c, 'prev->next = cur->next', `prev (${val(vars.prev)}) melompati cur, langsung ke ${val(d.next)}.`, [vars.prev + '.next']);
+  }
+  if (tail === d.id) {
+    tail = vars.prev;
+    yield step(c, 'q->tail = prev', `cur node terakhir, jadi tail mundur ke prev (${val(vars.prev)}). Kalau lupa, enqueue berikutnya menyambung ke node yang sudah di-free.`, ['tail']);
+  } else {
+    yield step(c, 'if (cur == q->tail)', 'cur bukan node terakhir, jadi tail tidak berubah.');
+  }
+  d.lifted = true;
+  yield step(c, 'free(cur)', 'cur sudah terlepas dari queue, jadi aman di-free.');
+  remove(d.id);
+  delete vars.cur;
+  delete vars.prev;
+  yield done(c, 'free(cur)', `Selesai: ${x} keluar dari antrean. Urutan node lain tidak berubah.`);
+}
+
+const OPS = {
+  enqueue: (x) => enqueue(x),
+  dequeue: () => dequeue(),
+  cancel: (x) => cancel(x),
+};
+const check = checkCommon;
+listViz({ doubly: false, values: [10, 20, 30], tail: true, pos: false, noun: 'Queue' });
+</script>
+</body>
+</html>
