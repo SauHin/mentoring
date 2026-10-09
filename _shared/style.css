@@ -27,6 +27,15 @@
   --btn-bg: var(--kertas);
   --btn-edge: rgb(55 53 47 / 0.16);
   --hot: rgb(217 115 13);         /* sorotan "baru berubah" di visualisasi */
+  /* Warna sintaks code block (theme.js: hlC). Versi gelap palet Notion, kontras >= 4.5:1 di atas --kode. */
+  --sx-kw: rgb(173 26 114);
+  --sx-ty: rgb(11 110 153);
+  --sx-fn: rgb(105 64 165);
+  --sx-str: rgb(48 118 76);
+  --sx-fmt: rgb(168 72 0);
+  --sx-num: rgb(176 52 52);
+  --sx-pp: rgb(140 90 60);
+  --sx-cm: rgb(112 111 107);
   --font: var(--huruf);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -44,6 +53,14 @@
   --btn-bg: rgb(37 37 37);
   --btn-edge: rgb(255 255 255 / 0.14);
   --hot: rgb(255 163 68);
+  --sx-kw: rgb(232 120 180);
+  --sx-ty: rgb(110 180 230);
+  --sx-fn: rgb(190 160 235);
+  --sx-str: rgb(120 200 150);
+  --sx-fmt: rgb(255 175 95);
+  --sx-num: rgb(240 140 130);
+  --sx-pp: rgb(210 165 135);
+  --sx-cm: rgb(155 154 151);
 }
 
 /* ---------- Dasar ---------- */
@@ -56,6 +73,14 @@ code, pre { font-variant-ligatures: none; }
 /* Semua blok kode tampil seperti pre.kode di gaya.css. */
 pre { margin: 1.25em 0; padding: 1rem 1.25rem; overflow-x: auto; font: 0.85rem/1.6 var(--mono); tab-size: 4; background: var(--kode); border-radius: 6px; }
 pre code { padding: 0; font: inherit; color: inherit; background: none; }
+.sx-kw { color: var(--sx-kw); font-weight: 600; }
+.sx-ty { color: var(--sx-ty); }
+.sx-fn { color: var(--sx-fn); }
+.sx-str { color: var(--sx-str); }
+.sx-fmt { color: var(--sx-fmt); font-weight: 600; }
+.sx-num { color: var(--sx-num); }
+.sx-pp { color: var(--sx-pp); }
+.sx-cm { color: var(--sx-cm); font-style: italic; }
 
 /* Dua kolom dari layar lebar, satu kolom di HP. */
 .cols { display: grid; gap: 1.5em 3em; align-items: center; }

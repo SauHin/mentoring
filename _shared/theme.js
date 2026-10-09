@@ -72,6 +72,40 @@
       document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js?v=d4d95638', root).href;
   });
 
+  // Syntax highlighting C untuk code block. hlC dipakai juga oleh notes.js (full code) dan cviz.js (panel kode).
+  const KW = /^(if|else|for|while|do|return|break|continue|switch|case|default|sizeof|typedef|struct|goto)$/;
+  const TY = /^(int|char|float|double|long|short|void|unsigned|signed|const|static|FILE|size_t|bool|Node|Stack|Queue)$/;
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const span = (c, s) => `<span class="sx-${c}">${s}</span>`;
+  const TOK = /(\/\*[\s\S]*?\*\/|\/\/[^\n]*)|((?:^|(?<=\n))[ \t]*#\w+[^\n]*)|("(?:\\.|[^"\\\n])*")|('(?:\\.|[^'\\\n])')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b(?=(\s*\()?)/g;
+  window.hlC = (src) => {
+    let out = '', last = 0;
+    src.replace(TOK, (m, cm, pp, str, ch, num, word, call, at) => {
+      out += esc(src.slice(last, at));
+      last = at + m.length;
+      if (cm) out += span('cm', esc(m));
+      else if (pp) out += span('pp', esc(m));
+      else if (str) out += span('str', esc(m).replace(/%[-+ #0]*\d*(?:\.\d+)?(?:ll|l|h)?[a-zA-Z]|\\./g, (f) => span('fmt', f)));
+      else if (ch) out += span('str', esc(m));
+      else if (num) out += span('num', m);
+      else if (KW.test(word)) out += span('kw', m);
+      else if (TY.test(word)) out += span('ty', m);
+      else if (/^(NULL|true|false)$/.test(word)) out += span('num', m);
+      else if (call !== undefined) out += span('fn', m);
+      else out += m;
+      return m;
+    });
+    return out + esc(src.slice(last));
+  };
+  // Hanya blok yang terlihat seperti C: ada ; { atau #include, dan bukan notasi logika/grammar (→ ⇒ ≡ ∴).
+  addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre > code').forEach((c) => {
+      const t = c.textContent;
+      if (c.children.length || !/[;{]|#include/.test(t) || /[→⇒≡∴]/.test(t)) return;
+      c.innerHTML = window.hlC(t);
+    });
+  });
+
   // Event load halaman induk baru jalan setelah semua iframe selesai dimuat.
   addEventListener('load', () => document.querySelectorAll('iframe').forEach(send));
 })();

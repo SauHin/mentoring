@@ -123,11 +123,12 @@
 
     code.innerHTML = blocks.map((b) => {
       const k = promptLen(b);
-      const head = esc(b.slice(0, k).join('\n'));
+      const hl = window.hlC || esc; // warna sintaks dari theme.js
+      const head = hl(b.slice(0, k).join('\n'));
       if (k === b.length) return `<span class="blk open">${head}</span>`;
       const indent = b[k].match(/^\s*/)[0];
       return `<span class="blk" data-step><span class="head">${head}</span>\n` +
-        `<span class="body">${esc(b.slice(k).join('\n'))}</span>` +
+        `<span class="body">${hl(b.slice(k).join('\n'))}</span>` +
         `<span class="ph">${indent}... ${b.length - k} baris: tulis sendiri dulu</span></span>`;
     }).join('\n\n');
 
