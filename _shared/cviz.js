@@ -344,7 +344,7 @@ function cviz({ programs, layout }) {
       const lines = src.split('\n');
       const on = find[name] ? lines.findIndex((l) => l.includes(find[name])) : -1;
       if (find[name] && on < 0) window.cvizMissing.push(`${prog.title} / ${name}: ${find[name]}`);
-      return `<div class="cv-pane"><div class="cv-title">${name}</div><pre class="cv-code">${lines.map((l, i) => `<span class="ln${i === on ? ' on' : ''}">${esc(l) || ' '}</span>`).join('')}</pre></div>`;
+      return `<div class="cv-pane"><div class="cv-title">${name}</div><pre class="cv-code">${lines.map((l, i) => `<span class="ln${i === on ? ' on' : ''}">${(window.hlC ? hlC(l) : esc(l)) || ' '}</span>`).join('')}</pre></div>`;
     }).join('');
     if (find.Flowchart) {
       const node = $('cv-panes').querySelector(`[data-id="${find.Flowchart}"]`);
