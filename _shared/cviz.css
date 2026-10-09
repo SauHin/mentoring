@@ -1,7 +1,7 @@
 /* Gaya visualisasi program C (dipakai bersama cviz.js). */
 .viz { max-width: 1240px; }
 .ops { display: flex; flex-wrap: wrap; gap: 10px; }
-.cv-main { display: grid; gap: 20px; }
+.cv-main { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); } /* satu kolom di HP: isi selebar layar, bukan selebar kode terpanjang */
 @media (min-width: 900px) {
   .cv-main { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
   /* Tiga panel kode (pseudocode, flowchart, C) memakai lebar penuh, lalu kartu langkah dan state berdampingan. */
@@ -10,7 +10,8 @@
 }
 /* Panel kode tanpa kartu pembungkus: judul kecil di atas blok kode. */
 .cv-panes { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start; }
-.cv-side { display: grid; gap: 16px; }
+.cv-pane { min-width: 0; } /* baris kode panjang di-scroll di dalam pre, bukan melebarkan panel */
+.cv-side { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); } /* kartu tidak ikut melebar mengikuti tabel */
 .cv-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .cv-title .label { font-weight: 400; font-size: 0.8rem; }
 .cv-code { margin: 0; font-size: 0.85rem; line-height: 1.55; padding: 14px 10px; }
@@ -65,6 +66,7 @@
 .cv-caret { display: inline-block; width: 8px; height: 1em; vertical-align: text-bottom; background: var(--ink-3); }
 
 /* Trace table */
+.cv-trace { overflow-x: auto; } /* trace table dengan banyak kolom di-scroll sendiri di HP */
 .cv-trace table { margin: 0; font-size: 0.88rem; }
 .cv-trace td, .cv-trace th { padding: 4px 10px; font-family: var(--mono); }
 .cv-trace tr.last td { background: color-mix(in srgb, var(--hot) 18%, transparent); }

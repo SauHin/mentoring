@@ -23,6 +23,7 @@ Semua kode C untuk Dev-C++. Visualisasi memakai mesin bersama `_shared/cviz.js` 
 | 02 | Variabel, tipe data, dan input/output | [notes](algorithm-and-programming/02-variabel-tipe-data-io/notes.html) | [slides](algorithm-and-programming/02-variabel-tipe-data-io/slides.html) |
 | 03 | Repetition (loop) | [notes](algorithm-and-programming/03-repetition/notes.html) | [slides](algorithm-and-programming/03-repetition/slides.html) |
 | 04 | Pointer dan array | [notes](algorithm-and-programming/04-pointer-dan-array/notes.html) | [slides](algorithm-and-programming/04-pointer-dan-array/slides.html) |
+| 05 | Mengerjakan soal kasus | [notes](algorithm-and-programming/05-soal-kasus/notes.html) | [slides](algorithm-and-programming/05-soal-kasus/slides.html) |
 
 ### Data structure
 
@@ -74,7 +75,7 @@ mentoring/
 │   └── NN-nama-materi/         salin folder ini untuk materi baru
 ├── algorithm-and-programming/
 │   ├── index.html
-│   └── 01-… sampai 04-…
+│   └── 01-… sampai 05-…        05 = cara mengerjakan soal kasus
 ├── data-structure/
 │   ├── index.html              daftar materi data structure
 │   └── 01-… sampai 05-…        05 = cara mengerjakan soal kasus
