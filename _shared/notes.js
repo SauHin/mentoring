@@ -1,8 +1,37 @@
-// Notes: daftar isi otomatis dari setiap <h2>, sorotan bagian yang sedang dibaca,
+// Notes lama (article.notes): daftar isi otomatis dari setiap <h2>, sorotan bagian yang sedang dibaca,
 // tombol daftar isi mengambang (layar sempit), dan tombol kembali ke atas.
 // Cukup muat file ini, tidak perlu menulis daftar isi manual.
+// Notes gaya catatan (body.catatan): tidak ada daftar isi, karena peta jalur dan section yang
+// tertutup sudah jadi outline. Link ke #langkah-N (dari peta jalur atau dari section lain) membuka section itu.
 (function () {
-  const article = document.querySelector('.notes');
+  if (!document.body.classList.contains('catatan')) return;
+  function openTarget() {
+    const t = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    const d = t && (t.matches('details') ? t : t.querySelector(':scope > details') || t.closest('details'));
+    if (!d) return;
+    d.open = true;
+    t.scrollIntoView();
+  }
+  addEventListener('hashchange', openTarget);
+  openTarget();
+  // Klik link ke section yang sedang dibuka tidak memicu hashchange, jadi tangani di sini juga.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (a && a.getAttribute('href') === location.hash) openTarget();
+  });
+
+  const up = document.body.appendChild(document.createElement('button'));
+  up.className = 'tool to-top';
+  up.title = 'Kembali ke atas';
+  up.setAttribute('aria-label', 'Kembali ke atas');
+  up.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg>';
+  up.onclick = () => scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  addEventListener('scroll', () => up.classList.toggle('show', scrollY > 600), { passive: true });
+})();
+
+(function () {
+  const article = document.querySelector('article.notes');
+  if (!article) return;
   const heads = [...article.querySelectorAll('h2')];
   if (!heads.length) return;
 
@@ -79,7 +108,7 @@
     return i;
   }
 
-  document.querySelectorAll('.notes details').forEach((d) => {
+  document.querySelectorAll('.notes details, .catatan details').forEach((d) => {
     const code = d.querySelector('pre > code');
     if (!code || !/full code/i.test(d.querySelector('summary')?.textContent || '')) return;
     const pre = code.parentElement;

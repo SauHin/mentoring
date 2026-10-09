@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Priority Queue dengan Linked List</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=3f7fc4dc">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Priority queue dengan linked list</h1>
-<p>Angka di node adalah <b>prioritas</b> (makin besar makin didahulukan), nama di bawahnya adalah pasien. Masukkan prioritas yang <b>sama</b> dengan pasien yang sudah ada, lalu lihat kenapa pasien baru tidak menyalip.</p>
+<p>Visualisasi ini menjalankan pqPush dan pqPop pada priority queue berbasis list terurut. Angka di node = prioritas (makin besar makin didahulukan), nama di bawahnya = pasien.</p>
+<p class="coba"><strong>Coba:</strong> isi <b>Prioritas</b> dengan angka yang sama dengan pasien yang sudah ada (misalnya 3), klik <b>pqPush</b>, lalu klik <b>Langkah berikutnya</b>.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> cur melewati semua node yang prioritasnya sama atau lebih tinggi, jadi pasien baru tidak menyalip pasien setara.</p>
 
-<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script src="../../../_shared/listviz.js?v=5942227c"></script>
 <script>
 const NAMES = ['Ana', 'Budi', 'Cici', 'Dodi', 'Eka', 'Fani', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kiki', 'Lala', 'Mira', 'Nino', 'Oki', 'Putu', 'Rina', 'Sari', 'Tono', 'Umi'];
 const who = (id) => NAMES[id % NAMES.length];
@@ -134,7 +137,13 @@ const OPS = {
   pqPop: () => pqPop(),
 };
 const check = checkCommon;
-listViz({ doubly: false, values: [5, 3, 3, 1], pos: false, valueLabel: 'Prioritas', tag: who, noun: 'Antrean' });
+listViz({
+  doubly: false, values: [5, 3, 3, 1], pos: false, valueLabel: 'Prioritas', tag: who, noun: 'Antrean',
+  hints: {
+    pqPush: 'kasus head dicek dulu. Kalau bukan, cur maju selama node sesudahnya &gt;= prioritas baru, lalu node baru disambung dulu sebelum cur→next ditimpa (notes 4️⃣ 5️⃣).',
+    pqPop: 'yang dilayani selalu head, karena list selalu terurut. Nama disalin dulu, baru node di-free (notes 6️⃣).',
+  },
+});
 document.getElementById('val').value = 3;
 </script>
 </body>

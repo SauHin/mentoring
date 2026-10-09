@@ -1,0 +1,225 @@
+/* gaya.css: tampilan semua catatan, meniru Notion (terang dan gelap mengikuti tema sistem).
+   Ubah di sini, semua catatan ikut berubah. */
+
+:root {
+  --kertas: #ffffff;
+  --tinta: rgb(55 53 47);
+  --pudar: rgb(105 104 100);
+  --garis: rgb(233 233 231);
+  --callout: rgb(241 241 239);
+  --kode: rgb(247 246 243);
+  --kepala-tabel: rgb(232 231 227);
+  --belang: rgb(245 245 243);
+  --frasa: rgb(158 104 0); /* <b> frasa kunci: teks tebal kuning seperti Notion */
+  --kode-teks: rgb(235 87 87);
+  --jebakan-bg: rgb(253 235 236);
+  --intinya-bg: rgb(231 243 248);
+  --stabilo: .25;
+  /* Stabilo. Artinya tetap: kuning = istilah, hijau = kaitan, pink = jebakan, biru = kunci. */
+  --kuning: 233 168 0;
+  --hijau: 28 147 95;
+  --pink: 221 0 129;
+  --biru: 35 131 226;
+  --huruf: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  --mono: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace;
+}
+
+/* warna dark mode diambil dari screenshot Notion Joda.
+   Di project mentoring, mode gelap dipasang theme.js lewat data-theme (awalnya ikut sistem),
+   supaya tombol tema Siang/Malam tetap jalan. */
+:root[data-theme='dark'] {
+  --kertas: rgb(25 25 25);
+  --tinta: rgb(240 239 237);
+  --pudar: rgb(168 167 164);
+  --garis: rgb(56 56 54);
+  --callout: rgb(56 56 54);
+  --kode: rgb(37 37 37);
+  --kepala-tabel: rgb(56 56 54);
+  --belang: rgb(40 40 39);
+  --frasa: rgb(203 148 52);
+  --kode-teks: rgb(255 115 105);
+  --jebakan-bg: rgb(80 44 41);
+  --intinya-bg: rgb(30 47 64);
+  --stabilo: .35;
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: light; background: var(--kertas); }
+html[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  max-width: calc(708px + 3rem);
+  margin: 0 auto;
+  padding: 5rem 1.5rem 8rem;
+  color: var(--tinta);
+  font: 16px/1.7 var(--huruf);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- ukuran dan jarak Notion ---------- */
+h1, h2, h3 { font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
+h1 { margin: 0 0 .4em; font-size: 2.5rem; font-weight: 700; line-height: 1.2; }
+h2 { margin: 0; font-size: 1.875rem; }
+h3 { margin: 1.6em 0 .4em; font-size: 1.25rem; }
+p { margin: .75em 0; }
+ul, ol { margin: .75em 0; padding-left: 1.7em; }
+li { padding: .3em 0 .3em .1em; }
+b { color: var(--frasa); }
+.tujuan { color: var(--pudar); }
+
+/* ---------- stabilo ---------- */
+mark {
+  --w: var(--kuning);
+  padding: 0 .15em;
+  color: inherit;
+  background: rgb(var(--w) / var(--stabilo));
+  border-radius: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+mark.kaitan { --w: var(--hijau); }
+mark.jebakan { --w: var(--pink); }
+mark.kunci { --w: var(--biru); }
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.1rem;
+  margin: .8rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
+  font-size: .85rem;
+}
+.legenda li { padding: 0; }
+
+/* ---------- callout: kotak berwarna dengan ikon di kiri ---------- */
+.peta, aside.catatan, aside.jebakan, aside.hitung, .intinya {
+  position: relative;
+  margin: 1.25em 0;
+  padding: 1rem 1.2rem 1rem 3.1rem;
+  background: var(--callout);
+  border-radius: 10px;
+}
+.peta::before, aside.catatan::before, aside.jebakan::before, aside.hitung::before, .intinya::before {
+  position: absolute;
+  top: 1rem;
+  left: 1.05rem;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+.peta::before { content: "🗺️"; }
+aside.catatan::before { content: "💡"; }
+aside.hitung::before { content: "📌"; }
+aside.jebakan { background: var(--jebakan-bg); }
+aside.jebakan::before { content: "⚠️"; }
+.intinya { font-weight: 600; background: var(--intinya-bg); }
+.intinya::before { content: "🔑"; }
+aside > :first-child, .peta > :first-child, aside details > summary + * { margin-top: 0; }
+aside > :last-child, aside details > :last-child { margin-bottom: 0; }
+
+.peta h2 { margin-bottom: .2em; font-size: 1rem; }
+.peta ol { margin: 0; }
+pre.mermaid { margin: 1rem 0 0; text-align: center; background: none; }
+
+/* ---------- toggle: segitiga Notion ---------- */
+details { padding-left: 1.5em; }
+summary { display: block; cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before {
+  content: "";
+  display: inline-block;
+  width: .6em;
+  height: .7em;
+  margin: 0 .7em 0 -1.3em;
+  vertical-align: .02em;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  transition: transform .15s;
+}
+details[open] > summary::before { transform: rotate(90deg); }
+summary:focus-visible { outline: 2px solid rgb(var(--biru)); outline-offset: 2px; border-radius: 3px; }
+aside details > summary { font-weight: 600; }
+aside details[open] > summary { margin-bottom: .5em; }
+
+/* ---------- langkah: toggle heading dengan nomor keycap ---------- */
+main { counter-reset: langkah; }
+.langkah { margin-top: 2.2rem; counter-increment: langkah; }
+.langkah > details > summary::before { vertical-align: .3em; }
+.langkah > details[open] > summary { margin-bottom: .6rem; }
+.langkah > details > summary h2 { display: inline; }
+.langkah > details > summary h2::before { content: counter(langkah) "\FE0F\20E3"; margin-right: .3em; }
+/* keycap emoji hanya ada untuk 0-9; langkah 10 ke atas memakai kotak biru serupa */
+.langkah:nth-of-type(n+10) > details > summary h2::before {
+  content: counter(langkah);
+  display: inline-grid;
+  place-items: center;
+  height: 1.1em;
+  padding: 0 .2em;
+  font-size: .8em;
+  font-weight: 700;
+  vertical-align: .1em;
+  color: #fff;
+  background: rgb(59 136 195);
+  border-radius: .2em;
+}
+
+/* kaitan: dari mana konsep ini berangkat, ke mana ia dipakai */
+.rantai { display: grid; gap: .1rem; margin: .4rem 0 1.2rem; font-size: .92rem; }
+.rantai .dari::before { content: "🔗 Berangkat dari: "; font-weight: 600; }
+.rantai .ke::before { content: "➜ Dipakai untuk: "; font-weight: 600; }
+
+/* analogi: kutipan Notion */
+.analogi { margin: 1.25em 0; padding: 0 0 0 .9em; border-left: 3px solid currentColor; }
+.analogi .batas { font-size: .9rem; color: var(--pudar); }
+.analogi .batas::before { content: "Batas analogi: "; font-weight: 600; }
+
+/* rumus penting: blok persamaan di tengah */
+.rumus { margin: 1.2em 0; font-size: 1.15em; text-align: center; }
+
+/* keterangan simbol: tepat di bawah rumus, satu baris per simbol */
+.keterangan { margin: .5em 0 1em; }
+.keterangan > summary { font-weight: 600; color: var(--pudar); }
+.keterangan dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1.2rem; margin: .5em 0 0; }
+.keterangan dd { margin: 0; }
+
+.soal { margin: .8em 0; }
+.soal > summary { font-weight: 600; }
+.soal > summary strong { color: var(--pudar); }
+.soal[open] > summary { margin-bottom: .4em; }
+
+/* ---------- gambar dan visualisasi ---------- */
+figure { margin: 1.5em 0; text-align: center; }
+figure > img { max-width: 100%; height: auto; }
+figure > svg { width: 100%; max-width: 32rem; height: auto; }
+figcaption { margin-top: .5em; font-size: .85rem; color: var(--pudar); }
+
+/* ---------- kode, tabel, rumus ---------- */
+code { padding: .2em .4em; font: 85% var(--mono); color: var(--kode-teks); background: rgb(135 131 120 / .15); border-radius: 3px; }
+pre.kode {
+  margin: 1.25em 0;
+  padding: 2rem 1rem 2rem 2rem;
+  overflow-x: auto;
+  font: .85rem/1.6 var(--mono);
+  tab-size: 2;
+  background: var(--kode);
+  border-radius: 6px;
+}
+pre.kode code { padding: 0; font: inherit; color: inherit; background: none; }
+
+/* tabel: header berlatar tegas, baris belang supaya mata tidak salah baris, kolom pertama tebal */
+table { width: 100%; margin: 1.4em 0; border-collapse: collapse; font-size: .9rem; }
+th, td { padding: .6rem .8rem; line-height: 1.6; text-align: left; vertical-align: top; border: 1px solid var(--garis); }
+th { font-weight: 700; background: var(--kepala-tabel); border-bottom: 2px solid var(--pudar); }
+td:first-child { font-weight: 600; }
+tr:nth-child(odd) > td { background: var(--belang); }
+aside table { background: var(--kertas); }
+
+mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+
+@media (max-width: 40rem) {
+  body { padding: 2.5rem 1rem 5rem; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
+  table { display: block; overflow-x: auto; }
+}

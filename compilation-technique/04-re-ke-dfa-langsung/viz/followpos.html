@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RE ke DFA Langsung (followpos)</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=db2dcc70">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>RE → DFA langsung (followpos)</h1>
-<p>Empat tahap: syntax tree dengan nomor posisi, lalu <b>nullable / firstpos / lastpos</b> dari bawah ke atas, lalu <b>followpos</b>, lalu DFA. State DFA = himpunan posisi yang boleh dibaca berikutnya.</p>
+<p>Visualisasi ini menjalankan empat tahap: syntax tree dengan nomor posisi, lalu <b>nullable, firstpos, lastpos</b> dari bawah ke atas, lalu <b>followpos</b>, lalu DFA. State DFA adalah himpunan posisi yang boleh dibaca berikutnya.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh, lalu klik <b>Langkah berikutnya</b> sampai DFA selesai. Nyalakan <b>Mode tebak</b> untuk menebak hasil setiap langkah.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> angka biru di kiri node adalah firstpos dan angka hijau di kanan adalah lastpos. Node concatenation menyambung lastpos kiri ke firstpos kanan di tabel followpos.</p>
 
 <div class="controls">
   <label class="pick">Contoh <select class="field" id="pre"></select></label>

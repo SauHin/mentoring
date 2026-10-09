@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Jalankan String pada NFA</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=db2dcc70">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Jalankan string pada NFA</h1>
-<p>NFA bisa berada di <b>beberapa state sekaligus</b>. Baca satu simbol, pindahkan semua state aktif, lalu tambahkan yang bisa dicapai lewat ε. String <b>accepted</b> kalau setelah input habis ada final state yang aktif.</p>
+<p>Visualisasi ini menjalankan string pada NFA. NFA bisa berada di <b>beberapa state sekaligus</b>: setiap simbol memindahkan semua state aktif, lalu state yang bisa dicapai lewat ε ditambahkan.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh, ketik string di kolom <b>String</b> (misalnya <code>5.6</code> atau <code>-31</code>), lalu klik <b>Langkah berikutnya</b>.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> state oranye adalah state aktif. String accepted kalau setelah input habis ada final state yang oranye.</p>
 
 <div class="controls">
   <label class="pick">Contoh <select class="field" id="pre"></select></label>

@@ -5,41 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NFA ke DFA (Subset Construction)</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../_shared/automata.css?v=45a95657">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=db2dcc70">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
   <style>
-    .deck .slide.full { padding-bottom: 3vh; }
-    .deck .slide.full h2 { margin-bottom: 0.3em; }
-    .deck .slide.full iframe { min-height: 0; }
-    .steps li::marker { font-weight: 700; color: var(--go-ink); }
-    .t td, .t th { font-family: var(--mono); padding: 0.3em 0.7em; }
+    .t td, .t th, .tight td, .tight th { padding: 0.3em 0.7em; }
   </style>
 </head>
 <body class="deck">
 
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
-  <h1>NFA → DFA (subset construction)</h1>
-  <p>Compilation technique · soal "ubah NFA / NFA-ε berikut menjadi DFA" dan "apakah string ini diterima?". Kuncinya: ECLOSE dan himpunan state.</p>
+  <h1>NFA ke DFA (subset construction)</h1>
+  <p class="sub">Compilation technique · materi 03 · prasyarat: ε-NFA (materi 02)</p>
+  <p>Target: kamu bisa menghitung ECLOSE, menjalankan string pada ε-NFA, dan membuat tabel DFA dengan subset construction.</p>
+  <p class="coba-link">Label di atas setiap judul (misalnya "Notes 3️⃣") menunjuk section notes yang membahas hal yang sama secara lengkap.</p>
 </section>
 
 <section class="slide">
-  <h2>DFA dan NFA</h2>
-  <p class="sub">Keduanya mengenali language yang sama kuatnya (regular language). Bedanya ada pada berapa banyak pilihan di setiap langkah.</p>
-  <table>
-    <tr><th></th><th>DFA</th><th>NFA</th></tr>
-    <tr><td>Fungsi transisi</td><td>δ : Q × Σ → Q, tepat <b>satu</b> state tujuan</td><td>δ : Q × (Σ ∪ {ε}) → himpunan state: nol, satu, atau banyak</td></tr>
+  <p class="kicker">Notes 1️⃣ · DFA dan NFA</p>
+  <h2>DFA selalu punya tepat satu state tujuan, NFA boleh punya nol atau banyak</h2>
+  <p class="sub">Keduanya mengenali language yang sama kuatnya. Bedanya ada di jumlah pilihan pada setiap langkah.</p>
+  <table class="tight">
+    <tr><th></th><th><mark>DFA</mark></th><th>NFA</th></tr>
+    <tr><td>Fungsi transisi</td><td>δ : Q × Σ → Q, tepat <b>satu</b> tujuan</td><td>δ : Q × (Σ ∪ {ε}) → himpunan state</td></tr>
     <tr><td>Jalur untuk satu string</td><td>Tepat satu</td><td>Bisa banyak sekaligus</td></tr>
-    <tr><td>String diterima kalau</td><td>Jalur satu-satunya berakhir di final</td><td><b>Minimal satu</b> jalur berakhir di final</td></tr>
-    <tr><td>Jumlah state</td><td>Sering lebih banyak</td><td>Sering lebih sedikit, dan mudah dibuat dari RE</td></tr>
-    <tr><td>Implementasi</td><td>Mudah: satu state, satu langkah per simbol</td><td>Harus melacak banyak state, jadi biasanya diubah dulu ke DFA</td></tr>
+    <tr><td>Diterima kalau</td><td>Jalur satu-satunya berakhir di final</td><td><b>Minimal satu</b> jalur berakhir di final</td></tr>
+    <tr><td>Implementasi</td><td>Mudah: satu state, satu langkah per simbol</td><td>Harus melacak banyak state, jadi diubah dulu ke DFA</td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Ide: state DFA = himpunan state NFA</h2>
-  <p class="sub">NFA bisa berada di beberapa state sekaligus. Kalau kita mencatat <b>himpunan</b> state yang aktif, setiap simbol membawa himpunan itu ke tepat satu himpunan lain. Itu sudah sebuah DFA.</p>
+  <p class="kicker">Notes 2️⃣ · Ide subset construction</p>
+  <h2>Catat himpunan state yang aktif, dan himpunan itu menjadi satu state DFA</h2>
+  <p class="sub">Dari satu himpunan, setiap simbol membawa ke tepat satu himpunan lain. Itulah <mark>subset construction</mark>.</p>
   <div class="cols">
     <div class="au-fig" data-auto="NFA untuk (a|b)*abb">a b
 →0 {0,1} {0}
@@ -47,16 +47,17 @@
 2 - {3}
 *3 - -</div>
     <ul>
-      <li>Mulai di {0}. Setelah membaca <code>a</code>, NFA bisa di 0 atau 1: himpunan {0,1}.</li>
+      <li>Mulai di {0}. Setelah <code>a</code>, NFA bisa di 0 atau 1: himpunan {0,1}.</li>
       <li>Dari {0,1} dengan <code>b</code>: δ(0,b) ∪ δ(1,b) = {0} ∪ {2} = {0,2}.</li>
-      <li>Himpunan yang berbeda menjadi state DFA yang berbeda. NFA dengan n state punya paling banyak 2ⁿ himpunan, jadi prosesnya pasti selesai.</li>
+      <li>NFA dengan n state punya paling banyak 2ⁿ himpunan, jadi prosesnya pasti selesai.</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2>ECLOSE: semua state yang terjangkau tanpa input</h2>
-  <p class="sub">Di ε-NFA, mesin bisa pindah lewat ε kapan saja tanpa membaca simbol. <mark>ECLOSE(q)</mark> adalah q ditambah semua state yang bisa dicapai dari q lewat ε saja, berapa pun langkahnya.</p>
+  <p class="kicker">Notes 3️⃣ · ECLOSE</p>
+  <h2>ECLOSE(q) adalah q ditambah semua state yang terjangkau lewat ε saja</h2>
+  <p class="sub">Di ε-NFA, mesin bisa pindah lewat ε kapan saja tanpa membaca simbol. <mark>ECLOSE</mark> mengumpulkan semua state itu.</p>
   <div class="cols">
     <div class="au-fig" data-auto="ε-NFA untuk (a|b)*a">ε a b
 →0 {1,7} - -
@@ -68,17 +69,18 @@
 6 {1,7} - -
 7 - {8} -
 *8 - - -</div>
-    <ol class="steps">
-      <li><b>Basis</b>: q selalu ada di ECLOSE(q).</li>
-      <li><b>Induksi</b>: kalau p ada di ECLOSE(q) dan ada ε dari p ke r, masukkan r.</li>
-      <li>Ulangi sampai tidak ada yang bertambah. Contoh: ECLOSE(0) = {0, 1, 7} lalu dari 1: {2, 4} → <b>{0,1,2,4,7}</b>.</li>
+    <ol>
+      <li><strong>Basis:</strong> q selalu ada di ECLOSE(q).</li>
+      <li><strong>Induksi:</strong> kalau p ada di ECLOSE(q) dan ada ε dari p ke r, masukkan r.</li>
+      <li><strong>Ulangi</strong> sampai tidak ada yang bertambah. ECLOSE(0) = {0,1,7}, lalu dari 1: 2 dan 4. Hasil: <b>{0,1,2,4,7}</b>.</li>
     </ol>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Menjalankan string pada ε-NFA</h2>
-  <p class="sub">Soal "compute string 5.6" dikerjakan dengan mencatat himpunan state aktif. Setiap simbol: <b>pindahkan</b> semua state aktif, lalu ambil <b>ECLOSE</b>. Di ε-NFA bilangan desimal ini, d = digit apa saja.</p>
+  <p class="kicker">Notes 4️⃣ · Menjalankan string</p>
+  <h2>Menjalankan string pada ε-NFA: pindahkan semua state aktif, lalu ambil ECLOSE</h2>
+  <p class="sub">ε-NFA bilangan desimal dari slide (d = digit apa saja). Contoh: string <code>5.6</code>.</p>
   <div class="cols">
     <div class="au-fig" data-auto="ε-NFA bilangan desimal">ε + - . d
 →q0 {q1} {q1} {q1} - -
@@ -95,7 +97,7 @@ q4 - - - {q3} -
       <tr><td>6</td><td>{q3}</td><td><b>{q3,q5}</b></td></tr>
     </table>
   </div>
-  <p>Input habis dan himpunan akhir memuat final state q5, jadi <code>5.6</code> <b>accepted</b>. Untuk <code>-31</code>, himpunan akhirnya {q1,q4} tanpa q5, jadi rejected.</p>
+  <p>Himpunan akhir memuat final q5, jadi <code>5.6</code> <b>accepted</b>. <code>-31</code> berakhir di {q1,q4} tanpa q5, jadi rejected.</p>
 </section>
 
 <section class="slide full">
@@ -104,20 +106,22 @@ q4 - - - {q3} -
 </section>
 
 <section class="slide">
-  <h2>Resep subset construction</h2>
-  <p class="sub">Langkahnya sama dengan menjalankan string, tetapi untuk <b>semua</b> simbol dari <b>semua</b> himpunan yang muncul. Hasilnya ditulis sebagai tabel DFA.</p>
-  <ol class="steps">
-    <li><b>Start state DFA</b> = ECLOSE(q₀). Kalau NFA tidak punya ε, cukup {q₀}. Beri nama A.</li>
-    <li>Ambil state DFA yang <b>belum diproses</b>. Untuk setiap simbol a: gabungkan δ(p, a) untuk semua p di himpunan itu (<b>move</b>), lalu ambil ECLOSE-nya.</li>
-    <li>Kalau himpunan hasilnya <b>baru</b>, tambahkan sebagai baris baru. Kalau sudah ada, tulis namanya. Kalau ∅, itu dead state.</li>
-    <li>Ulangi langkah 2 sampai semua baris diproses.</li>
-    <li><b>Final state DFA</b> = setiap himpunan yang <b>memuat</b> minimal satu final state NFA.</li>
+  <p class="kicker">Notes 5️⃣ · Resep</p>
+  <h2>Setiap sel tabel DFA = ECLOSE(move(himpunan, simbol)), sampai tidak ada himpunan baru</h2>
+  <p class="sub"><mark>move</mark>(S, a) adalah gabungan δ(p, a) untuk semua p di S. Langkahnya sama dengan menjalankan string, untuk semua simbol.</p>
+  <ol>
+    <li><strong>Start DFA = ECLOSE(q₀)</strong>, beri nama A. Tanpa ε, cukup {q₀}.</li>
+    <li><strong>Ambil baris yang belum diproses.</strong> Untuk setiap simbol, isi sel dengan ECLOSE(move).</li>
+    <li><strong>Himpunan baru</strong> = baris baru. Hasil ∅ = dead state.</li>
+    <li><strong>Ulangi</strong> sampai semua baris diproses.</li>
+    <li><strong>Final DFA</strong> = setiap himpunan yang <b>memuat</b> minimal satu final NFA.</li>
   </ol>
 </section>
 
 <section class="slide">
-  <h2>Contoh slide: NFA tanpa ε</h2>
-  <p class="sub">NFA M = ({q0,q1}, {0,1}, δ, q0, {q1}) dengan δ(q0,0) = {q0,q1}, δ(q0,1) = {q1}, δ(q1,0) = ∅, δ(q1,1) = {q0,q1}.</p>
+  <p class="kicker">Notes 6️⃣ · Contoh tanpa ε</p>
+  <h2>Tanpa ε, setiap sel cukup gabungan transisi anggota himpunannya</h2>
+  <p class="sub">Contoh slide: δ(q0,0) = {q0,q1}, δ(q0,1) = {q1}, δ(q1,0) = ∅, δ(q1,1) = {q0,q1}, final q1.</p>
   <div class="cols">
     <table class="t">
       <tr><th>DFA</th><th>Himpunan</th><th>0</th><th>1</th></tr>
@@ -130,24 +134,25 @@ q4 - - - {q3} -
 *B B B
 *C - B</div>
   </div>
-  <p class="label">B dan C final karena keduanya memuat q1. Sel ∅ adalah dead state: boleh ditulis sebagai state jebakan, atau tidak digambar.</p>
+  <p>B dan C final karena keduanya memuat q1. Sel ∅ adalah dead state: boleh digambar sebagai state jebakan atau tidak digambar.</p>
 </section>
 
 <section class="slide">
-  <h2>Contoh slide: ε-NFA (a|b)*a</h2>
-  <p class="sub">Pakai ε-NFA di slide ECLOSE (state 0 sampai 8). Setiap sel = ECLOSE(move(himpunan, simbol)).</p>
+  <p class="kicker">Notes 7️⃣ · Contoh ε-NFA</p>
+  <h2>Di ε-NFA, start dan setiap sel harus diambil ECLOSE-nya</h2>
+  <p class="sub">Contoh slide: ε-NFA <code>(a|b)*a</code> di slide ECLOSE (state 0 sampai 8).</p>
   <table class="t">
-    <tr><th>DFA</th><th>Himpunan</th><th>a: move → ECLOSE</th><th>b: move → ECLOSE</th></tr>
-    <tr><td>→A</td><td>{0,1,2,4,7}</td><td>{3,8} → {1,2,3,4,6,7,8} = B</td><td>{5} → {1,2,4,5,6,7} = C</td></tr>
-    <tr><td>*B</td><td>{1,2,3,4,6,7,8}</td><td>{3,8} → B</td><td>{5} → C</td></tr>
-    <tr><td>C</td><td>{1,2,4,5,6,7}</td><td>{3,8} → B</td><td>{5} → C</td></tr>
+    <tr><th>DFA</th><th>Himpunan</th><th>a: move, lalu ECLOSE</th><th>b: move, lalu ECLOSE</th></tr>
+    <tr><td>→A</td><td>{0,1,2,4,7}</td><td>{3,8}, jadi {1,2,3,4,6,7,8} = B</td><td>{5}, jadi {1,2,4,5,6,7} = C</td></tr>
+    <tr><td>*B</td><td>{1,2,3,4,6,7,8}</td><td>{3,8}, jadi B</td><td>{5}, jadi C</td></tr>
+    <tr><td>C</td><td>{1,2,4,5,6,7}</td><td>{3,8}, jadi B</td><td>{5}, jadi C</td></tr>
   </table>
   <div class="cols">
     <div class="au-fig short" data-auto="DFA untuk (a|b)*a">a b
 →A B C
 *B B C
 C B C</div>
-    <p>Hanya B yang memuat 8 (final NFA), jadi hanya B yang final. Artinya: string diterima kalau diakhiri <code>a</code>.</p>
+    <p>Hanya B yang memuat 8 (final NFA), jadi hanya B yang final. Artinya string diterima kalau diakhiri <code>a</code>.</p>
   </div>
 </section>
 
@@ -157,28 +162,48 @@ C B C</div>
 </section>
 
 <section class="slide">
-  <h2>Kesalahan yang sering muncul</h2>
-  <p class="sub">Hampir semua kesalahan berasal dari lupa ECLOSE atau salah menentukan final state.</p>
-  <table>
-    <tr><th>Kesalahan</th><th>Akibatnya</th><th>Perbaikan</th></tr>
-    <tr><td>Start state = {q₀} di ε-NFA</td><td>State yang bisa dicapai lewat ε dari q₀ hilang</td><td>Start = ECLOSE(q₀)</td></tr>
-    <tr><td>Lupa ECLOSE setelah move</td><td>Himpunan kurang, DFA menolak string yang benar</td><td>Setiap sel = ECLOSE(move(…))</td></tr>
-    <tr><td>Final DFA = himpunan yang <b>sama persis</b> dengan F</td><td>{q0,q1} tidak dianggap final padahal memuat q1</td><td>Final = memuat minimal satu final NFA</td></tr>
-    <tr><td>{q0,q1} dan {q1,q0} dianggap berbeda</td><td>State ganda, tabel tidak pernah selesai</td><td>Himpunan tidak punya urutan. Tulis terurut.</td></tr>
+  <p class="kicker">Notes 8️⃣ · Kesalahan umum</p>
+  <h2>Kesalahan paling sering: lupa ECLOSE dan salah menentukan final</h2>
+  <p class="sub">Setiap baris menyebut akibatnya dan cara memperbaikinya.</p>
+  <table class="tight">
+    <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>Start = {q₀} di ε-NFA</td><td>State yang dicapai lewat ε dari q₀ hilang</td><td>Start = ECLOSE(q₀)</td></tr>
+    <tr><td>Lupa ECLOSE setelah move</td><td>DFA menolak string yang benar</td><td>Setiap sel = ECLOSE(move)</td></tr>
+    <tr><td>Final = himpunan yang sama persis dengan F</td><td>{q0,q1} tidak final padahal memuat q1</td><td>Final = memuat final NFA</td></tr>
+    <tr><td>{q0,q1} dan {q1,q0} dianggap berbeda</td><td>State ganda, tabel tidak selesai</td><td>Tulis isi himpunan terurut</td></tr>
     <tr><td>Berhenti sebelum semua baris diproses</td><td>Ada state tanpa transisi</td><td>Proses setiap himpunan baru</td></tr>
   </table>
 </section>
 
 <section class="slide">
   <h2>Ringkasan</h2>
+  <p class="sub">Subset construction mengubah "banyak state sekaligus" menjadi "satu himpunan state".</p>
   <ul>
-    <li>State DFA adalah <b>himpunan</b> state NFA yang mungkin aktif.</li>
-    <li><b>ECLOSE</b>(q) = q dan semua state yang terjangkau lewat ε. Start DFA = ECLOSE(q₀).</li>
-    <li>Isi tabel: untuk setiap himpunan dan simbol, <b>move</b> lalu <b>ECLOSE</b>. Himpunan baru = baris baru.</li>
-    <li>Final DFA = himpunan yang memuat minimal satu final NFA.</li>
-    <li>Menjalankan string pada ε-NFA memakai langkah yang sama, hanya untuk simbol-simbol string itu.</li>
+    <li><strong>State DFA</strong> = himpunan state NFA yang mungkin aktif.</li>
+    <li><strong>ECLOSE(q)</strong> = q dan semua state yang terjangkau lewat ε. Start DFA = ECLOSE(q₀).</li>
+    <li><strong>Sel tabel</strong> = ECLOSE(move(himpunan, simbol)). Himpunan baru = baris baru.</li>
+    <li><strong>Final DFA</strong> = himpunan yang memuat minimal satu final NFA.</li>
   </ul>
-  <p class="label">Jawaban latihan dosen (3 NFA) ada di notes. Materi berikutnya: RE langsung ke DFA dengan followpos.</p>
+</section>
+
+<section class="slide">
+  <h2>Soal</h2>
+  <p class="sub">Latihan slide dosen. Buat tabel DFA-nya, lalu cek di slide berikutnya atau di visualisasi ("Latihan 1/2/3").</p>
+  <ol class="soal-list">
+    <li>p: 0 ke {p,q}, 1 ke {p}; q: 0 ke {r}, 1 ke {r}; r: 0 ke {s}, 1 ke ∅; *s: 0 ke {s}, 1 ke {s}. Start p.</li>
+    <li>p: 0 ke {p,q}, 1 ke {p}; q: 0 ke {r,s}, 1 ke {t}; r: 0 ke {p,r}, 1 ke {t}; *s, *t: kosong. Start p.</li>
+    <li>ε-NFA. p: ε ke ∅, a ke {p}, b ke {q}, c ke {r}; q: ε ke {p}, a ke {q}, b ke {r}; *r: ε ke {q}, a ke {r}, c ke {p}. Transisi yang tidak disebut = ∅.</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2>Jawaban</h2>
+  <p class="sub">Tabel lengkap ada di notes (nomor section di kurung).</p>
+  <ol class="soal-list">
+    <li>8 state: {p}, {p,q}, {p,q,r}, {p,r}, dan 4 himpunan yang memuat s (semuanya final) (<a href="notes.html#langkah-6">6️⃣</a>).</li>
+    <li>4 state: {p}, {p,q}, *{p,q,r,s}, *{p,t} (<a href="notes.html#langkah-6">6️⃣</a>).</li>
+    <li>ECLOSE(p) = {p}, ECLOSE(q) = {p,q}, ECLOSE(r) = {p,q,r}. 3 state: {p}, {p,q}, *{p,q,r} (<a href="notes.html#langkah-7">7️⃣</a>).</li>
+  </ol>
 </section>
 
 <script src="../../_shared/automata.js?v=9b7b4edb"></script>

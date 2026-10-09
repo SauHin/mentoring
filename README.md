@@ -5,8 +5,8 @@ Online: https://sauhin.github.io/mentoring/
 Notes, slide, dan visualisasi interaktif untuk tiap materi. Semuanya file HTML.
 Klik dua kali untuk membuka di browser. Tidak perlu install apa pun dan tidak perlu internet.
 
-Gaya visual mengikuti Empur (`D:\sem-5\speech-recognition\DESIGN.md`):
-latar polos, kartu abu tanpa garis, tombol pil hijau, dan font Lexend.
+Tampilan mengikuti gaya catatan Notion (`_shared/gaya.css`, salinan dari `belajar/catatan/gaya.css`):
+warna Notion terang/gelap, font sistem, callout, toggle, dan tabel belang.
 Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 
 ## Daftar Materi
@@ -23,6 +23,7 @@ Semua kode C untuk Dev-C++. Visualisasi memakai mesin bersama `_shared/cviz.js` 
 | 02 | Variabel, tipe data, dan input/output | [notes](algorithm-and-programming/02-variabel-tipe-data-io/notes.html) | [slides](algorithm-and-programming/02-variabel-tipe-data-io/slides.html) |
 | 03 | Repetition (loop) | [notes](algorithm-and-programming/03-repetition/notes.html) | [slides](algorithm-and-programming/03-repetition/slides.html) |
 | 04 | Pointer dan array | [notes](algorithm-and-programming/04-pointer-dan-array/notes.html) | [slides](algorithm-and-programming/04-pointer-dan-array/slides.html) |
+| 05 | Mengerjakan soal kasus | [notes](algorithm-and-programming/05-soal-kasus/notes.html) | [slides](algorithm-and-programming/05-soal-kasus/slides.html) |
 
 ### Data structure
 
@@ -69,12 +70,12 @@ Jawaban di mesin dicek terhadap contoh dan latihan di slide dosen: `node tools/c
 ```
 mentoring/
 ├── index.html                  home: daftar mata kuliah
-├── _shared/                    style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, cviz.js/css, logic.js/css, automata.js/css, grammar.js, font, logo
+├── _shared/                    gaya.css, style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, cviz.js/css, logic.js/css, automata.js/css, grammar.js, logo
 ├── _template/
 │   └── NN-nama-materi/         salin folder ini untuk materi baru
 ├── algorithm-and-programming/
 │   ├── index.html
-│   └── 01-… sampai 04-…
+│   └── 01-… sampai 05-…        05 = cara mengerjakan soal kasus
 ├── data-structure/
 │   ├── index.html              daftar materi data structure
 │   └── 01-… sampai 05-…        05 = cara mengerjakan soal kasus
@@ -106,41 +107,56 @@ Jalankan `python tools/cachebust.py`. Script ini menambahkan `?v=<hash>` ke seti
 ## Gaya Penulisan
 
 - Bahasa Indonesia, tetapi istilah yang lebih umum dalam bahasa Inggris tetap Inggris: node, pointer, insert, delete, traverse, edge case.
+- Aturan lengkap gaya bahasa, notes, slide, dan visualisasi ada di `CLAUDE.md`. Ringkasnya: notes dan slide masing-masing harus bisa dibaca sendiri tanpa mentor.
 - Singkat. Pakai **bold**, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
-- Slide harus bisa dipahami tanpa penjelasan lisan, seperti notes versi ringkas.
-  - Setiap slide punya kalimat pembuka `<p class="sub">` di bawah judul.
-  - Poin ditulis sebagai kalimat lengkap, bukan rantai panah ("A → B → crash").
 - Pakai istilah Inggris kalau padanan Indonesianya terdengar janggal. Contoh: valid (bukan sah), garbage value (bukan nilai sampah), return value, newline, term, logic gate, predicate, quantifier, truth table.
 - Bahasa pemrograman per matkul: **algorithm and programming dan data structure pakai C** untuk Dev-C++. Kode harus jalan di compiler C dan C++. Data structure memakai (`malloc`/`free`, `NULL`, `printf`), dan harus juga jalan di compiler C++ (cast `(Node*)malloc(...)`).
 - Fokus pada **pemahaman kode**: tiap operasi diturunkan (sebelum → sesudah → panah yang berubah → urutan → edge case → kode), latihan berupa trace, cari bug, dan turunkan sendiri.
 - Visualisasi linked list, stack, queue, dan priority queue memakai mesin bersama `_shared/listviz.js` (termasuk mode tebak). Opsi `head`, `tail`, `pos`, `tag`, dan `noun` di `listViz()` mengatur nama pointer, input posisi, dan label di bawah node.
-- Notes dibuka dengan kotak TL;DR dan ditutup dengan daftar pustaka.
-- Daftar isi dan tombol kembali ke atas dibuat otomatis oleh `notes.js` dari setiap `<h2>`.
+- Notes gaya catatan (`body.catatan`): header berisi tujuan, legenda stabilo, dan peta jalur, lalu satu section toggle bernomor per konsep (semua tertutup). Link `#langkah-N` membuka section-nya (`notes.js`). Notes ditutup dengan daftar pustaka.
+- Notes lama (`article.notes`, belum diubah): kotak TL;DR di awal, daftar isi otomatis dari setiap `<h2>`.
 - Setiap `<details>` yang judulnya memuat "full code" otomatis punya pilihan **Tampil semua** atau **Bertahap** (`notes.js`). Mode bertahap memotong kode di baris kosong menjadi blok, menampilkan baris pertama tiap blok sebagai soal, dan membuka isinya satu per satu. Jadi pisahkan fungsi dan bagian `main` dengan baris kosong.
 
 ## Kelas Gaya
 
+Dari `gaya.css` (notes dan slide):
+
 | Kelas / tag | Hasil |
 |-------------|-------|
-| `<mark>` | Sorotan stabilo kuning untuk istilah penting |
-| `<blockquote>` | Kutipan dengan garis kiri biru muda |
-| `<details>` | Lipatan, misalnya untuk jawaban latihan |
-| `.card` | Kartu abu tanpa garis |
-| `.panel` | Kartu putih dengan garis tipis |
-| `.btn`, `.btn-go`, `.btn-stop` | Tombol pil biasa, hijau, merah |
-| `.chip`, `.label` | Pil kecil, teks kecil abu |
+| `section.langkah > details > summary > h2` | Section toggle bernomor keycap (1️⃣). Nomor 10 ke atas: kotak biru |
+| `p.tujuan`, `ul.legenda`, `nav.peta` | Header notes: tujuan, legenda stabilo, peta jalur |
+| `p.rantai` + `span.dari` / `span.ke` | Kaitan: berangkat dari apa, dipakai untuk apa |
+| `aside.analogi` + `p.batas` | Analogi bergaya kutipan, diikuti batas analogi |
+| `mark`, `mark.kaitan`, `mark.jebakan`, `mark.kunci` | Stabilo kuning (istilah baru), hijau (kaitan), pink (jebakan), biru (wajib diingat) |
+| `<b>`, `<strong>` | Frasa kunci (tebal kuning), label poin ("Kelebihan:") |
+| `p.rumus` + `details.keterangan` | Rumus di tengah, lalu arti simbol (tertutup) |
+| `aside.catatan`, `aside.jebakan`, `aside.hitung`, `p.intinya` | Callout 💡, ⚠️, 📌 (contoh hitungan dalam toggle), 🔑 |
+| `details.soal` | Soal latihan, jawabannya tertutup |
+| `pre.kode`, `<table>`, `figure` + `figcaption` | Kode, tabel belang, gambar dengan keterangan |
+
+Dari `style.css`:
+
+| Kelas / tag | Hasil |
+|-------------|-------|
+| `aside.coba` | Callout 🧪 ajakan mencoba visualisasi |
+| `a.no`, `span.no` | Rujukan ke section 10 ke atas (kotak biru) |
+| `p.kicker` | Di slide: nomor section notes di atas judul ("Notes 3️⃣ · while") |
+| `p.sub` | Di slide: satu kalimat pembuka di bawah judul |
+| `p.coba`, `p.perhatikan` | Di viz: petunjuk "Coba:" dan "Perhatikan:" |
+| `.card`, `.panel` | Kartu abu tanpa garis, kartu putih bergaris tipis |
+| `.btn`, `.btn-go` | Tombol datar putih, tombol biru untuk aksi utama |
+| `.chip`, `.label` | Label kecil, teks kecil abu |
 | `.controls` | Baris kontrol di visualisasi, tanpa kotak |
 | `label.pick` + `select.field` | Dropdown "Contoh"/"Program" untuk lebih dari 4 pilihan |
-| `.seg` + `.btn.sel` | Grup tombol pilihan (maksimal 4), yang aktif bergaris hijau |
+| `.seg` + `.btn.sel` | Grup tombol pilihan (maksimal 4), yang aktif berlatar biru muda |
 | `label.check` | Pengaturan sekunder kecil, misalnya mode tebak |
-| `.callout`, `.callout.tip`, `.callout.warn` | Kotak catatan biru, tips hijau, peringatan merah |
-| `.card.tldr` | Kotak ringkasan di awal notes |
+| `.callout`, `.callout.tip`, `.callout.warn` | Callout lama (materi yang belum diubah) |
 | `.crumbs` | Nama matkul di sebelah tombol Home (dibuat otomatis) |
 | `ol.refs` | Daftar pustaka |
 
 Warna untuk seri data di visualisasi: `--go-ink`, `--c-jingga`, `--c-biru`, `--c-pink`, `--c-mint`, `--c-lilac`.
 
-Aturan gaya Empur: huruf kalimat biasa (tidak ada teks kapital penuh), tidak ada garis luar tebal, dan bayangan hanya untuk benda yang melayang.
+Viz yang dibuka di dalam iframe slide mendapat kelas `embed` di `<html>` (dari `theme.js`), dan judulnya disembunyikan karena slide sudah punya judul.
 
 ## Kontrol Slide
 

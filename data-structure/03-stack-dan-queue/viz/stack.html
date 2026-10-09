@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Stack dengan Linked List</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=3f7fc4dc">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Stack dengan linked list</h1>
-<p>Push dan pop sama-sama terjadi di <b>top</b>, yaitu node pertama. Jalankan step by step dan perhatikan: node yang terakhir di-push selalu yang pertama di-pop.</p>
+<p>Visualisasi ini menjalankan push dan pop pada stack berbasis linked list. Top adalah node pertama.</p>
+<p class="coba"><strong>Coba:</strong> isi <b>Nilai</b>, klik <b>push</b> beberapa kali, lalu klik <b>pop</b>. Klik <b>Langkah berikutnya</b> untuk menjalankan setiap baris.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> push dan pop sama-sama terjadi di top. Node yang terakhir di-push selalu yang pertama di-pop (LIFO).</p>
 
-<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script src="../../../_shared/listviz.js?v=5942227c"></script>
 <script>
 const CODE = {
   struct: `typedef struct Node {
@@ -80,7 +83,13 @@ const OPS = {
   pop: () => pop(),
 };
 const check = checkCommon;
-listViz({ doubly: false, values: [30, 20, 10], head: 'top', pos: false, noun: 'Stack' });
+listViz({
+  doubly: false, values: [30, 20, 10], head: 'top', pos: false, noun: 'Stack',
+  hints: {
+    push: 'newNode→next disambung ke top lama dulu, baru top pindah ke node baru (notes 4️⃣).',
+    pop: 'alamat dan data node top disimpan dulu, top pindah ke node berikutnya, baru node lama di-free (notes 4️⃣).',
+  },
+});
 </script>
 </body>
 </html>

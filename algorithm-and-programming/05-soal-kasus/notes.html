@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mengerjakan Soal Kasus · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
+</head>
+<body class="catatan">
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+
+<header>
+  <h1>Mengerjakan soal kasus</h1>
+  <p class="tujuan">Cara mengubah soal cerita (problem solving case) menjadi program C lengkap dengan variabel, <code>if</code>, loop, dan array. Target: kamu bisa mengerjakan soal quiz dengan resep yang sama setiap kali, dan output-mu sama persis dengan sample output.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/soal-kasus.html">trace soal kasus</a> · Materi yang dipakai: <a href="../01-algoritma-dan-struktur-c/notes.html">01</a>, <a href="../02-variabel-tipe-data-io/notes.html">02</a>, <a href="../03-repetition/notes.html">03</a>, <a href="../04-pointer-dan-array/notes.html">04</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
+  </ul>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Resep 6 langkah</a></li>
+      <li><a href="#langkah-2">Tandai input, proses, output</a></li>
+      <li><a href="#langkah-3">Kerjakan sample dengan tangan</a></li>
+      <li><a href="#langkah-4">Tulis langkah dalam bahasa biasa</a></li>
+      <li><a href="#langkah-5">Pilih alat dari kalimat soal</a></li>
+      <li><a href="#langkah-6">Pola membaca input</a></li>
+      <li><a href="#langkah-7">Output harus sama persis</a></li>
+      <li><a href="#langkah-8">Contoh 1: nilai kuis</a></li>
+      <li><a href="#langkah-9">Contoh 2: suhu di atas rata-rata</a></li>
+      <li><a href="#langkah-10">Uji edge case dan bug yang sering muncul</a></li>
+      <li><a href="#langkah-11">Latihan soal kasus format quiz</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Resep 6 langkah: pahami soal dulu, baru logika, baru kode</h2></summary>
+  <p class="rantai">
+    <span class="dari">tujuh langkah dari masalah ke program (materi 01)</span>
+    <span class="ke">semua section di halaman ini</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Memasak pesanan tamu: pahami pesanannya, coba bayangkan hasilnya, tulis langkahnya, siapkan alat, masak, lalu cicipi.</p>
+    <p class="batas">masakan yang sedikit beda masih bisa dimakan. Output yang beda satu spasi saja sudah dianggap salah.</p>
+  </aside>
+
+  <p><mark>Soal kasus</mark> adalah soal cerita yang meminta program lengkap: membaca input, memprosesnya, lalu mencetak output dengan format tertentu. Kerjakan selalu dengan resep yang sama:</p>
+  <ol>
+    <li><strong>Tandai</strong> input, proses, output, dan batas nilainya.</li>
+    <li><strong>Kerjakan sample input dengan tangan</strong> sampai hasilnya sama dengan sample output.</li>
+    <li><strong>Tulis langkah</strong> dalam bahasa biasa, 3–6 baris.</li>
+    <li><strong>Pilih alat C</strong> dari kalimat soal.</li>
+    <li><strong>Tulis kode bertahap:</strong> input, lalu proses, lalu output.</li>
+    <li><strong>Uji</strong> dengan sample, edge case, dan format output.</li>
+  </ol>
+  <p><strong>Kenapa urutannya begini:</strong> langkah 1–3 dikerjakan tanpa kode. Kalau kamu langsung menulis kode, kamu memikirkan arti soal, logika, dan sintaks sekaligus, jadi kesalahan sulit dilacak.</p>
+
+  <p class="intinya">Langkah 1–3 di kertas, langkah 4–6 di Dev-C++.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa sample input dikerjakan dengan tangan (langkah 2) sebelum menulis kode?</summary>
+    <p>Kalau hasil hitunganmu sudah sama dengan sample output, berarti kamu sudah paham soalnya. Kalau nanti output program salah, kesalahannya pasti di kode, bukan di cara memahami soal.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Langkah 1: tandai input, proses, output, dan batas nilainya dengan tiga warna</h2></summary>
+  <p class="rantai">
+    <span class="dari">input, proses, output (materi 01)</span>
+    <span class="ke">pilih tipe data (<a href="#langkah-5">5️⃣</a>) dan pola input (<a href="#langkah-6">6️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Membaca resep sambil menandai bahan, cara masak, dan cara penyajian dengan stabilo berbeda.</p>
+    <p class="batas">resep bisa dibaca sekilas. Soal kasus harus dibaca kalimat per kalimat, karena satu kata ("di atas", "minimal") bisa mengubah jawaban.</p>
+  </aside>
+
+  <p>Di kertas, tandai ketiga bagian soal dengan tiga warna stabilo berbeda. Contoh soal (dipakai lagi di <a href="#langkah-8">8️⃣</a>):</p>
+  <aside class="catatan">
+    <p>Pak Budi punya N mahasiswa (1 ≤ N ≤ 100). Baris pertama berisi N, baris kedua berisi N nilai bulat 0–100. Hitung rata-rata, nilai tertinggi, dan jumlah yang lulus (nilai ≥ 75). Cetak tiga baris: "Rata-rata: " dengan 2 desimal, "Tertinggi: ", dan "Lulus: ".</p>
+  </aside>
+  <table>
+    <tr><th>Bagian</th><th>Isi di soal</th></tr>
+    <tr><td><strong>Input</strong></td><td>N (1 ≤ N ≤ 100), lalu N nilai bulat 0–100</td></tr>
+    <tr><td><strong>Proses</strong></td><td>rata-rata, nilai tertinggi, banyak nilai ≥ 75</td></tr>
+    <tr><td><strong>Output</strong></td><td>tiga baris dengan label persis, rata-rata 2 desimal</td></tr>
+  </table>
+  <p><mark>Constraint</mark> (batas nilai, misalnya 1 ≤ N ≤ 100) menentukan ukuran array dan tipe data, jadi jangan dilewati.</p>
+
+  <p class="intinya">Tiga warna: input, proses, output. Constraint selalu dicatat.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Constraint soal: "harga tiap barang 1 sampai 1.000.000, paling banyak 10.000 barang". Tipe apa untuk total harga?</summary>
+    <p>Total bisa mencapai 1.000.000 × 10.000 = 10<sup>10</sup>, lebih besar dari batas <code>int</code> (sekitar 2,1 × 10<sup>9</sup>). Pakai <code>long long</code> dan <code>%lld</code> (materi 02).</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Langkah 2: kerjakan sample input dengan tangan sampai hasilnya sama dengan sample output</h2></summary>
+  <p class="rantai">
+    <span class="dari">trace table (materi 03)</span>
+    <span class="ke">langkah dalam bahasa biasa (<a href="#langkah-4">4️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mencoba satu soal contoh di buku sebelum mengerjakan latihannya.</p>
+    <p class="batas">contoh di buku sudah ada pembahasannya. Di soal kasus, kamu yang harus menemukan kenapa sample output-nya begitu.</p>
+  </aside>
+
+  <p><mark>Sample input</mark> dan sample output adalah contoh pasangan input dan output yang benar di soal. Hitung dengan tangan memakai trace table:</p>
+  <table>
+    <tr><th>Nilai</th><th>total</th><th>tertinggi</th><th>lulus</th></tr>
+    <tr><td>(awal)</td><td>0</td><td>-1</td><td>0</td></tr>
+    <tr><td>80</td><td>80</td><td>80</td><td>1</td></tr>
+    <tr><td>65</td><td>145</td><td>80</td><td>1</td></tr>
+    <tr><td>90</td><td>235</td><td>90</td><td>2</td></tr>
+    <tr><td>75</td><td>310</td><td>90</td><td>3</td></tr>
+    <tr><td>52</td><td>362</td><td>90</td><td>3</td></tr>
+  </table>
+  <p>Rata-rata = 362 / 5 = 72.40. Sample output-nya "Rata-rata: 72.40", "Tertinggi: 90", "Lulus: 3", jadi pemahamanmu sudah benar.</p>
+
+  <p class="intinya">Sampai trace-mu cocok dengan sample output, jangan mulai menulis kode.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa nilai 75 dihitung lulus?</summary>
+    <p>Soal menulis "nilai ≥ 75", jadi 75 termasuk. Kalau soal menulis "di atas 75", 75 tidak termasuk. Trace dengan tangan memaksa kamu memperhatikan detail seperti ini.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Langkah 3: tulis langkahnya dalam bahasa biasa, 3–6 baris</h2></summary>
+  <p class="rantai">
+    <span class="dari">pseudocode (materi 01)</span>
+    <span class="ke">pilih alat C (<a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menulis daftar belanja sebelum ke pasar, supaya tidak bingung di tengah jalan.</p>
+    <p class="batas">daftar belanja boleh berantakan. Langkah di sini harus berurutan, karena program menjalankannya dari atas ke bawah.</p>
+  </aside>
+
+  <p>Tulis apa yang kamu lakukan saat trace di <a href="#langkah-3">3️⃣</a>, tanpa sintaks C:</p>
+<pre class="kode"><code>1. Baca N.
+2. Siapkan total = 0, tertinggi = -1, lulus = 0.
+3. Ulangi N kali: baca satu nilai, tambahkan ke total,
+   ganti tertinggi kalau nilai lebih besar, tambah lulus kalau nilai ≥ 75.
+4. Cetak total / N dengan 2 desimal, tertinggi, dan lulus.</code></pre>
+  <ul>
+    <li><strong>Gunanya:</strong> logika diperiksa sendiri, terpisah dari sintaks.</li>
+    <li><strong>Cek:</strong> setiap kata kerja (baca, ulangi, ganti, cetak) nanti menjadi satu bagian kode.</li>
+  </ul>
+
+  <p class="intinya">Kalau langkahnya tidak bisa ditulis dalam bahasa biasa, kodenya juga belum bisa ditulis.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis langkah bahasa biasa untuk "baca N bilangan, cetak berapa yang genap".</summary>
+    <p>1. Baca N. 2. Siapkan genap = 0. 3. Ulangi N kali: baca satu bilangan, kalau sisa baginya dengan 2 adalah 0, tambah genap. 4. Cetak genap.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Langkah 4: pilih alat C dari kata kunci di kalimat soal</h2></summary>
+  <p class="rantai">
+    <span class="dari">tipe data, <code>if</code>, loop, array (materi 01–04)</span>
+    <span class="ke">kedua contoh (<a href="#langkah-8">8️⃣</a>, <a href="#langkah-9">9️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Memilih alat dari jenis pekerjaan: sekrup pakai obeng, paku pakai palu.</p>
+    <p class="batas">alat yang kurang tepat kadang masih bisa dipakai. Di C, alat yang salah (misalnya <code>int</code> untuk desimal) langsung memberi output yang salah.</p>
+  </aside>
+
+  <p>Setiap kata kunci di soal menunjuk ke satu alat:</p>
+  <table>
+    <tr><th>Kalimat soal</th><th>Alat di C</th></tr>
+    <tr><td>"sebanyak N", "untuk setiap"</td><td><code>for</code></td></tr>
+    <tr><td>"sampai input 0", "selama"</td><td><code>while</code> dengan sentinel</td></tr>
+    <tr><td>"jika", "kategori", "minimal"</td><td><code>if</code> / <code>else if</code></td></tr>
+    <tr><td>"total", "jumlah", "berapa banyak"</td><td>akumulator, mulai dari 0</td></tr>
+    <tr><td>"tertinggi", "terendah"</td><td>variabel pembanding dengan nilai awal di luar rentang</td></tr>
+    <tr><td>"bandingkan dengan rata-rata", "cetak terbalik"</td><td>array: data harus disimpan dulu</td></tr>
+    <tr><td>desimal, rata-rata</td><td><code>double</code>, <code>%.2f</code>, casting</td></tr>
+    <tr><td>angka sangat besar</td><td><code>long long</code>, <code>%lld</code></td></tr>
+  </table>
+
+  <p class="intinya">Kata kunci soal menentukan alat. Butuh data lagi setelah dibaca berarti butuh array.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> "Baca bilangan sampai bertemu -1, cetak bilangan terkecil." Alat apa saja?</summary>
+    <p><code>while</code> dengan sentinel -1, dan variabel pembanding <code>terkecil</code>. Nilai awalnya bisa bilangan pertama yang dibaca, atau angka yang lebih besar dari batas soal.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Pola membaca input: N lalu N data, sentinel, atau kata</h2></summary>
+  <p class="rantai">
+    <span class="dari"><code>scanf</code> dan buffer keyboard (materi 02), sentinel (materi 03)</span>
+    <span class="ke">kedua contoh (<a href="#langkah-8">8️⃣</a>, <a href="#langkah-9">9️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Petugas loket yang tahu dari awal berapa tamu yang datang, dibanding petugas yang menunggu sampai ada tanda "tutup".</p>
+    <p class="batas">petugas bisa menebak antrean. Program harus tahu persis kapan berhenti membaca, dari N atau dari sentinel.</p>
+  </aside>
+
+  <p>Hampir semua soal quiz memakai salah satu dari tiga pola ini:</p>
+<pre class="kode"><code>/* 1. N lalu N data */
+scanf("%d", &amp;n);
+for (i = 0; i &lt; n; i++) scanf("%d", &amp;x);
+
+/* 2. Sentinel: berhenti saat bertemu 0 */
+scanf("%d", &amp;x);
+while (x != 0) { /* proses x */ scanf("%d", &amp;x); }
+
+/* 3. Satu kata tanpa spasi */
+scanf("%s", kata);</code></pre>
+  <p><code>%d</code> melewati spasi dan Enter, jadi data boleh satu baris atau beberapa baris. Kata tanpa <code>&amp;</code>, karena nama array sudah berupa alamat (materi 04).</p>
+
+  <p class="intinya">Tahu dulu kapan berhenti membaca: dari N, dari sentinel, atau satu kata.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Di pola sentinel, kenapa <code>scanf</code> ditulis dua kali (sebelum loop dan di akhir body)?</summary>
+    <p><code>scanf</code> pertama mengisi x sebelum kondisi pertama dicek. <code>scanf</code> di akhir body membaca data berikutnya sebelum kondisi dicek lagi. Tanpa yang kedua, x tidak pernah berubah dan loop tidak berhenti.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Output harus sama persis dengan sample output, sampai spasi dan newline</h2></summary>
+  <p class="rantai">
+    <span class="dari"><code>printf</code> dan format specifier (materi 02)</span>
+    <span class="ke">uji format (<a class="no" href="#langkah-10">10</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mengisi formulir resmi: tulisan di luar kotak atau format tanggal yang beda membuat formulir ditolak.</p>
+    <p class="batas">petugas kadang memaklumi. Penilaian otomatis membandingkan output karakter per karakter, tanpa memaklumi.</p>
+  </aside>
+
+  <p>Quiz biasanya dinilai dengan membandingkan output-mu dan output kunci karakter per karakter. Bandingkan bagian ini:</p>
+  <table>
+    <tr><th>Bagian</th><th>Contoh</th><th>Cara di C</th></tr>
+    <tr><td>Teks label</td><td><code>Rata-rata: </code></td><td>salin persis, termasuk huruf besar dan spasi</td></tr>
+    <tr><td>Jumlah desimal</td><td>72.40</td><td><code>%.2f</code></td></tr>
+    <tr><td>Pemisah</td><td><code>3 5</code></td><td>spasi di antara, tidak ada spasi di akhir</td></tr>
+    <tr><td>Akhir baris</td><td>satu baris per hasil</td><td><code>\n</code> di setiap <code>printf</code></td></tr>
+  </table>
+
+  <aside class="jebakan">
+    <p>Jangan mencetak teks yang tidak diminta, seperti <mark class="jebakan">"Masukkan N:"</mark>. Teks itu ikut terbaca sebagai output dan membuat jawaban salah.</p>
+  </aside>
+
+  <p class="intinya">Cetak hanya yang diminta, dengan format yang persis sama.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Bagaimana mencetak bilangan dipisah spasi tanpa spasi di akhir?</summary>
+    <p>Cetak spasi <b>sebelum</b> setiap bilangan kecuali yang pertama: <code>if (i &gt; 0) printf(" "); printf("%d", x);</code>. Atau cetak label dulu, lalu <code>printf(" %d", x)</code> untuk setiap bilangan, seperti di <a href="#langkah-9">9️⃣</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Contoh 1 nilai kuis: loop, <code>if</code>, akumulator, dan casting dalam satu program</h2></summary>
+  <p class="rantai">
+    <span class="dari">langkah 1–4 (<a href="#langkah-2">2️⃣</a> sampai <a href="#langkah-5">5️⃣</a>)</span>
+    <span class="ke">contoh dengan array (<a href="#langkah-9">9️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menyalin rekap nilai satu per satu ke buku: sambil membaca, kamu menjumlah, mencatat yang tertinggi, dan menghitung yang lulus.</p>
+    <p class="batas">di buku kamu bisa membaca ulang. Di program ini setiap nilai hanya dibaca sekali, jadi semua dihitung dalam satu loop.</p>
+  </aside>
+
+  <p>Soalnya ada di <a href="#langkah-2">2️⃣</a>. Sample input <code>5</code> lalu <code>80 65 90 75 52</code>, sample output "Rata-rata: 72.40", "Tertinggi: 90", "Lulus: 3". Tiga keputusan penting:</p>
+  <ul>
+    <li><strong>Nilai awal tertinggi:</strong> -1, lebih kecil dari nilai terkecil (0), jadi nilai pertama pasti menggantikannya.</li>
+    <li><strong>Satu loop cukup:</strong> setiap nilai langsung diproses, tidak perlu disimpan.</li>
+    <li><strong>Casting:</strong> <code>(double)total / n</code>, karena <code>total / n</code> membuang desimal.</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Full code contoh 1</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int n, i, nilai;
+    int total = 0, tertinggi = -1, lulus = 0;
+
+    scanf("%d", &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        scanf("%d", &amp;nilai);
+        total += nilai;
+        if (nilai &gt; tertinggi) {
+            tertinggi = nilai;
+        }
+        if (nilai &gt;= 75) {
+            lulus++;
+        }
+    }
+
+    printf("Rata-rata: %.2f\n", (double)total / n);
+    printf("Tertinggi: %d\n", tertinggi);
+    printf("Lulus: %d\n", lulus);
+    return 0;
+}</code></pre>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Jalankan di <a href="viz/soal-kasus.html#nilai">visualisasi</a>, lalu bandingkan trace table-nya dengan trace tanganmu di <a href="#langkah-3">3️⃣</a>.</p>
+  </aside>
+
+  <p class="intinya">Data yang cukup diproses sekali: satu loop, tanpa array.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Ubah program supaya juga mencetak "Terendah: " (nilai terendah).</summary>
+    <p>Tambahkan <code>int terendah = 101;</code> (lebih besar dari nilai terbesar), lalu di dalam loop <code>if (nilai &lt; terendah) terendah = nilai;</code>, dan setelah loop <code>printf("Terendah: %d\n", terendah);</code>. Dengan sample input, hasilnya 52.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Contoh 2 suhu: data harus disimpan di array kalau dipakai lagi setelah semua dibaca</h2></summary>
+  <p class="rantai">
+    <span class="dari">array (materi 04), contoh 1 (<a href="#langkah-8">8️⃣</a>)</span>
+    <span class="ke">latihan (<a class="no" href="#langkah-11">11</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Memilih siswa yang nilainya di atas rata-rata kelas: kamu harus mencatat semua nilai dulu, baru bisa memilih.</p>
+    <p class="batas">di kelas kamu bisa bertanya ulang ke siswa. Program tidak bisa membaca input yang sama dua kali, jadi semua data disimpan di array.</p>
+  </aside>
+
+  <aside class="catatan">
+    <p>Baris pertama berisi N hari (1 ≤ N ≤ 100), baris kedua N suhu bulat. Cetak "Rata-rata: " dengan 1 desimal, lalu "Hari:" diikuti nomor hari (mulai 1) yang suhunya di atas rata-rata. Kalau tidak ada, cetak "Hari: tidak ada".</p>
+  </aside>
+  <p>Sample input <code>6</code> lalu <code>30 28 33 29 35 31</code>, sample output "Rata-rata: 31.0" dan "Hari: 3 5". Kenapa butuh array: hari pertama (30) baru bisa dinilai setelah rata-rata (31.0) diketahui, dan rata-rata baru diketahui setelah semua suhu dibaca.</p>
+  <ul>
+    <li><strong>Loop 1:</strong> simpan ke <code>suhu[i]</code> dan jumlahkan.</li>
+    <li><strong>Loop 2:</strong> bandingkan setiap <code>suhu[i]</code> dengan rata-rata, cetak <code>i + 1</code>.</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Full code contoh 2</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int n, i, ada = 0, total = 0;
+    int suhu[100];
+    double rata;
+
+    scanf("%d", &amp;n);
+    for (i = 0; i &lt; n; i++) {
+        scanf("%d", &amp;suhu[i]);
+        total += suhu[i];
+    }
+    rata = (double)total / n;
+
+    printf("Rata-rata: %.1f\n", rata);
+    printf("Hari:");
+    for (i = 0; i &lt; n; i++) {
+        if (suhu[i] &gt; rata) {
+            printf(" %d", i + 1);
+            ada++;
+        }
+    }
+    if (ada == 0) {
+        printf(" tidak ada");
+    }
+    printf("\n");
+    return 0;
+}</code></pre>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Jalankan di <a href="viz/soal-kasus.html#suhu">visualisasi</a>. Lewat "Ubah input", coba <code>3</code> lalu <code>30 30 30</code> untuk melihat "tidak ada".</p>
+  </aside>
+
+  <p class="intinya">Butuh data lagi setelah semuanya dibaca berarti simpan di array, lalu pakai dua loop.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa yang dicetak <code>i + 1</code>, bukan <code>i</code>?</summary>
+    <p>Index array dimulai dari 0, tapi soal menghitung hari mulai dari 1. Suhu 33 ada di <code>suhu[2]</code>, dan itu hari ke-3.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-10">
+<details>
+  <summary><h2>Langkah 6: uji dengan sample, edge case, dan format, lalu cek daftar bug</h2></summary>
+  <p class="rantai">
+    <span class="dari">bug di materi 02–04, kedua contoh</span>
+    <span class="ke">jawaban quiz yang lolos penilaian</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menguji rem mobil tidak cukup di jalan lurus saja. Rem juga diuji di turunan.</p>
+    <p class="batas">tes mobil bisa diulang kapan saja. Di quiz waktunya terbatas, jadi uji dulu kasus yang paling sering membuat salah.</p>
+  </aside>
+
+  <p><mark>Edge case</mark> adalah input di ujung batas soal: N = 1, semua nilai sama, nilai maksimum, atau tidak ada yang memenuhi syarat. Setelah sample benar, coba minimal dua edge case, lalu cek daftar ini:</p>
+  <table>
+    <tr><th>Bug</th><th>Penyebab</th><th>Perbaikan</th></tr>
+    <tr><td>Rata-rata 72.00, seharusnya 72.40</td><td><code>total / n</code> dihitung sebagai int</td><td><code>(double)total / n</code></td></tr>
+    <tr><td>Hasil ngawur</td><td>Akumulator tanpa nilai awal (garbage value)</td><td><code>total = 0</code> sebelum loop</td></tr>
+    <tr><td>Loop kurang atau lebih satu kali</td><td>Salah <code>&lt;</code> dan <code>&lt;=</code>, atau mulai dari 0 dan 1</td><td>Cek dengan N = 1</td></tr>
+    <tr><td>Total negatif</td><td>Overflow <code>int</code></td><td><code>long long</code> dan <code>%lld</code></td></tr>
+    <tr><td>Program crash</td><td><code>&amp;</code> lupa di <code>scanf</code>, atau index di luar array</td><td>Cek setiap <code>scanf</code> dan ukuran array</td></tr>
+    <tr><td>Jawaban salah padahal angka benar</td><td>Teks tambahan, spasi di akhir, desimal beda</td><td>Bandingkan dengan sample karakter per karakter</td></tr>
+  </table>
+
+  <aside class="coba">
+    <p>Program "Bug: pembagian integer" di <a href="viz/soal-kasus.html#bug">visualisasi</a> menunjukkan baris pertama tabel ini.</p>
+  </aside>
+
+  <p class="intinya">Sample benar belum cukup. Uji edge case dan format sebelum mengumpulkan.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Edge case apa yang membuat contoh 1 menghasilkan "Lulus: 0"?</summary>
+    <p>Semua nilai di bawah 75, misalnya N = 2 dengan nilai <code>60 70</code>. Program tetap benar, karena <code>lulus</code> mulai dari 0 dan tidak pernah bertambah.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-11">
+<details>
+  <summary><h2>Latihan soal kasus: tujuh soal dengan format quiz</h2></summary>
+  <p class="rantai">
+    <span class="dari">resep 6 langkah (<a href="#langkah-1">1️⃣</a>) dan materi 01–04</span>
+    <span class="ke">quiz dan ujian algorithm and programming</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Latihan menyetir di beberapa rute berbeda: aturannya sama, tapi setiap rute melatih situasi yang lain.</p>
+    <p class="batas">rute menyetir bisa dihafal. Soal quiz hampir selalu baru, jadi yang dilatih adalah resepnya, bukan jawabannya.</p>
+  </aside>
+
+  <p>Ketujuh soal ini dibuat mentor dengan format soal quiz: deskripsi, format input dan output, batasan, dan sample. Ini <b>bukan soal asli dosen</b>. Semua jawaban sudah diuji dengan MinGW gcc (C) dan g++ (C++) terhadap setiap sample. Kerjakan dengan resep 6 langkah, buka petunjuk hanya kalau macet, lalu bandingkan dengan full code.</p>
+  <table>
+    <tr><th>Latihan</th><th>Materi</th><th>Pola utama</th></tr>
+    <tr><td>1. Kembalian</td><td>02: pembagian integer</td><td><code>/</code> untuk jumlah lembar, <code>%</code> untuk sisa</td></tr>
+    <tr><td>2. Nilai huruf</td><td>01: <code>if</code> dan <code>else if</code></td><td>urutkan syarat dari batas tertinggi</td></tr>
+    <tr><td>3. Kasir diskon</td><td>03: sentinel, 02: <code>long long</code></td><td>baca sampai bertemu 0</td></tr>
+    <tr><td>4. Bilangan prima</td><td>03: <code>break</code></td><td>cek pembagi sampai akar N</td></tr>
+    <tr><td>5. Segitiga angka</td><td>03: nested loop</td><td>loop dalam bergantung pada loop luar</td></tr>
+    <tr><td>6. Vokal dan konsonan</td><td>04: string</td><td><code>strlen</code> dan <code>tolower</code></td></tr>
+    <tr><td>7. Penjualan cabang</td><td>04: array 2D</td><td>jumlah per baris dan per kolom</td></tr>
+  </table>
+
+  <p class="intinya">Program dianggap benar kalau output-nya sama persis dengan <b>semua</b> sample, bukan hanya sample pertama.</p>
+
+  <details class="soal">
+    <summary><strong>Latihan 1:</strong> kembalian (pembagian integer dan modulo)</summary>
+    <p>Mesin kasir hanya punya uang pecahan 50000, 20000, 10000, 5000, 2000, dan 1000. Diberikan harga barang dan uang yang dibayar pembeli. Hitung kembalian, lalu tentukan berapa lembar setiap pecahan yang diberikan, mulai dari pecahan terbesar, supaya jumlah lembarnya sesedikit mungkin.</p>
+    <ul>
+      <li><strong>Format input:</strong> satu baris berisi dua bilangan bulat: harga dan uang.</li>
+      <li><strong>Format output:</strong> baris pertama "Kembalian: " diikuti besar kembalian. Lalu enam baris, satu untuk setiap pecahan dari yang terbesar, dengan format "pecahan: jumlah lembar".</li>
+      <li><strong>Batasan:</strong> 1000 ≤ harga ≤ uang ≤ 1.000.000, keduanya kelipatan 1000.</li>
+    </ul>
+    <table>
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre class="kode"><code>37000 100000</code></pre></td><td><pre class="kode"><code>Kembalian: 63000
+50000: 1
+20000: 0
+10000: 1
+5000: 0
+2000: 1
+1000: 1</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>15000 15000</code></pre></td><td><pre class="kode"><code>Kembalian: 0
+50000: 0
+20000: 0
+10000: 0
+5000: 0
+2000: 0
+1000: 0</code></pre></td></tr>
+    </table>
+    <details>
+      <summary>Petunjuk</summary>
+      <p>Jumlah lembar = <code>kembali / pecahan</code> (pembagian integer), dan sisa yang belum dibayar = <code>kembali % pecahan</code>. Simpan keenam pecahan di array, supaya cukup satu loop. Sample kedua menguji kembalian 0.</p>
+    </details>
+    <details>
+      <summary>Full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int pecahan[6] = {50000, 20000, 10000, 5000, 2000, 1000};
+    int harga, uang, kembali, i;
+
+    scanf("%d %d", &amp;harga, &amp;uang);
+    kembali = uang - harga;
+    printf("Kembalian: %d\n", kembali);
+    for (i = 0; i &lt; 6; i++) {
+        printf("%d: %d\n", pecahan[i], kembali / pecahan[i]);
+        kembali = kembali % pecahan[i];
+    }
+    return 0;
+}</code></pre>
+    </details>
+  </details>
+
+  <details class="soal">
+    <summary><strong>Latihan 2:</strong> nilai huruf (if dan else if)</summary>
+    <p>Nilai akhir mahasiswa dihitung dari 20% nilai tugas, 30% nilai kuis, dan 50% nilai ujian. Nilai huruf: A kalau nilai akhir ≥ 85, B kalau ≥ 70, C kalau ≥ 55, D kalau ≥ 40, dan E untuk sisanya. Cetak nilai akhir dan nilai huruf setiap mahasiswa.</p>
+    <ul>
+      <li><strong>Format input:</strong> baris pertama berisi T, banyaknya mahasiswa. T baris berikutnya masing-masing berisi tiga bilangan bulat: nilai tugas, kuis, dan ujian.</li>
+      <li><strong>Format output:</strong> untuk mahasiswa ke-k, cetak "Mahasiswa k: " diikuti nilai akhir dengan 2 desimal, satu spasi, lalu nilai huruf.</li>
+      <li><strong>Batasan:</strong> 1 ≤ T ≤ 100, setiap nilai 0–100.</li>
+    </ul>
+    <table>
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre class="kode"><code>3
+80 90 85
+70 60 65
+40 30 20</code></pre></td><td><pre class="kode"><code>Mahasiswa 1: 85.50 A
+Mahasiswa 2: 64.50 C
+Mahasiswa 3: 27.00 E</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>2
+85 85 85
+55 55 54</code></pre></td><td><pre class="kode"><code>Mahasiswa 1: 85.00 A
+Mahasiswa 2: 54.50 D</code></pre></td></tr>
+    </table>
+    <details>
+      <summary>Petunjuk</summary>
+      <p>Hitung <code>(20 * tugas + 30 * kuis + 50 * ujian) / 100.0</code>. Pembilangnya bulat, jadi nilai seperti 85.00 tidak bergeser menjadi 84.999… karena pembulatan double. Urutkan <code>if</code> dari batas tertinggi, supaya nilai 90 tidak berhenti di syarat ≥ 40. Sample kedua menguji batas tepat 85 dan nilai 54.50.</p>
+    </details>
+    <details>
+      <summary>Full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int t, k, tugas, kuis, ujian;
+    double akhir;
+    char huruf;
+
+    scanf("%d", &amp;t);
+    for (k = 1; k &lt;= t; k++) {
+        scanf("%d %d %d", &amp;tugas, &amp;kuis, &amp;ujian);
+        akhir = (20 * tugas + 30 * kuis + 50 * ujian) / 100.0;
+        if (akhir &gt;= 85) {
+            huruf = 'A';
+        } else if (akhir &gt;= 70) {
+            huruf = 'B';
+        } else if (akhir &gt;= 55) {
+            huruf = 'C';
+        } else if (akhir &gt;= 40) {
+            huruf = 'D';
+        } else {
+            huruf = 'E';
+        }
+        printf("Mahasiswa %d: %.2f %c\n", k, akhir, huruf);
+    }
+    return 0;
+}</code></pre>
+    </details>
+  </details>
+
+  <details class="soal">
+    <summary><strong>Latihan 3:</strong> kasir diskon (sentinel dan long long)</summary>
+    <p>Kasir membaca harga barang satu per satu sampai bertemu angka 0. Kalau total belanja lebih dari 100000, pembeli mendapat diskon 10% (dibulatkan ke bawah). Cetak jumlah barang, total belanja, dan uang yang harus dibayar.</p>
+    <ul>
+      <li><strong>Format input:</strong> beberapa bilangan bulat, satu per baris. Bilangan terakhir selalu 0 dan bukan harga barang.</li>
+      <li><strong>Format output:</strong> tiga baris: "Jumlah barang: ", "Total: ", dan "Bayar: ", masing-masing diikuti angkanya.</li>
+      <li><strong>Batasan:</strong> setiap harga 1–1.000.000, paling banyak 10.000 barang.</li>
+    </ul>
+    <table>
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre class="kode"><code>25000
+50000
+40000
+0</code></pre></td><td><pre class="kode"><code>Jumlah barang: 3
+Total: 115000
+Bayar: 103500</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>0</code></pre></td><td><pre class="kode"><code>Jumlah barang: 0
+Total: 0
+Bayar: 0</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>1000000
+1000000
+1000000
+0</code></pre></td><td><pre class="kode"><code>Jumlah barang: 3
+Total: 3000000
+Bayar: 2700000</code></pre></td></tr>
+    </table>
+    <details>
+      <summary>Petunjuk</summary>
+      <p>Pakai pola sentinel (<a href="#langkah-6">6️⃣</a>). Total bisa mencapai 10<sup>10</sup>, lebih dari batas <code>int</code>, jadi pakai <code>long long</code> dan <code>%lld</code>. <code>total / 10</code> adalah pembagian integer, jadi diskonnya otomatis dibulatkan ke bawah. Sample kedua menguji input yang langsung 0.</p>
+    </details>
+    <details>
+      <summary>Full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    long long harga, total = 0, bayar;
+    int jumlah = 0;
+
+    scanf("%lld", &amp;harga);
+    while (harga != 0) {
+        total += harga;
+        jumlah++;
+        scanf("%lld", &amp;harga);
+    }
+
+    bayar = total;
+    if (total &gt; 100000) {
+        bayar = total - total / 10;
+    }
+
+    printf("Jumlah barang: %d\n", jumlah);
+    printf("Total: %lld\n", total);
+    printf("Bayar: %lld\n", bayar);
+    return 0;
+}</code></pre>
+    </details>
+  </details>
+
+  <details class="soal">
+    <summary><strong>Latihan 4:</strong> bilangan prima (loop dan break)</summary>
+    <p>Bilangan prima adalah bilangan bulat lebih dari 1 yang hanya habis dibagi 1 dan dirinya sendiri. Untuk setiap bilangan, tentukan apakah bilangan itu prima.</p>
+    <ul>
+      <li><strong>Format input:</strong> baris pertama berisi T. T baris berikutnya masing-masing berisi satu bilangan N.</li>
+      <li><strong>Format output:</strong> untuk setiap N, cetak "N adalah prima" atau "N bukan prima".</li>
+      <li><strong>Batasan:</strong> 1 ≤ T ≤ 100, 1 ≤ N ≤ 1.000.000.</li>
+    </ul>
+    <table>
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre class="kode"><code>4
+7
+1
+12
+97</code></pre></td><td><pre class="kode"><code>7 adalah prima
+1 bukan prima
+12 bukan prima
+97 adalah prima</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>3
+2
+9
+999983</code></pre></td><td><pre class="kode"><code>2 adalah prima
+9 bukan prima
+999983 adalah prima</code></pre></td></tr>
+    </table>
+    <details>
+      <summary>Petunjuk</summary>
+      <p>Cukup cek pembagi dari 2 sampai akar N dengan kondisi <code>i * i &lt;= n</code>. Kalau N punya pembagi yang lebih besar dari akarnya, pasangannya pasti lebih kecil dari akar, jadi sudah ketemu lebih dulu. Begitu ketemu satu pembagi, <code>break</code>. Angka 1 bukan prima, jadi dicek tersendiri.</p>
+    </details>
+    <details>
+      <summary>Full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int t, k, n, i, prima;
+
+    scanf("%d", &amp;t);
+    for (k = 0; k &lt; t; k++) {
+        scanf("%d", &amp;n);
+        prima = 1;
+        if (n &lt; 2) {
+            prima = 0;
+        }
+        for (i = 2; i * i &lt;= n; i++) {
+            if (n % i == 0) {
+                prima = 0;
+                break;
+            }
+        }
+        if (prima) {
+            printf("%d adalah prima\n", n);
+        } else {
+            printf("%d bukan prima\n", n);
+        }
+    }
+    return 0;
+}</code></pre>
+    </details>
+  </details>
+
+  <details class="soal">
+    <summary><strong>Latihan 5:</strong> segitiga angka (nested loop)</summary>
+    <p>Cetak segitiga angka setinggi N baris. Baris ke-k berisi angka 1 sampai k, dipisah satu spasi, tanpa spasi di akhir baris.</p>
+    <ul>
+      <li><strong>Format input:</strong> satu bilangan bulat N.</li>
+      <li><strong>Format output:</strong> N baris segitiga angka.</li>
+      <li><strong>Batasan:</strong> 1 ≤ N ≤ 20.</li>
+    </ul>
+    <table>
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre class="kode"><code>4</code></pre></td><td><pre class="kode"><code>1
+1 2
+1 2 3
+1 2 3 4</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>1</code></pre></td><td><pre class="kode"><code>1</code></pre></td></tr>
+    </table>
+    <details>
+      <summary>Petunjuk</summary>
+      <p>Loop luar untuk baris, loop dalam berjalan sebanyak nomor baris (materi 03). Cetak spasi <b>sebelum</b> setiap angka kecuali angka pertama, supaya tidak ada spasi di akhir. Sample kedua menguji N = 1.</p>
+    </details>
+    <details>
+      <summary>Full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int n, baris, kolom;
+
+    scanf("%d", &amp;n);
+    for (baris = 1; baris &lt;= n; baris++) {
+        for (kolom = 1; kolom &lt;= baris; kolom++) {
+            if (kolom &gt; 1) {
+                printf(" ");
+            }
+            printf("%d", kolom);
+        }
+        printf("\n");
+    }
+    return 0;
+}</code></pre>
+    </details>
+  </details>
+
+  <details class="soal">
+    <summary><strong>Latihan 6:</strong> vokal dan konsonan (string)</summary>
+    <p>Diberikan satu kata yang hanya berisi huruf. Hitung banyaknya huruf vokal (a, i, u, e, o) dan konsonan. Huruf besar juga dihitung.</p>
+    <ul>
+      <li><strong>Format input:</strong> satu kata tanpa spasi.</li>
+      <li><strong>Format output:</strong> dua baris: "Vokal: " dan "Konsonan: ", masing-masing diikuti jumlahnya.</li>
+      <li><strong>Batasan:</strong> panjang kata 1–100 huruf.</li>
+    </ul>
+    <table>
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre class="kode"><code>Informatika</code></pre></td><td><pre class="kode"><code>Vokal: 5
+Konsonan: 6</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>BINUS</code></pre></td><td><pre class="kode"><code>Vokal: 2
+Konsonan: 3</code></pre></td></tr>
+    </table>
+    <details>
+      <summary>Petunjuk</summary>
+      <p>Array char butuh 101 tempat: 100 huruf ditambah <code>'\0'</code>. Ubah setiap huruf dengan <code>tolower</code> supaya 'I' dan 'i' sama-sama terhitung. Karena kata hanya berisi huruf, konsonan = panjang kata dikurangi vokal.</p>
+    </details>
+    <details>
+      <summary>Full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+int main() {
+    char kata[101];
+    char c;
+    int i, panjang, vokal = 0;
+
+    scanf("%s", kata);
+    panjang = strlen(kata);
+    for (i = 0; i &lt; panjang; i++) {
+        c = tolower(kata[i]);
+        if (c == 'a' || c == 'i' || c == 'u' || c == 'e' || c == 'o') {
+            vokal++;
+        }
+    }
+    printf("Vokal: %d\n", vokal);
+    printf("Konsonan: %d\n", panjang - vokal);
+    return 0;
+}</code></pre>
+    </details>
+  </details>
+
+  <details class="soal">
+    <summary><strong>Latihan 7:</strong> penjualan cabang (array 2D)</summary>
+    <p>Sebuah toko punya R cabang, dan penjualan setiap cabang dicatat selama C hari. Cetak total penjualan setiap cabang, total penjualan setiap hari, dan cabang dengan total tertinggi. Kalau ada yang seri, pilih nomor cabang terkecil. Wajib memakai array 2 dimensi.</p>
+    <ul>
+      <li><strong>Format input:</strong> baris pertama berisi R dan C. R baris berikutnya masing-masing berisi C bilangan bulat: penjualan cabang itu dari hari 1 sampai hari C.</li>
+      <li><strong>Format output:</strong> R baris "Cabang k: total", lalu C baris "Hari k: total", lalu satu baris "Terbaik: Cabang k".</li>
+      <li><strong>Batasan:</strong> 1 ≤ R ≤ 10, 1 ≤ C ≤ 7, setiap penjualan 0–1000.</li>
+    </ul>
+    <table>
+      <tr><th>Sample input</th><th>Sample output</th></tr>
+      <tr><td><pre class="kode"><code>3 4
+10 20 30 40
+5 5 5 5
+50 0 25 30</code></pre></td><td><pre class="kode"><code>Cabang 1: 100
+Cabang 2: 20
+Cabang 3: 105
+Hari 1: 65
+Hari 2: 25
+Hari 3: 60
+Hari 4: 75
+Terbaik: Cabang 3</code></pre></td></tr>
+      <tr><td><pre class="kode"><code>2 2
+3 4
+5 2</code></pre></td><td><pre class="kode"><code>Cabang 1: 7
+Cabang 2: 7
+Hari 1: 8
+Hari 2: 6
+Terbaik: Cabang 1</code></pre></td></tr>
+    </table>
+    <details>
+      <summary>Petunjuk</summary>
+      <p>Simpan semua angka di <code>jual[10][7]</code> dulu. Total cabang = jumlah satu baris (loop dalam j), total hari = jumlah satu kolom (loop luar j, loop dalam i). Pakai <code>&gt;</code>, bukan <code>&gt;=</code>, saat mencari maksimum, supaya cabang yang seri memilih nomor terkecil seperti di sample kedua.</p>
+    </details>
+    <details>
+      <summary>Full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int jual[10][7];
+    int r, c, i, j, total, maks = -1, terbaik = 0;
+
+    scanf("%d %d", &amp;r, &amp;c);
+    for (i = 0; i &lt; r; i++) {
+        for (j = 0; j &lt; c; j++) {
+            scanf("%d", &amp;jual[i][j]);
+        }
+    }
+
+    for (i = 0; i &lt; r; i++) {
+        total = 0;
+        for (j = 0; j &lt; c; j++) {
+            total += jual[i][j];
+        }
+        printf("Cabang %d: %d\n", i + 1, total);
+        if (total &gt; maks) {
+            maks = total;
+            terbaik = i + 1;
+        }
+    }
+
+    for (j = 0; j &lt; c; j++) {
+        total = 0;
+        for (i = 0; i &lt; r; i++) {
+            total += jual[i][j];
+        }
+        printf("Hari %d: %d\n", j + 1, total);
+    }
+    printf("Terbaik: Cabang %d\n", terbaik);
+    return 0;
+}</code></pre>
+    </details>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
+<ol class="refs">
+  <li>Deitel, P., &amp; Deitel, H. (2016). <i>C how to program</i> (8th ed.). Pearson. Bab 3–4 (structured program development) dan Bab 6 (arrays).</li>
+  <li>Polya, G. (1945). <i>How to solve it</i>. Princeton University Press. Empat tahap memahami soal, membuat rencana, melaksanakan, dan memeriksa kembali.</li>
+</ol>
+
+</main>
+</body>
+</html>

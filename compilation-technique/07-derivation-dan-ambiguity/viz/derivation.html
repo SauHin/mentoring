@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Derivation dan Parse Tree</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=db2dcc70">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Derivation dan parse tree</h1>
-<p>Setiap langkah derivation mengganti <b>satu variabel</b> dengan salah satu alternatifnya. <b>LMD</b> selalu mengganti variabel paling kiri, <b>RMD</b> paling kanan. Keduanya menghasilkan parse tree yang sama. Kalau satu string punya <b>dua parse tree</b>, grammar-nya ambiguous.</p>
+<p>Visualisasi ini menulis derivation langkah demi langkah sambil membangun parse tree. <b>LMD</b> selalu mengganti variabel paling kiri, <b>RMD</b> paling kanan, dan keduanya menghasilkan tree yang sama. Kalau satu string punya <b>dua parse tree</b>, grammar-nya ambiguous.</p>
+<p class="coba"><strong>Coba:</strong> pilih LMD atau RMD dan contoh, lalu klik <b>Langkah berikutnya</b>. Untuk contoh ambiguous, bandingkan kedua tree dengan tombol di samping judul Parse tree.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> variabel oranye bergaris bawah adalah yang akan diganti, dan simbol hijau adalah hasil penggantiannya. Di LMD variabel oranye selalu yang paling kiri.</p>
 
 <div class="controls">
   <div class="seg" id="mode"></div>

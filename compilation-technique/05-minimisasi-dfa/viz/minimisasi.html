@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Minimisasi DFA</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=db2dcc70">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Minimisasi DFA</h1>
-<p>Dua state boleh digabung kalau <b>tidak ada string</b> yang membedakan keduanya. Kedua metode mencari pasangan yang pasti beda, mulai dari final vs bukan final. Pilih metode, lalu jalankan langkah demi langkah.</p>
+<p>Visualisasi ini menjalankan minimisasi DFA langkah demi langkah. Dua state boleh digabung kalau <b>tidak ada string</b> yang membedakan keduanya, dan kedua metode mencarinya mulai dari pasangan final dan bukan final.</p>
+<p class="coba"><strong>Coba:</strong> pilih metode (table-filling atau partition) dan contoh, lalu klik <b>Langkah berikutnya</b> sampai selesai.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> angka kecil di samping X menunjukkan putaran saat pasangan itu ditandai. Sel O di akhir, atau grup yang tidak pecah lagi, menjadi satu state di DFA minimum.</p>
 
 <div class="controls">
   <div class="seg" id="method"></div>

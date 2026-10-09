@@ -3,6 +3,7 @@
 // Halaman induk mengirim tema ke iframe (visualisasi) lewat postMessage, jadi tetap jalan di file://.
 (function () {
   const root = document.documentElement;
+  if (parent !== window) root.classList.add('embed'); // viz di dalam iframe slide: judulnya disembunyikan (style.css)
   const send = (f) => f.contentWindow && f.contentWindow.postMessage({ theme: root.dataset.theme }, '*');
 
   function apply(theme) {
@@ -37,14 +38,26 @@
   // Tombol Home di pojok kiri atas, posisinya sama persis di slide dan notes.
   // Link-nya ke index.html di root (satu tingkat di atas _shared), langsung ke bagian matkul-nya.
   addEventListener('DOMContentLoaded', () => {
-    if (parent !== window || !document.querySelector('body.deck, article.notes')) return;
+    if (parent !== window || !document.querySelector('body.deck, body.catatan, article.notes, body.viz')) return;
+    const viz = document.body.classList.contains('viz');
     // Selector sengaja tanpa awalan "_shared/" supaya tidak ikut diberi ?v= oleh tools/cachebust.py.
     const root = new URL('../', document.querySelector('link[href*="style.css"]').href);
     const matkul = location.href.startsWith(root.href) ? location.href.slice(root.href.length).split('/')[0] : '';
-    const bar = document.body.appendChild(document.createElement('div'));
+    // Di viz, bar ini ikut alur halaman (di atas judul), bukan melayang.
+    const bar = document.createElement('div');
+    if (viz) document.body.prepend(bar); else document.body.appendChild(bar);
     bar.className = 'topbar';
     bar.innerHTML = '<a class="tool home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/></svg>Home</a>';
     bar.firstChild.href = new URL('index.html', root).href;
+    // Viz yang dibuka lewat link di slide atau notes: tombol untuk kembali ke halaman itu.
+    // Tanpa riwayat (dibuka langsung), kembali ke slide materinya.
+    if (viz) {
+      const back = document.createElement('button');
+      back.className = 'tool home';
+      back.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Kembali';
+      back.onclick = () => (history.length > 1 ? history.back() : location.assign(new URL('../slides.html', location.href)));
+      bar.prepend(back);
+    }
     // Breadcrumb "/ Data structure" dari nama folder matkul (data-structure → Data structure), link ke daftar materinya.
     if (matkul && !matkul.endsWith('.html')) {
       const crumbs = bar.appendChild(document.createElement('nav'));

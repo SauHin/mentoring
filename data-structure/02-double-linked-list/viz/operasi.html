@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Operasi Double Linked List</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=3f7fc4dc">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Operasi double linked list</h1>
-<p>Pilih operasi, lalu jalankan <b>step by step</b>. Pointer yang baru berubah berwarna <b>oranye</b>. Nyalakan <b>mode tebak</b> untuk menebak tiap langkah sebelum ditampilkan.</p>
+<p>Visualisasi ini menjalankan setiap operasi double linked list langkah demi langkah. Panah hijau = next, panah biru = prev.</p>
+<p class="coba"><strong>Coba:</strong> isi <b>Nilai</b> (dan <b>Posisi</b> untuk insertAt/deleteAt), klik salah satu operasi, lalu klik <b>Langkah berikutnya</b>. Centang <b>Mode tebak</b> untuk menebak dulu.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> setiap sambungan baru selalu mengubah dua panah (next dan prev). Panah yang baru berubah berwarna oranye.</p>
 
-<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script src="../../../_shared/listviz.js?v=5942227c"></script>
 <script>
 const CODE = {
   struct: `typedef struct Node {
@@ -250,7 +253,18 @@ const OPS = {
   printBackward: () => traverse('printBackward', tail, 'prev'),
 };
 const check = checkCommon;
-listViz({ doubly: true });
+listViz({
+  doubly: true,
+  hints: {
+    insertFront: 'newNode→next dan head→prev dipasang dulu, baru head dipindah. List kosong → head dan tail sama-sama menunjuk node baru (notes 4️⃣).',
+    insertBack: 'cermin insertFront: newNode→prev dan tail→next dipasang dulu, baru tail dipindah. Tidak ada traverse (notes 5️⃣).',
+    insertAt: 'cur berhenti DI posisi pos. Empat pointer berubah, dan cur→prev ditimpa paling akhir (notes 6️⃣).',
+    deleteAt: 'tetangga kiri dan kanan del disambung langsung dari dua arah. Kalau del di ujung, yang pindah head atau tail (notes 7️⃣).',
+    search: 'cur berjalan maju dari head sampai ketemu nilai yang dicari, atau sampai NULL (notes 8️⃣).',
+    printForward: 'cur berjalan dari head lewat next sampai NULL (notes 8️⃣).',
+    printBackward: 'cur berjalan dari tail lewat prev sampai NULL. Hasilnya harus kebalikan printForward (notes 8️⃣).',
+  },
+});
 </script>
 </body>
 </html>

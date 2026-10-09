@@ -5,176 +5,467 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Algoritma dan Struktur Program C · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
   <style>
     .shape { width: 64px; height: 30px; vertical-align: middle; }
-    .shape rect, .shape polygon { fill: var(--card-2); }
+    .shape rect, .shape polygon { fill: var(--kertas); stroke: var(--pudar); stroke-width: 1.5; }
   </style>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Algorithm and programming · 01</span>
-<h1>Algoritma dan struktur program C</h1>
-<p class="lead">Dari masalah → langkah-langkah → kode C. Tujuannya: kamu bisa <b>menyusun langkah sendiri</b>, bukan menghafal contoh program.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/tiga-bentuk.html">Visualisasi: satu algoritma, tiga bentuk</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li><b>Algoritma</b> = langkah yang jelas, berurutan, dan pasti berhenti untuk menyelesaikan masalah.</li>
-    <li>Semua program dibangun dari <b>3 struktur</b>: sequence, selection, repetition.</li>
-    <li>Pseudocode dan flowchart = algoritma tanpa aturan bahasa. Kode C = algoritma + aturan bahasa (tipe data, <code>;</code>, <code>{ }</code>).</li>
-    <li>Bedakan <b>syntax error</b> (ditolak compiler) dan <b>logic error</b> (program jalan, tapi hasilnya salah).</li>
+<header>
+  <h1>Algoritma dan struktur program C</h1>
+  <p class="tujuan">Cara mengubah masalah menjadi langkah-langkah (algoritma), lalu menjadi program C. Target: kamu bisa menyusun langkah sendiri dan menulisnya dalam C, bukan menghafal contoh program.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/tiga-bentuk.html">satu algoritma, tiga bentuk</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Algoritma</a></li>
+      <li><a href="#langkah-2">Tujuh langkah dari masalah ke program</a></li>
+      <li><a href="#langkah-3">Pseudocode</a></li>
+      <li><a href="#langkah-4">Flowchart</a></li>
+      <li><a href="#langkah-5">Tiga struktur</a></li>
+      <li><a href="#langkah-6">Anatomi program C</a></li>
+      <li><a href="#langkah-7">Escape sequence</a></li>
+      <li><a href="#langkah-8">Identifier</a></li>
+      <li><a href="#langkah-9">Header file</a></li>
+      <li><a href="#langkah-10">Syntax error</a></li>
+      <li><a href="#langkah-11">Logic error</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Apa itu algoritma?</h2>
-<p>Algoritma adalah <b>resep</b>: daftar langkah yang urutannya jelas untuk menyelesaikan satu masalah. Komputer tidak bisa menebak maksudmu, jadi setiap langkah harus pasti.</p>
-<p>Satu masalah bisa punya <b>banyak algoritma yang benar</b>. Contoh: rata-rata 3 bilangan.</p>
-<table>
-  <tr><th>Algoritma 1</th><th>Algoritma 2</th></tr>
-  <tr><td>Read A<br>Read B<br>Read C<br>average = (A + B + C) / 3<br>Print average</td><td>Read A, B, C sekaligus<br>sum = A + B + C<br>average = sum / 3<br>Print average</td></tr>
-</table>
-<p>Keduanya benar, karena hasilnya sama. Yang dinilai bukan "mirip contoh atau tidak", tapi <b>hasilnya benar dan langkahnya jelas</b>.</p>
+<main>
 
-<table>
-  <tr><th>Ciri algoritma yang baik</th><th>Artinya</th></tr>
-  <tr><td>Logikanya benar</td><td>Menghasilkan output yang benar untuk semua input yang valid</td></tr>
-  <tr><td>Tidak ambigu</td><td>Setiap langkah hanya bisa diartikan satu cara</td></tr>
-  <tr><td>Berhenti</td><td>Setelah sejumlah langkah, pasti selesai (tidak berputar selamanya)</td></tr>
-  <tr><td>Efisien</td><td>Tidak membuang langkah yang tidak perlu</td></tr>
-  <tr><td>Mudah diterjemahkan</td><td>Bisa langsung ditulis ke bahasa pemrograman</td></tr>
-</table>
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Algoritma: langkah yang jelas, berurutan, dan pasti berhenti</h2></summary>
+  <p class="rantai">
+    <span class="dari">cara kamu menyelesaikan masalah sehari-hari, misalnya mengikuti resep</span>
+    <span class="ke">semua materi berikutnya, karena setiap program adalah algoritma yang ditulis dalam C</span>
+  </p>
 
-<h2>2. Dari masalah ke program</h2>
-<p>Contoh masalah dari kuliah: mencari akar persamaan kuadrat <code>ax² + bx + c = 0</code>.</p>
-<table>
-  <tr><th>Langkah</th><th>Pertanyaan kunci</th><th>Contoh</th></tr>
-  <tr><td>1. Definisi masalah</td><td>Input apa? Output apa?</td><td>Input a, b, c. Output x1 dan x2.</td></tr>
-  <tr><td>2. Model</td><td>Rumus atau aturan apa yang dipakai?</td><td><code>d = b² − 4ac</code>, <code>x = (−b ± √d) / 2a</code></td></tr>
-  <tr><td>3. Desain algoritma</td><td>Langkahnya apa saja, urutannya bagaimana?</td><td>Pseudocode atau flowchart. Kalau d &lt; 0, akarnya imajiner.</td></tr>
-  <tr><td>4. Tulis kode</td><td>Bagaimana menulisnya dalam C?</td><td>File <code>.c</code> di Dev-C++</td></tr>
-  <tr><td>5. Compile</td><td>Apakah aturan bahasanya sudah benar?</td><td>Perbaiki <b>syntax error</b></td></tr>
-  <tr><td>6. Run &amp; tes</td><td>Apakah hasilnya benar?</td><td>Coba a=1, b=−3, c=2 → harus 2 dan 1. Perbaiki <b>logic error</b>.</td></tr>
-  <tr><td>7. Dokumentasi</td><td>Apakah orang lain (atau kamu nanti) paham?</td><td>Komentar dan nama variabel yang jelas</td></tr>
-</table>
-<div class="callout warn"><strong>Dua jenis error</strong><b>Syntax error</b>: melanggar aturan bahasa (lupa <code>;</code>, salah ketik <code>Printf</code>). Compiler menolak, dan memberi tahu nomor barisnya. <b>Logic error</b>: program jalan, tapi hasilnya salah (misalnya menulis <code>/ 2 * a</code> padahal maksudnya <code>/ (2 * a)</code>). Compiler <b>tidak</b> bisa mendeteksinya, jadi kamu harus menguji dengan input yang jawabannya sudah kamu tahu.</div>
+  <aside class="analogi">
+    <p>Resep mie instan: rebus air, masukkan mie, tunggu 3 menit, tiriskan, campur bumbu. Urutannya jelas, dan ada akhirnya.</p>
+    <p class="batas">kamu bisa menebak maksud "garam secukupnya". Komputer tidak bisa menebak, jadi setiap langkah harus pasti.</p>
+  </aside>
 
-<h2>3. Tiga cara menulis algoritma</h2>
-<ul>
-  <li><b>Structured English</b>: kalimat biasa yang terstruktur.</li>
-  <li><b>Pseudocode</b>: mirip kode, tapi bebas aturan bahasa. Fokus ke logika.</li>
-  <li><b>Flowchart</b>: gambar dengan simbol dan panah.</li>
-</ul>
+  <p><mark>Algoritma</mark> adalah urutan langkah yang jelas untuk menyelesaikan satu masalah, dan pasti berhenti. Satu masalah bisa punya <b>banyak algoritma yang benar</b>, jadi yang dinilai adalah hasilnya, bukan kemiripan dengan contoh.</p>
+  <table>
+    <tr><th>Ciri algoritma yang baik</th><th>Artinya</th></tr>
+    <tr><td>Logikanya benar</td><td>Output-nya benar untuk semua input yang valid</td></tr>
+    <tr><td>Tidak ambigu</td><td>Setiap langkah hanya bisa diartikan dengan satu cara</td></tr>
+    <tr><td>Berhenti</td><td>Setelah sejumlah langkah, pasti selesai</td></tr>
+    <tr><td>Efisien</td><td>Tidak ada langkah yang tidak perlu</td></tr>
+    <tr><td>Mudah diterjemahkan</td><td>Bisa langsung ditulis ke bahasa pemrograman</td></tr>
+  </table>
 
-<h3>Pseudocode → C</h3>
-<p>Keyword pseudocode hampir selalu punya pasangan langsung di C. Kalau kamu bisa menulis pseudocode-nya, menerjemahkannya ke C tinggal mencocokkan tabel ini.</p>
-<table>
-  <tr><th>Operasi</th><th>Pseudocode</th><th>C</th></tr>
-  <tr><td>Input</td><td>Read, Get, Input</td><td><code>scanf("%d", &amp;x);</code></td></tr>
-  <tr><td>Output</td><td>Print, Display, Write</td><td><code>printf("%d", x);</code></td></tr>
-  <tr><td>Simpan nilai</td><td>Set x to 0, x = 0, Store</td><td><code>x = 0;</code></td></tr>
-  <tr><td>Hitung</td><td>Compute, Add, +, −, *, /</td><td><code>total = total + x;</code></td></tr>
-  <tr><td>Selection</td><td>IF … THEN … ELSE … ENDIF</td><td><code>if (…) { … } else { … }</code></td></tr>
-  <tr><td>Repetition</td><td>DOWHILE … ENDDO, WHILE</td><td><code>while (…) { … }</code></td></tr>
-</table>
-<div class="callout"><strong>Yang ada di C tapi tidak di pseudocode</strong>Deklarasi variabel dan tipenya (<code>int x;</code>), <code>#include</code>, <code>main()</code>, dan titik koma. Ini aturan bahasa, bukan bagian dari logika.</div>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh: dua algoritma rata-rata 3 bilangan</summary>
+      <table>
+        <tr><th>Algoritma 1</th><th>Algoritma 2</th></tr>
+        <tr><td>Read A<br>Read B<br>Read C<br>average = (A + B + C) / 3<br>Print average</td><td>Read A, B, C sekaligus<br>sum = A + B + C<br>average = sum / 3<br>Print average</td></tr>
+      </table>
+      <p>Langkahnya berbeda, tapi keduanya benar, karena hasilnya sama untuk semua input.</p>
+    </details>
+  </aside>
 
-<h3>Simbol flowchart</h3>
-<table>
-  <tr><th>Simbol</th><th>Nama</th><th>Untuk</th></tr>
-  <tr><td><svg class="shape" viewBox="0 0 64 30"><rect x="2" y="3" width="60" height="24" rx="12"/></svg></td><td>Terminal</td><td>Start dan End</td></tr>
-  <tr><td><svg class="shape" viewBox="0 0 64 30"><polygon points="12,3 62,3 52,27 2,27"/></svg></td><td>Input/Output</td><td>Read dan Print</td></tr>
-  <tr><td><svg class="shape" viewBox="0 0 64 30"><rect x="2" y="3" width="60" height="24" rx="3"/></svg></td><td>Process</td><td>Hitung dan simpan nilai</td></tr>
-  <tr><td><svg class="shape" viewBox="0 0 64 30"><polygon points="32,1 62,15 32,29 2,15"/></svg></td><td>Decision</td><td>Kondisi ya/tidak (IF, kondisi loop)</td></tr>
-</table>
-<p>Panah menunjukkan urutan langkah. Contoh flowchart lengkap ada di <a href="viz/tiga-bentuk.html">visualisasi</a>.</p>
+  <p class="intinya">Algoritma yang baik benar untuk semua input yang valid, tidak ambigu, dan pasti berhenti. Tidak harus mirip contoh.</p>
 
-<h2>4. Structure theorem: hanya 3 struktur</h2>
-<p>Program serumit apa pun hanya tersusun dari tiga struktur ini. Saat bingung menulis program, tanyakan: <b>bagian mana yang berurutan, mana yang memilih, mana yang mengulang?</b></p>
-<table>
-  <tr><th>Struktur</th><th>Artinya</th><th>Contoh C</th></tr>
-  <tr><td><b>Sequence</b></td><td>Langkah dijalankan berurutan dari atas ke bawah</td><td><code>scanf(…); avg = sum / 3; printf(…);</code></td></tr>
-  <tr><td><b>Selection</b></td><td>Pilih salah satu cabang berdasarkan kondisi</td><td><code>if (n % 2 == 0) … else …</code></td></tr>
-  <tr><td><b>Repetition</b></td><td>Ulangi selama kondisi masih benar</td><td><code>while (stars &lt; 5) { … }</code></td></tr>
-</table>
-<p>Buka <a href="viz/tiga-bentuk.html">visualisasi "satu algoritma, tiga bentuk"</a>: ketiga struktur dijalankan langkah demi langkah, dengan pseudocode, flowchart, dan C menyala bersamaan.</p>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa langkah "tambahkan garam secukupnya" tidak boleh ada di algoritma?</summary>
+    <p>Langkah itu <b>ambigu</b>: setiap orang mengartikan "secukupnya" dengan jumlah yang berbeda. Langkah algoritma harus pasti, misalnya "tambahkan 1 sendok teh garam".</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Baca 3 bilangan, cetak yang terbesar. Pikirkan <b>dua algoritma berbeda</b>.</summary>
+    <p><strong>Cara 1, bandingkan semua:</strong> kalau a ≥ b dan a ≥ c, maka a terbesar. Kalau tidak, bandingkan b dan c.</p>
+    <p><strong>Cara 2, "juara sementara":</strong> anggap a terbesar, lalu bandingkan dengan yang lain satu per satu. Cara ini mudah diperluas ke 100 bilangan dengan loop (materi 03).</p>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 
-<h2>5. Anatomi program C</h2>
-<pre><code>#include &lt;stdio.h&gt;           // 1. ambil "katalog" fungsi input/output (printf, scanf)
+int main() {
+    int a, b, c, max;
+    scanf("%d %d %d", &amp;a, &amp;b, &amp;c);
+    max = a;                 // juara sementara
+    if (b &gt; max) max = b;
+    if (c &gt; max) max = c;
+    printf("%d\n", max);
+    return 0;
+}</code></pre>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Tujuh langkah dari masalah ke program</h2></summary>
+  <p class="rantai">
+    <span class="dari">algoritma (<a href="#langkah-1">1️⃣</a>)</span>
+    <span class="ke">pseudocode dan flowchart (<a href="#langkah-3">3️⃣</a>, <a href="#langkah-4">4️⃣</a>), serta syntax error dan logic error (<a class="no" href="#langkah-10">10</a>, <a class="no" href="#langkah-11">11</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Membangun rumah: tentukan kebutuhan (berapa kamar), buat denah, baru bangun, lalu cek hasilnya.</p>
+    <p class="batas">rumah yang salah bangun susah dibongkar, sedangkan kode bisa diubah kapan saja. Tapi kesalahan di langkah awal tetap paling mahal, karena semua langkah sesudahnya ikut salah.</p>
+  </aside>
+
+  <p>Langkah ke-2 butuh satu istilah: <mark>model</mark> adalah rumus atau aturan yang menghubungkan input dengan output.</p>
+  <table>
+    <tr><th>Langkah</th><th>Pertanyaan kunci</th></tr>
+    <tr><td>1. Definisi masalah</td><td>Input-nya apa? Output-nya apa?</td></tr>
+    <tr><td>2. Model</td><td>Rumus atau aturan apa yang dipakai?</td></tr>
+    <tr><td>3. Desain algoritma</td><td>Langkahnya apa, dan urutannya bagaimana? Tulis sebagai pseudocode atau flowchart.</td></tr>
+    <tr><td>4. Tulis kode</td><td>Bagaimana menulisnya dalam C?</td></tr>
+    <tr><td>5. Compile</td><td>Apakah aturan penulisan C sudah benar?</td></tr>
+    <tr><td>6. Run dan test</td><td>Apakah hasilnya benar?</td></tr>
+    <tr><td>7. Dokumentasi</td><td>Apakah orang lain (atau kamu nanti) paham?</td></tr>
+  </table>
+  <ul>
+    <li><strong>Definisi sebelum model:</strong> rumus baru bisa dipilih kalau input dan output-nya jelas.</li>
+    <li><strong>Desain sebelum kode:</strong> kalau langsung menulis kode, kamu memikirkan logika dan aturan C sekaligus, jadi kesalahannya bercampur.</li>
+    <li><strong>Compile sebelum test:</strong> program yang melanggar aturan C tidak bisa dijalankan sama sekali.</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dari kuliah: akar persamaan kuadrat <code>ax² + bx + c = 0</code></summary>
+      <table>
+        <tr><th>Langkah</th><th>Isinya</th></tr>
+        <tr><td>1. Definisi</td><td>Input a, b, c. Output x1 dan x2.</td></tr>
+        <tr><td>2. Model</td><td><code>d = b² − 4ac</code>, lalu <code>x = (−b ± √d) / 2a</code></td></tr>
+        <tr><td>3. Desain</td><td>Pseudocode atau flowchart. Kalau d &lt; 0, akarnya imajiner.</td></tr>
+        <tr><td>4. Kode</td><td>File <code>.c</code> di Dev-C++ (programnya ada di <a href="#langkah-9">9️⃣</a>)</td></tr>
+        <tr><td>5. Compile</td><td>Perbaiki syntax error (<a class="no" href="#langkah-10">10</a>)</td></tr>
+        <tr><td>6. Test</td><td>a = 1, b = −3, c = 2 harus menghasilkan 2 dan 1. Kalau tidak, ada logic error (<a class="no" href="#langkah-11">11</a>).</td></tr>
+        <tr><td>7. Dokumentasi</td><td>Komentar dan nama variabel yang jelas</td></tr>
+      </table>
+    </details>
+  </aside>
+
+  <p class="intinya">Jangan langsung menulis kode. Tentukan input, output, dan rumusnya dulu, lalu susun langkahnya.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Ubah detik menjadi jam, menit, dan detik (contoh: 3725 detik = 1 jam 2 menit 5 detik). Tentukan input, output, model, lalu tulis programnya.</summary>
+    <p><strong>Input:</strong> total detik. <strong>Output:</strong> jam, menit, detik. <strong>Model:</strong> 1 jam = 3600 detik, 1 menit = 60 detik. Ambil hasil bagi bulat (div) dan sisanya (mod).</p>
+<pre class="kode"><code>Start
+Read total
+jam = total div 3600
+sisa = total mod 3600
+menit = sisa div 60
+detik = sisa mod 60
+Print jam, menit, detik
+End</code></pre>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    int total, jam, menit, detik;
+    scanf("%d", &amp;total);
+    jam = total / 3600;           // int / int: sisa dibuang
+    menit = (total % 3600) / 60;  // % = sisa bagi
+    detik = total % 60;
+    printf("%d jam %d menit %d detik\n", jam, menit, detik);
+    return 0;
+}</code></pre>
+    <p><code>/</code> antar int = pembagian bulat, dan <code>%</code> = sisanya. Ini dibahas lebih dalam di materi 02.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Pseudocode: algoritma tanpa aturan bahasa</h2></summary>
+  <p class="rantai">
+    <span class="dari">langkah desain algoritma (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">menulis kode C (<a href="#langkah-6">6️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kerangka esai di kertas coretan: isinya lengkap, tapi kamu belum peduli ejaan dan tanda baca.</p>
+    <p class="batas">kerangka esai boleh lompat-lompat. Pseudocode tetap harus berurutan dan tidak ambigu, sama seperti algoritma.</p>
+  </aside>
+
+  <p><mark>Pseudocode</mark> adalah algoritma yang ditulis mirip kode, tapi bebas dari aturan bahasa pemrograman. Bentuk lain: structured English (kalimat biasa yang terstruktur) dan flowchart (<a href="#langkah-4">4️⃣</a>).</p>
+  <p>Setiap keyword pseudocode punya pasangan langsung di C, jadi menerjemahkannya tinggal mencocokkan:</p>
+  <table>
+    <tr><th>Operasi</th><th>Pseudocode</th><th>C</th></tr>
+    <tr><td>Input</td><td>Read, Get, Input</td><td><code>scanf("%d", &amp;x);</code></td></tr>
+    <tr><td>Output</td><td>Print, Display, Write</td><td><code>printf("%d", x);</code></td></tr>
+    <tr><td>Simpan nilai</td><td>Set x to 0, x = 0, Store</td><td><code>x = 0;</code></td></tr>
+    <tr><td>Hitung</td><td>Compute, Add, +, −, *, /</td><td><code>total = total + x;</code></td></tr>
+    <tr><td>Selection</td><td>IF … THEN … ELSE … ENDIF</td><td><code>if (…) { … } else { … }</code></td></tr>
+    <tr><td>Repetition</td><td>DOWHILE … ENDDO, WHILE</td><td><code>while (…) { … }</code></td></tr>
+  </table>
+  <aside class="catatan">
+    <p>Yang hanya ada di C: deklarasi variabel dan tipenya (<code>int x;</code>), <code>#include</code>, <code>main()</code>, dan <code>;</code>. Ini aturan bahasa, bukan logika. Detail <code>scanf</code> dan <code>printf</code> ada di materi 02.</p>
+  </aside>
+
+  <p class="intinya">Tulis pseudocode dulu. Setelah itu, menerjemahkannya ke C tinggal mencocokkan tabel ini.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis pseudocode lalu kode C untuk menghitung luas persegi panjang dari panjang dan lebar.</summary>
+<pre class="kode"><code>Start
+Read panjang, lebar
+luas = panjang * lebar
+Print luas
+End</code></pre>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    float panjang, lebar, luas;
+    scanf("%f %f", &amp;panjang, &amp;lebar);
+    luas = panjang * lebar;
+    printf("%.2f\n", luas);
+    return 0;
+}</code></pre>
+    <p>Strukturnya hanya sequence (<a href="#langkah-5">5️⃣</a>).</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis program untuk menghitung luas lingkaran dari jari-jari.</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+#define PI 3.14159
+
+int main() {
+    float r;
+    scanf("%f", &amp;r);
+    printf("%.2f\n", PI * r * r);
+    return 0;
+}</code></pre>
+    <p><code>#define PI</code> membuat konstanta bernama, jadi angka 3.14159 tidak muncul "tiba-tiba" di tengah rumus. Konstanta dibahas di materi 02.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Flowchart: algoritma dalam bentuk gambar</h2></summary>
+  <p class="rantai">
+    <span class="dari">pseudocode (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">tiga struktur (<a href="#langkah-5">5️⃣</a>) dan visualisasi materi ini</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Peta jalur di stasiun: kotak menunjukkan tempat, panah menunjukkan arah jalan.</p>
+    <p class="batas">di peta kamu bebas memilih jalur. Di flowchart, cabang hanya diambil berdasarkan kondisi di simbol decision.</p>
+  </aside>
+
+  <p><mark>Flowchart</mark> adalah gambar algoritma: setiap langkah berupa simbol, dan panah menunjukkan urutannya.</p>
+  <table>
+    <tr><th>Simbol</th><th>Nama</th><th>Untuk</th></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Persegi panjang bersudut bulat"><rect x="2" y="3" width="60" height="24" rx="12"/></svg></td><td>Terminal</td><td>Start dan End</td></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Jajar genjang"><polygon points="12,3 62,3 52,27 2,27"/></svg></td><td>Input/Output</td><td>Read dan Print</td></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Persegi panjang"><rect x="2" y="3" width="60" height="24" rx="3"/></svg></td><td>Process</td><td>Hitung dan simpan nilai</td></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Belah ketupat"><polygon points="32,1 62,15 32,29 2,15"/></svg></td><td>Decision</td><td>Kondisi ya/tidak (IF, kondisi loop)</td></tr>
+  </table>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/tiga-bentuk.html#odd">visualisasi, program "Selection"</a>, lalu klik <b>Langkah berikutnya</b>. Simbol flowchart yang sedang jalan berubah warna, bersamaan dengan baris pseudocode dan C yang sama.</p>
+  </aside>
+
+  <p class="intinya">Bentuk simbol menunjukkan jenis langkah. Panah menunjukkan urutannya.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Simbol apa yang dipakai untuk "Read panjang", "luas = panjang * lebar", dan "n % 2 == 0?"</summary>
+    <p>"Read panjang" = <b>Input/Output</b> (jajar genjang). "luas = panjang * lebar" = <b>Process</b> (persegi panjang). "n % 2 == 0?" = <b>Decision</b> (belah ketupat), karena jawabannya ya atau tidak.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Tiga struktur: semua program hanya tersusun dari ini</h2></summary>
+  <p class="rantai">
+    <span class="dari">pseudocode dan flowchart (<a href="#langkah-3">3️⃣</a>, <a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">selection dengan <code>if</code>, dan repetition (materi 03)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Perjalanan ke kampus: jalan lurus (sequence), belok kiri atau kanan tergantung macet (selection), naik tangga sampai lantai 5 (repetition).</p>
+    <p class="batas">di jalan kamu bisa berimprovisasi. Program tidak punya bentuk keempat: semuanya hanya gabungan tiga bentuk ini.</p>
+  </aside>
+
+  <p><mark>Structure theorem</mark> menyatakan bahwa semua program bisa disusun hanya dari tiga struktur: sequence, selection, dan repetition.</p>
+  <table>
+    <tr><th>Struktur</th><th>Artinya</th><th>Contoh C</th></tr>
+    <tr><td>Sequence</td><td>Langkah dijalankan berurutan dari atas ke bawah</td><td><code>scanf(…); avg = sum / 3; printf(…);</code></td></tr>
+    <tr><td>Selection</td><td>Pilih salah satu cabang berdasarkan kondisi</td><td><code>if (n % 2 == 0) … else …</code></td></tr>
+    <tr><td>Repetition</td><td>Ulangi selama kondisi masih benar</td><td><code>while (stars &lt; 5) { … }</code></td></tr>
+  </table>
+  <p>Saat bingung menulis program, tanyakan: bagian mana yang <b>berurutan</b>, mana yang <b>memilih</b>, dan mana yang <b>mengulang</b>?</p>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/tiga-bentuk.html">visualisasi "satu algoritma, tiga bentuk"</a>. Ketiga struktur dijalankan langkah demi langkah, dengan pseudocode, flowchart, dan C menyala bersamaan.</p>
+  </aside>
+
+  <p class="intinya">Sequence = berurutan, selection = memilih satu cabang, repetition = mengulang. Program sebesar apa pun hanya gabungan ketiganya.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Struktur apa yang dipakai program "baca bilangan, lalu cetak Genap atau Ganjil"?</summary>
+    <p><b>Selection.</b> Bilangan genap kalau sisa bagi 2 sama dengan 0. Kode lengkapnya ada di <a href="viz/tiga-bentuk.html#odd">visualisasi, program "Selection"</a>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Sebutkan struktur di setiap bagian: "baca 10 nilai, jumlahkan semuanya, lalu cetak Lulus kalau rata-ratanya ≥ 60".</summary>
+    <p>Membaca dan menjumlahkan 10 nilai = <b>repetition</b>. Menghitung rata-rata setelahnya = <b>sequence</b>. Mencetak Lulus kalau ≥ 60 = <b>selection</b>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Anatomi program C: setiap baris punya tugas</h2></summary>
+  <p class="rantai">
+    <span class="dari">pseudocode yang diterjemahkan ke C (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">semua kode di materi berikutnya</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Surat resmi: kop surat di atas (<code>#include</code>), isi surat (<code>main</code>), titik di akhir kalimat (<code>;</code>), dan salam penutup (<code>return 0</code>).</p>
+    <p class="batas">surat tetap bisa dibaca walau titiknya lupa. Program C tidak bisa di-compile kalau <code>;</code> lupa.</p>
+  </aside>
+
+  <p><mark>Statement</mark> adalah satu perintah di C, dan selalu diakhiri <code>;</code>. C tidak menganggap Enter sebagai akhir perintah.</p>
+<pre class="kode"><code>#include &lt;stdio.h&gt;           // 1. ambil daftar fungsi input/output (printf, scanf)
 
 int main() {                 // 2. program SELALU mulai dari main
     printf("Welcome to BINUS\n");   // 3. statement, diakhiri ;
     return 0;                // 4. beri tahu sistem: program selesai tanpa error
 }                            // 5. kurung kurawal menutup blok main</code></pre>
-<table>
-  <tr><th>Bagian</th><th>Kenapa perlu</th></tr>
-  <tr><td><code>#include &lt;stdio.h&gt;</code></td><td>Compiler perlu tahu bentuk fungsi <code>printf</code>. Tanpa ini, Dev-C++ memberi warning atau error.</td></tr>
-  <tr><td><code>int main()</code></td><td>Titik mulai program. Harus ada tepat satu.</td></tr>
-  <tr><td><code>{ }</code></td><td>Mengelompokkan statement menjadi satu blok.</td></tr>
-  <tr><td><code>;</code></td><td>Menandai akhir satu statement. C tidak melihat Enter sebagai akhir baris.</td></tr>
-  <tr><td><code>return 0;</code></td><td>Nilai 0 artinya program berakhir normal.</td></tr>
-</table>
-<div class="callout"><strong>main di Dev-C++</strong>Tulis <code>int main()</code> dengan <code>return 0;</code>. Bentuk <code>void main()</code> atau <code>main()</code> tanpa tipe memang ada di buku lama, tapi di Dev-C++ (gcc) bisa memberi warning. <code>int main()</code> selalu aman.</div>
-<p><b>C itu case sensitive</b>: <code>main</code> ≠ <code>Main</code>, <code>sum</code> ≠ <code>Sum</code>, <code>printf</code> ≠ <code>Printf</code>.</p>
+  <table>
+    <tr><th>Bagian</th><th>Kenapa perlu</th></tr>
+    <tr><td><code>#include &lt;stdio.h&gt;</code></td><td>Compiler perlu tahu bentuk fungsi <code>printf</code>. Tanpa ini, Dev-C++ memberi warning atau error.</td></tr>
+    <tr><td><code>int main()</code></td><td>Titik mulai program. Harus ada tepat satu.</td></tr>
+    <tr><td><code>{ }</code></td><td>Mengelompokkan statement menjadi satu blok.</td></tr>
+    <tr><td><code>return 0;</code></td><td>Nilai 0 artinya program berakhir normal.</td></tr>
+  </table>
+  <p><strong>Komentar:</strong> teks setelah <code>//</code> (satu baris) atau di antara <code>/* … */</code> (beberapa baris) diabaikan compiler. Komentar tidak dijalankan dan tidak dicetak.</p>
 
-<h3>Komentar</h3>
-<pre><code>// komentar satu baris
-/* komentar
-   beberapa baris */</code></pre>
-<p>Komentar diabaikan compiler: tidak dijalankan dan <b>tidak dicetak</b>. Gunanya untuk manusia yang membaca kode.</p>
+  <aside class="catatan">
+    <details>
+      <summary>Kenapa <code>int main()</code>, bukan <code>void main()</code>?</summary>
+      <p>Bentuk <code>void main()</code> atau <code>main()</code> tanpa tipe memang ada di buku lama, tapi di Dev-C++ (gcc) bisa memberi warning. <code>int main()</code> dengan <code>return 0;</code> selalu aman.</p>
+    </details>
+  </aside>
 
-<h2>6. Karakter dan escape sequence</h2>
-<p>Beberapa karakter tidak bisa diketik langsung di dalam string (misalnya Enter), atau punya arti khusus (tanda kutip). Untuk itu dipakai <b>escape sequence</b>: backslash + satu huruf.</p>
-<table>
-  <tr><th>Tulis</th><th>Artinya</th></tr>
-  <tr><td><code>\n</code></td><td>Pindah baris (newline)</td></tr>
-  <tr><td><code>\t</code></td><td>Tab</td></tr>
-  <tr><td><code>\"</code></td><td>Tanda kutip ganda di dalam string</td></tr>
-  <tr><td><code>\'</code></td><td>Tanda kutip tunggal</td></tr>
-  <tr><td><code>\\</code></td><td>Backslash itu sendiri</td></tr>
-  <tr><td><code>\a</code></td><td>Bunyi beep</td></tr>
-</table>
-<p><b>Tebak output-nya</b> dulu, baru buka jawabannya:</p>
-<pre><code>printf("A\tB\nC\\D \"E\"");</code></pre>
+  <aside class="jebakan">
+    <p>C itu <mark class="jebakan">case sensitive</mark>: huruf besar dan kecil dianggap berbeda. <code>main</code> ≠ <code>Main</code>, <code>sum</code> ≠ <code>Sum</code>, <code>printf</code> ≠ <code>Printf</code>.</p>
+  </aside>
+
+  <p class="intinya">Program C mulai dari <code>main</code>, setiap statement diakhiri <code>;</code>, dan huruf besar-kecil itu berbeda.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Benar atau salah? (a) Setiap program C mulai dari <code>main</code>. (b) Komentar <code>/* … */</code> dicetak saat program jalan. (c) Semua variabel harus dideklarasikan sebelum dipakai. (d) Semua variabel harus diberi tipe. (e) C menganggap <code>number</code> dan <code>Number</code> sama.</summary>
+    <p>(a) <b>Benar.</b> (b) <b>Salah</b>: komentar diabaikan compiler, tidak pernah dicetak. (c) <b>Benar.</b> (d) <b>Benar</b>: compiler harus tahu ukuran kotaknya (materi 02). (e) <b>Salah</b>: C case sensitive, jadi keduanya variabel berbeda.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
 <details>
-  <summary>Jawaban</summary>
-<pre><code>A       B
+  <summary><h2>Escape sequence: menulis karakter khusus di dalam string</h2></summary>
+  <p class="rantai">
+    <span class="dari"><code>printf</code> di anatomi program (<a href="#langkah-6">6️⃣</a>)</span>
+    <span class="ke">format output di materi 02</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Di aplikasi chat, mengetik <code>:)</code> bisa berubah jadi emoji senyum. Dua karakter berubah jadi satu tanda.</p>
+    <p class="batas">emoji diubah oleh aplikasinya. Escape sequence diubah oleh compiler saat program di-compile.</p>
+  </aside>
+
+  <p><mark>Escape sequence</mark> adalah backslash (<code>\</code>) diikuti satu karakter, untuk menulis karakter yang tidak bisa diketik langsung di dalam string. Contoh: Enter di dalam string ditulis <code>\n</code>.</p>
+  <table>
+    <tr><th>Tulis</th><th>Artinya</th></tr>
+    <tr><td><code>\n</code></td><td>Pindah baris (newline)</td></tr>
+    <tr><td><code>\t</code></td><td>Tab</td></tr>
+    <tr><td><code>\"</code></td><td>Tanda kutip ganda di dalam string</td></tr>
+    <tr><td><code>\'</code></td><td>Tanda kutip tunggal</td></tr>
+    <tr><td><code>\\</code></td><td>Backslash itu sendiri</td></tr>
+    <tr><td><code>\a</code></td><td>Bunyi beep</td></tr>
+  </table>
+
+  <aside class="jebakan">
+    <p>Untuk mencetak satu backslash, tulis <mark class="jebakan">dua: <code>\\</code></mark>. Satu backslash saja selalu dibaca sebagai awal escape sequence.</p>
+  </aside>
+
+  <p class="intinya">Backslash mengubah karakter sesudahnya menjadi karakter khusus: <code>\n</code> pindah baris, <code>\t</code> tab, <code>\\</code> backslash.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tebak output <code>printf("A\tB\nC\\D \"E\"");</code></summary>
+<pre class="kode"><code>A       B
 C\D "E"</code></pre>
-  <p><code>\t</code> jadi tab, <code>\n</code> pindah baris, <code>\\</code> jadi satu backslash, dan <code>\"</code> jadi tanda kutip.</p>
+    <p><code>\t</code> jadi tab, <code>\n</code> pindah baris, <code>\\</code> jadi satu backslash, dan <code>\"</code> jadi tanda kutip.</p>
+  </details>
 </details>
+</section>
 
-<h2>7. Identifier dan keyword</h2>
-<p><b>Identifier</b> = nama yang kamu buat sendiri (nama variabel, fungsi). Aturannya:</p>
-<ul>
-  <li>Diawali <b>huruf atau underscore</b> (<code>_</code>), bukan angka.</li>
-  <li>Isinya hanya huruf, angka, dan underscore. Tidak boleh spasi atau tanda lain.</li>
-  <li>Case sensitive, dan tidak boleh sama dengan <b>keyword</b>.</li>
-</ul>
-<p><b>Keyword</b> = kata yang sudah dipakai C sendiri: <code>int</code>, <code>float</code>, <code>char</code>, <code>if</code>, <code>else</code>, <code>for</code>, <code>while</code>, <code>do</code>, <code>return</code>, <code>void</code>, <code>break</code>, <code>continue</code>, dan seterusnya. Dev-C++ mewarnai keyword dengan tebal, jadi mudah dikenali.</p>
-<p><b>Cek sendiri</b>: mana yang identifier valid?</p>
-<pre><code>name   x1   _total   1time   int   total-harga   jumlahData   Total</code></pre>
+<section class="langkah" id="langkah-8">
 <details>
-  <summary>Jawaban</summary>
-  <p>Valid: <code>name</code>, <code>x1</code>, <code>_total</code>, <code>jumlahData</code>, <code>Total</code> (berbeda dari <code>total</code>). Tidak valid: <code>1time</code> (diawali angka), <code>int</code> (keyword), <code>total-harga</code> (tanda <code>-</code> dibaca sebagai operator kurang).</p>
-</details>
+  <summary><h2>Identifier: nama buatanmu, dengan tiga aturan</h2></summary>
+  <p class="rantai">
+    <span class="dari">deklarasi variabel di anatomi program (<a href="#langkah-6">6️⃣</a>)</span>
+    <span class="ke">semua nama variabel dan fungsi yang kamu buat</span>
+  </p>
 
-<h2>8. Standard library: katalog fungsi siap pakai</h2>
-<p>Header file adalah <b>katalog</b>. <code>#include</code> berarti "saya akan memakai fungsi dari katalog ini". Kamu tidak perlu menghafal isinya: cukup tahu katalog mana yang dicari.</p>
-<table>
-  <tr><th>Header</th><th>Isinya</th><th>Contoh fungsi</th></tr>
-  <tr><td><code>stdio.h</code></td><td>Input/output</td><td><code>printf</code>, <code>scanf</code>, <code>getchar</code>, <code>puts</code></td></tr>
-  <tr><td><code>math.h</code></td><td>Matematika</td><td><code>sqrt</code>, <code>pow</code>, <code>fabs</code>, <code>ceil</code>, <code>floor</code></td></tr>
-  <tr><td><code>stdlib.h</code></td><td>Utility umum</td><td><code>malloc</code>, <code>free</code>, <code>rand</code>, <code>srand</code>, <code>atoi</code>, <code>exit</code></td></tr>
-  <tr><td><code>string.h</code></td><td>Olah string</td><td><code>strlen</code>, <code>strcpy</code>, <code>strcmp</code>, <code>strcat</code></td></tr>
-  <tr><td><code>time.h</code></td><td>Waktu dan tanggal</td><td><code>time</code>, <code>clock</code></td></tr>
-</table>
-<p>Contoh: persamaan kuadrat dari kuliah, memakai <code>math.h</code>.</p>
-<pre><code>#include &lt;stdio.h&gt;
+  <aside class="analogi">
+    <p>Aturan nama akun: tidak boleh pakai spasi, dan tidak boleh memakai nama yang sudah dipakai sistem.</p>
+    <p class="batas">nama akun biasanya tidak membedakan huruf besar dan kecil. Identifier di C membedakannya: <code>Total</code> ≠ <code>total</code>.</p>
+  </aside>
+
+  <p><mark>Identifier</mark> adalah nama yang kamu buat sendiri, misalnya nama variabel dan nama fungsi. Aturannya:</p>
+  <ol>
+    <li>Diawali <b>huruf atau underscore</b> (<code>_</code>), bukan angka.</li>
+    <li>Isinya hanya huruf, angka, dan underscore. Tidak boleh spasi atau tanda lain.</li>
+    <li>Tidak boleh sama dengan <b>keyword</b>, yaitu kata yang sudah dipakai C sendiri: <code>int</code>, <code>float</code>, <code>char</code>, <code>if</code>, <code>else</code>, <code>for</code>, <code>while</code>, <code>do</code>, <code>return</code>, <code>void</code>, <code>break</code>, <code>continue</code>, dan seterusnya.</li>
+  </ol>
+  <p>Dev-C++ menebalkan keyword, jadi mudah dikenali.</p>
+
+  <p class="intinya">Identifier diawali huruf atau <code>_</code>, hanya berisi huruf, angka, dan <code>_</code>, dan bukan keyword.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Mana yang identifier valid? <code>name</code>, <code>x1</code>, <code>_total</code>, <code>1time</code>, <code>int</code>, <code>total-harga</code>, <code>jumlahData</code>, <code>Total</code></summary>
+    <p><strong>Valid:</strong> <code>name</code>, <code>x1</code>, <code>_total</code>, <code>jumlahData</code>, <code>Total</code> (berbeda dari <code>total</code>).</p>
+    <p><strong>Tidak valid:</strong> <code>1time</code> (diawali angka), <code>int</code> (keyword), <code>total-harga</code> (tanda <code>-</code> dibaca sebagai operator kurang).</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Header file: daftar fungsi siap pakai</h2></summary>
+  <p class="rantai">
+    <span class="dari"><code>#include</code> di anatomi program (<a href="#langkah-6">6️⃣</a>)</span>
+    <span class="ke"><code>printf</code>/<code>scanf</code> (materi 02), fungsi string (materi 04), <code>malloc</code> (data structure)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Katalog toko: kamu tidak perlu menghafal semua barang, cukup tahu katalog mana yang dibuka.</p>
+    <p class="batas">katalog hanya daftar barang. <code>#include</code> juga hanya memberi tahu compiler bentuk fungsinya, sedangkan isi fungsinya sudah disediakan library C.</p>
+  </aside>
+
+  <p><mark>Header file</mark> adalah file berisi daftar fungsi siap pakai. <code>#include</code> artinya "aku akan memakai fungsi dari daftar ini". Kamu tidak perlu menghafal isinya, cukup tahu header mana yang dicari.</p>
+  <table>
+    <tr><th>Header</th><th>Isinya</th><th>Contoh fungsi</th></tr>
+    <tr><td><code>stdio.h</code></td><td>Input/output</td><td><code>printf</code>, <code>scanf</code>, <code>getchar</code>, <code>puts</code></td></tr>
+    <tr><td><code>math.h</code></td><td>Matematika</td><td><code>sqrt</code>, <code>pow</code>, <code>fabs</code>, <code>ceil</code>, <code>floor</code></td></tr>
+    <tr><td><code>stdlib.h</code></td><td>Utility umum</td><td><code>malloc</code>, <code>free</code>, <code>rand</code>, <code>srand</code>, <code>atoi</code>, <code>exit</code></td></tr>
+    <tr><td><code>string.h</code></td><td>Olah string</td><td><code>strlen</code>, <code>strcpy</code>, <code>strcmp</code>, <code>strcat</code></td></tr>
+    <tr><td><code>time.h</code></td><td>Waktu dan tanggal</td><td><code>time</code>, <code>clock</code></td></tr>
+  </table>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dari kuliah: persamaan kuadrat dengan <code>math.h</code></summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 #include &lt;math.h&gt;
 
 int main() {
@@ -190,139 +481,105 @@ int main() {
     }
     return 0;
 }</code></pre>
-<p>Perhatikan: algoritma di flowchart (sequence → selection) diterjemahkan baris demi baris. Coba input <code>1 -3 2</code>: hasilnya harus 2.00 dan 1.00.</p>
+      <p>Algoritma di flowchart (sequence lalu selection) diterjemahkan baris demi baris. Input <code>1 -3 2</code> harus menghasilkan 2.00 dan 1.00.</p>
+    </details>
+  </aside>
 
-<h2>9. Error yang sering muncul</h2>
-<table>
-  <tr><th>Kode</th><th>Jenis</th><th>Kenapa salah</th></tr>
-  <tr><td><code>printf("Hi")</code> tanpa <code>;</code></td><td>Syntax</td><td>Statement belum ditutup. Pesan error sering menunjuk baris <b>berikutnya</b>.</td></tr>
-  <tr><td><code>Printf("Hi");</code></td><td>Syntax</td><td>Case sensitive: fungsinya <code>printf</code></td></tr>
-  <tr><td><code>printf('Hi');</code></td><td>Syntax</td><td>String pakai kutip ganda <code>"…"</code>. Kutip tunggal hanya untuk satu karakter.</td></tr>
-  <tr><td>Lupa <code>#include &lt;math.h&gt;</code></td><td>Warning → hasil aneh</td><td>Compiler tidak tahu bentuk <code>sqrt</code></td></tr>
-  <tr><td><code>x / 2 * a</code></td><td>Logic</td><td>Dihitung <code>(x / 2) * a</code>. Pakai kurung: <code>x / (2 * a)</code></td></tr>
-  <tr><td><code>avg = a + b + c / 3</code></td><td>Logic</td><td>Hanya <code>c</code> yang dibagi 3. Pakai <code>(a + b + c) / 3</code></td></tr>
-</table>
+  <aside class="jebakan">
+    <p>Lupa <code>#include &lt;math.h&gt;</code> saat memakai <code>sqrt</code>: compiler <mark class="jebakan">hanya memberi warning</mark>, tapi hasilnya bisa aneh, karena compiler tidak tahu bentuk fungsinya.</p>
+  </aside>
 
-<h2>10. Latihan</h2>
-<p>Untuk setiap soal: tulis <b>pseudocode dulu</b>, lalu terjemahkan ke C pakai tabel di bagian 3.</p>
+  <p class="intinya">Pakai fungsi siap pakai → include header-nya dulu. Cukup tahu header mana untuk keperluan apa.</p>
 
-<p><b>1.</b> Hitung luas persegi panjang dari panjang dan lebar.</p>
-<details>
-  <summary>Jawaban</summary>
-<pre><code>Start
-Read panjang, lebar
-luas = panjang * lebar
-Print luas
-End</code></pre>
-<pre><code>#include &lt;stdio.h&gt;
-
-int main() {
-    float panjang, lebar, luas;
-    scanf("%f %f", &amp;panjang, &amp;lebar);
-    luas = panjang * lebar;
-    printf("%.2f\n", luas);
-    return 0;
-}</code></pre>
-  <p>Strukturnya hanya <b>sequence</b>.</p>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Program kamu memakai <code>printf</code>, <code>sqrt</code>, dan <code>strlen</code>. Header apa saja yang harus di-include?</summary>
+    <p><code>stdio.h</code> (untuk <code>printf</code>), <code>math.h</code> (untuk <code>sqrt</code>), dan <code>string.h</code> (untuk <code>strlen</code>).</p>
+  </details>
 </details>
+</section>
 
-<p><b>2.</b> Ubah detik menjadi jam, menit, dan detik. Contoh: 3725 detik = 1 jam 2 menit 5 detik.</p>
+<section class="langkah" id="langkah-10">
 <details>
-  <summary>Jawaban</summary>
-<pre><code>Start
-Read total
-jam = total div 3600
-sisa = total mod 3600
-menit = sisa div 60
-detik = sisa mod 60
-Print jam, menit, detik
-End</code></pre>
-<pre><code>#include &lt;stdio.h&gt;
+  <summary><h2>Syntax error: melanggar aturan bahasa, ditolak compiler</h2></summary>
+  <p class="rantai">
+    <span class="dari">langkah compile (<a href="#langkah-2">2️⃣</a>) dan anatomi program (<a href="#langkah-6">6️⃣</a>)</span>
+    <span class="ke">membaca pesan error di Dev-C++</span>
+  </p>
 
-int main() {
-    int total, jam, menit, detik;
-    scanf("%d", &amp;total);
-    jam = total / 3600;           // int / int: sisa dibuang
-    menit = (total % 3600) / 60;  // % = sisa bagi
-    detik = total % 60;
-    printf("%d jam %d menit %d detik\n", jam, menit, detik);
-    return 0;
-}</code></pre>
-  <p>Kuncinya: <code>/</code> antar int = pembagian bulat, dan <code>%</code> = sisanya. Ini dibahas lebih dalam di materi 02.</p>
-</details>
+  <aside class="analogi">
+    <p>Petugas tata bahasa yang menolak surat karena salah ketik, dan menunjuk baris yang salah.</p>
+    <p class="batas">petugas manusia bisa menebak maksudmu. Compiler menolak sampai tulisannya benar-benar sesuai aturan.</p>
+  </aside>
 
-<p><b>3.</b> Tentukan apakah sebuah bilangan ganjil atau genap.</p>
-<details>
-  <summary>Jawaban</summary>
-  <p>Bilangan genap kalau sisa bagi 2 sama dengan 0. Kode lengkapnya ada di <a href="viz/tiga-bentuk.html">visualisasi</a> (program "Selection"). Strukturnya <b>selection</b>.</p>
-</details>
+  <p><mark>Syntax error</mark> adalah kesalahan penulisan yang melanggar aturan bahasa C, sehingga compiler menolak program. Kabar baiknya, compiler memberi tahu nomor barisnya.</p>
+  <table>
+    <tr><th>Kode</th><th>Kenapa salah</th></tr>
+    <tr><td><code>printf("Hi")</code> tanpa <code>;</code></td><td>Statement belum ditutup</td></tr>
+    <tr><td><code>Printf("Hi");</code></td><td>Case sensitive: fungsinya <code>printf</code></td></tr>
+    <tr><td><code>printf('Hi');</code></td><td>String pakai kutip ganda <code>"…"</code>. Kutip tunggal hanya untuk satu karakter.</td></tr>
+  </table>
 
-<p><b>4.</b> Hitung luas lingkaran dari jari-jari.</p>
-<details>
-  <summary>Jawaban</summary>
-<pre><code>#include &lt;stdio.h&gt;
-#define PI 3.14159
+  <aside class="jebakan">
+    <p>Kalau <code>;</code> lupa, pesan error sering <mark class="jebakan">menunjuk baris berikutnya</mark>, karena compiler baru sadar ada yang salah saat membaca baris itu. Cek juga baris sebelumnya.</p>
+  </aside>
 
-int main() {
-    float r;
-    scanf("%f", &amp;r);
-    printf("%.2f\n", PI * r * r);
-    return 0;
-}</code></pre>
-  <p><code>#define PI</code> membuat konstanta bernama, jadi angka 3.14159 tidak muncul "tiba-tiba" di tengah rumus.</p>
-</details>
+  <p class="intinya">Syntax error ditemukan compiler. Baca nomor barisnya, lalu cek baris itu dan baris sebelumnya.</p>
 
-<p><b>5.</b> Baca 3 bilangan, cetak yang terbesar. Coba pikirkan <b>dua algoritma berbeda</b>.</p>
-<details>
-  <summary>Jawaban</summary>
-  <p><b>Cara 1, bandingkan semua:</b> kalau a ≥ b dan a ≥ c, maka a terbesar. Kalau tidak, bandingkan b dan c.</p>
-  <p><b>Cara 2, "juara sementara":</b> anggap a terbesar, lalu bandingkan dengan yang lain satu per satu. Cara ini mudah diperluas ke 100 bilangan (dengan loop, materi 03).</p>
-<pre><code>#include &lt;stdio.h&gt;
-
-int main() {
-    int a, b, c, max;
-    scanf("%d %d %d", &amp;a, &amp;b, &amp;c);
-    max = a;                 // juara sementara
-    if (b &gt; max) max = b;
-    if (c &gt; max) max = c;
-    printf("%d\n", max);
-    return 0;
-}</code></pre>
-</details>
-
-<p><b>6.</b> Benar atau salah? Kalau salah, jelaskan.</p>
-<ol type="a">
-  <li>Setiap program C mulai dijalankan dari fungsi <code>main</code>.</li>
-  <li>Komentar <code>/* … */</code> dicetak ke layar saat program jalan.</li>
-  <li>Semua variabel harus dideklarasikan sebelum dipakai.</li>
-  <li>Semua variabel harus diberi tipe saat dideklarasikan.</li>
-  <li>C menganggap <code>number</code> dan <code>Number</code> sama.</li>
-</ol>
-<details>
-  <summary>Jawaban</summary>
-  <p>a. <b>Benar.</b> b. <b>Salah</b>: komentar diabaikan compiler, tidak pernah dicetak. c. <b>Benar.</b> d. <b>Benar</b>: compiler harus tahu ukuran kotaknya. e. <b>Salah</b>: C case sensitive, jadi keduanya variabel berbeda.</p>
-</details>
-
-<p><b>7. Cari error.</b> Ada 3 syntax error. Temukan sebelum membuka jawaban.</p>
-<pre><code>#include &lt;stdio.h&gt;
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Ada 3 syntax error di program ini. Temukan semuanya.
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 
 int Main() {
     int x = 5
     printf("%d\n", X);
     return 0;
-}</code></pre>
-<details>
-  <summary>Jawaban</summary>
-  <p>(1) <code>Main</code> harus <code>main</code>: tanpa <code>main</code>, program tidak punya titik mulai. (2) <code>int x = 5</code> belum diakhiri <code>;</code>. (3) <code>X</code> belum dideklarasikan, karena yang ada <code>x</code> huruf kecil.</p>
+}</code></pre></summary>
+    <p>(1) <code>Main</code> harus <code>main</code>: tanpa <code>main</code>, program tidak punya titik mulai. (2) <code>int x = 5</code> belum diakhiri <code>;</code>. (3) <code>X</code> belum dideklarasikan, karena yang ada <code>x</code> huruf kecil.</p>
+  </details>
 </details>
+</section>
 
-<h2>Daftar pustaka</h2>
+<section class="langkah" id="langkah-11">
+<details>
+  <summary><h2>Logic error: program jalan, tapi hasilnya salah</h2></summary>
+  <p class="rantai">
+    <span class="dari">langkah run dan test (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">mencari bug dengan trace table (materi 03)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Resep yang tertulis rapi, tapi takaran gulanya salah: kuenya tetap jadi, tapi rasanya aneh.</p>
+    <p class="batas">kue yang salah langsung terasa. Logic error bisa tidak kelihatan sama sekali kalau kamu tidak mengecek hasilnya.</p>
+  </aside>
+
+  <p><mark>Logic error</mark> adalah kesalahan di algoritma: program jalan tanpa protes, tapi hasilnya salah. Compiler <b>tidak bisa</b> menemukannya, jadi kamu harus menguji dengan input yang jawabannya sudah kamu tahu.</p>
+  <table>
+    <tr><th>Kode</th><th>Kenapa salah</th><th>Perbaikan</th></tr>
+    <tr><td><code>x / 2 * a</code></td><td>Dihitung <code>(x / 2) * a</code></td><td><code>x / (2 * a)</code></td></tr>
+    <tr><td><code>avg = a + b + c / 3</code></td><td>Hanya <code>c</code> yang dibagi 3, karena <code>/</code> dikerjakan sebelum <code>+</code></td><td><code>(a + b + c) / 3</code></td></tr>
+  </table>
+  <table>
+    <tr><th></th><th>Syntax error</th><th>Logic error</th></tr>
+    <tr><td>Yang menemukan</td><td>Compiler</td><td>Kamu sendiri, lewat testing</td></tr>
+    <tr><td>Program bisa jalan?</td><td>Tidak</td><td>Bisa, tapi hasilnya salah</td></tr>
+  </table>
+
+  <p class="intinya">Program yang jalan belum tentu benar. Selalu test dengan input yang jawabannya sudah kamu tahu.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>avg = a + b + c / 3</code> dengan a = 3, b = 6, c = 9. Berapa hasilnya, dan berapa seharusnya?</summary>
+    <p>Hasilnya 3 + 6 + 9 / 3 = 3 + 6 + 3 = <b>12</b>. Seharusnya (3 + 6 + 9) / 3 = 18 / 3 = <b>6</b>.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Deitel, P., &amp; Deitel, H. (2021). <i>C How to Program</i> (9th ed.). Pearson Education.</li>
   <li>Hanly, J. R., &amp; Koffman, E. B. (2016). <i>Problem Solving and Program Design in C</i> (8th ed.). Pearson.</li>
   <li>Kernighan, B. W., &amp; Ritchie, D. M. (1988). <i>The C Programming Language</i> (2nd ed.). Prentice Hall. Bab 1: A Tutorial Introduction.</li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

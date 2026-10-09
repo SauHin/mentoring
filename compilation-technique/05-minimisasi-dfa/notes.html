@@ -5,147 +5,351 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Minimisasi DFA · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../_shared/automata.css?v=45a95657">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=db2dcc70">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Compilation technique · 05</span>
-<h1>Minimisasi DFA</h1>
-<p class="lead">Satu language bisa dikenali banyak DFA dengan jumlah state berbeda. Minimisasi menggabungkan state yang tidak bisa dibedakan oleh string apa pun, sampai jumlah state paling sedikit.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/minimisasi.html">Visualisasi: table-filling dan partition</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li>p dan q <b>distinguishable</b> kalau ada string x yang dari p berakhir di final dan dari q tidak (atau sebaliknya).</li>
-    <li>Basis: (final, bukan final) pasti berbeda. Induksi: kalau δ(p,a) dan δ(q,a) berbeda, p dan q berbeda.</li>
-    <li><b>Table-filling</b>: tandai X sampai stabil, sel kosong = ekuivalen. <b>Partition</b>: mulai {final}, {bukan final}, pecah berdasarkan grup tujuan sampai stabil.</li>
-    <li>DFA minimum: satu state per grup. Start = grup start lama, final = grup yang memuat final lama.</li>
+<header>
+  <h1>Minimisasi DFA</h1>
+  <p class="tujuan">Satu language bisa dikenali banyak DFA dengan jumlah state berbeda. Minimisasi menggabungkan state yang tidak bisa dibedakan oleh string apa pun, sampai jumlah state paling sedikit. Target: kamu bisa membuat DFA minimum dengan table-filling dan dengan partition.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/minimisasi.html">table-filling dan partition</a> · Prasyarat: <a href="../03-nfa-ke-dfa/notes.html">DFA (materi 03)</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Satu language, banyak DFA</a></li>
+      <li><a href="#langkah-2">Distinguishable dan ekuivalen</a></li>
+      <li><a href="#langkah-3">Metode table-filling</a></li>
+      <li><a href="#langkah-4">Contoh table-filling</a></li>
+      <li><a href="#langkah-5">Menggambar DFA minimum</a></li>
+      <li><a href="#langkah-6">Metode partition</a></li>
+      <li><a href="#langkah-7">Contoh partition</a></li>
+      <li><a href="#langkah-8">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Distinguishable dan ekuivalen</h2>
-<p>DFA punya jumlah state minimum kalau semua state-nya saling distinguishable. Dua state yang tidak distinguishable disebut <b>ekuivalen</b>: dari keduanya, setiap string memberi hasil yang sama (diterima atau ditolak). Karena itu keduanya boleh digabung tanpa mengubah language.</p>
-<ul>
-  <li><b>Basis</b>: kalau p final dan q bukan final, string ε membedakan keduanya.</li>
-  <li><b>Induksi</b>: misalkan r = δ(p, a) dan s = δ(q, a), dan r, s sudah diketahui berbeda dengan string x. Maka string <code>ax</code> membedakan p dan q.</li>
-</ul>
-<p>Contoh di slide: DFA "diakhiri 1" dengan 3 state (A, B, C) bisa dikecilkan menjadi 2 state, karena A dan C sama-sama bukan final dan transisinya sama.</p>
+<main>
 
-<h2>2. Metode table-filling</h2>
-<ol>
-  <li>Buat tabel segitiga berisi semua pasangan state.</li>
-  <li>Beri X pada setiap pasangan (final, bukan final).</li>
-  <li>Untuk setiap pasangan (p, q) yang belum X dan setiap simbol a: kalau pasangan (δ(p,a), δ(q,a)) sudah X, beri X pada (p, q). Kalau δ(p,a) = δ(q,a), simbol a tidak membedakan apa pun.</li>
-  <li>Ulangi langkah 3 sampai satu putaran penuh tidak menghasilkan X baru.</li>
-  <li>Pasangan tanpa X (O) = ekuivalen. Gabungkan. Kalau (A,D) dan (D,G) ekuivalen, maka A, D, G satu grup.</li>
-</ol>
-<div class="callout">Slide dosen memakai versi Hopcroft yang menyimpan daftar pasangan dan menandai secara rekursif. Hasilnya sama dengan versi "ulangi sampai stabil" di atas, dan versi ini lebih mudah dikerjakan di kertas.</div>
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Satu language bisa dikenali banyak DFA, dan DFA minimum adalah yang state-nya paling sedikit</h2></summary>
+  <p class="rantai">
+    <span class="dari">DFA hasil subset construction atau followpos (materi 03, 04)</span>
+    <span class="ke">distinguishable (<a href="#langkah-2">2️⃣</a>)</span>
+  </p>
 
-<h3>Contoh: DFA state A sampai H (slide)</h3>
-<table class="t">
-  <tr><th></th><th>0</th><th>1</th></tr>
-  <tr><td>→A</td><td>B</td><td>F</td></tr><tr><td>B</td><td>G</td><td>C</td></tr>
-  <tr><td>*C</td><td>A</td><td>C</td></tr><tr><td>D</td><td>C</td><td>G</td></tr>
-  <tr><td>E</td><td>H</td><td>F</td></tr><tr><td>F</td><td>C</td><td>G</td></tr>
-  <tr><td>G</td><td>G</td><td>E</td></tr><tr><td>H</td><td>G</td><td>C</td></tr>
-</table>
-<table class="au-tri"><tr><th>B</th><td class="x">X<sub>1</sub></td></tr><tr><th>C</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>D</th><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>E</th><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>F</th><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>1</sub></td></tr><tr><th>G</th><td class="x">X<sub>2</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>H</th><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th></tr></table>
-<p>Beberapa alasan:</p>
-<ul>
-  <li>(A,B): dengan 1 menuju (F,C). (C,F) = X<sub>0</sub>, jadi (A,B) X di putaran 1.</li>
-  <li>(A,G): dengan 0 menuju (B,G), dengan 1 menuju (F,E). Di putaran 1 keduanya belum X. (B,G) baru X di putaran 1, jadi (A,G) X di putaran 2.</li>
-  <li>(A,E): dengan 0 menuju (B,H), dengan 1 menuju (F,F). (B,H) tidak pernah X dan F = F, jadi (A,E) tetap O.</li>
-</ul>
-<p>Hasil: {A,E}, {B,H}, {C}, {D,F}, {G}.</p>
-<div class="au-fig" data-auto="DFA minimum contoh A sampai H">0 1
+  <aside class="analogi">
+    <p>Dua peta untuk kota yang sama: satu menggambar setiap gang, satu hanya jalan utama. Keduanya membawamu ke tujuan yang sama.</p>
+    <p class="batas">peta sederhana bisa kehilangan detail. DFA minimum tidak kehilangan apa pun: language-nya persis sama.</p>
+  </aside>
+
+  <p><mark>DFA minimum</mark> adalah DFA dengan state paling sedikit untuk suatu language. Contoh slide, DFA "diakhiri 1":</p>
+  <div class="au-figs">
+    <figure><div class="au-fig" data-auto="DFA 3 state">0 1
+→A C B
+*B C B
+C C B</div><figcaption>3 state: A dan C sama-sama bukan final, dengan 0 ke C dan 1 ke B.</figcaption></figure>
+    <figure><div class="au-fig" data-auto="DFA 2 state">0 1
+→A A B
+*B A B</div><figcaption>2 state: A dan C digabung. Ini DFA minimum.</figcaption></figure>
+  </div>
+  <p>DFA minimum <b>unik</b>: semua DFA minimum untuk language yang sama hanya berbeda nama state.</p>
+
+  <p class="intinya">Minimisasi menggabungkan state yang berperilaku sama, tanpa mengubah language.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa A dan C di DFA 3 state boleh digabung?</summary>
+    <p>Keduanya bukan final, dan untuk setiap simbol keduanya menuju state yang sama (0 ke C, 1 ke B). Jadi string apa pun memberi hasil yang sama dari A maupun dari C.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Dua state distinguishable kalau ada string yang membedakan hasilnya, dan ekuivalen kalau tidak ada</h2></summary>
+  <p class="rantai">
+    <span class="dari">DFA minimum (<a href="#langkah-1">1️⃣</a>), induksi (discrete mathematics)</span>
+    <span class="ke">table-filling (<a href="#langkah-3">3️⃣</a>) dan partition (<a href="#langkah-6">6️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Dua anak kembar identik bisa dibedakan dengan satu pertanyaan yang jawabannya berbeda.</p>
+    <p class="batas">kembar mungkin belum pernah ditanya. Di DFA, kalau tidak ada string pembeda sama sekali, keduanya benar-benar sama.</p>
+  </aside>
+
+  <p>State p dan q <mark>distinguishable</mark> kalau ada string x sehingga dari p, x berakhir di final, sedangkan dari q tidak (atau sebaliknya). Kalau tidak ada x seperti itu, p dan q <b>ekuivalen</b> dan boleh digabung.</p>
+  <ul>
+    <li><strong>Basis:</strong> p final dan q bukan final pasti berbeda. String pembedanya ε.</li>
+    <li><strong>Induksi:</strong> kalau r = δ(p, a) dan s = δ(q, a) sudah diketahui berbeda dengan string x, maka p dan q berbeda dengan string <code>ax</code>.</li>
+  </ul>
+
+  <p class="intinya">Final dan bukan final pasti berbeda. Kalau tujuannya berbeda, asalnya juga berbeda.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Di DFA 3 state (<a href="#langkah-1">1️⃣</a>), apakah A dan B ekuivalen?</summary>
+    <p><b>Tidak.</b> B final dan A bukan final, jadi string ε membedakan keduanya (basis).</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Table-filling: beri X pada pasangan yang terbukti berbeda, sampai satu putaran tidak menambah X</h2></summary>
+  <p class="rantai">
+    <span class="dari">basis dan induksi (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">contoh (<a href="#langkah-4">4️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Tabel jarak antar kota berbentuk segitiga: setiap pasangan cukup ditulis sekali.</p>
+    <p class="batas">jarak cukup diukur sekali. Tanda X bisa menyebar, jadi tabel harus dicek berulang sampai stabil.</p>
+  </aside>
+
+  <p><mark>Table-filling</mark> mencatat setiap pasangan state di tabel segitiga:</p>
+  <ol>
+    <li><strong>Basis:</strong> beri X pada setiap pasangan (final, bukan final).</li>
+    <li><strong>Untuk setiap pasangan (p, q) yang belum X</strong> dan setiap simbol a: kalau (δ(p,a), δ(q,a)) sudah X, beri X pada (p, q). Kalau δ(p,a) = δ(q,a), simbol a tidak membedakan apa pun.</li>
+    <li><strong>Ulangi langkah 2</strong> sampai satu putaran penuh tidak menambah X. Satu putaran belum cukup, karena X baru bisa memicu X lain.</li>
+    <li><strong>Pasangan tanpa X (O)</strong> = ekuivalen. Kalau (A,D) dan (D,G) ekuivalen, maka A, D, G satu grup.</li>
+  </ol>
+
+  <aside class="catatan">
+    <p>Slide dosen memakai versi Hopcroft yang menyimpan daftar pasangan dan menandai secara rekursif. Hasilnya sama dengan versi "ulangi sampai stabil" di atas, dan versi ini lebih mudah dikerjakan di kertas.</p>
+  </aside>
+
+  <p class="intinya">Basis dulu, lalu ulangi pengecekan sampai stabil. Sel O = digabung.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> δ(p,0) = δ(q,0) = r, δ(p,1) = s, δ(q,1) = t, dan (s,t) sudah X. Apakah (p,q) diberi X?</summary>
+    <p><b>Ya.</b> Simbol 0 tidak membedakan (tujuannya sama), tapi simbol 1 menuju pasangan yang sudah X. Satu simbol pembeda sudah cukup.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Contoh table-filling: X bisa muncul di putaran kedua karena dipicu X dari putaran pertama</h2></summary>
+  <p class="rantai">
+    <span class="dari">langkah table-filling (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">menggambar DFA minimum (<a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Efek domino: satu X baru bisa menjatuhkan X lain di putaran berikutnya.</p>
+    <p class="batas">domino jatuh sendiri. Di sini kamu yang harus mengecek ulang setiap pasangan.</p>
+  </aside>
+
+  <p>Contoh slide: DFA state A sampai H, start A, final C. X<sub>0</sub> = basis, X<sub>1</sub> dan X<sub>2</sub> = ditandai di putaran 1 dan 2. Hasil: <b>{A,E}, {B,H}, {C}, {D,F}, {G}</b>.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Tabel DFA, tabel segitiga, dan alasannya</summary>
+      <table class="t">
+        <tr><th></th><th>0</th><th>1</th></tr>
+        <tr><td>→A</td><td>B</td><td>F</td></tr><tr><td>B</td><td>G</td><td>C</td></tr>
+        <tr><td>*C</td><td>A</td><td>C</td></tr><tr><td>D</td><td>C</td><td>G</td></tr>
+        <tr><td>E</td><td>H</td><td>F</td></tr><tr><td>F</td><td>C</td><td>G</td></tr>
+        <tr><td>G</td><td>G</td><td>E</td></tr><tr><td>H</td><td>G</td><td>C</td></tr>
+      </table>
+      <table class="au-tri"><tr><th>B</th><td class="x">X<sub>1</sub></td></tr><tr><th>C</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>D</th><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>E</th><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>F</th><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>1</sub></td></tr><tr><th>G</th><td class="x">X<sub>2</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>H</th><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th></tr></table>
+      <ul>
+        <li><strong>(A,B):</strong> dengan 1 menuju (F,C). (C,F) = X<sub>0</sub>, jadi (A,B) X di putaran 1.</li>
+        <li><strong>(A,G):</strong> dengan 0 menuju (B,G), dengan 1 menuju (F,E). Di awal putaran 1 keduanya belum X. (B,G) baru X di putaran 1, jadi (A,G) X di putaran 2.</li>
+        <li><strong>(A,E):</strong> dengan 0 menuju (B,H), dengan 1 menuju (F,F). (B,H) tidak pernah X dan F = F, jadi (A,E) tetap O.</li>
+      </ul>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Di <a href="viz/minimisasi.html">visualisasi</a>, pilih metode table-filling dan contoh "Slide: A sampai H". Perhatikan kapan (A,G) ditandai.</p>
+  </aside>
+
+  <p class="intinya">Catat putaran setiap X. Pasangan yang tujuannya baru X di putaran k akan X di putaran k + 1.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Buat DFA minimum dengan table-filling. Start A, final C, F, I. A: B, E; B: C, F; C: D, H; D: E, H; E: F, I; F: G, B; G: H, B; H: I, C; I: A, E (kolom 0, lalu 1).</summary>
+    <table class="au-tri"><tr><th>B</th><td class="x">X<sub>1</sub></td></tr><tr><th>C</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>D</th><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>E</th><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>F</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>G</th><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>H</th><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>I</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th></tr></table>
+    <p>Putaran 1 menandai 9 pasangan, misalnya (A,B): dengan 0 menuju (B,C), dan (B,C) = X<sub>0</sub>. Putaran 2 tidak menambah X. Hasil: <b>{A,D,G}, {B,E,H}, {C,F,I}</b>.</p>
+    <div class="au-fig" data-auto="DFA minimum latihan 1">0 1
+→ADG BEH BEH
+BEH CFI CFI
+*CFI ADG BEH</div>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Menggambar DFA minimum: satu state per grup, transisinya diambil dari salah satu anggota</h2></summary>
+  <p class="rantai">
+    <span class="dari">grup ekuivalen (<a href="#langkah-4">4️⃣</a>, <a href="#langkah-7">7️⃣</a>)</span>
+    <span class="ke">jawaban akhir soal minimisasi</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menggabungkan beberapa kelas yang jadwalnya sama: jadwal kelas gabungan cukup diambil dari salah satu kelas.</p>
+    <p class="batas">kelas gabungan bisa bentrok jadwal. Anggota grup dijamin menuju grup yang sama untuk setiap simbol.</p>
+  </aside>
+
+  <p>Semua anggota grup pasti menuju grup yang sama, jadi transisi cukup diambil dari satu anggota.</p>
+  <div class="au-fig" data-auto="DFA minimum contoh A sampai H">0 1
 →AE BH DF
 BH G C
 *C AE C
 DF C G
 G G AE</div>
-<div class="callout warn"><strong>State yang tidak tercapai</strong>Di contoh ini, D tidak bisa dicapai dari A (tidak ada transisi menuju D). Slide tetap mengikutkannya sehingga muncul grup {D,F}. Untuk DFA yang benar-benar minimum, buang dulu state yang tidak tercapai, baru minimisasi.</div>
+  <ul>
+    <li><strong>Start</strong> = grup yang memuat start lama (A), yaitu AE.</li>
+    <li><strong>Final</strong> = grup yang memuat final lama (C).</li>
+    <li><strong>Contoh:</strong> AE dengan 0. A ke B dan E ke H, keduanya di grup BH.</li>
+  </ul>
 
-<h2>3. Metode partition</h2>
-<ol>
-  <li>Round 0: P = {final, bukan final}.</li>
-  <li>Untuk setiap grup G dan setiap state s di G, tulis grup tujuan δ(s, a) untuk setiap simbol a.</li>
-  <li>State dalam G dengan baris grup tujuan yang sama tetap satu grup. Yang berbeda dipisah.</li>
-  <li>Ulangi sampai tidak ada grup yang pecah. Start DFA minimum = grup yang memuat start lama, final = grup yang memuat final lama.</li>
-</ol>
-<h3>Contoh slide: 3 state</h3>
-<p>Final = 2. G1 = {2}, G2 = {1,3}. move(1,a) = 2, move(1,b) = 3, move(3,a) = 2, move(3,b) = 3: baris grup tujuan 1 dan 3 sama (G1, G2), jadi G2 tidak pecah. DFA minimum: {1,3} dan {2}.</p>
-<h3>Contoh slide: 4 state</h3>
-<table class="t">
-  <tr><th>State</th><th>a</th><th>b</th><th>Round 1 (G1={4}, G2={1,2,3})</th><th>Round 2 (G1={4}, G2={1,2}, G3={3})</th></tr>
-  <tr><td>→1</td><td>2</td><td>3</td><td>G2 G2</td><td>G2 G3</td></tr>
-  <tr><td>2</td><td>2</td><td>3</td><td>G2 G2</td><td>G2 G3</td></tr>
-  <tr><td>3</td><td>4</td><td>3</td><td>G1 G2 → pisah</td><td>(sendiri)</td></tr>
-  <tr><td>*4</td><td>2</td><td>3</td><td>(sendiri)</td><td>(sendiri)</td></tr>
-</table>
-<p>Hasil: {1,2}, {3}, {4}.</p>
+  <aside class="jebakan">
+    <p>Di contoh ini, D <mark class="jebakan">tidak bisa dicapai</mark> dari A (tidak ada transisi menuju D). Slide tetap mengikutkannya sehingga muncul grup {D,F}. Untuk DFA yang benar-benar minimum, buang dulu state yang tidak tercapai.</p>
+  </aside>
 
-<h2>4. Kesalahan yang sering muncul</h2>
-<table>
-  <tr><th>Kesalahan</th><th>Perbaikan</th></tr>
-  <tr><td>Menggabung final dengan bukan final</td><td>Basis selalu memisahkan keduanya</td></tr>
-  <tr><td>Berhenti setelah satu putaran</td><td>Ulangi sampai satu putaran tanpa X baru (atau tanpa grup pecah)</td></tr>
-  <tr><td>Partition: membandingkan state tujuan</td><td>Bandingkan nomor grup tujuan</td></tr>
-  <tr><td>Lupa dead state pada DFA yang tidak lengkap</td><td>Lengkapi dulu dengan state ∅</td></tr>
-  <tr><td>Start DFA minimum = state pertama di tabel</td><td>Start = grup yang memuat start lama</td></tr>
-</table>
+  <p class="intinya">Satu grup = satu state. Start dan final mengikuti anggota grupnya.</p>
 
-<h2>5. Latihan (dari slide dosen)</h2>
-<p>Cek setiap langkah di <a href="viz/minimisasi.html">visualisasi</a> (pilih "Latihan 1" atau "Latihan 2").</p>
-<p><b>1.</b> Buat DFA minimum yang ekuivalen. Start A, final C, F, I.</p>
-<table class="t">
-  <tr><th></th><th>0</th><th>1</th></tr>
-  <tr><td>→A</td><td>B</td><td>E</td></tr><tr><td>B</td><td>C</td><td>F</td></tr><tr><td>*C</td><td>D</td><td>H</td></tr>
-  <tr><td>D</td><td>E</td><td>H</td></tr><tr><td>E</td><td>F</td><td>I</td></tr><tr><td>*F</td><td>G</td><td>B</td></tr>
-  <tr><td>G</td><td>H</td><td>B</td></tr><tr><td>H</td><td>I</td><td>C</td></tr><tr><td>*I</td><td>A</td><td>E</td></tr>
-</table>
-<details><summary>Jawaban (table-filling)</summary>
-<table class="au-tri"><tr><th>B</th><td class="x">X<sub>1</sub></td></tr><tr><th>C</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>D</th><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>E</th><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>F</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>G</th><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>1</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th>H</th><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>1</sub></td></tr><tr><th>I</th><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td><td class="o">O</td><td class="x">X<sub>0</sub></td><td class="x">X<sub>0</sub></td></tr><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th></tr></table>
-<p>Putaran 1 menandai 9 pasangan, misalnya (A,B): dengan 0 menuju (B,C), dan (B,C) = X<sub>0</sub>. Putaran 2 tidak menambah X. Hasil: <b>{A,D,G}, {B,E,H}, {C,F,I}</b>.</p>
-<div class="au-fig" data-auto="DFA minimum latihan 1">0 1
-→ADG BEH BEH
-BEH CFI CFI
-*CFI ADG BEH</div>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan grup {A,E}, {B,H}, {C}, {D,F}, {G}, tentukan transisi grup BH.</summary>
+    <p>Dengan 0: B ke G dan H ke G, jadi BH ke <b>G</b>. Dengan 1: B ke C dan H ke C, jadi BH ke <b>C</b>.</p>
+  </details>
 </details>
-<p><b>2.</b> Buat DFA minimum dengan metode partition. Start A, final F.</p>
-<table class="t">
-  <tr><th></th><th>0</th><th>1</th></tr>
-  <tr><td>→A</td><td>B</td><td>C</td></tr><tr><td>B</td><td>A</td><td>C</td></tr><tr><td>C</td><td>D</td><td>E</td></tr>
-  <tr><td>D</td><td>B</td><td>F</td></tr><tr><td>E</td><td>G</td><td>C</td></tr><tr><td>*F</td><td>G</td><td>E</td></tr>
-  <tr><td>G</td><td>A</td><td>F</td></tr>
-</table>
-<details><summary>Jawaban (partition)</summary>
-<p><b>Round 0</b>: G1 = {F}, G2 = {A,B,C,D,E,G}.</p>
-<p><b>Round 1</b>: grup tujuan untuk (0, 1): A → (G2, G2), B → (G2, G2), C → (G2, G2), E → (G2, G2), D → (G2, <b>G1</b>), G → (G2, <b>G1</b>). Pecah: {A,B,C,E} dan {D,G}.</p>
-<p><b>Round 2</b> dengan G1 = {F}, G2 = {A,B,C,E}, G3 = {D,G}: A → (G2, G2), B → (G2, G2), C → (<b>G3</b>, G2), E → (<b>G3</b>, G2). Pecah: {A,B} dan {C,E}. D → (G2, G1), G → (G2, G1): tetap.</p>
-<p><b>Round 3</b>: tidak ada grup yang pecah. Hasil: <b>{A,B}, {C,E}, {D,G}, {F}</b>.</p>
-<div class="au-fig" data-auto="DFA minimum latihan 2">0 1
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Partition: mulai dari {final} dan {bukan final}, lalu pecah grup berdasarkan grup tujuan</h2></summary>
+  <p class="rantai">
+    <span class="dari">basis dan induksi (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">contoh (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Memilah siswa: mula-mula "lulus" dan "tidak lulus", lalu dipecah lagi berdasarkan kelas tujuan mereka.</p>
+    <p class="batas">siswa bisa dipindah balik. Di partition, grup hanya bisa pecah, tidak pernah bergabung lagi.</p>
+  </aside>
+
+  <p><mark>Partition</mark> menjalankan ide yang sama dengan table-filling, tapi mencatatnya sebagai grup:</p>
+  <ol>
+    <li><strong>Round 0:</strong> G1 = final, G2 = bukan final.</li>
+    <li><strong>Tulis grup tujuan</strong> δ(s, a) untuk setiap state s dan simbol a.</li>
+    <li><strong>Di dalam satu grup,</strong> state dengan baris grup tujuan yang sama tetap bersama. Yang berbeda dipisah.</li>
+    <li><strong>Ulangi</strong> sampai tidak ada grup yang pecah.</li>
+  </ol>
+
+  <aside class="jebakan">
+    <p>Yang dibandingkan adalah <mark class="jebakan">nomor grup tujuan, bukan state tujuan</mark>. 1 ke 2 dan 3 ke 4 tetap "sama" kalau 2 dan 4 masih satu grup.</p>
+  </aside>
+
+  <p class="intinya">Dua grup awal, pecah berdasarkan baris grup tujuan, ulangi sampai stabil.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Minimumkan DFA hasil followpos untuk <code>(a|b)*(ab|bb)a*</code> (materi 04): A: a ke B, b ke C; B: a ke B, b ke D; C: a ke B, b ke D; *D: a ke E, b ke D; *E: a ke E, b ke D.</summary>
+    <p>Round 0: G1 = {D,E}, G2 = {A,B,C}. Round 1: A ke (G2, G2), B ke (G2, G1), C ke (G2, G1), jadi A dipisah. D dan E sama-sama (G1, G1). Round 2 stabil. Hasil: <b>{A}, {B,C}, {D,E}</b>, 3 state.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Contoh partition: grup pecah sampai setiap anggota punya baris grup tujuan yang sama</h2></summary>
+  <p class="rantai">
+    <span class="dari">langkah partition (<a href="#langkah-6">6️⃣</a>)</span>
+    <span class="ke">menggambar DFA minimum (<a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Memecah grup chat besar menjadi grup kecil berdasarkan minat yang sama.</p>
+    <p class="batas">grup chat bisa dibuat sesukanya. Di sini pemecahan hanya berdasarkan baris grup tujuan.</p>
+  </aside>
+
+  <p>Contoh slide 4 state, final = 4. Kolom Round berisi grup tujuan untuk a dan b.</p>
+  <table class="t">
+    <tr><th>State</th><th>a</th><th>b</th><th>Round 1 (G1={4}, G2={1,2,3})</th><th>Round 2 (G1={4}, G2={1,2}, G3={3})</th></tr>
+    <tr><td>→1</td><td>2</td><td>3</td><td>G2 G2</td><td>G2 G3</td></tr>
+    <tr><td>2</td><td>2</td><td>3</td><td>G2 G2</td><td>G2 G3</td></tr>
+    <tr><td>3</td><td>4</td><td>3</td><td><b>G1</b> G2, jadi dipisah</td><td>(sendiri)</td></tr>
+    <tr><td>*4</td><td>2</td><td>3</td><td>(sendiri)</td><td>(sendiri)</td></tr>
+  </table>
+  <p>Hasil: {1,2}, {3}, {4}.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide 3 state</summary>
+      <p>Final = 2. G1 = {2}, G2 = {1,3}. move(1,a) = 2, move(1,b) = 3, move(3,a) = 2, move(3,b) = 3. Baris grup tujuan 1 dan 3 sama (G1, G2), jadi G2 tidak pecah. DFA minimum: {1,3} dan {2}.</p>
+    </details>
+  </aside>
+
+  <p class="intinya">Round berhenti saat tidak ada grup yang pecah. Grup akhir = state DFA minimum.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Minimumkan dengan partition. Start A, final F. A: B, C; B: A, C; C: D, E; D: B, F; E: G, C; F: G, E; G: A, F (kolom 0, lalu 1).</summary>
+    <p><b>Round 0:</b> G1 = {F}, G2 = {A,B,C,D,E,G}.</p>
+    <p><b>Round 1:</b> grup tujuan (0, 1): A, B, C, E ke (G2, G2), sedangkan D dan G ke (G2, <b>G1</b>). Pecah: {A,B,C,E} dan {D,G}.</p>
+    <p><b>Round 2</b> dengan G1 = {F}, G2 = {A,B,C,E}, G3 = {D,G}: A dan B ke (G2, G2), C dan E ke (<b>G3</b>, G2). Pecah: {A,B} dan {C,E}. D dan G tetap (G2, G1).</p>
+    <p><b>Round 3:</b> tidak ada yang pecah. Hasil: <b>{A,B}, {C,E}, {D,G}, {F}</b>.</p>
+    <div class="au-fig" data-auto="DFA minimum latihan 2">0 1
 →AB AB CE
 CE DG CE
 DG AB F
 *F DG CE</div>
+  </details>
 </details>
-<p><b>3.</b> Minimumkan DFA hasil followpos untuk <code>(a|b)*(ab|bb)a*</code> (materi 04): A: a→B, b→C; B: a→B, b→D; C: a→B, b→D; *D: a→E, b→D; *E: a→E, b→D.</p>
-<details><summary>Jawaban</summary><p>Round 0: {D,E}, {A,B,C}. Round 1: A → (G2, G2), B → (G2, G1), C → (G2, G1), jadi A dipisah. D dan E sama-sama (G1, G1). Round 2 stabil. Hasil: <b>{A}, {B,C}, {D,E}</b>, 3 state.</p></details>
+</section>
 
-<h2>Daftar pustaka</h2>
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: berhenti terlalu cepat dan membandingkan hal yang salah</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">mengecek DFA minimum-mu sendiri</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Berhenti menyapu sebelum lantai benar-benar bersih.</p>
+    <p class="batas">lantai yang hampir bersih masih bisa dipakai. Tabel yang belum stabil memberi DFA yang salah.</p>
+  </aside>
+
+  <p>Cek setiap langkah di visualisasi kalau ragu.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>Menggabung final dengan bukan final</td><td>Language berubah, karena ε membedakan keduanya</td><td>Basis selalu memisahkan keduanya</td></tr>
+    <tr><td>Berhenti setelah satu putaran</td><td>(A,G) di contoh dianggap ekuivalen</td><td>Ulangi sampai satu putaran tanpa X baru (atau tanpa grup pecah)</td></tr>
+    <tr><td>Partition: membandingkan state tujuan</td><td>State yang sama malah dipisah</td><td>Bandingkan nomor grup tujuan</td></tr>
+    <tr><td>DFA tidak lengkap (ada sel kosong)</td><td>Pasangan tidak bisa dicek untuk simbol itu</td><td>Lengkapi dulu dengan dead state ∅</td></tr>
+    <tr><td>Start DFA minimum = state pertama di tabel</td><td>Start salah</td><td>Start = grup yang memuat start lama</td></tr>
+  </table>
+
+  <p class="intinya">Ulangi sampai stabil, bandingkan grup (bukan state), dan lengkapi DFA dulu.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Temanmu berhenti setelah putaran 1 di contoh A sampai H dan menyimpulkan (A,G) ekuivalen. Kenapa salah?</summary>
+    <p>(A,G) dengan 0 menuju (B,G), yang baru diberi X di putaran 1. Karena itu (A,G) harus diberi X di putaran 2. Berhenti terlalu cepat membuat A dan G salah digabung.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Addison-Wesley. Bab 4.4.</li>
   <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 3.9.6.</li>
   <li>Nasari, M. (2025). <i>DFA minimization</i> [slide kuliah COMP6062 Compilation Techniques, sesi 6].</li>
 </ol>
 
-</article>
+</main>
 <script src="../../_shared/automata.js?v=9b7b4edb"></script>
 <script>renderFigures();</script>
 </body>

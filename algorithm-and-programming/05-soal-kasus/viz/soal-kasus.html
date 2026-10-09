@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trace Soal Kasus</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/cviz.css?v=a013a6e6">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
+</head>
+<body class="viz">
+
+<h1>Trace soal kasus</h1>
+<p>Visualisasi ini menjalankan program jawaban soal kasus baris demi baris dengan sample input, sama seperti langkah 2 resep yang kamu kerjakan di kertas.</p>
+<p class="coba"><strong>Coba:</strong> pilih program di menu <b>Program</b>, lalu klik <b>Langkah berikutnya</b>. Isi keyboard bisa diganti lewat <b>Ubah input</b> untuk mencoba edge case.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> kotak memory yang berubah dan trace table yang bertambah satu baris di setiap putaran. Output di layar harus sama persis dengan sample output.</p>
+
+<script src="../../../_shared/cviz.js?v=a6fad534"></script>
+<script>
+cviz({
+  programs: {
+    nilai: {
+      title: 'Contoh 1: nilai kuis',
+      perhatikan: 'tertinggi mulai dari -1, jadi nilai pertama (80) pasti menggantikannya. Rata-rata dihitung dengan <code>(double)total / n</code>, jadi hasilnya 72.40, bukan 72.00 (notes 8️⃣).',
+      input: '5\n80 65 90 75 52',
+      watch: ['i', 'nilai', 'total', 'tertinggi', 'lulus'],
+      code: `#include <stdio.h>
+
+int main() {
+    int n, i, nilai;
+    int total = 0, tertinggi = -1, lulus = 0;
+
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &nilai);
+        total += nilai;
+        if (nilai > tertinggi) {
+            tertinggi = nilai;
+        }
+        if (nilai >= 75) {
+            lulus++;
+        }
+    }
+
+    printf("Rata-rata: %.2f\\n", (double)total / n);
+    printf("Tertinggi: %d\\n", tertinggi);
+    printf("Lulus: %d\\n", lulus);
+    return 0;
+}`,
+      *run(m) {
+        m.decl('int', 'n'); m.decl('int', 'i'); m.decl('int', 'nilai');
+        m.decl('int', 'total', 0); m.decl('int', 'tertinggi', -1); m.decl('int', 'lulus', 0);
+        yield m.step('int total', 'Tiga akumulator diberi nilai awal. <code>total</code> dan <code>lulus</code> mulai dari 0 karena belum ada yang dihitung. <code>tertinggi</code> mulai dari -1, lebih kecil dari nilai terkecil yang mungkin (0).', { hot: ['total', 'tertinggi', 'lulus'] });
+        m.scanf('%d', 'n');
+        const n = m.get('n');
+        yield m.step('scanf("%d", &n)', `n = ${n}: loop akan membaca ${n} nilai.`, { hot: ['n'] });
+        for (let i = 0; i < n; i++) {
+          m.set('i', i);
+          m.scanf('%d', 'nilai');
+          const v = m.get('nilai');
+          m.set('total', m.get('total') + v);
+          yield m.step('total += nilai', `i = ${i}: baca nilai ke-${i + 1} = ${v}, lalu total = ${m.get('total')}.`, { hot: ['i', 'nilai', 'total'] });
+          const t = m.get('tertinggi');
+          if (v > t) {
+            m.set('tertinggi', v);
+            yield m.step('tertinggi = nilai', `${v} &gt; ${t}, jadi tertinggi diganti menjadi ${v}.`, { hot: ['tertinggi'] });
+          } else yield m.step('if (nilai > tertinggi)', `${v} tidak lebih besar dari ${t}, jadi tertinggi tetap.`);
+          if (v >= 75) {
+            m.set('lulus', m.get('lulus') + 1);
+            yield m.step('lulus++', `${v} &gt;= 75, jadi lulus bertambah menjadi ${m.get('lulus')}.`, { hot: ['lulus'] });
+          } else yield m.step('if (nilai >= 75)', `${v} &lt; 75, jadi tidak dihitung lulus.`);
+          m.trace();
+        }
+        m.set('i', n);
+        yield m.step('for (i = 0', `i = ${n}: ${n} &lt; ${n} false, loop selesai. Semua nilai sudah dibaca.`, { hot: ['i'] });
+        const total = m.get('total');
+        m.printf('Rata-rata: %.2f\n', total / n);
+        yield m.step('Rata-rata', `<code>(double)total / n</code> = ${total}.0 / ${n} = ${(total / n).toFixed(2)}. Casting membuat pembagiannya desimal.`);
+        m.printf('Tertinggi: %d\n', m.get('tertinggi'));
+        m.printf('Lulus: %d\n', m.get('lulus'));
+        yield m.step('Lulus: %d', 'Output tiga baris, sama persis dengan sample output: label, titik dua, spasi, lalu angkanya.', { final: true });
+      },
+    },
+    suhu: {
+      title: 'Contoh 2: suhu di atas rata-rata',
+      perhatikan: 'loop pertama hanya menyimpan dan menjumlahkan. Hari baru bisa dibandingkan setelah rata-rata diketahui, jadi semua suhu harus disimpan dulu di array (notes 9️⃣).',
+      input: '6\n30 28 33 29 35 31',
+      watch: ['i', 'total', 'ada'],
+      code: `#include <stdio.h>
+
+int main() {
+    int n, i, ada = 0, total = 0;
+    int suhu[100];
+    double rata;
+
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &suhu[i]);
+        total += suhu[i];
+    }
+    rata = (double)total / n;
+
+    printf("Rata-rata: %.1f\\n", rata);
+    printf("Hari:");
+    for (i = 0; i < n; i++) {
+        if (suhu[i] > rata) {
+            printf(" %d", i + 1);
+            ada++;
+        }
+    }
+    if (ada == 0) {
+        printf(" tidak ada");
+    }
+    printf("\\n");
+    return 0;
+}`,
+      *run(m) {
+        m.decl('int', 'n'); m.decl('int', 'i'); m.decl('int', 'ada', 0); m.decl('int', 'total', 0);
+        m.decl('int', 'suhu[100]'); m.decl('double', 'rata');
+        yield m.step('int suhu[100]', 'Array berukuran 100, sesuai batas soal (N paling banyak 100). Yang terpakai hanya n elemen pertama.', { hot: ['suhu'] });
+        m.scanf('%d', 'n');
+        const n = m.get('n');
+        yield m.step('scanf("%d", &n)', `n = ${n} hari.`, { hot: ['n'] });
+        for (let i = 0; i < n; i++) {
+          m.set('i', i);
+          m.scanf('%d', `suhu[${i}]`);
+          m.set('total', m.get('total') + m.get(`suhu[${i}]`));
+          m.trace();
+          yield m.step('total += suhu[i]', `<b>Loop 1</b>, i = ${i}: simpan suhu[${i}] = ${m.get(`suhu[${i}]`)}, total = ${m.get('total')}. Belum ada yang dibandingkan, karena rata-rata belum diketahui.`, { hot: ['i', `suhu[${i}]`, 'total'] });
+        }
+        const rata = m.get('total') / n;
+        m.set('rata', rata);
+        yield m.step('rata = (double)', `rata = ${m.get('total')}.0 / ${n} = ${rata.toFixed(1)}. Baru sekarang rata-rata diketahui.`, { hot: ['rata'] });
+        m.printf('Rata-rata: %.1f\n', rata);
+        m.printf('Hari:');
+        yield m.step('printf("Hari:");', 'Label "Hari:" dicetak sekali, sebelum loop kedua. Setiap nomor hari nanti diawali satu spasi.');
+        for (let i = 0; i < n; i++) {
+          m.set('i', i);
+          const s = m.get(`suhu[${i}]`);
+          if (s > rata) {
+            m.printf(' %d', i + 1);
+            m.set('ada', m.get('ada') + 1);
+            m.trace();
+            yield m.step('printf(" %d", i + 1)', `<b>Loop 2</b>, i = ${i}: ${s} &gt; ${rata.toFixed(1)}, jadi cetak hari ke-${i + 1} (index + 1, karena hari dihitung mulai 1).`, { hot: ['i', `suhu[${i}]`, 'ada'] });
+          } else {
+            m.trace();
+            yield m.step('if (suhu[i] > rata)', `<b>Loop 2</b>, i = ${i}: ${s} tidak lebih dari ${rata.toFixed(1)}, lewati.`, { hot: ['i', `suhu[${i}]`] });
+          }
+        }
+        yield m.step('if (ada == 0)', `ada = ${m.get('ada')}, jadi "tidak ada" tidak dicetak.`);
+        m.printf('\n');
+        yield m.step('printf("\\n");', 'Newline di akhir menutup baris kedua. Output sama dengan sample: "Hari: 3 5", tanpa spasi di akhir.', { final: true });
+      },
+    },
+    bug: {
+      title: 'Bug: pembagian integer',
+      perhatikan: 'input sama dengan contoh 1, tapi rata-rata keluar 72.00. Pembagian <code>total / n</code> dikerjakan sebagai int sebelum disimpan ke double (notes <span class="no">10</span>).',
+      input: '5\n80 65 90 75 52',
+      watch: ['i', 'total'],
+      code: `int n, i, nilai, total = 0;
+double rata;
+
+scanf("%d", &n);
+for (i = 0; i < n; i++) {
+    scanf("%d", &nilai);
+    total += nilai;
+}
+rata = total / n;
+printf("Rata-rata: %.2f\\n", rata);`,
+      *run(m) {
+        m.decl('int', 'n'); m.decl('int', 'i'); m.decl('int', 'nilai'); m.decl('int', 'total', 0); m.decl('double', 'rata');
+        m.scanf('%d', 'n');
+        const n = m.get('n');
+        for (let i = 0; i < n; i++) {
+          m.set('i', i);
+          m.scanf('%d', 'nilai');
+          m.set('total', m.get('total') + m.get('nilai'));
+          m.trace();
+        }
+        yield m.step('total += nilai', `Loop sudah selesai: total = ${m.get('total')}, n = ${n}. Sampai sini sama dengan contoh 1.`, { hot: ['total'] });
+        const q = Math.trunc(m.get('total') / n);
+        m.set('rata', q);
+        yield m.step('rata = total / n', `<b>Bug:</b> total dan n sama-sama int, jadi ${m.get('total')} / ${n} = ${q} (desimalnya dibuang). Baru setelah itu ${q} disimpan ke double rata, jadi rata = ${q}.0.`, { hot: ['rata'] });
+        m.printf('Rata-rata: %.2f\n', q);
+        yield m.step('printf', `Output ${q}.00, padahal seharusnya ${(m.get('total') / n).toFixed(2)}. Perbaikan: <code>rata = (double)total / n;</code>`, { final: true });
+      },
+    },
+  },
+});
+</script>
+</body>
+</html>

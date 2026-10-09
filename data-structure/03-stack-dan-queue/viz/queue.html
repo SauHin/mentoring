@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Queue dengan Linked List</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=3f7fc4dc">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Queue dengan linked list</h1>
-<p><b>Enqueue</b> masuk di tail, <b>dequeue</b> keluar dari head, dan <b>cancel</b> mengeluarkan nilai tertentu dari tengah antrean. Perhatikan kapan <code>tail</code> ikut berubah.</p>
+<p>Visualisasi ini menjalankan enqueue, dequeue, dan cancel pada queue berbasis linked list.</p>
+<p class="coba"><strong>Coba:</strong> isi <b>Nilai</b>, lalu klik <b>enqueue</b>, <b>dequeue</b>, atau <b>cancel</b> (untuk mengeluarkan nilai tertentu dari tengah). Klik <b>Langkah berikutnya</b> untuk menjalankan setiap baris.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> enqueue masuk di tail, dequeue keluar dari head. Lihat kapan <code>tail</code> ikut berubah.</p>
 
-<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script src="../../../_shared/listviz.js?v=5942227c"></script>
 <script>
 const CODE = {
   struct: `typedef struct Node {
@@ -158,7 +161,14 @@ const OPS = {
   cancel: (x) => cancel(x),
 };
 const check = checkCommon;
-listViz({ doubly: false, values: [10, 20, 30], tail: true, pos: false, noun: 'Queue' });
+listViz({
+  doubly: false, values: [10, 20, 30], tail: true, pos: false, noun: 'Queue',
+  hints: {
+    enqueue: 'node baru disambung di belakang tail, lalu tail pindah. Queue kosong → head dan tail sama-sama node baru (notes 5️⃣).',
+    dequeue: 'head pindah ke node ke-2. Kalau antrean jadi kosong, tail juga harus jadi NULL (notes 5️⃣).',
+    cancel: 'prev selalu satu langkah di belakang cur. Saat nilai ketemu, prev→next melompati cur, dan head/tail dipindah kalau cur di ujung (notes 6️⃣).',
+  },
+});
 </script>
 </body>
 </html>

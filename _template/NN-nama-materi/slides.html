@@ -1,33 +1,65 @@
 <!doctype html>
+<!-- Template slide gaya catatan. Acuan lengkap: algorithm-and-programming/03-repetition/slides.html.
+     Satu slide = satu ide: p.kicker (nomor section notes) → h2 kalimat kesimpulan → p.sub satu kalimat
+     → bukti (tabel, gambar berlabel + figcaption, contoh angka, atau iframe viz) → maksimal 3 poin. Sekitar 60 kata.
+     Akhiri dengan slide ringkasan, slide soal latihan, dan slide jawaban. -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Judul Materi</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="deck">
 
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
   <h1>Judul materi</h1>
-  <p>Subjudul atau tujuan pertemuan</p>
+  <p class="sub">Nama matkul · materi NN</p>
+  <p>Target: apa yang bisa kamu lakukan setelah slide ini.</p>
 </section>
 
 <section class="slide">
-  <h2>Poin utama</h2>
-  <p class="sub">Satu atau dua kalimat yang menjelaskan isi slide ini, supaya slide bisa dipahami tanpa penjelasan lisan.</p>
+  <p class="kicker">Notes 1️⃣ · Konsep pertama</p>
+  <h2>Judul berupa kalimat kesimpulan, bukan nama topik</h2>
+  <p class="sub"><mark>Istilah</mark> adalah … (satu kalimat).</p>
+  <table>
+    <tr><th>Kolom</th><th>Kolom</th></tr>
+    <tr><td>Bukti</td><td>untuk judul</td></tr>
+  </table>
   <ul>
-    <li>Poin pertama dengan <mark>istilah penting</mark>, ditulis sebagai kalimat lengkap.</li>
-    <li>Poin kedua menjelaskan alasannya, bukan hanya "A → B".</li>
+    <li>Poin pendek yang menjelaskan kenapa.</li>
+  </ul>
+</section>
+
+<section class="slide full">
+  <p class="kicker">Notes 1️⃣ · Nama visualisasi</p>
+  <h2>Coba sendiri: apa yang harus diperhatikan</h2>
+  <iframe src="viz/contoh.html" title="Visualisasi contoh"></iframe>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan: …</h2>
+  <ul>
+    <li>Poin terpenting, dengan nomor section notes (1️⃣).</li>
   </ul>
 </section>
 
 <section class="slide">
-  <h2>Coba sendiri</h2>
-  <iframe src="viz/contoh.html" title="Visualisasi contoh"></iframe>
+  <h2>Soal latihan: kerjakan dulu, jawabannya di slide berikutnya</h2>
+  <ol class="soal-list">
+    <li>Soal pertama.</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2>Jawaban soal latihan</h2>
+  <ol class="soal-list">
+    <li>Jawaban beserta alasannya.</li>
+  </ol>
 </section>
 
 <script src="../../_shared/slides.js?v=805bba15"></script>

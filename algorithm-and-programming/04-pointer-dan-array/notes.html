@@ -5,189 +5,207 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pointer dan Array · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
+  <style>
+    .mem { max-width: 32rem; }
+    .mem rect { fill: var(--callout); stroke: var(--pudar); stroke-width: 1.5; }
+    .mem text { fill: currentColor; font: 14px var(--mono); text-anchor: middle; dominant-baseline: central; }
+    .mem .isi { font: 600 18px var(--mono); }
+    .mem .ket { fill: var(--pudar); font-size: 12px; }
+    .mem .panah { fill: none; stroke: rgb(var(--biru)); stroke-width: 2.2; }
+  </style>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="rgb(35 131 226)"/></marker></defs></svg>
 
-<span class="chip">Algorithm and programming · 04</span>
-<h1>Pointer dan array</h1>
-<p class="lead">Pointer terasa sulit kalau dihafal sebagai aturan simbol. Dengan gambar <b>kotak dan alamat</b> dari materi 02, pointer hanyalah <b>kotak yang isinya alamat kotak lain</b>.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/pointer-array.html">Visualisasi pointer &amp; array</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li><code>&amp;x</code> = alamat x. <code>*p</code> = isi kotak yang alamatnya disimpan di p.</li>
-    <li>Array = kotak <b>berderet</b> tanpa celah. <code>A[i]</code> sama dengan <code>*(A + i)</code>.</li>
-    <li>C <b>tidak memeriksa</b> batas array: <code>A[10]</code> pada array 10 elemen lolos compile, tapi merusak memory.</li>
-    <li>String = array char yang diakhiri <code>'\0'</code>. Semua fungsi string berhenti di <code>'\0'</code>.</li>
+<header>
+  <h1>Pointer dan array</h1>
+  <p class="tujuan">Dengan gambar kotak dan alamat dari materi 02, pointer hanyalah kotak yang isinya alamat kotak lain. Target: kamu bisa menggambar isi memory untuk kode pointer, array, dan string, lalu menebak output-nya.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/pointer-array.html">pointer dan array di memory</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Pointer: kotak berisi alamat</a></li>
+      <li><a href="#langkah-2">Tiga arti tanda *</a></li>
+      <li><a href="#langkah-3">Pointer ke pointer</a></li>
+      <li><a href="#langkah-4">Array: kotak berderet</a></li>
+      <li><a href="#langkah-5">A[i] = *(A + i)</a></li>
+      <li><a href="#langkah-6">Pointer variable vs nama array</a></li>
+      <li><a href="#langkah-7">Index di luar batas</a></li>
+      <li><a href="#langkah-8">Array 2D dan 3D</a></li>
+      <li><a href="#langkah-9">Array of pointer</a></li>
+      <li><a href="#langkah-10">String = array char + '\0'</a></li>
+      <li><a href="#langkah-11">Fungsi string dan karakter</a></li>
+      <li><a href="#langkah-12">Bug yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Ingat lagi: setiap kotak punya alamat</h2>
-<pre><code>int i = 7;
-printf("%d\n", i);    // 7         ← isi kotak
-printf("%p\n", &amp;i);   // 000000000061FE1C  ← alamat kotak (angkanya bisa berbeda)</code></pre>
-<p>Kamu sudah memakai alamat sejak materi 02: <code>scanf("%d", &amp;i)</code> memberi tahu scanf <b>di mana</b> kotak i berada, supaya scanf bisa menulis ke sana.</p>
+<main>
 
-<h2>2. Pointer: kotak berisi alamat</h2>
-<pre><code>int i = 7;
-int *ptr;      // ptr: kotak yang akan menyimpan alamat sebuah int
-ptr = &amp;i;      // simpan alamat i ke ptr  → ptr "menunjuk" i
-*ptr = 5;      // ikuti alamat di ptr, ubah isinya → i jadi 5
-
-     ptr                 i
-  ┌────────┐         ┌──────┐
-  │ 0x1000 │ ──────▶ │  5   │
-  └────────┘         └──────┘
-    0x1008             0x1000</code></pre>
-<p>Tanda <code>*</code> punya tiga arti, tergantung tempatnya:</p>
-<table>
-  <tr><th>Tempat</th><th>Contoh</th><th>Arti</th></tr>
-  <tr><td>Di deklarasi</td><td><code>int *ptr;</code></td><td>"ptr adalah pointer ke int"</td></tr>
-  <tr><td>Di depan pointer, dalam ekspresi</td><td><code>*ptr = 5;</code></td><td>"kotak yang ditunjuk ptr" (dereference)</td></tr>
-  <tr><td>Di antara dua nilai</td><td><code>a * b</code></td><td>Perkalian</td></tr>
-</table>
-<div class="callout warn"><strong>Pointer kosong</strong>Pointer yang belum diisi menunjuk ke alamat acak. <code>*ptr = 5;</code> sebelum <code>ptr = &amp;i;</code> bisa merusak memory atau crash. Kalau belum punya alamat, isi dengan <code>NULL</code> supaya jelas "belum menunjuk apa-apa".</div>
-<p>Jalankan langkah ini di <a href="viz/pointer-array.html">visualisasi</a> (program "Pointer dasar"). Panahnya terlihat.</p>
-
-<h3>Pointer ke pointer</h3>
-<pre><code>int i, *ptr, **ptr_ptr;
-ptr = &amp;i;          // ptr menunjuk i
-ptr_ptr = &amp;ptr;    // ptr_ptr menunjuk ptr (pointer juga kotak, punya alamat)
-**ptr_ptr = 9;     // ikuti 2 panah: ptr_ptr → ptr → i. i = 9</code></pre>
-<p>Jumlah <code>*</code> = jumlah panah yang diikuti.</p>
-
-<h2>3. Array: kotak berderet</h2>
-<pre><code>int A[5] = {10, 20, 30, 40, 50};
-
- index:   [0]    [1]    [2]    [3]    [4]
-        ┌────┬──────┬──────┬──────┬──────┐
-        │ 10 │  20  │  30  │  40  │  50  │
-        └────┴──────┴──────┴──────┴──────┘
- alamat: 0x1000 0x1004 0x1008 0x100c 0x1010   ← naik 4 byte (ukuran int)</code></pre>
-<ul>
-  <li><b>Homogen</b>: semua elemen bertipe sama. <b>Index mulai 0</b>, jadi index terakhir = ukuran − 1.</li>
-  <li><b>Random access</b>: elemen mana pun bisa langsung diakses, karena alamatnya bisa dihitung.</li>
-</ul>
-<table>
-  <tr><th>Inisialisasi</th><th>Hasil</th></tr>
-  <tr><td><code>int B[] = {1, 2, -4, 8};</code></td><td>Ukuran dihitung otomatis: 4 elemen</td></tr>
-  <tr><td><code>int B[8] = {1, 2, -4, 8};</code></td><td>8 elemen. Sisa 4 elemen otomatis <b>0</b></td></tr>
-  <tr><td><code>int B[4] = {1, 2, -4, 8, 9};</code></td><td><b>Error</b>: isi lebih banyak dari ukuran</td></tr>
-  <tr><td><code>int A[5];</code> lalu <code>A = {0,0,0,0,0};</code></td><td><b>Error</b>: kurung kurawal hanya boleh saat deklarasi. Isi dengan loop.</td></tr>
-</table>
-
-<h2>4. Array dan pointer: A[i] = *(A + i)</h2>
-<p>Nama array <code>A</code> adalah <b>alamat elemen pertama</b> (<code>&amp;A[0]</code>). Dari situ, <code>A[i]</code> bisa diturunkan sendiri:</p>
-<ol>
-  <li>Elemen ke-i ada di alamat <code>A + i × 4</code> (int = 4 byte).</li>
-  <li>Di C, <code>A + i</code> <b>otomatis</b> dikali ukuran elemen. <code>A + 2</code> berarti maju 2 elemen, bukan 2 byte.</li>
-  <li>Jadi <code>*(A + i)</code> = isi elemen ke-i = <code>A[i]</code>. Tanda <code>[ ]</code> hanyalah singkatan.</li>
-</ol>
-<pre><code>int arr[4] = {1, 2, 3, 4};
-int *ptr = arr;           // ptr menunjuk arr[0]
-printf("%d\n", *(ptr + 1));   // 2
-printf("%d\n", *(arr + 1));   // 2
-printf("%d\n", ptr[1]);       // 2: pointer juga boleh pakai [ ]</code></pre>
-
-<h3>Pointer variable vs nama array</h3>
-<table>
-  <tr><th></th><th><code>int *ptr</code> (pointer variable)</th><th><code>int arr[4]</code> (nama array)</th></tr>
-  <tr><td>Isinya</td><td>Alamat, bisa diganti kapan saja</td><td>Alamat elemen pertama, <b>tetap</b></td></tr>
-  <tr><td><code>ptr = &amp;x;</code> / <code>arr = &amp;x;</code></td><td>Boleh</td><td><b>Error</b>: nama array tidak bisa diberi alamat baru</td></tr>
-  <tr><td><code>ptr++</code> / <code>arr++</code></td><td>Boleh: pindah ke elemen berikutnya</td><td><b>Error</b></td></tr>
-</table>
-<div class="callout"><strong>Catatan: slide "Accessing array using a pointer"</strong>Di slide tertulis "ptr is a <b>pointer constant</b> pointing to the first element". Yang tepat: <code>ptr</code> adalah <b>pointer variable</b>, sesuai komentar di kodenya sendiri (<code>// ptr is a pointer variable</code>). Yang konstan adalah nama array <code>arr</code>.</div>
-
-<h2>5. Index di luar batas</h2>
-<pre><code>int A[3] = {1, 2, 3};
-A[3] = 7;    // index valid hanya 0, 1, 2</code></pre>
-<p><code>A[3]</code> = alamat A + 3 elemen = kotak <b>setelah</b> array berakhir. C tidak memeriksa batas array, jadi baris ini <b>lolos compile tanpa error</b>. Saat jalan, nilai 7 ditulis ke memory milik variabel lain, atau program crash. Ini disebut <b>undefined behavior</b>, dan jauh lebih berbahaya daripada error, karena tidak ada yang memberi tahu.</p>
-<div class="callout"><strong>Catatan: slide "Pointer constant (array)"</strong>Di slide, <code>arr1[10] = 12; // error max 9</code> ditandai error. Index 10 memang salah, tapi compiler (termasuk Dev-C++) <b>tidak</b> menolaknya. Kesalahannya baru terasa saat program jalan. Lihat program "Index di luar batas" di <a href="viz/pointer-array.html">visualisasi</a>.</div>
-
-<h2>6. Array 2D dan 3D</h2>
-<pre><code>int a[3][4];   // 3 baris, 4 kolom. a[baris][kolom]</code></pre>
-<p>Di memory, array 2D tetap <b>satu deret</b>: baris 0 seluruhnya, lalu baris 1, dan seterusnya (<b>row-major</b>). Posisi <code>a[i][j]</code> dari awal = <code>i × jumlah_kolom + j</code>.</p>
-<table>
-  <tr><th>Inisialisasi</th><th>Isi</th></tr>
-  <tr><td><code>int a[2][4] = {3,5,6,10,4,7,8,2};</code></td><td>Diisi berurutan per baris: {3,5,6,10}, {4,7,8,2}</td></tr>
-  <tr><td><code>int a[2][4] = {{3,5,6,10},{4,7,8,2}};</code></td><td>Sama, tapi lebih jelas</td></tr>
-  <tr><td><code>int b[2][4] = {{3},{4,7,8,2}};</code></td><td>Baris 0 = {3,0,0,0}: setiap <code>{ }</code> mengisi satu baris, sisanya 0</td></tr>
-</table>
-<p>Pola memproses array 2D = <b>nested loop</b> (materi 03): loop luar untuk baris, loop dalam untuk kolom.</p>
-<pre><code>for (int i = 0; i &lt; 3; i++) {
-    for (int j = 0; j &lt; 4; j++)
-        printf("%4d", a[i][j]);
-    printf("\n");
-}</code></pre>
-<p><b>3D</b> sama saja, ditambah satu dimensi: <code>x[blok][baris][kolom]</code>.</p>
-
-<h3>Array of pointer</h3>
-<pre><code>int x = 1, y = 2, z = 3;
-int *ptr[3] = {&amp;x, &amp;y, &amp;z};   // array berisi 3 alamat
-for (int i = 0; i &lt; 3; i++) printf("%d ", *ptr[i]);   // 1 2 3</code></pre>
-
-<h2>7. String = array char + '\0'</h2>
-<pre><code>char s[] = "BiNus";
-// sama dengan:
-char s[] = {'B', 'i', 'N', 'u', 's', '\0'};   // 6 kotak, bukan 5!</code></pre>
-<ul>
-  <li><code>'A'</code> (kutip tunggal) = <b>satu karakter</b>, 1 byte. <code>"A"</code> (kutip ganda) = <b>string</b>, 2 byte: <code>'A'</code> dan <code>'\0'</code>.</li>
-  <li><code>'\0'</code> (nilai 0) menandai <b>akhir string</b>. printf <code>%s</code>, strlen, dan strcpy semuanya membaca sampai ketemu <code>'\0'</code>.</li>
-  <li><code>char name[40] = "Amir";</code> boleh (saat deklarasi). <code>name = "Amir";</code> <b>error</b>, karena nama array tidak bisa diberi alamat baru. Pakai <code>strcpy(name, "Amir");</code>.</li>
-  <li>scanf string tanpa <code>&amp;</code>: <code>scanf("%s", name);</code>, karena <code>name</code> sudah alamat.</li>
-</ul>
-
-<h3>Turunkan sendiri: strlen</h3>
-<p>Daripada menghafal cara kerja <code>strlen</code>, tulis sendiri dengan pola loop dari materi 03:</p>
-<pre><code>int n = 0;
-while (s[n] != '\0')   // selama belum ketemu akhir string
-    n++;
-// n = panjang string</code></pre>
-<p>Jalankan di <a href="viz/pointer-array.html">visualisasi</a> (program "String &amp; \0").</p>
-
-<h2>8. Fungsi string dan karakter: cukup tahu</h2>
-<p>Tidak perlu dihafal. Gunakan tabel ini sebagai referensi, dan pahami bahwa semua fungsi string bekerja sampai <code>'\0'</code>.</p>
-<table>
-  <tr><th>Fungsi (<code>string.h</code>)</th><th>Hasil</th></tr>
-  <tr><td><code>strlen(s)</code></td><td>Panjang string, tanpa <code>'\0'</code></td></tr>
-  <tr><td><code>strcpy(s1, s2)</code></td><td>Salin s2 ke s1. s1 harus cukup besar.</td></tr>
-  <tr><td><code>strncpy(s1, s2, n)</code></td><td>Salin maksimal n karakter</td></tr>
-  <tr><td><code>strcat(s1, s2)</code></td><td>Sambung s2 ke akhir s1</td></tr>
-  <tr><td><code>strcmp(s1, s2)</code></td><td><b>0 kalau sama</b>, negatif kalau s1 &lt; s2, positif kalau s1 &gt; s2</td></tr>
-</table>
-<div class="callout warn"><strong>Jangan bandingkan string dengan ==</strong><code>if (s1 == s2)</code> membandingkan <b>alamat</b> kedua array (pasti berbeda), bukan isinya. Pakai <code>if (strcmp(s1, s2) == 0)</code>.</div>
-<table>
-  <tr><th>Fungsi (<code>ctype.h</code>)</th><th>Cek / ubah</th></tr>
-  <tr><td><code>isupper</code>, <code>islower</code></td><td>Huruf besar / kecil?</td></tr>
-  <tr><td><code>isalpha</code>, <code>isdigit</code>, <code>isalnum</code></td><td>Huruf? Angka? Huruf atau angka?</td></tr>
-  <tr><td><code>isspace</code></td><td>Spasi, tab, atau Enter?</td></tr>
-  <tr><td><code>toupper</code>, <code>tolower</code></td><td>Ubah ke huruf besar / kecil</td></tr>
-</table>
-<p>Konversi string ke angka (<code>stdlib.h</code>): <code>strtol</code> (ke long), <code>strtoul</code> (ke unsigned long), <code>strtod</code> (ke double). Ketiganya juga memberi tahu sisa string yang bukan angka, lewat parameter <code>char **endPtr</code>.</p>
-
-<h2>9. Bug yang sering muncul</h2>
-<table>
-  <tr><th>Bug</th><th>Gejala</th></tr>
-  <tr><td><code>for (i = 0; i &lt;= n; i++) A[i] = …</code> pada <code>A[n]</code></td><td>Menulis 1 kotak di luar array (off-by-one)</td></tr>
-  <tr><td><code>*ptr = 5;</code> sebelum ptr diisi alamat</td><td>Crash atau memory rusak</td></tr>
-  <tr><td>Array char terlalu kecil untuk string (lupa tempat <code>'\0'</code>)</td><td>Output berisi karakter aneh di akhir</td></tr>
-  <tr><td><code>if (s1 == s2)</code> untuk string</td><td>Selalu false</td></tr>
-  <tr><td><code>scanf("%s", &amp;name)</code></td><td>Biasanya tetap jalan, tapi salah tipe. Tulis <code>name</code></td></tr>
-  <tr><td><code>name = "Amir";</code></td><td>Compile error. Pakai <code>strcpy</code></td></tr>
-</table>
-
-<h2>10. Latihan</h2>
-
-<p><b>1.</b> Baca 10 bilangan bulat ke array, lalu cetak max, min, dan rata-ratanya.</p>
+<section class="langkah" id="langkah-1">
 <details>
-  <summary>Jawaban</summary>
-<pre><code>#include &lt;stdio.h&gt;
+  <summary><h2>Pointer: kotak yang isinya alamat kotak lain</h2></summary>
+  <p class="rantai">
+    <span class="dari">alamat kotak dan <code>&amp;x</code> di scanf (materi 02)</span>
+    <span class="ke">array (<a href="#langkah-4">4️⃣</a>), string (<a class="no" href="#langkah-10">10</a>), dan linked list (data structure)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kertas berisi alamat rumah temanmu. Kertasnya bukan rumah, tapi dengan kertas itu kamu bisa datang dan mengubah isi rumahnya.</p>
+    <p class="batas">kertas alamat bisa kamu tulis sembarangan dan tidak terjadi apa-apa. Pointer yang berisi alamat sembarang bisa merusak memory saat dipakai.</p>
+  </aside>
+
+  <p>Kamu sudah memakai alamat sejak <mark class="kaitan">materi 02: <code>scanf("%d", &amp;i)</code></mark> memberi tahu scanf di mana kotak i berada. <mark>Pointer</mark> adalah variabel yang isinya alamat variabel lain.</p>
+<pre class="kode"><code>int i = 7;
+int *ptr;      // ptr: kotak yang akan menyimpan alamat sebuah int
+ptr = &amp;i;      // simpan alamat i ke ptr: ptr "menunjuk" i
+*ptr = 5;      // ikuti alamat di ptr, ubah isinya: i jadi 5</code></pre>
+  <figure>
+    <svg class="mem" viewBox="0 0 420 120" role="img" aria-label="Kotak ptr berisi 0x1000 dengan panah ke kotak i berisi 5 di alamat 0x1000">
+      <text x="80" y="14">ptr</text>
+      <rect x="20" y="28" width="120" height="48" rx="6"/><text class="isi" x="80" y="52">0x1000</text>
+      <text class="ket" x="80" y="94">alamat 0x1008</text>
+      <text x="320" y="14">i</text>
+      <rect x="270" y="28" width="100" height="48" rx="6"/><text class="isi" x="320" y="52">5</text>
+      <text class="ket" x="320" y="94">alamat 0x1000</text>
+      <path class="panah" d="M140 52H266" marker-end="url(#tip)"/>
+    </svg>
+    <figcaption>Isi ptr adalah alamat i, jadi ptr "menunjuk" i. Lewat ptr, nilai i bisa diubah tanpa menyebut nama i.</figcaption>
+  </figure>
+
+  <aside class="jebakan">
+    <p>Pointer yang belum diisi <mark class="jebakan">menunjuk ke alamat acak</mark>. <code>*ptr = 5;</code> sebelum <code>ptr = &amp;i;</code> bisa merusak memory atau crash. Kalau belum punya alamat, isi dengan <code>NULL</code> (alamat 0, artinya "belum menunjuk apa-apa").</p>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/pointer-array.html#ptr">visualisasi, program "Pointer dasar"</a>. Panah biru muncul setelah <code>ptr = &amp;i</code>.</p>
+  </aside>
+
+  <p class="intinya"><code>&amp;</code> = ambil alamat. Pointer = kotak yang menyimpan alamat itu.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>int a = 3, *p = &amp;a; *p = *p + 4;</code> Berapa nilai a?</summary>
+    <p>a = 7. <code>*p</code> adalah kotak a, jadi barisnya sama dengan <code>a = a + 4</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Tanda <code>*</code> punya tiga arti, tergantung tempatnya</h2></summary>
+  <p class="rantai">
+    <span class="dari">pointer (<a href="#langkah-1">1️⃣</a>)</span>
+    <span class="ke">membaca semua kode pointer, termasuk linked list</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kata "bisa" dalam bahasa Indonesia: "aku bisa berenang" dan "bisa ular". Artinya ditentukan oleh posisinya di kalimat.</p>
+    <p class="batas">di bahasa sehari-hari kadang tetap ambigu. Di C, posisi <code>*</code> selalu menentukan artinya dengan pasti.</p>
+  </aside>
+
+  <p><mark>Dereference</mark> adalah mengikuti alamat yang disimpan pointer untuk memakai kotak di sana, ditulis <code>*ptr</code>. Tanda <code>*</code> yang sama juga dipakai untuk hal lain:</p>
+  <table>
+    <tr><th>Tempat</th><th>Contoh</th><th>Arti</th></tr>
+    <tr><td>Di deklarasi</td><td><code>int *ptr;</code></td><td>"ptr adalah pointer ke int"</td></tr>
+    <tr><td>Di depan pointer, dalam ekspresi</td><td><code>*ptr = 5;</code></td><td>Dereference: "kotak yang ditunjuk ptr"</td></tr>
+    <tr><td>Di antara dua nilai</td><td><code>a * b</code></td><td>Perkalian</td></tr>
+  </table>
+
+  <p class="intinya"><code>&amp;</code> = ambil alamat, <code>*</code> di depan pointer = ikuti alamat.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Di baris <code>int *q = &amp;x; y = *q * 2;</code>, apa arti setiap <code>*</code>?</summary>
+    <p><code>int *q</code>: deklarasi pointer. <code>*q</code>: dereference (isi x). <code>* 2</code>: perkalian. Jadi y = isi x dikali 2.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Pointer ke pointer: jumlah <code>*</code> = jumlah panah yang diikuti</h2></summary>
+  <p class="rantai">
+    <span class="dari">pointer dan dereference (<a href="#langkah-1">1️⃣</a>, <a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">fungsi yang mengubah pointer, misalnya <code>insert(Node **head)</code> di linked list</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kertas yang berisi lokasi kertas lain, yang berisi alamat rumah. Kamu harus mengikuti dua petunjuk untuk sampai ke rumah.</p>
+    <p class="batas">di dunia nyata kamu bisa berhenti di tengah. Di C, jumlah <code>*</code> menentukan persis berapa petunjuk yang diikuti.</p>
+  </aside>
+
+  <p><mark>Pointer ke pointer</mark> adalah pointer yang menyimpan alamat pointer lain. Pointer juga kotak, jadi ia punya alamat sendiri.</p>
+<pre class="kode"><code>int i, *ptr, **ptr_ptr;
+ptr = &amp;i;          // ptr menunjuk i
+ptr_ptr = &amp;ptr;    // ptr_ptr menunjuk ptr
+**ptr_ptr = 9;     // ikuti 2 panah: ptr_ptr → ptr → i. Jadi i = 9</code></pre>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/pointer-array.html#ptr2">visualisasi, program "Pointer ke pointer"</a>. Ada dua panah berantai.</p>
+  </aside>
+
+  <p class="intinya">Satu <code>*</code> = ikuti satu panah. <code>**pp</code> = ikuti dua panah.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan kode di atas, apa yang ditunjuk oleh <code>*ptr_ptr</code> (satu bintang)?</summary>
+    <p><code>*ptr_ptr</code> adalah kotak ptr itu sendiri (ikuti satu panah), yang isinya alamat i. Baru <code>**ptr_ptr</code> sampai ke i.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Array: kotak bertipe sama yang berderet tanpa celah</h2></summary>
+  <p class="rantai">
+    <span class="dari">variabel sebagai kotak (materi 02) dan loop (materi 03)</span>
+    <span class="ke"><code>A[i] = *(A + i)</code> (<a href="#langkah-5">5️⃣</a>), string (<a class="no" href="#langkah-10">10</a>), stack dan queue berbasis array (data structure)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Deretan kursi bernomor di bioskop: semua kursinya sama, dan kursi nomor 5 bisa langsung didatangi tanpa melewati kursi 1 sampai 4.</p>
+    <p class="batas">nomor kursi bioskop mulai dari 1. Index array mulai dari 0.</p>
+  </aside>
+
+  <p><mark>Array</mark> adalah sekumpulan kotak bertipe sama yang disimpan berurutan di memory, dan diakses lewat index. Index mulai dari <b>0</b>, jadi index terakhir = ukuran − 1.</p>
+  <figure>
+    <svg class="mem" viewBox="0 0 440 110" role="img" aria-label="Array A berisi 10 20 30 40 50 di alamat 0x1000 sampai 0x1010">
+      <text class="ket" x="60" y="12">[0]</text><text class="ket" x="140" y="12">[1]</text><text class="ket" x="220" y="12">[2]</text><text class="ket" x="300" y="12">[3]</text><text class="ket" x="380" y="12">[4]</text>
+      <rect x="20" y="24" width="80" height="44"/><rect x="100" y="24" width="80" height="44"/><rect x="180" y="24" width="80" height="44"/><rect x="260" y="24" width="80" height="44"/><rect x="340" y="24" width="80" height="44"/>
+      <text class="isi" x="60" y="46">10</text><text class="isi" x="140" y="46">20</text><text class="isi" x="220" y="46">30</text><text class="isi" x="300" y="46">40</text><text class="isi" x="380" y="46">50</text>
+      <text class="ket" x="60" y="86">0x1000</text><text class="ket" x="140" y="86">0x1004</text><text class="ket" x="220" y="86">0x1008</text><text class="ket" x="300" y="86">0x100c</text><text class="ket" x="380" y="86">0x1010</text>
+    </svg>
+    <figcaption><code>int A[5] = {10, 20, 30, 40, 50};</code> Index di atas, alamat di bawah. Alamatnya naik 4 byte, karena setiap int berukuran 4 byte.</figcaption>
+  </figure>
+
+  <aside class="hitung">
+    <details>
+      <summary>Aturan inisialisasi array</summary>
+      <table>
+        <tr><th>Inisialisasi</th><th>Hasil</th></tr>
+        <tr><td><code>int B[] = {1, 2, -4, 8};</code></td><td>Ukuran dihitung otomatis: 4 elemen</td></tr>
+        <tr><td><code>int B[8] = {1, 2, -4, 8};</code></td><td>8 elemen. Sisa 4 elemen otomatis <b>0</b></td></tr>
+        <tr><td><code>int B[4] = {1, 2, -4, 8, 9};</code></td><td><b>Error</b>: isi lebih banyak dari ukuran</td></tr>
+        <tr><td><code>int A[5];</code> lalu <code>A = {0,0,0,0,0};</code></td><td><b>Error</b>: kurung kurawal hanya boleh saat deklarasi. Isi dengan loop.</td></tr>
+      </table>
+    </details>
+  </aside>
+
+  <p class="intinya">Array = kotak berderet, semuanya bertipe sama. Index mulai 0, terakhir = ukuran − 1.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Baca 10 bilangan bulat ke array, lalu cetak max, min, dan rata-ratanya.</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 
 int main() {
     int a[10], max, min, total = 0;
@@ -201,23 +219,169 @@ int main() {
     printf("Max = %d, Min = %d, Avg = %.2f\n", max, min, (float)total / 10);
     return 0;
 }</code></pre>
-  <p>Gabungan tiga pola: akumulasi, cari max, dan cari min. max dan min dimulai dari data pertama, <b>bukan 0</b>, supaya tetap benar kalau semua data negatif.</p>
+    <p>Gabungan tiga pola dari materi 03: akumulasi, cari max, dan cari min. max dan min dimulai dari data pertama, <b>bukan 0</b>, supaya tetap benar kalau semua data negatif.</p>
+  </details>
 </details>
+</section>
 
-<p><b>2.</b> Penjumlahan dua matriks 2 × 3.</p>
+<section class="langkah" id="langkah-5">
 <details>
-  <summary>Jawaban</summary>
-  <p>Elemen hasil di posisi (i, j) = jumlah elemen kedua matriks di posisi yang sama.</p>
-<pre><code>for (int i = 0; i &lt; 2; i++)
+  <summary><h2><code>A[i]</code> sama dengan <code>*(A + i)</code>: turunkan sendiri</h2></summary>
+  <p class="rantai">
+    <span class="dari">array berderet (<a href="#langkah-4">4️⃣</a>) dan dereference (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">pointer variable vs nama array (<a href="#langkah-6">6️⃣</a>) dan index di luar batas (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Rumah di satu gang: kalau tahu alamat rumah pertama dan semua rumah sama lebarnya, kamu bisa menghitung letak rumah ke-5.</p>
+    <p class="batas">di gang, kamu menghitung lebar rumah sendiri. Di C, perkalian dengan ukuran elemen dilakukan otomatis.</p>
+  </aside>
+
+  <p><mark>Aritmetika pointer</mark> adalah menambah atau mengurangi pointer dengan bilangan bulat, yang satuannya <b>elemen</b>, bukan byte. Dari situ, <code>A[i]</code> bisa diturunkan:</p>
+  <ol>
+    <li>Nama array <code>A</code> adalah alamat elemen pertama (<code>&amp;A[0]</code>).</li>
+    <li><code>A + i</code> maju i elemen. Untuk int, alamatnya bertambah i × 4 byte secara otomatis.</li>
+    <li><code>*(A + i)</code> mengikuti alamat itu, jadi hasilnya isi elemen ke-i, yaitu <code>A[i]</code>. Tanda <code>[ ]</code> hanyalah singkatan.</li>
+  </ol>
+<pre class="kode"><code>int arr[4] = {1, 2, 3, 4};
+int *ptr = arr;               // ptr menunjuk arr[0]
+printf("%d\n", *(ptr + 1));   // 2
+printf("%d\n", *(arr + 1));   // 2
+printf("%d\n", ptr[1]);       // 2: pointer juga boleh pakai [ ]</code></pre>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/pointer-array.html#arr">visualisasi, program "Array &amp; *(A+i)"</a>. Saat <code>p = p + 1</code>, panah p pindah satu kotak (4 byte), bukan 1 byte.</p>
+  </aside>
+
+  <p class="intinya"><code>A + i</code> = alamat elemen ke-i. <code>*(A + i)</code> = isinya = <code>A[i]</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>int A[5] = {10, 20, 30, 40, 50}; int *p = A + 3;</code> Berapa <code>*p</code>, <code>*(p - 1)</code>, dan <code>p[1]</code>?</summary>
+    <p>p menunjuk A[3]. <code>*p</code> = 40. <code>*(p - 1)</code> = A[2] = 30. <code>p[1]</code> = <code>*(p + 1)</code> = A[4] = 50.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Pointer variable bisa dipindah, nama array tidak</h2></summary>
+  <p class="rantai">
+    <span class="dari"><code>A[i] = *(A + i)</code> (<a href="#langkah-5">5️⃣</a>)</span>
+    <span class="ke">kenapa <code>name = "Amir";</code> error di string (<a class="no" href="#langkah-10">10</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Papan nama gedung vs penunjuk jalan. Papan nama menempel di gedungnya. Penunjuk jalan bisa dicabut dan dipasang mengarah ke tempat lain.</p>
+    <p class="batas">papan nama gedung masih bisa dibongkar. Nama array benar-benar tidak bisa diberi alamat baru.</p>
+  </aside>
+
+  <p>Slide dosen menyebut nama array sebagai <mark>pointer constant</mark>: alamat yang tetap dan tidak bisa diganti. Pointer biasa disebut pointer variable, karena isinya bisa diganti kapan saja.</p>
+  <table>
+    <tr><th></th><th><code>int *ptr</code> (pointer variable)</th><th><code>int arr[4]</code> (nama array)</th></tr>
+    <tr><td>Isinya</td><td>Alamat, bisa diganti kapan saja</td><td>Alamat elemen pertama, <b>tetap</b></td></tr>
+    <tr><td><code>ptr = &amp;x;</code> / <code>arr = &amp;x;</code></td><td>Boleh</td><td><b>Error</b></td></tr>
+    <tr><td><code>ptr++</code> / <code>arr++</code></td><td>Boleh: pindah ke elemen berikutnya</td><td><b>Error</b></td></tr>
+  </table>
+
+  <aside class="catatan">
+    <p><strong>Catatan untuk slide "Accessing array using a pointer":</strong> di slide tertulis "ptr is a pointer <b>constant</b>". Yang tepat, <code>ptr</code> adalah pointer <b>variable</b>, sesuai komentar di kodenya sendiri (<code>// ptr is a pointer variable</code>). Yang konstan adalah nama array <code>arr</code>.</p>
+  </aside>
+
+  <p class="intinya">Pointer variable bisa diisi ulang dan digeser. Nama array selalu menempel di elemen pertamanya.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>int arr[3], *p = arr;</code> Mana yang error: <code>p++;</code> atau <code>arr++;</code>?</summary>
+    <p><code>arr++;</code> error, karena nama array adalah pointer constant. <code>p++;</code> boleh, dan membuat p menunjuk arr[1].</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Index di luar batas lolos compile, tapi merusak memory</h2></summary>
+  <p class="rantai">
+    <span class="dari"><code>A[i] = *(A + i)</code> (<a href="#langkah-5">5️⃣</a>) dan off-by-one (materi 03)</span>
+    <span class="ke">semua loop yang memproses array</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menaruh barang di loker nomor 11, padahal lokermu hanya sampai 10: barangnya masuk ke loker orang lain.</p>
+    <p class="batas">petugas loker akan menegurmu. C tidak menegur sama sekali, jadi kesalahannya tidak terlihat.</p>
+  </aside>
+
+  <p>C tidak memeriksa batas array. <code>A[3]</code> pada array 3 elemen menunjuk kotak <b>setelah</b> array berakhir, dan kodenya lolos compile tanpa error.</p>
+<pre class="kode"><code>int A[3] = {1, 2, 3};
+int x = 99;
+A[3] = 7;      // index valid hanya 0, 1, 2
+printf("%d", x);   // bisa tercetak 7!</code></pre>
+  <p>Hasil seperti ini disebut <mark>undefined behavior</mark>: perilaku yang tidak diatur standar C, jadi bisa berbeda di setiap komputer. Nilai 7 bisa menimpa variabel lain, atau program crash.</p>
+
+  <aside class="catatan">
+    <p><strong>Catatan untuk slide "Pointer constant (array)":</strong> di slide, <code>arr1[10] = 12; // error max 9</code> ditandai error. Index 10 memang salah, tapi compiler (termasuk Dev-C++) <b>tidak</b> menolaknya. Kesalahannya baru terasa saat program jalan.</p>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/pointer-array.html#oob">visualisasi, program "Index di luar batas"</a>. x berubah jadi 7 padahal tidak pernah disentuh.</p>
+  </aside>
+
+  <p class="intinya">Index valid hanya 0 sampai ukuran − 1. C tidak memeriksanya, jadi kamu sendiri yang harus menjaga.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>int A[5]; for (int i = 0; i &lt;= 5; i++) A[i] = 0;</code> Apa yang salah?</summary>
+    <p>Loop jalan untuk i = 0 sampai 5, padahal index terakhir 4. <code>A[5] = 0</code> menulis di luar array (off-by-one). Pakai <code>i &lt; 5</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Array 2D tetap disimpan satu deret, baris demi baris</h2></summary>
+  <p class="rantai">
+    <span class="dari">array (<a href="#langkah-4">4️⃣</a>) dan nested loop (materi 03)</span>
+    <span class="ke">matriks, tabel nilai, dan papan permainan</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kursi bioskop yang punya baris dan nomor kursi, tapi dicetak di tiket berurutan: semua kursi baris A dulu, lalu baris B.</p>
+    <p class="batas">bioskop memang punya baris fisik. Memory tidak punya baris, jadi "baris" hanya cara kita membagi satu deret panjang.</p>
+  </aside>
+
+  <p>Array 2D ditulis <code>int a[3][4];</code> (3 baris, 4 kolom), dan diakses <code>a[baris][kolom]</code>. Di memory, isinya <mark>row-major</mark>: baris 0 seluruhnya, lalu baris 1, dan seterusnya. Karena itu posisi <code>a[i][j]</code> dari awal = <code>i × jumlah_kolom + j</code>.</p>
+  <table>
+    <tr><th>Inisialisasi</th><th>Isi</th></tr>
+    <tr><td><code>int a[2][4] = {3,5,6,10,4,7,8,2};</code></td><td>Diisi berurutan per baris: {3,5,6,10}, {4,7,8,2}</td></tr>
+    <tr><td><code>int a[2][4] = {{3,5,6,10},{4,7,8,2}};</code></td><td>Sama, tapi lebih jelas</td></tr>
+    <tr><td><code>int b[2][4] = {{3},{4,7,8,2}};</code></td><td>Baris 0 = {3,0,0,0}: setiap <code>{ }</code> mengisi satu baris, sisanya 0</td></tr>
+  </table>
+  <p>Pola memproses array 2D = nested loop: loop luar untuk baris, loop dalam untuk kolom. <b>3D</b> sama saja, ditambah satu dimensi: <code>x[blok][baris][kolom]</code>.</p>
+<pre class="kode"><code>for (int i = 0; i &lt; 3; i++) {
+    for (int j = 0; j &lt; 4; j++)
+        printf("%4d", a[i][j]);
+    printf("\n");
+}</code></pre>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/pointer-array.html#arr2d">visualisasi, program "Array 2D (row-major)"</a>. Alamat baris 1 dimulai tepat setelah baris 0 berakhir.</p>
+  </aside>
+
+  <p class="intinya">Array 2D = deret panjang yang dibagi per baris. <code>a[i][j]</code> ada di posisi <code>i × kolom + j</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>int A[3][4] = {1, 3, 2, 4, 5, 7, 6, 8, 9, 11, 12};</code> dan <code>int B[3][3] = {{1, 2}, {3, 4, 5}, {7}};</code>. Berapa A[1][1], B[2][2], A[2][3], B[0][1], A[0][2]?</summary>
+    <p>Tulis dulu isi setiap baris. A: {1,3,2,4}, {5,7,6,8}, {9,11,12,<b>0</b>}. B: {1,2,<b>0</b>}, {3,4,5}, {7,<b>0</b>,<b>0</b>}.</p>
+    <p>A[1][1] = <b>7</b>, B[2][2] = <b>0</b>, A[2][3] = <b>0</b>, B[0][1] = <b>2</b>, A[0][2] = <b>2</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Jumlahkan dua matriks 2 × 3.</summary>
+    <p>Elemen hasil di posisi (i, j) = jumlah elemen kedua matriks di posisi yang sama.</p>
+<pre class="kode"><code>for (int i = 0; i &lt; 2; i++)
     for (int j = 0; j &lt; 3; j++)
         c[i][j] = a[i][j] + b[i][j];</code></pre>
-</details>
-
-<p><b>3.</b> Perkalian matriks A (2 × 3) dengan B (3 × 2).</p>
-<details>
-  <summary>Jawaban</summary>
-  <p>Turunkan dari definisinya: <code>C[i][j]</code> = baris i dari A "dikali" kolom j dari B, yaitu jumlah dari <code>A[i][k] × B[k][j]</code> untuk semua k. "Jumlah dari" = pola akumulasi, jadi butuh loop ketiga.</p>
-<pre><code>#include &lt;stdio.h&gt;
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kalikan matriks A (2 × 3) dengan B (3 × 2).</summary>
+    <p>Turunkan dari definisinya: <code>C[i][j]</code> = jumlah dari <code>A[i][k] × B[k][j]</code> untuk semua k. "Jumlah dari" = pola akumulasi, jadi butuh loop ketiga.</p>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 
 int main() {
     int A[2][3] = {{1, 2, 3}, {4, 5, 6}};
@@ -234,20 +398,109 @@ int main() {
         printf("%d %d\n", C[i][0], C[i][1]);   // 58 64 / 139 154
     return 0;
 }</code></pre>
+  </details>
 </details>
+</section>
 
-<p><b>4.</b> Berapa nilainya? <code>int A[3][4] = {1, 3, 2, 4, 5, 7, 6, 8, 9, 11, 12};</code> dan <code>int B[3][3] = {{1, 2}, {3, 4, 5}, {7}};</code> → A[1][1], B[2][2], A[2][3], B[0][1], A[0][2].</p>
+<section class="langkah" id="langkah-9">
 <details>
-  <summary>Jawaban</summary>
-  <p>Tulis dulu isi setiap baris. A: {1,3,2,4}, {5,7,6,8}, {9,11,12,<b>0</b>}. B: {1,2,<b>0</b>}, {3,4,5}, {7,<b>0</b>,<b>0</b>}.</p>
-  <p>A[1][1] = <b>7</b>, B[2][2] = <b>0</b>, A[2][3] = <b>0</b>, B[0][1] = <b>2</b>, A[0][2] = <b>2</b>.</p>
+  <summary><h2>Array of pointer: array yang isinya alamat</h2></summary>
+  <p class="rantai">
+    <span class="dari">pointer (<a href="#langkah-1">1️⃣</a>) dan array (<a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">array berisi string, misalnya nama hari di materi 03</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Buku alamat: setiap baris berisi alamat satu rumah, bukan rumahnya sendiri.</p>
+    <p class="batas">buku alamat boleh berisi alamat rumah yang sudah dibongkar. Pointer ke variabel yang sudah hilang membuat program salah atau crash.</p>
+  </aside>
+
+  <p><mark>Array of pointer</mark> adalah array yang setiap elemennya pointer. <code>int *ptr[3]</code> dibaca "ptr adalah array 3 elemen, dan setiap elemennya pointer ke int".</p>
+<pre class="kode"><code>int x = 1, y = 2, z = 3;
+int *ptr[3] = {&amp;x, &amp;y, &amp;z};   // array berisi 3 alamat
+for (int i = 0; i &lt; 3; i++) printf("%d ", *ptr[i]);   // 1 2 3</code></pre>
+  <p><code>*ptr[i]</code> berarti: ambil elemen ke-i (sebuah alamat), lalu ikuti alamat itu.</p>
+
+  <p class="intinya">Array of pointer = deretan alamat. <code>*ptr[i]</code> = isi kotak yang ditunjuk elemen ke-i.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan kode di atas, apa yang terjadi setelah <code>*ptr[1] = 20;</code>?</summary>
+    <p>ptr[1] berisi alamat y, jadi y menjadi 20.</p>
+  </details>
 </details>
+</section>
 
-<p><b>5.</b> Cetak input pengguna, tapi spasi berlebih (dua spasi atau lebih berturut-turut) dijadikan satu spasi.</p>
+<section class="langkah" id="langkah-10">
 <details>
-  <summary>Jawaban</summary>
-  <p>Idenya: cetak spasi hanya kalau karakter <b>sebelumnya</b> bukan spasi.</p>
-<pre><code>#include &lt;stdio.h&gt;
+  <summary><h2>String adalah array char yang diakhiri <code>'\0'</code></h2></summary>
+  <p class="rantai">
+    <span class="dari">array (<a href="#langkah-4">4️⃣</a>), <code>%s</code> dan buffer (materi 02)</span>
+    <span class="ke">fungsi string (<a class="no" href="#langkah-11">11</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kalimat yang diakhiri titik: pembaca tahu kalimatnya selesai di titik itu, walaupun kertasnya masih panjang.</p>
+    <p class="batas">tanpa titik, manusia masih bisa menebak akhir kalimat. Fungsi string tanpa <code>'\0'</code> terus membaca memory di luar array.</p>
+  </aside>
+
+  <p>C tidak punya tipe string. String adalah array char yang diakhiri <mark>null character</mark> <code>'\0'</code>, yaitu karakter bernilai 0 yang menandai akhir string.</p>
+<pre class="kode"><code>char s[] = "BiNus";
+// sama dengan:
+char s[] = {'B', 'i', 'N', 'u', 's', '\0'};   // 6 kotak, bukan 5!</code></pre>
+  <ul>
+    <li><code>'A'</code> (kutip tunggal) = satu karakter, 1 byte. <code>"A"</code> (kutip ganda) = string, 2 byte: <code>'A'</code> dan <code>'\0'</code>.</li>
+    <li><code>char name[40] = "Amir";</code> boleh (saat deklarasi). <code>name = "Amir";</code> <b>error</b>, karena nama array tidak bisa diberi alamat baru (<a href="#langkah-6">6️⃣</a>). Pakai <code>strcpy(name, "Amir");</code>.</li>
+    <li>scanf string tanpa <code>&amp;</code>: <code>scanf("%s", name);</code>, karena <code>name</code> sudah alamat.</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Turunkan sendiri: cara kerja <code>strlen</code></summary>
+<pre class="kode"><code>int n = 0;
+while (s[n] != '\0')   // selama belum ketemu akhir string
+    n++;
+// n = panjang string</code></pre>
+      <table>
+        <tr><th>n</th><th>s[n]</th><th>Lanjut?</th></tr>
+        <tr><td>0</td><td>'B'</td><td>ya</td></tr>
+        <tr><td>1</td><td>'i'</td><td>ya</td></tr>
+        <tr><td>2</td><td>'N'</td><td>ya</td></tr>
+        <tr><td>3</td><td>'u'</td><td>ya</td></tr>
+        <tr><td>4</td><td>'s'</td><td>ya</td></tr>
+        <tr><td>5</td><td>'\0'</td><td>berhenti, panjang = 5</td></tr>
+      </table>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/pointer-array.html#strlen">visualisasi, program "String &amp; \0"</a>, lalu program "Balik string".</p>
+  </aside>
+
+  <p class="intinya">String = array char + <code>'\0'</code>. Sediakan selalu satu kotak tambahan untuk <code>'\0'</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Balik string: <code>KASUR</code> → <code>RUSAK</code>.</summary>
+    <p>Tukar huruf paling kiri dengan paling kanan, lalu bergerak ke tengah. Simpan satu huruf di variabel sementara sebelum ditimpa.</p>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main() {
+    char s[100];
+    scanf("%s", s);
+    for (int i = 0, j = strlen(s) - 1; i &lt; j; i++, j--) {
+        char c = s[i];     // simpan dulu
+        s[i] = s[j];
+        s[j] = c;
+    }
+    printf("%s\n", s);
+    return 0;
+}</code></pre>
+    <p>Lihat setiap pertukaran di <a href="viz/pointer-array.html#reverse">visualisasi, program "Balik string"</a>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Cetak input pengguna, tapi spasi berlebih (dua spasi atau lebih berturut-turut) dijadikan satu spasi.</summary>
+    <p>Idenya: cetak spasi hanya kalau karakter <b>sebelumnya</b> bukan spasi.</p>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 
 int main() {
     char s[200];
@@ -260,13 +513,58 @@ int main() {
     putchar('\n');
     return 0;
 }</code></pre>
+    <p><code>&amp;&amp;</code> artinya "dan": ketiga syarat harus benar.</p>
+  </details>
 </details>
+</section>
 
-<p><b>6.</b> Validasi password: harus ada huruf besar, huruf kecil, angka, karakter spesial (<code>_/@-!?*#</code>), tanpa spasi, dan maksimal 12 karakter.</p>
+<section class="langkah" id="langkah-11">
 <details>
-  <summary>Jawaban</summary>
-  <p>Pola "hitung yang memenuhi syarat": siapkan satu penanda per syarat, lalu periksa setiap karakter dengan <code>ctype.h</code>.</p>
-<pre><code>#include &lt;stdio.h&gt;
+  <summary><h2>Fungsi string dan karakter: cukup tahu, semuanya bekerja sampai <code>'\0'</code></h2></summary>
+  <p class="rantai">
+    <span class="dari">string dan <code>'\0'</code> (<a class="no" href="#langkah-10">10</a>), header file (materi 01)</span>
+    <span class="ke">validasi input dan olah teks</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kotak perkakas: kamu tidak perlu membuat obeng sendiri, cukup tahu obeng ada di laci mana.</p>
+    <p class="batas">obeng bisa dipakai untuk benda apa pun. Fungsi string hanya benar untuk array yang punya <code>'\0'</code>.</p>
+  </aside>
+
+  <p>Header <mark class="kaitan"><code>string.h</code> dan <code>ctype.h</code></mark> berisi fungsi siap pakai. Tidak perlu dihafal, pakai tabel ini sebagai referensi.</p>
+  <table>
+    <tr><th>Fungsi (<code>string.h</code>)</th><th>Hasil</th></tr>
+    <tr><td><code>strlen(s)</code></td><td>Panjang string, tanpa <code>'\0'</code></td></tr>
+    <tr><td><code>strcpy(s1, s2)</code></td><td>Salin s2 ke s1. s1 harus cukup besar.</td></tr>
+    <tr><td><code>strncpy(s1, s2, n)</code></td><td>Salin maksimal n karakter</td></tr>
+    <tr><td><code>strcat(s1, s2)</code></td><td>Sambung s2 ke akhir s1</td></tr>
+    <tr><td><code>strcmp(s1, s2)</code></td><td><b>0 kalau sama</b>, negatif kalau s1 &lt; s2, positif kalau s1 &gt; s2</td></tr>
+  </table>
+
+  <aside class="catatan">
+    <details>
+      <summary>Fungsi karakter (<code>ctype.h</code>) dan konversi ke angka (<code>stdlib.h</code>)</summary>
+      <table>
+        <tr><th>Fungsi (<code>ctype.h</code>)</th><th>Cek / ubah</th></tr>
+        <tr><td><code>isupper</code>, <code>islower</code></td><td>Huruf besar / kecil?</td></tr>
+        <tr><td><code>isalpha</code>, <code>isdigit</code>, <code>isalnum</code></td><td>Huruf? Angka? Huruf atau angka?</td></tr>
+        <tr><td><code>isspace</code></td><td>Spasi, tab, atau Enter?</td></tr>
+        <tr><td><code>toupper</code>, <code>tolower</code></td><td>Ubah ke huruf besar / kecil</td></tr>
+      </table>
+      <p>Konversi string ke angka (<code>stdlib.h</code>): <code>strtol</code> (ke long), <code>strtoul</code> (ke unsigned long), <code>strtod</code> (ke double). Ketiganya juga memberi tahu sisa string yang bukan angka, lewat parameter <code>char **endPtr</code>.</p>
+    </details>
+  </aside>
+
+  <aside class="jebakan">
+    <p>Jangan bandingkan string dengan <mark class="jebakan"><code>==</code></mark>. <code>if (s1 == s2)</code> membandingkan <b>alamat</b> kedua array (pasti berbeda), bukan isinya. Pakai <code>if (strcmp(s1, s2) == 0)</code>.</p>
+  </aside>
+
+  <p class="intinya">Salin dengan <code>strcpy</code>, bandingkan dengan <code>strcmp(...) == 0</code>, ukur dengan <code>strlen</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Validasi password: harus ada huruf besar, huruf kecil, angka, karakter spesial (<code>_/@-!?*#</code>), tanpa spasi, dan maksimal 12 karakter.</summary>
+    <p>Pola "hitung yang memenuhi syarat": siapkan satu penanda per syarat, lalu periksa setiap karakter dengan <code>ctype.h</code>.</p>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;ctype.h&gt;
 
@@ -287,37 +585,51 @@ int main() {
         printf("Tidak valid\n");
     return 0;
 }</code></pre>
-  <p><code>strchr(daftar, c)</code> mengecek apakah karakter c ada di dalam daftar.</p>
+    <p><code>strchr(daftar, c)</code> mengecek apakah karakter c ada di dalam daftar. <code>!space</code> artinya "space bernilai 0".</p>
+  </details>
 </details>
+</section>
 
-<p><b>7.</b> Balik string: <code>KASUR</code> → <code>RUSAK</code>.</p>
+<section class="langkah" id="langkah-12">
 <details>
-  <summary>Jawaban</summary>
-  <p>Tukar huruf paling kiri dengan paling kanan, lalu bergerak ke tengah. Simpan satu huruf di variabel sementara sebelum ditimpa.</p>
-<pre><code>#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
+  <summary><h2>Bug yang sering muncul: kenali dari gejalanya</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">membaca kodemu sendiri saat program crash atau output aneh</span>
+  </p>
 
-int main() {
-    char s[100];
-    scanf("%s", s);
-    for (int i = 0, j = strlen(s) - 1; i &lt; j; i++, j--) {
-        char c = s[i];     // simpan dulu
-        s[i] = s[j];
-        s[j] = c;
-    }
-    printf("%s\n", s);
-    return 0;
-}</code></pre>
-  <p>Lihat setiap pertukaran di <a href="viz/pointer-array.html">visualisasi</a> (program "Balik string").</p>
+  <aside class="analogi">
+    <p>Montir yang mengenali kerusakan dari bunyi mesin: bunyi tertentu mengarah ke bagian tertentu.</p>
+    <p class="batas">montir bisa salah tebak. Di program, kamu bisa memastikan penyebabnya dengan menggambar isi memory.</p>
+  </aside>
+
+  <p>Sebagian besar bug pointer dan array <b>lolos compile</b>, jadi harus dikenali dari gejalanya.</p>
+  <table>
+    <tr><th>Bug</th><th>Gejala</th><th>Perbaikan</th></tr>
+    <tr><td><code>for (i = 0; i &lt;= n; i++) A[i] = …</code> pada <code>A[n]</code></td><td>Menulis 1 kotak di luar array</td><td>Pakai <code>i &lt; n</code> (<a href="#langkah-7">7️⃣</a>)</td></tr>
+    <tr><td><code>*ptr = 5;</code> sebelum ptr diisi alamat</td><td>Crash atau memory rusak</td><td>Isi dulu: <code>ptr = &amp;x;</code> (<a href="#langkah-1">1️⃣</a>)</td></tr>
+    <tr><td>Array char terlalu kecil (lupa tempat <code>'\0'</code>)</td><td>Karakter aneh di akhir output</td><td>Ukuran = panjang + 1 (<a class="no" href="#langkah-10">10</a>)</td></tr>
+    <tr><td><code>if (s1 == s2)</code> untuk string</td><td>Selalu false</td><td><code>strcmp(s1, s2) == 0</code> (<a class="no" href="#langkah-11">11</a>)</td></tr>
+    <tr><td><code>scanf("%s", &amp;name)</code></td><td>Biasanya tetap jalan, tapi salah tipe</td><td>Tulis <code>name</code> tanpa <code>&amp;</code></td></tr>
+    <tr><td><code>name = "Amir";</code></td><td>Compile error</td><td><code>strcpy(name, "Amir");</code> (<a href="#langkah-6">6️⃣</a>)</td></tr>
+  </table>
+
+  <p class="intinya">Crash → cek pointer yang belum diisi dan index di luar batas. Karakter aneh di string → cek tempat untuk <code>'\0'</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>char s[5] = "Hello";</code> lolos compile di C. Apa masalahnya?</summary>
+    <p>"Hello" butuh 6 kotak (5 huruf + <code>'\0'</code>), tapi s hanya 5. Tidak ada tempat untuk <code>'\0'</code>, jadi <code>printf("%s", s)</code> bisa terus mencetak karakter aneh dari memory sesudahnya. Pakai <code>char s[6]</code> atau <code>char s[]</code>.</p>
+  </details>
 </details>
+</section>
 
-<h2>Daftar pustaka</h2>
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Deitel, P., &amp; Deitel, H. (2021). <i>C How to Program</i> (9th ed.). Pearson Education. Bab 6 (arrays), 7 (pointers), dan 8 (characters and strings).</li>
   <li>Kernighan, B. W., &amp; Ritchie, D. M. (1988). <i>The C Programming Language</i> (2nd ed.). Prentice Hall. Bab 5: Pointers and Arrays.</li>
   <li>cppreference.com. <i>Null-terminated byte strings</i>. <a href="https://en.cppreference.com/w/c/string/byte">https://en.cppreference.com/w/c/string/byte</a></li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

@@ -1,54 +1,89 @@
 <!doctype html>
+<!-- Template notes gaya catatan. Acuan lengkap: algorithm-and-programming/03-repetition/notes.html.
+     Satu konsep = satu section.langkah (semua tertutup). Urutan isi section:
+     p.rantai → aside.analogi + p.batas → definisi (mark = istilah baru) → tabel atau p.rumus + details.keterangan
+     → aside.hitung (contoh hitungan dalam toggle) → aside.coba (link viz) → aside.jebakan → p.intinya → details.soal.
+     Rujukan section: <a href="#langkah-3">3️⃣</a> untuk 1-9, <a class="no" href="#langkah-11">11</a> untuk 10 ke atas. -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Judul Materi · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-
-<span class="chip">Nama matkul · NN</span>
-<h1>Judul materi</h1>
-<p class="lead">Satu kalimat: materi ini tentang apa.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/contoh.html">Visualisasi</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li>Poin terpenting pertama</li>
-    <li>Poin terpenting kedua</li>
+<header>
+  <h1>Judul materi</h1>
+  <p class="tujuan">Satu kalimat: materi ini tentang apa. Target: apa yang bisa kamu lakukan setelah membaca.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/contoh.html">nama visualisasi</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Konsep pertama</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Konsep utama</h2>
-<p>Penjelasan singkat dengan <b>kata kunci</b> dan <mark>istilah penting</mark> yang disorot.</p>
-<div class="callout"><strong>Catatan</strong>Info tambahan yang netral.</div>
-<div class="callout tip"><strong>Tips</strong>Trik atau keunggulan.</div>
-<div class="callout warn"><strong>Awas</strong>Kesalahan yang sering terjadi.</div>
+<main>
 
-<h2>2. Contoh</h2>
-<pre><code>print("halo")</code></pre>
-
-<h2>3. Latihan</h2>
-<p><b>1.</b> Soal pertama.</p>
+<section class="langkah" id="langkah-1">
 <details>
-  <summary>Jawaban</summary>
-  <p>Jawaban soal pertama.</p>
-</details>
+  <summary><h2>Judul section berupa kesimpulan singkat</h2></summary>
+  <p class="rantai">
+    <span class="dari">konsep yang sudah dipelajari (materi NN)</span>
+    <span class="ke">section atau materi yang memakai konsep ini</span>
+  </p>
 
-<h2>Daftar pustaka</h2>
+  <aside class="analogi">
+    <p>Analogi singkat dari kehidupan sehari-hari.</p>
+    <p class="batas">di mana analogi ini tidak berlaku.</p>
+  </aside>
+
+  <p><mark>Istilah</mark> adalah … (definisi satu kalimat). Lalu penjelasan santai, maksimal 3 kalimat per paragraf.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh hitungan</summary>
+      <p>Langkah berlabel tebal, nilai antara di tabel.</p>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/contoh.html">nama visualisasi</a>, lalu … Perhatikan …</p>
+  </aside>
+
+  <aside class="jebakan">
+    <p>Kesalahan yang sering terjadi, beserta penyebab dan perbaikannya.</p>
+  </aside>
+
+  <p class="intinya">Satu atau dua kalimat yang wajib diingat.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Pertanyaan.</summary>
+    <p>Jawaban beserta alasannya.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Penulis, A. A. (Tahun). <i>Judul buku</i> (edisi). Penerbit. Bab atau halaman yang dipakai.</li>
   <li>Nama situs. <i>Judul halaman</i>. <a href="#">URL</a></li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

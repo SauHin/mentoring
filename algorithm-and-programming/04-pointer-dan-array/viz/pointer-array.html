@@ -5,21 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pointer dan Array</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/cviz.css?v=e24d9524">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/cviz.css?v=a013a6e6">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Pointer dan array di memory</h1>
-<p>Pointer = kotak yang isinya <b>alamat</b> kotak lain (digambar sebagai panah biru). Array = kotak-kotak yang <b>berderet</b> di memory, lihat alamatnya yang berurutan. Ukuran mengikuti Dev-C++: <code>int</code> 4 byte, pointer 8 byte.</p>
+<p>Visualisasi ini menggambar pointer sebagai panah biru ke kotak yang alamatnya ia simpan, dan array sebagai kotak berderet dengan alamat berurutan. Ukuran mengikuti Dev-C++: <code>int</code> 4 byte, pointer 8 byte.</p>
+<p class="coba"><strong>Coba:</strong> pilih program di menu <b>Program</b>, lalu klik <b>Langkah berikutnya</b>.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> alamat di bawah setiap kotak, dan ke mana panah pointer menunjuk.</p>
 
-<script src="../../../_shared/cviz.js?v=bf27ea59"></script>
+<script src="../../../_shared/cviz.js?v=a6fad534"></script>
 <script>
 cviz({
   programs: {
     ptr: {
       title: 'Pointer dasar',
+      perhatikan: 'panah biru muncul setelah <code>ptr = &amp;i</code>, lalu <code>*ptr = 5</code> mengubah i tanpa menyebut nama i (notes 1️⃣ 2️⃣).',
       code: `int i = 7;
 int *ptr;
 ptr = &i;
@@ -40,6 +44,7 @@ printf("%d %d\\n", i, *ptr);`,
     },
     ptr2: {
       title: 'Pointer ke pointer',
+      perhatikan: 'ptr_ptr menunjuk ptr, dan ptr menunjuk i. <code>**ptr_ptr</code> mengikuti dua panah sampai ke i (notes 3️⃣).',
       code: `int i = 1, *ptr, **ptr_ptr;
 ptr = &i;
 ptr_ptr = &ptr;
@@ -60,6 +65,7 @@ ptr_ptr = &ptr;
     },
     arr: {
       title: 'Array & *(A+i)',
+      perhatikan: 'alamat A naik 4 byte per elemen. Saat <code>p = p + 1</code>, panah p pindah satu kotak (4 byte), bukan 1 byte (notes 4️⃣ 5️⃣).',
       watch: ['k', 'sum'],
       code: `int A[5] = {10, 20, 30, 40, 50};
 int *p = A;
@@ -89,6 +95,7 @@ for (int k = 0; k < 5; k++)
     },
     oob: {
       title: 'Index di luar batas',
+      perhatikan: 'A[3] jatuh tepat di alamat x, jadi x berubah jadi 7 padahal tidak pernah disentuh (notes 7️⃣).',
       code: `int A[3] = {1, 2, 3};
 int x = 99;
 A[3] = 7;
@@ -105,6 +112,7 @@ printf("%d\\n", x);`,
     },
     arr2d: {
       title: 'Array 2D (row-major)',
+      perhatikan: 'alamat baris 1 dimulai tepat setelah baris 0 berakhir. Array 2D tetap satu deret di memory (notes 8️⃣).',
       code: `int B[3][3] = {{1, 2}, {3, 4, 5}, {7}};
 printf("%d\\n", B[1][2]);
 printf("%d\\n", B[2][2]);`,
@@ -119,6 +127,7 @@ printf("%d\\n", B[2][2]);`,
     },
     strlen: {
       title: 'String & \\0: hitung panjang',
+      perhatikan: 'loop berhenti tepat di kotak berisi <code>\\0</code>. Banyaknya putaran = panjang string = 5 (notes 10).',
       watch: ['n'],
       code: `char s[10] = "BiNus";
 int n = 0;
@@ -143,6 +152,7 @@ printf("%d\\n", n);`,
     },
     reverse: {
       title: 'Balik string: KASUR → RUSAK',
+      perhatikan: 'c menyimpan huruf kiri dulu sebelum tertimpa, lalu i maju dan j mundur sampai bertemu di tengah (notes 10).',
       watch: ['i', 'j', 's'],
       code: `char s[] = "KASUR";
 int i, j;

@@ -5,12 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Variabel, Tipe Data, dan Input/Output</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
   <style>
-    .deck .slide.full { padding-bottom: 3vh; }
-    .deck .slide.full h2 { margin-bottom: 0.3em; }
-    .deck .slide.full iframe { min-height: 0; }
+    .kotak { width: 100%; max-width: 520px; height: auto; }
+    .kotak rect { fill: var(--callout); stroke: var(--pudar); stroke-width: 1.5; }
+    .kotak text { fill: var(--tinta); font: 15px var(--huruf); dominant-baseline: central; }
+    .kotak .isi { font: 600 22px var(--mono); text-anchor: middle; }
+    .kotak .nm { font: 600 16px var(--mono); text-anchor: middle; }
+    .kotak .ket { fill: var(--pudar); }
+    .kotak line { stroke: var(--pudar); stroke-dasharray: 3 3; }
   </style>
 </head>
 <body class="deck">
@@ -18,66 +23,120 @@
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
   <h1>Variabel, tipe data, dan input/output</h1>
-  <p>Algorithm and programming · semua materi ini memakai satu gambar: <b>variabel adalah kotak di memory</b>.</p>
+  <p class="sub">Algorithm and programming · materi 02</p>
+  <p>Target: kamu bisa menebak isi variabel setelah pembagian dan casting, dan tahu kenapa input kadang "dilewati". Semuanya memakai satu gambar: variabel adalah kotak di memory.</p>
+  <p class="coba-link">Label di atas setiap judul (misalnya "Notes 3️⃣") menunjuk section notes yang membahas hal yang sama secara lengkap.</p>
 </section>
 
 <section class="slide">
-  <h2>Variabel = kotak di memory</h2>
-  <p class="sub">Setiap variabel adalah kotak di memory dengan empat atribut: nama, tipe, alamat, dan nilai (isi kotak).</p>
-  <div class="cols">
-<pre><code>char ch = 65;
-
-  nama   ch
-        ┌──────┐
-  nilai │  65  │
-        └──────┘
-  alamat 0x1000
-  tipe   char (1 byte)</code></pre>
-    <ul>
-      <li>Deklarasi memesan kotak. Sebelum diisi, isinya <b>garbage value</b>: sisa data lama di memory.</li>
-      <li><code>=</code> artinya "simpan nilai di kanan ke kotak di kiri", bukan "sama dengan" seperti di matematika.</li>
-      <li>Karena itu <code>x = x + 5</code> valid: hitung <code>x + 5</code> dengan nilai lama, lalu simpan hasilnya ke x.</li>
-    </ul>
-  </div>
+  <p class="kicker">Notes 1️⃣ · Variabel</p>
+  <h2>Setiap variabel adalah kotak dengan nama, tipe, alamat, dan nilai</h2>
+  <p class="sub"><mark>Variabel</mark> adalah kotak di memory untuk menyimpan satu nilai.</p>
+  <figure>
+    <svg class="kotak" viewBox="0 0 360 150" role="img" aria-label="Kotak bernama ch berisi 65, di alamat 0x1000, bertipe char 1 byte">
+      <text class="nm" x="90" y="18">ch</text>
+      <rect x="40" y="34" width="100" height="56" rx="6"/>
+      <text class="isi" x="90" y="62">65</text>
+      <text x="90" y="110" text-anchor="middle">0x1000</text>
+      <line x1="120" y1="18" x2="190" y2="18"/><text class="ket" x="196" y="18">nama</text>
+      <line x1="145" y1="62" x2="190" y2="62"/><text class="ket" x="196" y="62">nilai (isi kotak)</text>
+      <line x1="125" y1="110" x2="190" y2="110"/><text class="ket" x="196" y="110">alamat (lokasi kotak)</text>
+      <text class="ket" x="196" y="138">tipe: char, 1 byte</text>
+    </svg>
+    <figcaption><code>char ch = 65;</code> menyiapkan kotak 1 byte bernama ch, berisi 65, di alamat 0x1000.</figcaption>
+  </figure>
+  <aside class="jebakan"><p>Kotak yang baru dideklarasikan berisi <b>garbage value</b> (sisa data lama di memory). Jangan membaca variabel sebelum diisi.</p></aside>
 </section>
 
 <section class="slide">
-  <h2>Tipe = ukuran kotak (di Dev-C++)</h2>
-  <p class="sub">Tipe menentukan ukuran kotak dan cara isinya dibaca. Format specifier di printf dan scanf harus cocok dengan tipenya.</p>
+  <p class="kicker">Notes 2️⃣ · Assignment</p>
+  <h2><code>=</code> artinya simpan nilai di kanan ke kotak di kiri, bukan sama dengan</h2>
+  <p class="sub"><mark>Assignment</mark> adalah perintah menyimpan nilai ke kotak. Sisi kanan dihitung dulu, lalu hasilnya disimpan.</p>
+  <table>
+    <tr><th>Statement</th><th>Yang terjadi</th><th>Isi x sesudahnya</th></tr>
+    <tr><td><code>int x;</code></td><td>Minta kotak</td><td>garbage value</td></tr>
+    <tr><td><code>x = 10;</code></td><td>Simpan 10 ke x</td><td>10</td></tr>
+    <tr><td><code>x = x + 5;</code></td><td>Ambil isi x (10), tambah 5, simpan 15 ke x</td><td>15</td></tr>
+  </table>
+  <p>Karena itu <code>x = x + 5</code> valid di C, walaupun di matematika tidak mungkin. Nilai lama x tertimpa.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 3️⃣ · Tipe data</p>
+  <h2>Tipe menentukan ukuran kotak, dan specifier harus cocok dengan tipenya</h2>
+  <p class="sub"><mark>Tipe data</mark> adalah jenis isi variabel. Ukuran di bawah berlaku untuk Dev-C++ di Windows.</p>
   <table>
     <tr><th>Tipe</th><th>Ukuran</th><th>printf</th><th>scanf</th></tr>
     <tr><td><code>char</code></td><td>1 byte (−128 … 127)</td><td><code>%c</code> (karakter) / <code>%d</code> (angka)</td><td><code>%c</code></td></tr>
-    <tr><td><code>int</code></td><td>4 byte</td><td><code>%d</code></td><td><code>%d</code></td></tr>
+    <tr><td><code>int</code></td><td>4 byte (± 2,1 miliar)</td><td><code>%d</code></td><td><code>%d</code></td></tr>
     <tr><td><code>long</code></td><td>4 byte di Windows</td><td><code>%ld</code></td><td><code>%ld</code></td></tr>
     <tr><td><code>float</code></td><td>4 byte, sekitar 7 digit</td><td><code>%f</code></td><td><code>%f</code></td></tr>
     <tr><td><code>double</code></td><td>8 byte, sekitar 15 digit</td><td><code>%f</code></td><td><b><code>%lf</code></b></td></tr>
   </table>
-  <p class="label">Perhatikan double: printf memakai <code>%f</code>, tapi scanf wajib <code>%lf</code>. Slide kuliah menulis long double → <code>%lf</code>. Standarnya <code>%Lf</code>, tapi di Dev-C++ keduanya bermasalah, jadi pakai double saja.</p>
+  <ul>
+    <li>double: printf memakai <code>%f</code>, tapi scanf <b>wajib</b> <code>%lf</code>.</li>
+    <li>Slide kuliah menulis long double → <code>%lf</code>. Di Dev-C++, <code>%lf</code> dan <code>%Lf</code> sama-sama bermasalah, jadi pakai double saja.</li>
+  </ul>
 </section>
 
 <section class="slide">
-  <h2>Pembagian dan cast: tebak isinya</h2>
-  <p class="sub">Hasil operasi ditentukan oleh tipe operand-nya, bukan oleh tipe variabel yang menampung hasilnya.</p>
+  <p class="kicker">Notes 4️⃣ · Overflow</p>
+  <h2>Nilai yang melebihi batas tipenya berputar ke sisi lain, tanpa error</h2>
+  <p class="sub"><mark>Overflow</mark> adalah kondisi saat nilai melebihi batas tipenya, sehingga nilainya wrap around.</p>
   <div class="cols">
-<pre><code>int a = 7, b = 2;
-float r1 = a / b;
-float r2 = (float)a / b;
-float r3 = (float)(a / b);
-int t = (int)3.99;
-char c = 130;</code></pre>
-    <ul>
-      <li><code>r1</code> = <b>3.0</b>. int / int menghasilkan int, jadi sisanya dibuang sebelum disimpan ke float.</li>
-      <li><code>r2</code> = <b>3.5</b>. Cast dilakukan <b>sebelum</b> membagi, jadi pembagiannya float.</li>
-      <li><code>r3</code> = <b>3.0</b>. Cast dilakukan setelah pembagian int, jadi sudah terlambat.</li>
-      <li><code>t</code> = <b>3</b>. Cast ke int memotong desimal (truncate), tidak membulatkan.</li>
-      <li><code>c</code> = <b>−126</b>. 130 melebihi batas char (127), jadi nilainya overflow dan wrap around.</li>
-    </ul>
+<pre><code>char c = 130;    // char: -128 … 127
+printf("%d", c); // -126</code></pre>
+    <ol>
+      <li>char punya 256 nilai: −128 sampai 127.</li>
+      <li>128 jadi −128, 129 jadi −127, 130 jadi −126.</li>
+      <li>Cara cepat: 130 − 256 = −126.</li>
+    </ol>
   </div>
+  <p>Mirip odometer 3 digit yang kembali ke 000 setelah 999, bedanya char kembali ke −128.</p>
 </section>
 
 <section class="slide">
-  <h2>printf: satu pola, bukan tabel hafalan</h2>
-  <p class="sub">Semua format printf mengikuti pola <code>%[flags][width][.precision]type</code>. Pahami arti tiap bagian, maka hasilnya bisa ditebak.</p>
+  <p class="kicker">Notes 5️⃣ · Pembagian integer</p>
+  <h2>int dibagi int menghasilkan int, jadi sisanya dibuang</h2>
+  <p class="sub"><mark>Pembagian integer</mark> adalah pembagian dua int. Hasil operasi mengikuti tipe terbesar di antara kedua operand.</p>
+  <table>
+    <tr><th>Operasi</th><th>Hasil</th><th>Kenapa</th></tr>
+    <tr><td><code>7 / 2</code></td><td>3</td><td>int dan int → int, sisanya dibuang</td></tr>
+    <tr><td><code>7 % 2</code></td><td>1</td><td><code>%</code> = sisa bagi: 7 = 2 × 3 + 1</td></tr>
+    <tr><td><code>7.0 / 2</code></td><td>3.5</td><td>double dan int → double</td></tr>
+  </table>
+  <aside class="jebakan"><p><code>float r1 = 7 / 2;</code> berisi 3.0, bukan 3.5. Tipe kotak tujuan tidak mengubah cara menghitung.</p></aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 6️⃣ · Casting</p>
+  <h2>Cast harus terjadi sebelum pembagian, bukan sesudahnya</h2>
+  <p class="sub"><mark>Casting</mark> adalah mengubah tipe satu nilai dengan <code>(tipe)nilai</code>. Contoh dengan a = 7 dan b = 2:</p>
+  <table>
+    <tr><th>Kode</th><th>Hasil</th><th>Kenapa</th></tr>
+    <tr><td><code>(float)a / b</code></td><td>3.5</td><td>a jadi 7.0 <b>sebelum</b> dibagi</td></tr>
+    <tr><td><code>(float)(a / b)</code></td><td>3.0</td><td>Kurung dihitung dulu (3), baru di-cast. Terlambat.</td></tr>
+    <tr><td><code>(int)3.99</code></td><td>3</td><td>Cast ke int memotong desimal, tidak membulatkan</td></tr>
+  </table>
+  <p class="coba-link">🧪 Coba: <a href="viz/memori-io.html#div">visualisasi, program Pembagian integer &amp; casting</a></p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 7️⃣ · Konstanta</p>
+  <h2>Konstanta mengunci nilai supaya tidak bisa diubah saat program jalan</h2>
+  <p class="sub"><mark>Konstanta</mark> adalah nilai bernama yang tidak bisa diubah. Ada dua cara menulisnya.</p>
+<pre><code>#define PI 3.14159          // diganti teks sebelum compile, tanpa tipe
+const float PI2 = 3.14159f; // variabel yang dikunci, punya tipe</code></pre>
+  <ul>
+    <li><b>Suffix</b> menentukan tipe angka: <code>3.14</code> = double, <code>3.14f</code> = float, <code>10L</code> = long.</li>
+    <li><code>PI2 = 3;</code> ditolak compiler, karena PI2 dikunci dengan <code>const</code>.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 8️⃣ · printf</p>
+  <h2>Semua format printf mengikuti satu pola, jadi hasilnya bisa ditebak</h2>
+  <p class="sub"><mark>Format specifier</mark> (<code>%…</code>) diganti satu nilai, berurutan dari kiri. Polanya <code>%[flags][width][.precision]type</code>.</p>
   <div class="cols">
     <ul>
       <li><b>flags</b>: <code>-</code> rata kiri, <code>0</code> isi sisa dengan nol.</li>
@@ -93,41 +152,48 @@ char c = 130;</code></pre>
       <tr><td><code>%8.2f</code>, 3.14159</td><td><code>····3.14</code></td></tr>
     </table>
   </div>
-  <p class="label">Coba format lain di printf playground (link ada di notes).</p>
+  <aside class="jebakan"><p>Jangan <code>printf(ss)</code>: kalau ss berisi <code>%</code>, outputnya kacau. Tulis <code>printf("%s", ss)</code>.</p></aside>
+</section>
+
+<section class="slide full">
+  <p class="kicker">Notes 8️⃣ · Printf playground</p>
+  <h2>Coba sendiri: ketik format, lalu lihat kolom mana yang berasal dari width</h2>
+  <iframe src="viz/printf.html" title="Printf playground"></iframe>
 </section>
 
 <section class="slide">
-  <h2>Kenapa scanf butuh &amp;?</h2>
-  <p class="sub">printf hanya perlu tahu <b>nilai</b> yang akan ditampilkan. scanf harus menulis ke dalam kotak, jadi scanf perlu tahu <b>alamat</b> kotak itu.</p>
+  <p class="kicker">Notes 9️⃣ · scanf</p>
+  <h2>scanf butuh alamat (<code>&amp;x</code>), karena scanf menulis ke kotak</h2>
+  <p class="sub"><mark>Operator &amp;</mark> memberi alamat sebuah variabel. printf cukup melihat isi kotak, scanf harus tahu lokasinya.</p>
   <div class="cols">
 <pre><code>printf("%d", x);    // baca ISI kotak x
 scanf("%d", &amp;x);    // tulis KE kotak x,
                     // jadi butuh alamat x</code></pre>
     <ul>
-      <li><code>&amp;x</code> artinya "alamat x".</li>
-      <li>Kalau <code>&amp;</code> lupa ditulis, scanf menganggap isi x sebagai alamat dan menulis ke tempat sembarang. Program bisa crash.</li>
-      <li>Array char <b>tidak</b> memakai <code>&amp;</code>, karena nama array sudah berupa alamat.</li>
+      <li>Kalau <code>&amp;</code> lupa, scanf menulis ke alamat sembarang, dan program bisa crash.</li>
       <li>Return value scanf = jumlah variabel yang <b>berhasil diisi</b>.</li>
+      <li>Array char <b>tidak</b> memakai <code>&amp;</code>, karena nama array sudah berupa alamat (materi 04).</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Format mana yang melewati spasi dan Enter?</h2>
-  <p class="sub">Spasi dan Enter juga karakter. Sebagian format scanf melewatinya secara otomatis, sebagian lagi ikut membacanya.</p>
+  <p class="kicker">Notes <span class="no">10</span> · Buffer keyboard</p>
+  <h2><code>%c</code> dan <code>getchar</code> ikut membaca spasi dan Enter</h2>
+  <p class="sub"><mark>Buffer</mark> adalah penampungan ketikan keyboard, termasuk Enter. Format scanf mengambil karakter dari depan buffer.</p>
   <table>
     <tr><th>Format</th><th>Yang dibaca</th><th>Melewati spasi/Enter di depan?</th></tr>
     <tr><td><code>%d</code> <code>%f</code> <code>%lf</code></td><td>Angka</td><td>Ya</td></tr>
     <tr><td><code>%s</code></td><td>Satu kata, berhenti di spasi</td><td>Ya</td></tr>
-    <tr><td><code>%c</code></td><td>Satu karakter <b>apa pun</b>, termasuk Enter</td><td><b>Tidak</b></td></tr>
-    <tr><td><code>%[^\n]</code></td><td>Satu baris penuh sampai sebelum Enter</td><td>Tidak</td></tr>
-    <tr><td><code>getchar()</code></td><td>Satu karakter apa pun, termasuk Enter</td><td><b>Tidak</b></td></tr>
+    <tr><td><code>%c</code>, <code>getchar()</code></td><td>Satu karakter <b>apa pun</b>, termasuk Enter</td><td><b>Tidak</b></td></tr>
+    <tr><td><code>%[^\n]</code></td><td>Satu baris penuh, sampai sebelum Enter</td><td>Tidak</td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Buffer: kenapa getchar seperti "dilewati"</h2>
-  <p class="sub">Semua yang diketik masuk ke <b>buffer</b> keyboard dulu, termasuk Enter (<code>↵</code>). scanf dan getchar mengambil karakter dari buffer ini secara berurutan.</p>
+  <p class="kicker">Notes <span class="no">10</span> · Buffer keyboard</p>
+  <h2>Enter yang tertinggal setelah <code>%d</code> langsung diambil <code>getchar</code></h2>
+  <p class="sub">Pengguna mengetik nama, Enter, NIM, Enter. Begini isi buffer dan siapa yang mengambil apa.</p>
   <div class="cols">
 <pre><code>scanf("%[^\n]", name);
 scanf("%d", &amp;nim);
@@ -138,52 +204,77 @@ B u d i ↵ 1 2 3 4 5 ↵
                     ↑ tertinggal!</code></pre>
     <div>
       <ul>
-        <li><code>%d</code> berhenti tepat setelah angka, jadi Enter terakhir <b>tertinggal</b> di buffer.</li>
-        <li><code>getchar</code> langsung mengambil Enter itu tanpa menunggu ketikan baru. Akibatnya gender berisi <code>'\n'</code>.</li>
+        <li><code>%d</code> berhenti tepat setelah angka, jadi Enter terakhir <b>tertinggal</b>.</li>
+        <li><code>getchar</code> mengambil Enter itu tanpa menunggu ketikan baru, jadi gender berisi <code>'\n'</code>.</li>
       </ul>
-      <div class="callout tip"><strong>Perbaikan</strong>Pakai <code>scanf(" %c", &amp;gender);</code>. Spasi sebelum <code>%c</code> membuang semua spasi dan Enter yang tersisa.</div>
+      <aside class="catatan"><p><b>Perbaikan:</b> <code>scanf(" %c", &amp;gender);</code>. Spasi sebelum <code>%c</code> membuang spasi dan Enter yang tersisa.</p></aside>
     </div>
   </div>
 </section>
 
 <section class="slide full">
-  <h2>Coba sendiri: memory dan buffer</h2>
-  <iframe src="viz/memori-io.html" title="Visualisasi memory dan buffer input"></iframe>
+  <p class="kicker">Notes <span class="no">10</span> · Memory dan buffer</p>
+  <h2>Coba sendiri: lihat Enter yang tertinggal di buffer keyboard</h2>
+  <iframe src="viz/memori-io.html#buffer" title="Visualisasi memory dan buffer input"></iframe>
 </section>
 
 <section class="slide">
-  <h2>Fungsi I/O lain: cukup tahu</h2>
-  <p class="sub">Fungsi-fungsi ini sering muncul di contoh kuliah. Cukup tahu kegunaannya dan header-nya.</p>
+  <p class="kicker">Notes 8️⃣ dan <span class="no">10</span> · Fungsi I/O lain</p>
+  <h2>Fungsi I/O lain cukup dikenali kegunaan dan header-nya</h2>
+  <p class="sub">Fungsi-fungsi ini sering muncul di contoh kuliah.</p>
   <table>
     <tr><th>Fungsi</th><th>Header</th><th>Catatan</th></tr>
     <tr><td><code>putchar</code>, <code>puts</code>, <code>getchar</code></td><td><code>stdio.h</code></td><td>Standar C. <code>puts</code> otomatis menambahkan newline.</td></tr>
     <tr><td><code>getch</code>, <code>getche</code>, <code>putch</code></td><td><code>conio.h</code></td><td>Jalan di Dev-C++, tapi hanya ada di Windows.</td></tr>
-    <tr><td><code>gets</code></td><td><code>stdio.h</code></td><td>Jalan di Dev-C++, tapi bisa overflow kalau input terlalu panjang. Alternatif yang aman: <code>fgets</code>.</td></tr>
+    <tr><td><code>gets</code></td><td><code>stdio.h</code></td><td>Bisa menimpa memory kalau input terlalu panjang. Alternatif aman: <code>fgets</code>.</td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Bug yang sering muncul</h2>
+  <p class="kicker">Notes <span class="no">11</span> · Bug</p>
+  <h2>Bug I/O lolos compile, jadi kenali dari gejalanya</h2>
   <p class="sub">Kalau output aneh, cek daftar ini dulu.</p>
   <table>
     <tr><th>Bug</th><th>Gejala</th><th>Perbaikan</th></tr>
     <tr><td>Lupa <code>&amp;</code> di scanf</td><td>Crash, atau nilai tidak berubah</td><td>Tulis <code>&amp;x</code></td></tr>
     <tr><td><code>%f</code> untuk double di scanf</td><td>Nilai yang terbaca aneh</td><td>Pakai <code>%lf</code></td></tr>
+    <tr><td><code>printf("%d", 3.5)</code></td><td>Angka aneh</td><td>Specifier harus cocok: <code>%f</code></td></tr>
     <tr><td><code>total / n</code>, keduanya int</td><td>Desimal hilang</td><td><code>(float)total / n</code></td></tr>
     <tr><td><code>getchar</code> / <code>%c</code> setelah <code>%d</code></td><td>Input seperti dilewati</td><td><code>" %c"</code></td></tr>
-    <tr><td><code>printf(ss)</code></td><td>Output kacau kalau ss berisi <code>%</code></td><td><code>printf("%s", ss)</code></td></tr>
+    <tr><td>Membaca variabel sebelum diisi</td><td>Nilai acak</td><td><code>int total = 0;</code></td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Ringkasan</h2>
+  <h2>Ringkasan: semuanya kembali ke gambar kotak di memory</h2>
   <ul>
-    <li>Variabel adalah kotak dengan <b>nama, tipe, alamat, dan nilai</b>.</li>
-    <li><b>int / int = int</b>. Kalau butuh desimal, cast salah satu operand <b>sebelum</b> membagi.</li>
-    <li>printf butuh <b>nilai</b>, scanf butuh <b>alamat</b>.</li>
-    <li>Input lewat <b>buffer</b>. Waspadai Enter yang tertinggal sebelum <code>%c</code> atau <code>getchar</code>.</li>
+    <li>Variabel = kotak dengan <b>nama, tipe, alamat, dan nilai</b>. <code>=</code> artinya simpan (1️⃣ 2️⃣).</li>
+    <li>Tipe menentukan ukuran kotak dan specifier-nya. Nilai yang tidak muat akan overflow (3️⃣ 4️⃣).</li>
+    <li><b>int / int = int</b>. Kalau butuh desimal, cast salah satu operand <b>sebelum</b> membagi (5️⃣ 6️⃣).</li>
+    <li>printf butuh <b>nilai</b>, scanf butuh <b>alamat</b> (8️⃣ 9️⃣).</li>
+    <li>Input lewat <b>buffer</b>. Pakai <code>" %c"</code> kalau membaca karakter setelah angka (<span class="no">10</span>).</li>
   </ul>
-  <p class="label">Latihan (tebak isi buffer, return value scanf) ada di notes.</p>
+</section>
+
+<section class="slide">
+  <h2>Soal latihan: kerjakan dulu, jawabannya di slide berikutnya</h2>
+  <ol class="soal-list">
+    <li>Berapa isi <code>float r = 9 / 4;</code> dan <code>float s = (float)9 / 4;</code>?</li>
+    <li>Berapa nilai <code>char c = 200;</code> kalau dicetak dengan <code>%d</code>?</li>
+    <li>Apa output <code>printf("[%6.1f]", 3.14159);</code>?</li>
+    <li><code>x = scanf("%d %d", &amp;a, &amp;b);</code> dengan input <code>5 abc</code>. Berapa x?</li>
+  </ol>
+  <p class="coba-link">Soal lain (isi buffer, <code>%s</code>, <code>getchar</code>, program nilai akhir) ada di akhir setiap section notes.</p>
+</section>
+
+<section class="slide">
+  <h2>Jawaban soal latihan</h2>
+  <ol class="soal-list">
+    <li>r = <b>2.0</b> (9 / 4 dihitung sebagai int dulu). s = <b>2.25</b> (9 jadi float sebelum dibagi).</li>
+    <li>200 − 256 = <b>−56</b> (overflow).</li>
+    <li><code>[···3.1]</code>. Precision 1 → 3.1 (3 karakter), lalu width 6 menambah 3 spasi di kiri.</li>
+    <li>x = <b>1</b>. a berhasil diisi 5, tapi "abc" bukan angka, jadi b tidak terisi.</li>
+  </ol>
 </section>
 
 <script src="../../_shared/slides.js?v=805bba15"></script>

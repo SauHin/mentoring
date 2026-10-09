@@ -5,21 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Memory dan Input/Output</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/cviz.css?v=e24d9524">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/cviz.css?v=a013a6e6">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Memory dan input/output</h1>
-<p>Setiap variabel adalah <b>kotak di memory</b>: punya nama, tipe, nilai, dan alamat. Input dari keyboard masuk dulu ke <b>buffer</b>, lalu diambil oleh <code>scanf</code>/<code>getchar</code>. Ubah isi keyboard untuk mencoba sendiri.</p>
+<p>Visualisasi ini menampilkan variabel sebagai kotak di memory, dan ketikan keyboard sebagai buffer yang dibaca <code>scanf</code>/<code>getchar</code>.</p>
+<p class="coba"><strong>Coba:</strong> pilih program di menu <b>Program</b>, lalu klik <b>Langkah berikutnya</b>. Buka <b>Ubah input</b> untuk mengetik input lain.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> kotak yang berubah warna di Memory, dan karakter buffer yang dicoret setelah dibaca.</p>
 
-<script src="../../../_shared/cviz.js?v=bf27ea59"></script>
+<script src="../../../_shared/cviz.js?v=a6fad534"></script>
 <script>
 cviz({
   programs: {
     var: {
       title: 'Variabel = kotak',
+      perhatikan: 'x berisi <code>?</code> (garbage value) sampai diisi, lalu isi lamanya tertimpa saat <code>x = x + 5</code>. ch berisi angka 65 yang dicetak sebagai A dan 65 (notes 1️⃣ 2️⃣).',
       code: `int x;
 x = 10;
 x = x + 5;
@@ -40,6 +44,7 @@ printf("%c %d\\n", ch, ch);`,
     },
     div: {
       title: 'Pembagian integer & casting',
+      perhatikan: 'r1 dan r3 bernilai 3.0, hanya r2 yang 3.5, karena cast harus terjadi sebelum pembagian (notes 5️⃣ 6️⃣). c menjadi −126 karena overflow (notes 4️⃣).',
       code: `int a = 7, b = 2;
 float r1 = a / b;
 float r2 = (float)a / b;
@@ -63,6 +68,7 @@ char c = 130;`,
     },
     scanf: {
       title: 'scanf & nilai kembaliannya',
+      perhatikan: 'scanf mengisi y, z, w dari buffer, dan x berisi jumlah variabel yang berhasil diisi. Ubah input jadi <code>6 7 abc</code>, maka x = 2 (notes 9️⃣).',
       input: '6 7 8',
       code: `int x, y, z, w;
 x = scanf("%d %d %d", &y, &z, &w);
@@ -80,6 +86,7 @@ printf("x = %d\\n", x);`,
     },
     buffer: {
       title: 'Kenapa getchar dilewati?',
+      perhatikan: 'Enter setelah 12345 tertinggal di buffer, jadi getchar langsung mengambilnya dan gender berisi <code>\\n</code>, bukan M (notes 10).',
       input: 'Budi Santoso\n12345\nM',
       code: `char name[40];
 int nim;
@@ -103,6 +110,7 @@ printf("[%c]\\n", gender);`,
     },
     buffer2: {
       title: 'Perbaikan: " %c"',
+      perhatikan: 'spasi sebelum <code>%c</code> membuang Enter sisa di buffer, jadi gender berisi M (notes 10).',
       input: 'Budi Santoso\n12345\nM',
       code: `char name[40];
 int nim;
@@ -124,6 +132,7 @@ printf("[%c]\\n", gender);`,
     },
     string: {
       title: '%s vs %[^\\n]',
+      perhatikan: '<code>%s</code> berhenti di spasi pertama, sedangkan <code>%[^\\n]</code> ikut membaca spasi di depannya (notes 10).',
       input: 'Good morning everyone',
       code: `char s1[20], s2[30];
 scanf("%s", s1);

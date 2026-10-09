@@ -5,124 +5,389 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Regular Expression · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Compilation technique · 01</span>
-<h1>Regular expression</h1>
-<p class="lead">Regular expression (RE) adalah cara menulis sebuah <b>language</b> (himpunan string) dengan rumus pendek. Lexer memakai RE untuk mengenali token, dan semua soal automata berikutnya dimulai dari sebuah RE.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/cek-re.html">Visualisasi: cek RE kamu</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li>Tiga operator: <code>r*</code> (nol kali atau lebih), <code>rs</code> (concatenation), <code>r|s</code> atau <code>r+s</code> (union). Prioritas: star, lalu concatenation, lalu union.</li>
-    <li>Membaca RE: tulis string terpendek yang dihasilkan, lalu cari polanya.</li>
-    <li>Menulis RE: pola <b>diawali</b> <code>X(0|1)*</code>, <b>diakhiri</b> <code>(0|1)*X</code>, <b>memuat</b> <code>(0|1)*X(0|1)*</code>, <b>posisi ke-k dari kanan</b>, dan union untuk "atau". Untuk "dan", union semua urutan.</li>
-    <li>Selalu uji jawabanmu dengan ε, string terpendek, dan string yang hampir benar.</li>
+<header>
+  <h1>Regular expression</h1>
+  <p class="tujuan">Regular expression (RE) adalah cara menulis sebuah language (himpunan string) dengan rumus pendek. Lexer memakai RE untuk mengenali token, dan semua soal automata berikutnya dimulai dari sebuah RE. Target: kamu bisa membaca RE, menulis RE untuk soal "string yang …", dan mengecek jawabanmu sendiri.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/cek-re.html">cek RE kamu</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">RE di dalam compiler</a></li>
+      <li><a href="#langkah-2">Istilah dasar: alphabet, string, language</a></li>
+      <li><a href="#langkah-3">Operasi pada language</a></li>
+      <li><a href="#langkah-4">Operator RE dan prioritasnya</a></li>
+      <li><a href="#langkah-5">Membaca RE</a></li>
+      <li><a href="#langkah-6">Menulis RE dengan pola</a></li>
+      <li><a href="#langkah-7">Soal "atau" dan soal "dan"</a></li>
+      <li><a href="#langkah-8">Mengecek jawabanmu sendiri</a></li>
+      <li><a href="#langkah-9">Regular definition</a></li>
+      <li><a href="#langkah-10">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. RE di dalam compiler</h2>
-<p>Tahap pertama compiler adalah <b>lexical analyzer</b> (scanner). Lexer membaca source code karakter demi karakter, lalu mengelompokkannya menjadi potongan bermakna. Parser meminta token satu per satu ke lexer ("get next token"), jadi lexer tidak membuat daftar token sekaligus.</p>
-<pre><code>Source:  position = initial + rate * 60
+<main>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Lexer memecah source code menjadi token, dan bentuk setiap token ditulis sebagai RE</h2></summary>
+  <p class="rantai">
+    <span class="dari">source code C yang kamu tulis sendiri</span>
+    <span class="ke">RE (<a href="#langkah-4">4️⃣</a>) dan automata di materi 02–05</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Saat membaca, matamu mengelompokkan huruf menjadi kata dulu, baru memahami artinya.</p>
+    <p class="batas">kamu bisa menebak kata yang salah ketik. Lexer tidak bisa: <code>fi</code> tetap dianggap nama, bukan <code>if</code>.</p>
+  </aside>
+
+  <p>Tahap pertama compiler adalah <b>lexical analyzer</b> (lexer, scanner). Lexer membaca karakter demi karakter dan mengelompokkannya menjadi <mark>token</mark>, yaitu pasangan <code>&lt;nama token, attribute&gt;</code>.</p>
+<pre class="kode"><code>Source:  position = initial + rate * 60
 Token:   &lt;id,1&gt; &lt;=&gt; &lt;id,2&gt; &lt;+&gt; &lt;id,3&gt; &lt;*&gt; &lt;number,60&gt;</code></pre>
-<table>
-  <tr><th>Istilah</th><th>Arti</th><th>Contoh</th></tr>
-  <tr><td><b>Lexeme</b></td><td>Potongan teks asli di source code</td><td><code>position</code>, <code>=</code>, <code>60</code></td></tr>
-  <tr><td><b>Token</b></td><td>Pasangan <code>&lt;nama token, attribute&gt;</code>. Satu token mewakili banyak lexeme, jadi attribute menyimpan informasi lexeme yang mana.</td><td><code>&lt;id,1&gt;</code>: attribute = posisi di symbol table</td></tr>
-  <tr><td><b>Pattern</b></td><td>Aturan bentuk lexeme untuk satu token, biasanya ditulis sebagai RE</td><td><code>id → letter (letter | digit)*</code></td></tr>
-</table>
-<p>Contoh kelas token dari slide:</p>
-<table>
-  <tr><th>Token</th><th>Penjelasan</th><th>Contoh lexeme</th></tr>
-  <tr><td><code>if</code>, <code>else</code></td><td>keyword, persis karakter itu</td><td><code>if</code>, <code>else</code></td></tr>
-  <tr><td><code>comparison</code></td><td><code>&lt; &gt; &lt;= &gt;= == !=</code></td><td><code>&lt;=</code>, <code>!=</code></td></tr>
-  <tr><td><code>id</code></td><td>huruf, diikuti huruf atau digit</td><td><code>pi</code>, <code>score</code>, <code>D2</code></td></tr>
-  <tr><td><code>number</code></td><td>konstanta angka</td><td><code>3.14159</code>, <code>0</code>, <code>6.02e23</code></td></tr>
-  <tr><td><code>literal</code></td><td>apa saja di antara tanda kutip</td><td><code>"core dumped"</code></td></tr>
-</table>
-<div class="callout"><strong>Lexical error dan input buffering</strong>Lexer hampir tidak bisa mendeteksi kesalahan program. Pada <code>fi ( a == f(x) )</code>, lexer tidak tahu apakah <code>fi</code> salah ketik untuk <code>if</code> atau nama fungsi, jadi <code>fi</code> tetap menjadi <code>id</code>. Lexer juga sering harus membaca satu karakter lebih jauh: setelah <code>&lt;</code>, ia harus melihat karakter berikutnya untuk tahu apakah lexeme-nya <code>&lt;</code> atau <code>&lt;=</code>. Karena itu lexer memakai dua pointer (<code>lexemeBegin</code> dan <code>forward</code>) di atas buffer input.</div>
+  <table>
+    <tr><th>Istilah</th><th>Arti</th><th>Contoh</th></tr>
+    <tr><td><b>Lexeme</b></td><td>Potongan teks asli di source code</td><td><code>position</code>, <code>=</code>, <code>60</code></td></tr>
+    <tr><td><b>Token</b></td><td>Jenis lexeme. Attribute menyimpan lexeme yang mana, misalnya posisi di symbol table</td><td><code>&lt;id,1&gt;</code></td></tr>
+    <tr><td><b>Pattern</b></td><td>Aturan bentuk lexeme untuk satu token, ditulis sebagai RE</td><td><code>id → letter (letter | digit)*</code></td></tr>
+  </table>
 
-<h2>2. Istilah dasar</h2>
-<table>
-  <tr><th>Istilah</th><th>Arti</th><th>Contoh</th></tr>
-  <tr><td><b>Symbol</b></td><td>Satu karakter, tanpa arti sendiri</td><td><code>a</code>, <code>0</code>, <code>$</code></td></tr>
-  <tr><td><b>Alphabet</b> Σ</td><td>Himpunan simbol yang terbatas dan tidak kosong</td><td>Σ = {0, 1}</td></tr>
-  <tr><td><b>String</b></td><td>Deretan simbol dari Σ yang panjangnya terbatas</td><td><code>0011</code></td></tr>
-  <tr><td><b>|w|</b></td><td>Panjang string w</td><td>|abcb| = 4</td></tr>
-  <tr><td><b>ε</b></td><td>String kosong</td><td>|ε| = 0</td></tr>
-  <tr><td><b>Language</b> L</td><td>Himpunan string dari alphabet yang sama</td><td>L₁ = {a, ab, abb}, atau L₂ = {w | w palindrome}</td></tr>
-</table>
-<p><b>∅</b> adalah language kosong (tidak berisi string apa pun). <b>{ε}</b> berisi tepat satu string, yaitu string kosong. Keduanya berbeda.</p>
+  <aside class="hitung">
+    <details>
+      <summary>Kelas token dari slide, lexical error, dan input buffering</summary>
+      <table>
+        <tr><th>Token</th><th>Penjelasan</th><th>Contoh lexeme</th></tr>
+        <tr><td><code>if</code>, <code>else</code></td><td>keyword, persis karakter itu</td><td><code>if</code>, <code>else</code></td></tr>
+        <tr><td><code>comparison</code></td><td><code>&lt; &gt; &lt;= &gt;= == !=</code></td><td><code>&lt;=</code>, <code>!=</code></td></tr>
+        <tr><td><code>id</code></td><td>huruf, diikuti huruf atau digit</td><td><code>pi</code>, <code>score</code>, <code>D2</code></td></tr>
+        <tr><td><code>number</code></td><td>konstanta angka</td><td><code>3.14159</code>, <code>0</code>, <code>6.02e23</code></td></tr>
+        <tr><td><code>literal</code></td><td>apa saja di antara tanda kutip</td><td><code>"core dumped"</code></td></tr>
+      </table>
+      <ul>
+        <li><strong>Lexical error:</strong> lexer hampir tidak bisa mendeteksi kesalahan program. Pada <code>fi ( a == f(x) )</code>, <code>fi</code> tetap menjadi <code>id</code>.</li>
+        <li><strong>Input buffering:</strong> setelah <code>&lt;</code>, lexer harus melihat karakter berikutnya untuk tahu apakah lexeme-nya <code>&lt;</code> atau <code>&lt;=</code>. Karena itu lexer memakai dua pointer (<code>lexemeBegin</code> dan <code>forward</code>) di atas buffer.</li>
+        <li><strong>Get next token:</strong> parser meminta token satu per satu, jadi lexer tidak membuat daftar token sekaligus.</li>
+      </ul>
+    </details>
+  </aside>
 
-<h2>3. Operasi pada language</h2>
-<p>RE adalah singkatan untuk operasi-operasi ini. Misalkan L = {0, 1, 00, 01, 10} dan M = {10, 11}.</p>
-<table>
-  <tr><th>Operasi</th><th>Definisi</th><th>Contoh</th></tr>
-  <tr><td><b>Concatenation</b> LM</td><td>{xy | x ∈ L, y ∈ M}: satu string dari L lalu satu dari M</td><td>LM = {010, 011, 110, 111, 0010, 0011, 0110, 0111, 1010, 1011}</td></tr>
-  <tr><td><b>Union</b> L ∪ M</td><td>{x | x ∈ L atau x ∈ M}</td><td>L ∪ M = {0, 1, 00, 01, 10, 11}</td></tr>
-  <tr><td><b>Kleene closure</b> L*</td><td>L⁰ ∪ L¹ ∪ L² ∪ …: gabungan nol string atau lebih dari L</td><td>{1}* = {ε, 1, 11, 111, …}</td></tr>
-  <tr><td><b>Positive closure</b> L⁺</td><td>L¹ ∪ L² ∪ …: minimal satu</td><td>{1}⁺ = {1, 11, 111, …}</td></tr>
-</table>
-<p>Contoh lain dari slide: <code>(1100)*</code> = {ε, 1100, 11001100, …} dan <code>(00+11)*</code> = {ε, 00, 11, 0000, 0011, 1100, 1111, …}.</p>
+  <p class="intinya">Lexeme = teks asli. Token = jenisnya. Pattern = aturan bentuknya, ditulis sebagai RE.</p>
 
-<h2>4. Operator RE dan prioritasnya</h2>
-<p>Definisi RE bersifat rekursif: ∅, ε, dan setiap simbol a adalah RE. Kalau r dan s adalah RE, maka <code>r|s</code> (atau <code>r+s</code>), <code>rs</code>, dan <code>r*</code> juga RE.</p>
-<ul>
-  <li>Prioritas: <b>star</b> paling kuat, lalu <b>concatenation</b>, lalu <b>union</b>. Jadi <code>ab*|c</code> = <code>(a(b*))|c</code>.</li>
-  <li><code>r?</code> = <code>r|ε</code> (boleh ada, boleh tidak).</li>
-  <li><code>r⁺</code> = <code>rr*</code>. Slide menulis <code>baa(b|a)+</code> untuk "baa diikuti minimal satu simbol". Karena + juga dipakai untuk union, lebih aman menulis <code>baa(a|b)(a|b)*</code>.</li>
-</ul>
-<p>Sifat aljabar yang berguna untuk menyederhanakan RE (r, s, t adalah RE):</p>
-<pre><code>r|s = s|r                 (r|s)|t = r|(s|t)        (rs)t = r(st)
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Pada <code>x = y1 + 10;</code>, sebutkan lexeme dan token-nya.</summary>
+    <p>Lexeme: <code>x</code>, <code>=</code>, <code>y1</code>, <code>+</code>, <code>10</code>, <code>;</code>. Token: <code>&lt;id,1&gt; &lt;=&gt; &lt;id,2&gt; &lt;+&gt; &lt;number,10&gt; &lt;;&gt;</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Language adalah himpunan string, dan RE adalah cara menulisnya</h2></summary>
+  <p class="rantai">
+    <span class="dari">himpunan (discrete mathematics) dan string di C</span>
+    <span class="ke">operasi pada language (<a href="#langkah-3">3️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kamus: daftar semua kata yang ada di satu bahasa.</p>
+    <p class="batas">kamus selalu terbatas. Language boleh tak terbatas, misalnya semua string 0 dan 1.</p>
+  </aside>
+
+  <p><mark>Language</mark> adalah himpunan string dari alphabet yang sama. Istilah lain yang dipakai di setiap soal:</p>
+  <table>
+    <tr><th>Istilah</th><th>Arti</th><th>Contoh</th></tr>
+    <tr><td><b>Symbol</b></td><td>Satu karakter, tanpa arti sendiri</td><td><code>a</code>, <code>0</code>, <code>$</code></td></tr>
+    <tr><td><b>Alphabet</b> Σ</td><td>Himpunan simbol yang terbatas dan tidak kosong</td><td>Σ = {0, 1}</td></tr>
+    <tr><td><b>String</b></td><td>Deretan simbol dari Σ yang panjangnya terbatas</td><td><code>0011</code></td></tr>
+    <tr><td><b>|w|</b></td><td>Panjang string w</td><td>|abcb| = 4</td></tr>
+    <tr><td><b>ε</b></td><td>String kosong</td><td>|ε| = 0</td></tr>
+  </table>
+
+  <aside class="jebakan">
+    <p><mark class="jebakan">∅ tidak sama dengan {ε}</mark>. ∅ adalah language yang tidak berisi string apa pun. {ε} berisi tepat satu string, yaitu string kosong.</p>
+  </aside>
+
+  <p class="intinya">Symbol membentuk string, string membentuk language. ε adalah string, ∅ adalah language.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Apa beda ε, {ε}, dan ∅?</summary>
+    <p>ε adalah string kosong (bukan language). {ε} adalah language berisi satu string, yaitu ε. ∅ adalah language tanpa string sama sekali.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Tiga operasi pada language: concatenation, union, dan Kleene closure</h2></summary>
+  <p class="rantai">
+    <span class="dari">language (<a href="#langkah-2">2️⃣</a>), union himpunan (discrete mathematics)</span>
+    <span class="ke">operator RE (<a href="#langkah-4">4️⃣</a>), yang adalah singkatan dari operasi ini</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menu kombo: concatenation = satu makanan lalu satu minuman, union = gabung dua menu, star = ambil berapa porsi pun, termasuk nol.</p>
+    <p class="batas">urutan makan bebas. Di concatenation, urutannya tetap: string dari L dulu, baru dari M.</p>
+  </aside>
+
+  <p><mark>Kleene closure</mark> L* adalah gabungan nol string atau lebih dari L. Contoh dengan L = {0, 1, 00, 01, 10} dan M = {10, 11}:</p>
+  <table>
+    <tr><th>Operasi</th><th>Definisi</th><th>Contoh</th></tr>
+    <tr><td><b>Concatenation</b> LM</td><td>{xy | x ∈ L, y ∈ M}</td><td>LM = {010, 011, 110, 111, 0010, 0011, 0110, 0111, 1010, 1011}</td></tr>
+    <tr><td><b>Union</b> L ∪ M</td><td>{x | x ∈ L atau x ∈ M}</td><td>L ∪ M = {0, 1, 00, 01, 10, 11}</td></tr>
+    <tr><td><b>Kleene closure</b> L*</td><td>L⁰ ∪ L¹ ∪ L² ∪ …</td><td>{1}* = {ε, 1, 11, 111, …}</td></tr>
+    <tr><td><b>Positive closure</b> L⁺</td><td>L¹ ∪ L² ∪ …: minimal satu</td><td>{1}⁺ = {1, 11, 111, …}</td></tr>
+  </table>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh lain dari slide</summary>
+      <p><code>(1100)*</code> = {ε, 1100, 11001100, …} dan <code>(00+11)*</code> = {ε, 00, 11, 0000, 0011, 1100, 1111, …}.</p>
+    </details>
+  </aside>
+
+  <p class="intinya">Concatenation = sambung berurutan. Union = gabung. Star = ulang nol kali atau lebih, jadi ε selalu ikut.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> L = {a, b}, M = {c}. Hitung LM, L ∪ M, dan tiga string terpendek di L*.</summary>
+    <p>LM = {ac, bc}. L ∪ M = {a, b, c}. L* dimulai dengan ε, a, b (lalu aa, ab, ba, bb, …).</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Prioritas operator RE: star dulu, lalu concatenation, terakhir union</h2></summary>
+  <p class="rantai">
+    <span class="dari">operasi pada language (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">membaca dan menulis RE (<a href="#langkah-5">5️⃣</a>, <a href="#langkah-6">6️⃣</a>), Thompson (materi 02)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Seperti pangkat, lalu kali, lalu tambah di aritmetika.</p>
+    <p class="batas">aritmetika punya kurang dan bagi. RE hanya punya tiga operator, dan tanda + kadang berarti union.</p>
+  </aside>
+
+  <p><mark>Regular expression</mark> didefinisikan secara rekursif: ∅, ε, dan setiap simbol a adalah RE. Kalau r dan s RE, maka <code>r|s</code> (atau <code>r+s</code>), <code>rs</code>, dan <code>r*</code> juga RE.</p>
+  <table>
+    <tr><th>Operator</th><th>Arti</th><th>Contoh</th></tr>
+    <tr><td><code>r*</code> (star)</td><td>r diulang <b>nol kali</b> atau lebih</td><td><code>1*</code>: ε, 1, 11, …</td></tr>
+    <tr><td><code>rs</code> (concatenation)</td><td>r lalu langsung s</td><td><code>ab</code>: ab</td></tr>
+    <tr><td><code>r|s</code> (union)</td><td>r <b>atau</b> s</td><td><code>0|1</code>: 0, 1</td></tr>
+  </table>
+  <ul>
+    <li><strong>Prioritas:</strong> <code>ab*|c</code> dibaca <code>(a(b*))|c</code>. Pakai kurung kalau maksudnya lain, misalnya <code>(ab)*</code>.</li>
+    <li><strong>Singkatan:</strong> <code>r?</code> = <code>r|ε</code>, dan <code>r⁺</code> = <code>rr*</code>.</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Sifat aljabar untuk menyederhanakan RE (r, s, t adalah RE)</summary>
+<pre class="kode"><code>r|s = s|r                 (r|s)|t = r|(s|t)        (rs)t = r(st)
 r(s|t) = rs|rt            ∅|r = r                  ∅r = r∅ = ∅
 εr = rε = r               r|r = r                  (r*)* = r*
 ∅* = ε                    ε* = ε                   (r*s*)* = (r|s)*</code></pre>
+    </details>
+  </aside>
 
-<h2>5. Membaca RE</h2>
-<p>Cara paling aman: tulis string terpendek yang dihasilkan RE, lalu tebak polanya, lalu uji tebakanmu dengan string yang lebih panjang.</p>
-<table>
-  <tr><th>RE</th><th>String terpendek</th><th>Language</th></tr>
-  <tr><td><code>00</code></td><td>00</td><td>{00}</td></tr>
-  <tr><td><code>(0|1)*</code></td><td>ε, 0, 1, 00, 01</td><td>semua string 0 dan 1</td></tr>
-  <tr><td><code>(0|1)*00(0|1)*</code></td><td>00, 000, 100, 0010</td><td>memuat substring 00</td></tr>
-  <tr><td><code>(1|10)*</code></td><td>ε, 1, 11, 10, 110, 101</td><td>setiap 0 tepat didahului 1</td></tr>
-  <tr><td><code>(0|1)*011</code></td><td>011, 0011, 1011</td><td>diakhiri 011</td></tr>
-  <tr><td><code>(aa|ab|ba|bb)*</code></td><td>ε, aa, ba, aabb</td><td>panjang genap</td></tr>
-  <tr><td><code>(a|b)(a|b)(a|b)(a|b)*</code></td><td>aaa, abba</td><td>panjang minimal 3</td></tr>
-  <tr><td><code>baa(a|b)(a|b)*</code></td><td>baab, baaa, baabb</td><td>diawali baa, lalu minimal satu simbol</td></tr>
-</table>
+  <aside class="jebakan">
+    <p>Slide menulis <code>baa(b|a)+</code> untuk "baa diikuti minimal satu simbol". Karena <mark class="jebakan">+ juga dipakai untuk union</mark>, lebih aman menulis <code>baa(a|b)(a|b)*</code>.</p>
+  </aside>
 
-<h2>6. Menulis RE untuk sebuah soal</h2>
-<p>Langkah kerja:</p>
-<ol>
-  <li>Tentukan alphabet. "Simbol apa saja" ditulis <code>(0|1)</code> atau <code>(a|b|c)</code>, dan "string apa saja" ditulis dengan star: <code>(0|1)*</code>.</li>
-  <li>Cocokkan kalimat soal dengan salah satu pola di tabel.</li>
-  <li>Uji dengan ε, string terpendek yang harus diterima, dan string yang hampir benar tetapi harus ditolak.</li>
-</ol>
-<table>
-  <tr><th>Kalimat soal</th><th>Pola</th></tr>
-  <tr><td>diawali X</td><td><code>X(0|1)*</code></td></tr>
-  <tr><td>diakhiri X</td><td><code>(0|1)*X</code></td></tr>
-  <tr><td>memuat substring X</td><td><code>(0|1)*X(0|1)*</code></td></tr>
-  <tr><td>simbol ke-k dari kanan adalah 1</td><td><code>(0|1)*1</code> diikuti k−1 kali <code>(0|1)</code></td></tr>
-  <tr><td>simbol ke-k dari kiri adalah 1</td><td>k−1 kali <code>(0|1)</code>, lalu <code>1(0|1)*</code></td></tr>
-  <tr><td>panjang genap / kelipatan k</td><td><code>((0|1)(0|1))*</code></td></tr>
-  <tr><td>A atau B</td><td><code>RE_A | RE_B</code></td></tr>
-  <tr><td>A dan B (misalnya memuat a dan memuat b)</td><td>tulis setiap urutan kemunculan, lalu union</td></tr>
-</table>
-<div class="callout warn"><strong>Jebakan "diawali" dan "diakhiri"</strong><code>(a|b)*abb</code> berarti <b>diakhiri</b> abb. Kalau soalnya "diawali abb", abb harus ditulis di depan: <code>abb(a|b)*</code>.</div>
-<p>Uji RE-mu di <a href="viz/cek-re.html">visualisasi cek RE</a>. Visualisasi itu membandingkan RE-mu dengan kunci jawaban untuk semua string sampai panjang 6–8, lalu menunjukkan string mana yang salah.</p>
+  <p class="intinya">Star paling kuat, union paling lemah. Kalau ragu, pakai kurung.</p>
 
-<h2>7. Regular definition</h2>
-<p>Regular definition adalah deretan definisi <code>d₁ → r₁, d₂ → r₂, …</code>. Setiap rᵢ boleh memakai nama yang didefinisikan sebelumnya. Hasilnya sama dengan satu RE panjang, tetapi lebih mudah dibaca.</p>
-<pre><code>letter       → A | B | … | Z | a | b | … | z
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Beri kurung lengkap untuk <code>a|bc*</code>, lalu tulis tiga string terpendeknya.</summary>
+    <p><code>a|(b(c*))</code>. String terpendek: <code>a</code>, <code>b</code>, <code>bc</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Membaca RE: tulis string terpendeknya dulu, lalu cari polanya</h2></summary>
+  <p class="rantai">
+    <span class="dari">operator dan prioritas (<a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">menulis RE (<a href="#langkah-6">6️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menebak aturan barisan angka dari beberapa suku pertamanya.</p>
+    <p class="batas">tebakan barisan bisa salah. Uji tebakanmu dengan string yang lebih panjang sebelum menyimpulkan.</p>
+  </aside>
+
+  <p>Tulis 4–6 string terpendek yang dihasilkan, tebak polanya, lalu uji dengan string yang lebih panjang.</p>
+  <table>
+    <tr><th>RE</th><th>String terpendek</th><th>Language</th></tr>
+    <tr><td><code>(0|1)*00(0|1)*</code></td><td>00, 000, 100, 0010</td><td>memuat substring 00</td></tr>
+    <tr><td><code>(1|10)*</code></td><td>ε, 1, 11, 10, 110, 101</td><td>setiap 0 tepat didahului 1</td></tr>
+    <tr><td><code>(0|1)*011</code></td><td>011, 0011, 1011</td><td>diakhiri 011</td></tr>
+    <tr><td><code>(aa|ab|ba|bb)*</code></td><td>ε, aa, ba, aabb</td><td>panjang genap</td></tr>
+    <tr><td><code>(a|b)(a|b)(a|b)(a|b)*</code></td><td>aaa, abba</td><td>panjang minimal 3</td></tr>
+    <tr><td><code>baa(a|b)(a|b)*</code></td><td>baab, baaa, baabb</td><td>diawali baa, lalu minimal satu simbol</td></tr>
+  </table>
+  <p>Satu language bisa ditulis dengan banyak RE. Contoh: <code>(r*s*)* = (r|s)*</code>.</p>
+
+  <p class="intinya">String terpendek dulu, pola kemudian, lalu uji dengan string panjang.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Language apa yang dihasilkan <code>(0|1)*0(0|1)</code>?</summary>
+    <p>String yang simbol keduanya dari kanan adalah 0. String terpendek: <code>00</code>, <code>01</code>, <code>000</code>, <code>001</code>, <code>100</code>, <code>101</code>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa <code>a*b*</code> tidak sama dengan <code>(a|b)*</code>? Beri satu string pembeda.</summary>
+    <p><code>ba</code>. Di <code>a*b*</code>, semua a harus muncul sebelum semua b, jadi <code>ba</code> ditolak. <code>(a|b)*</code> menerimanya.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Menulis RE: cocokkan kalimat soal dengan salah satu pola</h2></summary>
+  <p class="rantai">
+    <span class="dari">membaca RE (<a href="#langkah-5">5️⃣</a>)</span>
+    <span class="ke">soal "atau" dan "dan" (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Template surat: kamu tinggal mengisi bagian yang kosong.</p>
+    <p class="batas">template tidak memeriksa isinya. RE yang diisi dari pola tetap harus diuji (<a href="#langkah-8">8️⃣</a>).</p>
+  </aside>
+
+  <p>Soal biasanya berbentuk "string di atas Σ yang …". Tentukan alphabet dulu: "simbol apa saja" = <code>(0|1)</code>, "string apa saja" = <code>(0|1)*</code>. Lalu ganti X dengan string yang diminta:</p>
+  <table>
+    <tr><th>Kalimat soal</th><th>Pola</th><th>Kenapa</th></tr>
+    <tr><td>diawali X</td><td><code>X(0|1)*</code></td><td>X wajib di depan, sisanya bebas</td></tr>
+    <tr><td>diakhiri X</td><td><code>(0|1)*X</code></td><td>bebas di depan, X wajib di akhir</td></tr>
+    <tr><td>memuat substring X</td><td><code>(0|1)*X(0|1)*</code></td><td>bebas di kedua sisi X</td></tr>
+    <tr><td>simbol ke-k dari kanan adalah 1</td><td><code>(0|1)*1</code> lalu (k − 1) kali <code>(0|1)</code></td><td>tepat (k − 1) simbol setelah 1</td></tr>
+    <tr><td>simbol ke-k dari kiri adalah 1</td><td>(k − 1) kali <code>(0|1)</code>, lalu <code>1(0|1)*</code></td><td>tepat (k − 1) simbol sebelum 1</td></tr>
+    <tr><td>panjang genap</td><td><code>((0|1)(0|1))*</code></td><td>setiap putaran star menambah 2 simbol</td></tr>
+  </table>
+
+  <aside class="jebakan">
+    <p><code>(a|b)*abb</code> berarti <mark class="jebakan">diakhiri</mark> abb. Untuk "diawali abb", abb ditulis di depan: <code>abb(a|b)*</code>.</p>
+  </aside>
+
+  <p class="intinya">Diawali: X di depan. Diakhiri: X di belakang. Memuat: bebas di kedua sisi.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> String 0 dan 1 yang simbol ketiganya dari kanan adalah 1.</summary>
+    <p><code>(0|1)*1(0|1)(0|1)</code>. Setelah angka 1 itu ada tepat dua simbol. Uji: <code>100</code> diterima, <code>0100</code> diterima, <code>010</code> ditolak, <code>11</code> ditolak (terlalu pendek).</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> String di atas {a, b} yang diawali abb.</summary>
+    <p><code>abb(a|b)*</code></p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> String di atas {0, 1} yang memuat substring 011.</summary>
+    <p><code>(0|1)*011(0|1)*</code></p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Untuk "atau" pakai union, untuk "dan" union semua urutan kemunculan</h2></summary>
+  <p class="rantai">
+    <span class="dari">pola (<a href="#langkah-6">6️⃣</a>), union (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">mengecek jawaban (<a href="#langkah-8">8️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>"Ani dan Budi sudah datang" bisa terjadi dengan Ani datang dulu, atau Budi datang dulu.</p>
+    <p class="batas">di daftar hadir urutan tidak penting. Di RE urutan penting, jadi setiap urutan harus ditulis sendiri.</p>
+  </aside>
+
+  <p>"A atau B" cukup <code>RE_A | RE_B</code>. RE tidak punya operator "dan", jadi untuk "memuat A dan B" kamu menulis setiap urutan kemunculan lalu menggabungkannya dengan union.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh: string di atas {a, b, c} yang memuat minimal satu a dan satu b</summary>
+      <p>Misalkan Σ* = <code>(a|b|c)*</code>.</p>
+      <ol>
+        <li><strong>a lebih dulu:</strong> <code>Σ* a Σ* b Σ*</code>. Bagian Σ* menampung huruf apa pun di sela-selanya.</li>
+        <li><strong>b lebih dulu:</strong> <code>ba</code> juga harus diterima, jadi butuh <code>Σ* b Σ* a Σ*</code>.</li>
+        <li><strong>Gabungkan</strong> dengan union.</li>
+      </ol>
+<pre class="kode"><code>(a|b|c)* a (a|b|c)* b (a|b|c)*  |  (a|b|c)* b (a|b|c)* a (a|b|c)*</code></pre>
+      <p>Cek cepat. Harus diterima: <code>ab</code>, <code>ba</code>, <code>cabc</code>. Harus ditolak: <code>ε</code>, <code>aaa</code>, <code>cbc</code>.</p>
+    </details>
+  </aside>
+
+  <p class="intinya">"Atau" = union. "Dan" = union dari semua urutan.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> String di atas {a, b, c} yang memuat minimal satu a dan satu b.</summary>
+    <p><code>(a|b|c)*a(a|b|c)*b(a|b|c)* | (a|b|c)*b(a|b|c)*a(a|b|c)*</code>. Butuh dua urutan, karena a boleh muncul sebelum atau sesudah b. Dengan satu urutan saja, <code>ba</code> ditolak.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> String di atas {0, 1} yang diawali atau diakhiri (atau keduanya) dengan 01.</summary>
+    <p><code>01(0|1)* | (0|1)*01</code>. "Atau keduanya" tidak butuh bagian tambahan, karena string seperti <code>0101</code> sudah cocok dengan bagian kiri.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Uji RE dengan ε, string terpendek, dan string yang hampir benar</h2></summary>
+  <p class="rantai">
+    <span class="dari">RE yang kamu tulis (<a href="#langkah-6">6️⃣</a>, <a href="#langkah-7">7️⃣</a>)</span>
+    <span class="ke">ε-NFA dari RE (materi 02)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menguji rem mobil di jalan lurus saja tidak cukup. Rem juga harus diuji di turunan.</p>
+    <p class="batas">tes mobil tidak pernah selesai. Untuk RE, visualisasi bisa mengecek semua string sampai panjang tertentu sekaligus.</p>
+  </aside>
+
+  <p>RE yang salah biasanya gagal di string pendek. Uji dengan tiga kelompok ini:</p>
+  <ol>
+    <li><strong>ε dan string terpendek</strong> yang seharusnya diterima. "Diakhiri 011": apakah <code>011</code> sendiri diterima?</li>
+    <li><strong>String yang hampir benar</strong> tapi harus ditolak. "Ke-3 dari kanan = 1": <code>100</code> diterima, <code>010</code> ditolak.</li>
+    <li><strong>Urutan lain</strong> yang juga memenuhi soal. Soal "dan": <code>ab</code> dan juga <code>ba</code>.</li>
+  </ol>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/cek-re.html">cek RE</a>, pilih soal, lalu tulis RE-mu. Visualisasi membandingkannya dengan kunci untuk semua string sampai panjang 6–8.</p>
+  </aside>
+
+  <p class="intinya">Satu string pendek yang salah sudah cukup untuk membuktikan RE-mu salah.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis RE untuk string 0 dan 1 yang <b>tidak</b> memuat <code>00</code>, lalu uji.</summary>
+    <p><code>(1|01)*(0|ε)</code>. Setiap 0 di tengah harus langsung diikuti 1, jadi bagian yang diulang adalah <code>1</code> atau <code>01</code>. Di akhir boleh ada satu 0 tambahan. Uji: <code>ε</code>, <code>0</code>, <code>010</code>, <code>1101</code> diterima, <code>100</code> ditolak.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Regular definition memberi nama pada potongan RE supaya mudah dibaca</h2></summary>
+  <p class="rantai">
+    <span class="dari">pattern untuk token (<a href="#langkah-1">1️⃣</a>)</span>
+    <span class="ke">cara lexer mendefinisikan token di praktik</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Variabel di program: hitung sekali, beri nama, lalu pakai berkali-kali.</p>
+    <p class="batas">variabel bisa diubah nilainya. Nama di regular definition tetap, dan hanya boleh memakai nama yang didefinisikan sebelumnya.</p>
+  </aside>
+
+  <p><mark>Regular definition</mark> adalah deretan definisi <code>d₁ → r₁, d₂ → r₂, …</code>. Hasilnya sama dengan satu RE panjang, tapi lebih mudah dibaca.</p>
+<pre class="kode"><code>letter       → A | B | … | Z | a | b | … | z
 digit        → 0 | 1 | … | 9
 id           → letter (letter | digit)*
 
@@ -130,43 +395,59 @@ digits       → digit digit*
 opt-fraction → ( . digits )?
 opt-exponent → ( E (+|-)? digits )?
 unsigned-num → digits opt-fraction opt-exponent</code></pre>
-<p><code>unsigned-num</code> cocok dengan <code>5280</code>, <code>39.37</code>, <code>6.336E4</code>, dan <code>1.894E-4</code>.</p>
+  <p><code>unsigned-num</code> cocok dengan <code>5280</code>, <code>39.37</code>, <code>6.336E4</code>, dan <code>1.894E-4</code>. Tanpa nama, RE untuk <code>id</code> menjadi <code>(A|…|z)((A|…|z)|(0|…|9))*</code>.</p>
 
-<h2>8. Latihan</h2>
-<p>Soal 1–5 adalah latihan di slide dosen. Coba tulis sendiri dulu, lalu uji di visualisasi.</p>
-<p><b>1.</b> String di atas {a, b, c} yang memuat minimal satu a dan satu b.</p>
-<details><summary>Jawaban</summary>
-<p><code>(a|b|c)*a(a|b|c)*b(a|b|c)* | (a|b|c)*b(a|b|c)*a(a|b|c)*</code></p>
-<p>Butuh dua urutan, karena a boleh muncul sebelum atau sesudah b. Dengan satu urutan saja, <code>ba</code> ditolak.</p>
-</details>
-<p><b>2.</b> String 0 dan 1 yang simbol ketiganya dari kanan adalah 1.</p>
-<details><summary>Jawaban</summary>
-<p><code>(0|1)*1(0|1)(0|1)</code>. Setelah angka 1 itu ada tepat dua simbol. Uji: <code>100</code> diterima, <code>0100</code> diterima, <code>010</code> ditolak, <code>11</code> ditolak (terlalu pendek).</p>
-</details>
-<p><b>3.</b> String di atas {a, b} yang diawali abb.</p>
-<details><summary>Jawaban</summary><p><code>abb(a|b)*</code></p></details>
-<p><b>4.</b> String di atas {0, 1} yang memuat substring 011.</p>
-<details><summary>Jawaban</summary><p><code>(0|1)*011(0|1)*</code></p></details>
-<p><b>5.</b> String di atas {0, 1} yang diawali atau diakhiri (atau keduanya) dengan 01.</p>
-<details><summary>Jawaban</summary>
-<p><code>01(0|1)* | (0|1)*01</code>. "Atau keduanya" tidak butuh bagian tambahan, karena string seperti <code>0101</code> sudah cocok dengan bagian kiri.</p>
-</details>
-<p><b>6.</b> Language apa yang dihasilkan <code>(0|1)*0(0|1)</code>?</p>
-<details><summary>Jawaban</summary><p>String yang simbol keduanya dari kanan adalah 0. String terpendek: <code>00</code>, <code>01</code>, <code>000</code>, <code>001</code>, <code>100</code>, <code>101</code>.</p></details>
-<p><b>7.</b> Kenapa <code>a*b*</code> tidak sama dengan <code>(a|b)*</code>? Beri satu string pembeda.</p>
-<details><summary>Jawaban</summary><p><code>ba</code>. Di <code>a*b*</code>, semua a harus muncul sebelum semua b, jadi <code>ba</code> ditolak. <code>(a|b)*</code> menerimanya.</p></details>
-<p><b>8.</b> Tulis RE untuk string 0 dan 1 yang <b>tidak</b> memuat <code>00</code>.</p>
-<details><summary>Jawaban</summary>
-<p><code>(1|01)*(0|ε)</code>. Setiap 0 di tengah harus langsung diikuti 1, jadi bagian yang diulang adalah <code>1</code> atau <code>01</code>. Di akhir boleh ada satu 0 tambahan. Uji: <code>ε</code>, <code>0</code>, <code>010</code>, <code>1101</code> diterima, <code>100</code> ditolak.</p>
-</details>
+  <p class="intinya">Regular definition = RE yang dipecah dan diberi nama. Isinya tetap satu RE.</p>
 
-<h2>Daftar pustaka</h2>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis regular definition untuk bilangan bulat dengan tanda opsional, misalnya <code>-12</code>, <code>+7</code>, <code>30</code>.</summary>
+<pre class="kode"><code>sign    → + | -
+digit   → 0 | 1 | … | 9
+integer → sign? digit digit*</code></pre>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-10">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: arah pola tertukar dan urutan yang terlupa</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">mengecek jawabanmu sendiri</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Salah membaca petunjuk "belok kiri setelah masjid" menjadi "sebelum masjid".</p>
+    <p class="batas">salah jalan masih bisa putar balik. RE dengan arah tertukar langsung menerima string yang salah.</p>
+  </aside>
+
+  <p>Setiap kesalahan di bawah membuat RE menerima string yang salah, atau menolak string yang benar.</p>
+  <table>
+    <tr><th>Jawaban salah</th><th>Kenapa salah</th><th>Perbaikan</th></tr>
+    <tr><td><code>(a|b)*abb</code> untuk "diawali abb"</td><td>Pola ini berarti diakhiri abb, jadi <code>babb</code> diterima</td><td><code>abb(a|b)*</code></td></tr>
+    <tr><td><code>a*b*</code> untuk "semua string a dan b"</td><td>Semua a harus sebelum semua b, jadi <code>ba</code> ditolak</td><td><code>(a|b)*</code></td></tr>
+    <tr><td><code>(0|1)(0|1)1(0|1)*</code> untuk "ke-3 dari kanan"</td><td>Ini simbol ke-3 dari kiri</td><td><code>(0|1)*1(0|1)(0|1)</code></td></tr>
+    <tr><td>Satu urutan untuk soal "a dan b"</td><td>String dengan urutan lain (<code>ba</code>) ditolak</td><td>Union semua urutan</td></tr>
+    <tr><td><code>(a|b)+</code> dibaca sebagai union</td><td>+ setelah kurung berarti satu kali atau lebih</td><td>Tulis <code>(a|b)(a|b)*</code></td></tr>
+    <tr><td>∅ dan {ε} dianggap sama</td><td>∅ tidak berisi string, {ε} berisi string kosong</td><td>Lihat <a href="#langkah-2">2️⃣</a></td></tr>
+  </table>
+
+  <p class="intinya">Cek arah pola, semua urutan, dan arti tanda + sebelum menyerahkan jawaban.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Temanmu menjawab <code>(0|1)*01</code> untuk "diawali 01". String apa yang membuktikan jawabannya salah?</summary>
+    <p><code>101</code> diterima padahal tidak diawali 01, dan <code>010</code> ditolak padahal diawali 01. Yang benar: <code>01(0|1)*</code>.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Addison-Wesley. Bab 1.1, 1.5, dan 3.1.</li>
   <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 3.1–3.3.</li>
   <li>Nasari, M. (2025). <i>Automata and language theory</i> dan <i>Lexical analysis</i> [slide kuliah COMP6062 Compilation Techniques, sesi 2–3].</li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

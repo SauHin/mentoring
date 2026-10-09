@@ -5,20 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Truth Table dan Equivalence</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/logic.css?v=4323dfa7">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=a616e7a3">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Truth table dan equivalence</h1>
-<p>Truth table adalah "hakim" di logika proposisi: hukum apa pun bisa dicek di sini, jadi tidak perlu dihafal. Ketik pakai simbol atau ASCII: <code>~ ! &amp; | -&gt; &lt;-&gt;</code>.</p>
+<p>Visualisasi ini membuat truth table dari ekspresi yang kamu ketik, dan membandingkan dua ekspresi baris per baris. Ketik pakai simbol atau ASCII: <code>~ ! &amp; | -&gt; &lt;-&gt;</code>.</p>
+<p class="coba"><strong>Coba:</strong> di bagian 2, pilih contoh <b>De Morgan</b>, lalu <b>De Morgan yang salah</b>.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> kolom biru (hasil akhir), dan baris merah yang menjadi bukti dua ekspresi tidak ekuivalen.</p>
 
 <div class="lg-keys" id="keys" role="group" aria-label="Sisipkan simbol"></div>
 
 <section class="lg-section">
   <div class="lg-head"><h2>1. Truth table satu ekspresi</h2><label class="pick">Contoh <select class="field" id="pre1"></select></label></div>
-  <p>Setiap sub-ekspresi jadi satu kolom, dikerjakan dari dalam ke luar. Kolom kuning = hasil akhir.</p>
+  <p>Setiap sub-ekspresi jadi satu kolom, dikerjakan dari dalam ke luar. Kolom biru = hasil akhir.</p>
   <label class="lg-input">Ekspresi <input class="field" id="e1" value="~(p ∧ q)" spellcheck="false" autocomplete="off"></label>
   <div class="lg-err" id="err1"></div>
   <div class="lg-table-wrap" id="tab1"></div>
