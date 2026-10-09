@@ -5,174 +5,434 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Predicate dan Quantifier · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Discrete mathematics · 04</span>
-<h1>Predicate dan quantifier</h1>
-<p class="lead">Logika proposisi tidak bisa mengatakan "<b>semua</b> mahasiswa" atau "<b>ada</b> bilangan". Untuk itu dibutuhkan <b>predicate</b> dan <b>quantifier</b>. Kuncinya satu: <b>∀ adalah AND besar, ∃ adalah OR besar</b>.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/kuantor.html">Visualisasi: playground quantifier</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li><b>Predicate</b> P(x) = kalimat dengan variabel. Baru menjadi statement kalau x diisi, atau diberi quantifier.</li>
-    <li><code>∀x ∈ D, P(x)</code> = P benar untuk <b>semua</b> x. <code>∃x ∈ D, P(x)</code> = P benar untuk <b>minimal satu</b> x.</li>
-    <li>Menyangkal ∀ cukup dengan <b>satu counterexample</b>. Membuktikan ∃ cukup dengan <b>satu witness</b>.</li>
-    <li>Negasi: <b>balik quantifier-nya, negasikan predicate-nya</b>. Untuk dua quantifier, urutannya mengubah arti.</li>
+<header>
+  <h1>Predicate dan quantifier</h1>
+  <p class="tujuan">Logika proposisi tidak bisa mengatakan "<b>semua</b> mahasiswa" atau "<b>ada</b> bilangan". Untuk itu kamu butuh predicate dan quantifier, dan kuncinya satu: <b>∀ adalah AND besar, ∃ adalah OR besar</b>. Target: kamu bisa menentukan nilai statement berquantifier, menerjemahkan kalimat, dan menulis negasinya.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/kuantor.html">quantifier playground</a> · Prasyarat: <a href="../01-logika-proposisi/notes.html">logika proposisi</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Predicate dan domain</a></li>
+      <li><a href="#langkah-2">∀ dan counterexample</a></li>
+      <li><a href="#langkah-3">∃ dan witness</a></li>
+      <li><a href="#langkah-4">∀ = AND besar, ∃ = OR besar</a></li>
+      <li><a href="#langkah-5">Menerjemahkan kalimat</a></li>
+      <li><a href="#langkah-6">∀ dengan →, ∃ dengan ∧</a></li>
+      <li><a href="#langkah-7">Negasi</a></li>
+      <li><a href="#langkah-8">Contrapositive, converse, inverse</a></li>
+      <li><a href="#langkah-9">Dua quantifier</a></li>
+      <li><a href="#langkah-10">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Predicate dan domain</h2>
-<p><b>Predicate</b> adalah kalimat dengan variabel yang menjadi statement setelah variabelnya diisi. <b>Domain</b> D = semua nilai yang boleh diisikan.</p>
-<p>Contoh: P(x) = "x² &gt; x", dengan domain bilangan real.</p>
-<table>
-  <tr><th>Diisi</th><th>Statement</th><th>Nilai</th></tr>
-  <tr><td>P(2)</td><td>4 &gt; 2</td><td>T</td></tr>
-  <tr><td>P(1/2)</td><td>1/4 &gt; 1/2</td><td>F</td></tr>
-  <tr><td>P(−2)</td><td>4 &gt; −2</td><td>T</td></tr>
-</table>
-<p><b>Truth set</b> = semua x di D yang membuat P(x) benar, ditulis <code>{x ∈ D | P(x)}</code>. Truth set bergantung pada domain. Q(n) = "n faktor dari 8" punya truth set {1, 2, 4, 8} kalau D = bilangan bulat positif, tapi {±1, ±2, ±4, ±8} kalau D = semua bilangan bulat.</p>
+<main>
 
-<h2>2. Dua quantifier</h2>
-<table>
-  <tr><th></th><th><code>∀x ∈ D, P(x)</code></th><th><code>∃x ∈ D, P(x)</code></th></tr>
-  <tr><td>Dibaca</td><td>for all, for every, for any, each</td><td>there exists, for some, at least one</td></tr>
-  <tr><td>Benar jika</td><td>P(x) benar untuk <b>setiap</b> x di D</td><td>P(x) benar untuk <b>minimal satu</b> x</td></tr>
-  <tr><td>Salah jika</td><td>Ada <b>satu</b> x yang membuat P(x) salah (<b>counterexample</b>)</td><td>P(x) salah untuk <b>semua</b> x</td></tr>
-  <tr><td>Membuktikan benar</td><td>Cek semua (kalau D kecil) atau buktikan secara umum</td><td>Cukup tunjukkan <b>satu witness</b></td></tr>
-  <tr><td>Membuktikan salah</td><td>Cukup tunjukkan <b>satu counterexample</b></td><td>Cek semua (kalau D kecil) atau buktikan secara umum</td></tr>
-</table>
-<p>Contoh slide: <code>∀x ∈ {1, 2, 3, 4, 5}, x² ≥ x</code> benar (cek kelimanya). <code>∀x ∈ ℝ, x² ≥ x</code> salah, dengan counterexample x = 1/2. <code>∃m ∈ ℤ, m² = m</code> benar, dengan witness m = 1. <code>∃m ∈ {5, 6, 7, 8, 9}, m² = m</code> salah (cek kelimanya).</p>
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Predicate adalah kalimat dengan variabel, dan baru bernilai setelah variabelnya diisi</h2></summary>
+  <p class="rantai">
+    <span class="dari">statement (materi 01), yang selalu bernilai T atau F</span>
+    <span class="ke">quantifier (<a href="#langkah-2">2️⃣</a>, <a href="#langkah-3">3️⃣</a>)</span>
+  </p>
 
-<h3>∀ = AND besar, ∃ = OR besar</h3>
-<p>Kalau D = {x₁, x₂, …, xₙ}:</p>
-<pre><code>∀x ∈ D, P(x)  ≡  P(x₁) ∧ P(x₂) ∧ … ∧ P(xₙ)
+  <aside class="analogi">
+    <p>Formulir dengan titik-titik: "____ adalah ibu kota Indonesia." Benar atau salahnya baru ketahuan setelah diisi.</p>
+    <p class="batas">formulir boleh diisi apa saja. Predicate hanya boleh diisi nilai dari domain-nya.</p>
+  </aside>
+
+  <p><mark>Predicate</mark> P(x) adalah kalimat dengan variabel yang menjadi statement setelah x diisi. Nilai yang boleh diisikan disebut <b>domain</b> D. Contoh: P(x) = "x² &gt; x", D = bilangan real.</p>
+  <table>
+    <tr><th>Diisi</th><th>Statement</th><th>Nilai</th></tr>
+    <tr><td>P(2)</td><td>4 &gt; 2</td><td>T</td></tr>
+    <tr><td>P(1/2)</td><td>1/4 &gt; 1/2</td><td>F</td></tr>
+    <tr><td>P(−2)</td><td>4 &gt; −2</td><td>T</td></tr>
+  </table>
+
+  <aside class="hitung">
+    <details>
+      <summary>Truth set: semua x yang membuat P(x) benar</summary>
+      <p><b>Truth set</b> ditulis <code>{x ∈ D | P(x)}</code>, dan isinya bergantung pada domain. Q(n) = "n faktor dari 8" punya truth set {1, 2, 4, 8} kalau D = bilangan bulat positif, tapi {±1, ±2, ±4, ±8} kalau D = semua bilangan bulat.</p>
+    </details>
+  </aside>
+
+  <p class="intinya">P(x) belum bernilai. P(x) menjadi statement kalau x diisi, atau kalau diberi quantifier.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> P(n) = "n² = n", D = bilangan bulat. Tentukan nilai P(0), P(1), P(2), dan truth set-nya.</summary>
+    <p>P(0) = T (0 = 0), P(1) = T (1 = 1), P(2) = F (4 ≠ 2). Truth set: {0, 1}.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>∀ benar kalau semua elemen memenuhi, dan satu counterexample sudah membuatnya salah</h2></summary>
+  <p class="rantai">
+    <span class="dari">predicate dan domain (<a href="#langkah-1">1️⃣</a>)</span>
+    <span class="ke">∀ sebagai AND besar (<a href="#langkah-4">4️⃣</a>) dan bukti (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Satpam mengecek "semua lampu gedung mati": satu lampu yang masih menyala sudah cukup untuk membantah.</p>
+    <p class="batas">satpam boleh berhenti setelah beberapa lantai. Untuk menyatakan ∀ benar, semua elemen harus dicek atau dibuktikan secara umum.</p>
+  </aside>
+
+  <p><mark>Universal quantifier</mark> <code>∀x ∈ D, P(x)</code> dibaca "for all x in D". Benar kalau P(x) benar untuk <b>setiap</b> x di D. Elemen yang membuat P(x) salah disebut <b>counterexample</b>.</p>
+  <ul>
+    <li><code>∀x ∈ {1, 2, 3, 4, 5}, x² ≥ x</code>: <b>benar</b>, cek kelimanya.</li>
+    <li><code>∀x ∈ ℝ, x² ≥ x</code>: <b>salah</b>, counterexample x = 1/2.</li>
+  </ul>
+  <p>Kata lain untuk ∀: for every, for any, each, semua, setiap.</p>
+
+  <p class="intinya">Membantah ∀: cukup satu counterexample. Membuktikan ∀: harus semua.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Benar atau salah: <code>∀n ∈ ℤ, n² ≥ n</code>?</summary>
+    <p><b>Benar.</b> Untuk n ≤ 0, n² ≥ 0 ≥ n. Untuk n ≥ 1, n² = n · n ≥ n · 1 = n. Bedanya dengan ℝ: tidak ada bilangan bulat di antara 0 dan 1, jadi counterexample 1/2 tidak ada.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>∃ benar kalau minimal satu elemen memenuhi, dan satu witness sudah cukup</h2></summary>
+  <p class="rantai">
+    <span class="dari">∀ dan counterexample (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">∃ sebagai OR besar (<a href="#langkah-4">4️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mencari kunci cadangan di laci: begitu satu kunci ketemu, pencarian selesai.</p>
+    <p class="batas">di dunia nyata kamu bisa yakin "pasti ada di suatu tempat". Di logika, ∃ dinyatakan benar dengan menunjukkan witness atau bukti.</p>
+  </aside>
+
+  <p><mark>Witness</mark> adalah elemen yang membuat P(x) benar. <code>∃x ∈ D, P(x)</code> ("there exists") benar kalau ada <b>minimal satu</b> witness, dan salah kalau P(x) salah untuk semua x.</p>
+  <table>
+    <tr><th></th><th><code>∀x ∈ D, P(x)</code></th><th><code>∃x ∈ D, P(x)</code></th></tr>
+    <tr><td>Membuktikan benar</td><td>Cek semua, atau buktikan umum</td><td>Cukup <b>satu witness</b></td></tr>
+    <tr><td>Membuktikan salah</td><td>Cukup <b>satu counterexample</b></td><td>Cek semua, atau buktikan umum</td></tr>
+  </table>
+  <ul>
+    <li><code>∃m ∈ ℤ, m² = m</code>: <b>benar</b>, witness m = 1.</li>
+    <li><code>∃m ∈ {5, 6, 7, 8, 9}, m² = m</code>: <b>salah</b>, cek kelimanya.</li>
+  </ul>
+
+  <p class="intinya">∃ dan ∀ bertukar peran: satu contoh cukup untuk membenarkan ∃, tapi untuk menyalahkannya harus semua.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Benar atau salah: <code>∃y ∃z, (y = 2z ∧ y prima)</code> untuk y, z bilangan bulat positif?</summary>
+    <p><b>Benar</b>, dengan witness z = 1, y = 2. Bilangan 2 adalah satu-satunya prima yang genap.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>∀ adalah AND besar, ∃ adalah OR besar, dan di kode keduanya adalah loop</h2></summary>
+  <p class="rantai">
+    <span class="dari"><code>∧</code> dan <code>∨</code> (materi 01), loop dengan break (algorithm and programming)</span>
+    <span class="ke">negasi (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Absen kelas: "semua hadir" sama dengan "Ani hadir <b>dan</b> Budi hadir <b>dan</b> …".</p>
+    <p class="batas">absen kelas selalu terbatas. Domain bisa tak hingga (bilangan real), jadi AND besar tidak bisa ditulis lengkap, hanya cara berpikirnya yang sama.</p>
+  </aside>
+
+  <p>Kalau D = {x₁, x₂, …, xₙ}, quantifier bisa ditulis ulang dengan connective:</p>
+<pre class="kode"><code>∀x ∈ D, P(x)  ≡  P(x₁) ∧ P(x₂) ∧ … ∧ P(xₙ)
 ∃x ∈ D, P(x)  ≡  P(x₁) ∨ P(x₂) ∨ … ∨ P(xₙ)</code></pre>
-<p>Ini menjelaskan semua aturan di tabel atas. AND menjadi F kalau satu P(xᵢ) bernilai F (counterexample), dan OR menjadi T kalau satu P(xᵢ) bernilai T (witness). Di kode, keduanya adalah loop:</p>
-<pre><code>// ∀: anggap benar, cari satu yang gagal        // ∃: anggap salah, cari satu yang berhasil
+  <p>Ini menjelaskan aturan di <a href="#langkah-3">3️⃣</a>: AND menjadi F kalau satu P(xᵢ) F (counterexample), dan OR menjadi T kalau satu P(xᵢ) T (witness).</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Padanan di kode C</summary>
+<pre class="kode"><code>// ∀: anggap benar, cari satu yang gagal        // ∃: anggap salah, cari satu yang berhasil
 int semua = 1;                                  int ada = 0;
 for (i = 0; i &lt; n; i++)                         for (i = 0; i &lt; n; i++)
     if (!P(D[i])) { semua = 0; break; }             if (P(D[i])) { ada = 1; break; }</code></pre>
-<p>Jalankan keduanya langkah demi langkah di <a href="viz/kuantor.html">visualisasi</a> (bagian 1).</p>
+      <p><code>break</code> terjadi tepat saat counterexample (untuk ∀) atau witness (untuk ∃) ditemukan.</p>
+    </details>
+  </aside>
 
-<h2>3. Menerjemahkan kalimat</h2>
-<table>
-  <tr><th>Kalimat</th><th>Formal</th></tr>
-  <tr><td>Semua segitiga punya tiga sisi.</td><td><code>∀t ∈ T, t punya tiga sisi</code></td></tr>
-  <tr><td>Tidak ada anjing yang bersayap.</td><td><code>∀d ∈ D, d tidak bersayap</code></td></tr>
-  <tr><td>Beberapa program terstruktur.</td><td><code>∃p ∈ P, p terstruktur</code></td></tr>
-</table>
-<p>"Tidak ada … yang …" (no, none) = "semua … tidak …". Jadi bentuknya ∀ dengan negasi, bukan ∃.</p>
+  <aside class="coba">
+    <p>Di <a href="viz/kuantor.html">quantifier playground</a>, bagian 1, klik "Cek elemen berikutnya" satu per satu. Pengecekan berhenti di counterexample atau witness pertama.</p>
+  </aside>
 
-<h3>Jebakan: ∀ berpasangan dengan →, ∃ berpasangan dengan ∧</h3>
-<p>Kalau domainnya lebih luas dari yang dibicarakan (misalnya D = semua hewan):</p>
-<table>
-  <tr><th>Kalimat</th><th>Benar</th><th>Salah</th></tr>
-  <tr><td>Semua kucing mengeong.</td><td><code>∀x, Kucing(x) → Mengeong(x)</code></td><td><code>∀x, Kucing(x) ∧ Mengeong(x)</code>: berarti semua hewan adalah kucing</td></tr>
-  <tr><td>Ada kucing yang hitam.</td><td><code>∃x, Kucing(x) ∧ Hitam(x)</code></td><td><code>∃x, Kucing(x) → Hitam(x)</code>: sudah benar hanya karena ada satu anjing (vacuously true)</td></tr>
-</table>
-<p>Bentuk <code>∀x, P(x) → Q(x)</code> disebut <b>universal conditional</b>, dan ini bentuk statement yang paling sering muncul di matematika. Contoh: <code>∀x ∈ ℝ, x &gt; 2 → x² &gt; 4</code> artinya "kuadrat setiap bilangan real yang lebih dari 2 pasti lebih dari 4".</p>
+  <p class="intinya">∀ = AND dari semua P(xᵢ). ∃ = OR dari semua P(xᵢ).</p>
 
-<h2>4. Negasi</h2>
-<p>Turunkan dari "AND besar / OR besar" dan De Morgan, jadi tidak perlu dihafal:</p>
-<pre><code>~(∀x, P(x)) ≡ ~(P(x₁) ∧ … ∧ P(xₙ)) ≡ ~P(x₁) ∨ … ∨ ~P(xₙ) ≡ ∃x, ~P(x)
-~(∃x, P(x)) ≡ ~(P(x₁) ∨ … ∨ P(xₙ)) ≡ ~P(x₁) ∧ … ∧ ~P(xₙ) ≡ ∀x, ~P(x)</code></pre>
-<div class="callout tip"><strong>Aturannya</strong><b>Balik quantifier-nya</b> (∀ ↔ ∃) dan <b>negasikan predicate-nya</b>. "Tidak semua lulus" = "ada yang tidak lulus". "Tidak ada yang lulus" = "semua tidak lulus".</div>
-<table>
-  <tr><th>Statement</th><th>Negasi</th></tr>
-  <tr><td>Semua bilangan prima ganjil.</td><td>Ada bilangan prima yang tidak ganjil. (Benar: 2.)</td></tr>
-  <tr><td>Tidak ada politisi yang jujur.</td><td>Ada politisi yang jujur.</td></tr>
-  <tr><td>1357 tidak habis dibagi bilangan bulat mana pun antara 1 dan 37.</td><td>Ada bilangan bulat antara 1 dan 37 yang membagi habis 1357.</td></tr>
-  <tr><td><code>∀x, P(x) → Q(x)</code></td><td><code>∃x, P(x) ∧ ~Q(x)</code></td></tr>
-</table>
-<p>Baris terakhir menggabungkan dua aturan: balik quantifier-nya, lalu pakai <code>~(p → q) ≡ p ∧ ~q</code> dari materi 01. Contoh: negasi "Semua orang pirang bermata biru" adalah "Ada orang pirang yang tidak bermata biru".</p>
-
-<h3>Contrapositive, converse, inverse</h3>
-<p>Untuk <code>∀x ∈ ℝ, x &gt; 2 → x² &gt; 4</code> (benar):</p>
-<table>
-  <tr><th>Varian</th><th>Bentuk</th><th>Nilai</th></tr>
-  <tr><td>Contrapositive</td><td><code>∀x, x² ≤ 4 → x ≤ 2</code></td><td>T (selalu sama dengan aslinya)</td></tr>
-  <tr><td>Converse</td><td><code>∀x, x² &gt; 4 → x &gt; 2</code></td><td>F, counterexample x = −3</td></tr>
-  <tr><td>Inverse</td><td><code>∀x, x ≤ 2 → x² ≤ 4</code></td><td>F, counterexample x = −3</td></tr>
-</table>
-
-<h2>5. Dua quantifier: urutan menentukan arti</h2>
-<p>Bayangkan tabel: baris = x, kolom = y, isi sel = apakah P(x, y) benar.</p>
-<table>
-  <tr><th>Bentuk</th><th>Arti</th><th>Di tabel</th></tr>
-  <tr><td><code>∀x ∀y, P(x, y)</code></td><td>Semua pasangan</td><td>Semua sel ✓</td></tr>
-  <tr><td><code>∃x ∃y, P(x, y)</code></td><td>Minimal satu pasangan</td><td>Ada satu sel ✓</td></tr>
-  <tr><td><code>∀x ∃y, P(x, y)</code></td><td>Setiap x punya pasangan y, <b>boleh berbeda-beda</b></td><td><b>Setiap baris</b> punya minimal satu ✓</td></tr>
-  <tr><td><code>∃x ∀y, P(x, y)</code></td><td>Ada satu x yang cocok dengan <b>semua</b> y</td><td><b>Ada satu baris</b> yang semuanya ✓</td></tr>
-</table>
-<p><code>∀x ∃y</code> dan <code>∃y ∀x</code> <b>berbeda</b>. Contoh P(x, y) = "x mengagumi y": <code>∀x ∃y</code> = "setiap orang mengagumi seseorang (boleh berbeda)", sedangkan <code>∃y ∀x</code> = "ada satu orang yang dikagumi semua orang". Contoh angka dari kuliah: X = {9, 10, 15}, Y = {2, 3}, Q(x, y) = "y membagi x".</p>
-<ul>
-  <li><code>∀x ∈ X ∃y ∈ Y, Q</code>: <b>benar</b>. 9 dan 15 dibagi 3, 10 dibagi 2.</li>
-  <li><code>∃y ∈ Y ∀x ∈ X, Q</code>: <b>salah</b>. Tidak ada satu y yang membagi ketiganya.</li>
-</ul>
-<p>Lihat tabelnya di <a href="viz/kuantor.html">visualisasi</a> (bagian 2). Ada juga contoh kafetaria dari slide.</p>
-
-<h3>Contoh kafetaria (slide)</h3>
-<p>Uta: green salad, spaghetti, pie, milk. Tim: fruit salad, fish, pie, cake, milk, coffee. Yuen: spaghetti, fish, pie, soda.</p>
-<table>
-  <tr><th>Statement</th><th>Nilai</th><th>Alasan</th></tr>
-  <tr><td>a. ∃ item I ∀ mahasiswa S, S memilih I</td><td>T</td><td>Semua memilih pie</td></tr>
-  <tr><td>b. ∃ mahasiswa S ∀ item I, S memilih I</td><td>F</td><td>Tidak ada yang memilih kesembilan item</td></tr>
-  <tr><td>c. ∃ S ∀ station Z ∃ item I di Z, S memilih I</td><td>T</td><td>Uta dan Tim memilih minimal satu item dari setiap station</td></tr>
-  <tr><td>d. ∀ S ∀ station Z ∃ item I di Z, S memilih I</td><td>F</td><td>Yuen tidak memilih salad</td></tr>
-</table>
-
-<h3>Negasi dua quantifier</h3>
-<p>Aturannya sama: balik <b>setiap</b> quantifier, satu per satu dari kiri, lalu negasikan predikatnya.</p>
-<pre><code>~(∀x ∃y, P(x, y)) ≡ ∃x ∀y, ~P(x, y)
-~(∃x ∀y, P(x, y)) ≡ ∀x ∃y, ~P(x, y)</code></pre>
-
-<h2>6. Kesalahan yang sering muncul</h2>
-<table>
-  <tr><th>Kesalahan</th><th>Yang benar</th></tr>
-  <tr><td>Membuktikan ∀ dengan beberapa contoh</td><td>Contoh hanya cukup untuk ∃. Untuk ∀, semua elemen harus dicek atau dibuktikan secara umum</td></tr>
-  <tr><td>Negasi "semua lulus" = "semua tidak lulus"</td><td>"Ada yang tidak lulus" (balik quantifier-nya)</td></tr>
-  <tr><td><code>∀x, A(x) ∧ B(x)</code> untuk "semua A adalah B"</td><td><code>∀x, A(x) → B(x)</code></td></tr>
-  <tr><td><code>∃x, A(x) → B(x)</code> untuk "ada A yang B"</td><td><code>∃x, A(x) ∧ B(x)</code></td></tr>
-  <tr><td>Menukar urutan ∀ dan ∃</td><td>Artinya berubah. Cek dengan tabel baris × kolom</td></tr>
-  <tr><td>Lupa domain</td><td>Truth value bisa berubah kalau domainnya berubah</td></tr>
-</table>
-
-<h2>7. Latihan</h2>
-
-<p><b>1.</b> P(x, y, z) = "xyz = 1" untuk x, y, z bilangan real positif. Tentukan nilai: (a) ∀x ∀y ∀z P (b) ∃x ∃y ∃z P (c) ∀x ∀y ∃z P (d) ∃x ∀y ∀z P.</p>
-<details><summary>Jawaban</summary>
-  <p>(a) <b>F</b>: counterexample x = y = z = 2. (b) <b>T</b>: witness x = y = z = 1. (c) <b>T</b>: untuk setiap x dan y, pilih z = 1/(xy). Nilai z boleh bergantung pada x dan y. (d) <b>F</b>: untuk x mana pun, pilih y = z = 2/x. Hasil kalinya 4/x, yang tidak selalu 1.</p>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis <code>∃x ∈ {1, 2, 3}, x &gt; 2</code> sebagai OR, lalu tentukan nilainya.</summary>
+    <p><code>(1 &gt; 2) ∨ (2 &gt; 2) ∨ (3 &gt; 2)</code> = F ∨ F ∨ T = <b>T</b>. Witness-nya x = 3.</p>
+  </details>
 </details>
+</section>
 
-<p><b>2.</b> Tulis tanpa ~ di depan quantifier: (a) <code>~(∀x ∀y, P(x, y))</code> (b) <code>~(∃x ∃y, P(x, y))</code></p>
-<details><summary>Jawaban</summary><p>(a) <code>∃x ∃y, ~P(x, y)</code> (b) <code>∀x ∀y, ~P(x, y)</code></p></details>
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Menerjemahkan kalimat: "tidak ada … yang …" artinya "semua … tidak …"</h2></summary>
+  <p class="rantai">
+    <span class="dari">∀ dan ∃ (<a href="#langkah-2">2️⃣</a>, <a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">pasangan connective (<a href="#langkah-6">6️⃣</a>)</span>
+  </p>
 
-<p><b>3.</b> C(x, y) = "x terdaftar di kelas y". Tulis negasi dari <code>∃x, (C(x, MH1812) ∧ C(x, CZ2002))</code>.</p>
-<details><summary>Jawaban</summary><p><code>∀x, (~C(x, MH1812) ∨ ~C(x, CZ2002))</code>: setiap mahasiswa tidak mengambil minimal salah satu dari dua kelas itu.</p></details>
+  <aside class="analogi">
+    <p>Menerjemahkan bahasa asing kata per kata sering menghasilkan arti yang salah.</p>
+    <p class="batas">terjemahan bahasa boleh agak bebas. Terjemahan ke logika harus punya arti yang persis sama.</p>
+  </aside>
 
-<p><b>4.</b> M(x, y) = "x mengirim email ke y". Tulis secara simbolik: "Ada mahasiswa yang sudah mengirim email ke semua orang."</p>
-<details><summary>Jawaban</summary><p><code>∃x ∀y, M(x, y)</code>. Kalau mengirim ke diri sendiri tidak dihitung: <code>∃x ∀y, (y ≠ x → M(x, y))</code>.</p></details>
+  <p>Cari dulu kata quantifier-nya ("semua", "setiap", "ada", "beberapa", "tidak ada"), lalu tentukan domain-nya.</p>
+  <table>
+    <tr><th>Kalimat</th><th>Formal</th></tr>
+    <tr><td>Semua segitiga punya tiga sisi.</td><td><code>∀t ∈ T, t punya tiga sisi</code></td></tr>
+    <tr><td>Beberapa program terstruktur.</td><td><code>∃p ∈ P, p terstruktur</code></td></tr>
+    <tr><td>Tidak ada anjing yang bersayap.</td><td><code>∀d ∈ D, d tidak bersayap</code></td></tr>
+  </table>
 
-<p><b>5.</b> Benar atau salah: <code>∃y ∃z, (y = 2z ∧ y prima)</code> untuk y, z bilangan bulat positif?</p>
-<details><summary>Jawaban</summary><p><b>Benar</b>, dengan witness z = 1, y = 2. Bilangan 2 adalah satu-satunya prima yang genap.</p></details>
+  <aside class="jebakan">
+    <p>"Tidak ada" (no, none) bentuknya <mark class="jebakan">∀ dengan negasi</mark>, bukan ∃. Bentuk lain yang ekuivalen: <code>~(∃d ∈ D, d bersayap)</code>.</p>
+  </aside>
 
-<p><b>6.</b> "Semua program dengan lebih dari 100.000 baris pasti punya bug." Tulis negasinya.</p>
-<details><summary>Jawaban</summary><p>"Ada program dengan lebih dari 100.000 baris yang tidak punya bug." Bentuknya <code>∃x, P(x) ∧ ~Q(x)</code>.</p></details>
+  <p class="intinya">"Semua/setiap" = ∀. "Ada/beberapa" = ∃. "Tidak ada" = ∀ … tidak ….</p>
 
-<h2>Daftar pustaka</h2>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis "Tidak ada mahasiswa yang suka ujian" dalam bentuk formal, dengan M = himpunan mahasiswa.</summary>
+    <p><code>∀m ∈ M, m tidak suka ujian</code>, atau <code>~(∃m ∈ M, m suka ujian)</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Kalau domain-nya luas, ∀ berpasangan dengan → dan ∃ berpasangan dengan ∧</h2></summary>
+  <p class="rantai">
+    <span class="dari">menerjemahkan kalimat (<a href="#langkah-5">5️⃣</a>) dan conditional (materi 01)</span>
+    <span class="ke">negasi universal conditional (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Pengumuman "semua peserta wajib membawa KTP" tidak berarti semua orang di gedung adalah peserta.</p>
+    <p class="batas">pengumuman bisa ditafsirkan longgar. Di logika, pilihan → atau ∧ menentukan arti secara pasti.</p>
+  </aside>
+
+  <p>Kalau D = semua hewan, "kucing" harus jadi predicate sendiri. Bentuk <code>∀x, P(x) → Q(x)</code> disebut <mark>universal conditional</mark>.</p>
+  <table>
+    <tr><th>Kalimat</th><th>Benar</th><th>Salah, karena</th></tr>
+    <tr><td>Semua kucing mengeong.</td><td><code>∀x, K(x) → M(x)</code></td><td><code>∀x, K(x) ∧ M(x)</code> berarti semua hewan adalah kucing</td></tr>
+    <tr><td>Ada kucing yang hitam.</td><td><code>∃x, K(x) ∧ H(x)</code></td><td><code>∃x, K(x) → H(x)</code> sudah benar hanya karena ada satu anjing (vacuously true)</td></tr>
+  </table>
+  <p>Universal conditional adalah bentuk yang paling sering muncul di matematika. Contoh: <code>∀x ∈ ℝ, x &gt; 2 → x² &gt; 4</code>.</p>
+
+  <p class="intinya">"Semua A adalah B": <code>∀x, A(x) → B(x)</code>. "Ada A yang B": <code>∃x, A(x) ∧ B(x)</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> D = bilangan bulat. Tulis "Semua bilangan prima yang lebih dari 2 adalah ganjil".</summary>
+    <p><code>∀n ∈ ℤ, (n prima ∧ n &gt; 2) → n ganjil</code>. Pakai →, karena tidak semua bilangan bulat adalah prima.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Negasi: balik quantifier-nya, lalu negasikan predicate-nya</h2></summary>
+  <p class="rantai">
+    <span class="dari">AND besar dan OR besar (<a href="#langkah-4">4️⃣</a>), De Morgan (materi 01)</span>
+    <span class="ke">bukti dengan contradiction (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Membantah "semua mahasiswa lulus" cukup dengan menunjuk satu mahasiswa yang tidak lulus.</p>
+    <p class="batas">dalam debat, orang membantah dengan "kebanyakan tidak". Negasi logika persis kebalikannya: "ada yang tidak".</p>
+  </aside>
+
+  <p>Aturan ini diturunkan dari De Morgan, jadi tidak perlu dihafal: negasi AND besar adalah OR besar.</p>
+<pre class="kode"><code>~(∀x, P(x))        ≡  ∃x, ~P(x)
+~(∃x, P(x))        ≡  ∀x, ~P(x)
+~(∀x, P(x) → Q(x)) ≡  ∃x, P(x) ∧ ~Q(x)</code></pre>
+  <p>Baris ketiga memakai <mark class="kaitan"><code>~(p → q) ≡ p ∧ ~q</code></mark> dari materi 01.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dari slide</summary>
+      <table>
+        <tr><th>Statement</th><th>Negasi</th></tr>
+        <tr><td>Semua bilangan prima ganjil.</td><td>Ada bilangan prima yang tidak ganjil. (Benar: 2.)</td></tr>
+        <tr><td>Tidak ada politisi yang jujur.</td><td>Ada politisi yang jujur.</td></tr>
+        <tr><td>1357 tidak habis dibagi bilangan bulat mana pun antara 1 dan 37.</td><td>Ada bilangan bulat antara 1 dan 37 yang membagi habis 1357.</td></tr>
+        <tr><td>Semua orang pirang bermata biru.</td><td>Ada orang pirang yang tidak bermata biru.</td></tr>
+      </table>
+    </details>
+  </aside>
+
+  <p class="intinya">"Tidak semua" = "ada yang tidak". "Tidak ada" = "semua tidak".</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> "Semua program dengan lebih dari 100.000 baris pasti punya bug." Tulis negasinya.</summary>
+    <p>"Ada program dengan lebih dari 100.000 baris yang tidak punya bug." Bentuknya <code>∃x, P(x) ∧ ~Q(x)</code>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> C(x, y) = "x terdaftar di kelas y". Tulis negasi dari <code>∃x, (C(x, MH1812) ∧ C(x, CZ2002))</code>.</summary>
+    <p><code>∀x, (~C(x, MH1812) ∨ ~C(x, CZ2002))</code>: setiap mahasiswa tidak mengambil minimal salah satu dari dua kelas itu.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Di dalam ∀, hanya contrapositive yang selalu bernilai sama dengan aslinya</h2></summary>
+  <p class="rantai">
+    <span class="dari">contrapositive, converse, inverse (materi 01)</span>
+    <span class="ke">bukti dengan contrapositive (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Aturan yang sama dibaca dari arah belakang: "kalau bukan hewan, berarti bukan kucing".</p>
+    <p class="batas">membaca terbalik tanpa menegasikan (converse) terasa sama di bahasa sehari-hari, padahal artinya berubah.</p>
+  </aside>
+
+  <p>Variasi dari materi 01 diterapkan pada bagian conditional, sementara ∀-nya tetap. Contoh <code>∀x ∈ ℝ, x &gt; 2 → x² &gt; 4</code> (benar):</p>
+  <table>
+    <tr><th>Variasi</th><th>Bentuk</th><th>Nilai</th></tr>
+    <tr><td>Contrapositive</td><td><code>∀x ∈ ℝ, x² ≤ 4 → x ≤ 2</code></td><td>T, selalu sama dengan aslinya</td></tr>
+    <tr><td>Converse</td><td><code>∀x ∈ ℝ, x² &gt; 4 → x &gt; 2</code></td><td>F, counterexample x = −3</td></tr>
+    <tr><td>Inverse</td><td><code>∀x ∈ ℝ, x ≤ 2 → x² ≤ 4</code></td><td>F, counterexample x = −3</td></tr>
+  </table>
+
+  <p class="intinya">Contrapositive: tukar dan negasikan, ∀ tetap. Converse dan inverse bisa salah walaupun aslinya benar.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis contrapositive dan converse dari <code>∀n ∈ ℤ, n habis dibagi 6 → n genap</code>. Mana yang benar?</summary>
+    <p>Contrapositive: <code>∀n ∈ ℤ, n ganjil → n tidak habis dibagi 6</code>, <b>benar</b>. Converse: <code>∀n ∈ ℤ, n genap → n habis dibagi 6</code>, <b>salah</b> dengan counterexample n = 2.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Dua quantifier: urutannya mengubah arti</h2></summary>
+  <p class="rantai">
+    <span class="dari">∀ dan ∃ (<a href="#langkah-2">2️⃣</a>, <a href="#langkah-3">3️⃣</a>), negasi (<a href="#langkah-7">7️⃣</a>)</span>
+    <span class="ke">definisi limit dan bukti di matematika</span>
+  </p>
+
+  <aside class="analogi">
+    <p>"Setiap pintu punya kuncinya (boleh beda-beda)" berbeda dengan "ada satu master key untuk semua pintu".</p>
+    <p class="batas">di dunia nyata kamu bisa menebak dari pengalaman. Di soal, cek tabelnya, jangan intuisi.</p>
+  </aside>
+
+  <p>Bayangkan tabel: baris = x, kolom = y, isi sel = apakah P(x, y) benar. Setiap bentuk menanyakan hal berbeda:</p>
+  <table>
+    <tr><th>Bentuk</th><th>Arti</th><th>Di tabel</th></tr>
+    <tr><td><code>∀x ∀y</code></td><td>Semua pasangan</td><td>Semua sel ✓</td></tr>
+    <tr><td><code>∃x ∃y</code></td><td>Minimal satu pasangan</td><td>Ada satu sel ✓</td></tr>
+    <tr><td><code>∀x ∃y</code></td><td>Setiap x punya pasangan y, <b>boleh berbeda</b></td><td><b>Setiap baris</b> punya minimal satu ✓</td></tr>
+    <tr><td><code>∃x ∀y</code></td><td>Ada satu x yang cocok dengan <b>semua</b> y</td><td><b>Ada satu baris</b> yang semuanya ✓</td></tr>
+  </table>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh kuliah: X = {9, 10, 15}, Y = {2, 3}, Q(x, y) = "y membagi x"</summary>
+      <ul>
+        <li><code>∀x ∈ X ∃y ∈ Y, Q</code>: <b>benar</b>. 9 dan 15 dibagi 3, 10 dibagi 2.</li>
+        <li><code>∃y ∈ Y ∀x ∈ X, Q</code>: <b>salah</b>. Tidak ada satu y yang membagi ketiganya.</li>
+      </ul>
+    </details>
+  </aside>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh kafetaria dari slide</summary>
+      <p>Uta: green salad, spaghetti, pie, milk. Tim: fruit salad, fish, pie, cake, milk, coffee. Yuen: spaghetti, fish, pie, soda.</p>
+      <table>
+        <tr><th>Statement</th><th>Nilai</th><th>Alasan</th></tr>
+        <tr><td>a. ∃ item I ∀ mahasiswa S, S memilih I</td><td>T</td><td>Semua memilih pie</td></tr>
+        <tr><td>b. ∃ mahasiswa S ∀ item I, S memilih I</td><td>F</td><td>Tidak ada yang memilih kesembilan item</td></tr>
+        <tr><td>c. ∃ S ∀ station Z ∃ item I di Z, S memilih I</td><td>T</td><td>Uta dan Tim memilih minimal satu item dari setiap station</td></tr>
+        <tr><td>d. ∀ S ∀ station Z ∃ item I di Z, S memilih I</td><td>F</td><td>Yuen tidak memilih salad</td></tr>
+      </table>
+    </details>
+  </aside>
+
+  <aside class="catatan">
+    <p><strong>Negasi dua quantifier:</strong> balik <b>setiap</b> quantifier dari kiri, lalu negasikan predicate. <code>~(∀x ∃y, P(x, y)) ≡ ∃x ∀y, ~P(x, y)</code> dan <code>~(∃x ∀y, P(x, y)) ≡ ∀x ∃y, ~P(x, y)</code>.</p>
+  </aside>
+
+  <aside class="coba">
+    <p>Di <a href="viz/kuantor.html">playground</a>, bagian 2, pilih "y membagi x", lalu bandingkan <code>∀x∃y</code> dengan <code>∃y∀x</code>.</p>
+  </aside>
+
+  <p class="intinya"><code>∀x ∃y</code>: setiap baris punya ✓. <code>∃x ∀y</code>: ada satu baris penuh ✓. Menukar urutan bisa mengubah nilai.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> P(x, y, z) = "xyz = 1" untuk x, y, z real positif. Nilai (a) ∀x ∀y ∀z P (b) ∃x ∃y ∃z P (c) ∀x ∀y ∃z P (d) ∃x ∀y ∀z P?</summary>
+    <p>(a) <b>F</b>: counterexample x = y = z = 2. (b) <b>T</b>: witness x = y = z = 1. (c) <b>T</b>: untuk setiap x dan y, pilih z = 1/(xy). Nilai z boleh bergantung pada x dan y. (d) <b>F</b>: untuk x mana pun, pilih y = z = 2/x. Hasil kalinya 4/x, yang tidak selalu 1.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis tanpa ~ di depan quantifier: (a) <code>~(∀x ∀y, P(x, y))</code> (b) <code>~(∃x ∃y, P(x, y))</code></summary>
+    <p>(a) <code>∃x ∃y, ~P(x, y)</code> (b) <code>∀x ∀y, ~P(x, y)</code></p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> M(x, y) = "x mengirim email ke y". Tulis: "Ada mahasiswa yang sudah mengirim email ke semua orang."</summary>
+    <p><code>∃x ∀y, M(x, y)</code>. Kalau mengirim ke diri sendiri tidak dihitung: <code>∃x ∀y, (y ≠ x → M(x, y))</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-10">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: quantifier tertukar dan connective salah pasangan</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">mengecek jawabanmu sendiri</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Membaca "diskon hingga 70%" sebagai "semua barang diskon 70%".</p>
+    <p class="batas">salah baca diskon hanya membuatmu kecewa di kasir. Di logika, satu quantifier yang tertukar membalik nilai statement.</p>
+  </aside>
+
+  <p>Sebelum menjawab, tulis dulu quantifier, domain, dan connective-nya.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Kenapa salah dan perbaikannya</th></tr>
+    <tr><td>Membuktikan ∀ dengan beberapa contoh</td><td>Contoh hanya cukup untuk ∃. Untuk ∀, cek semua elemen atau buktikan umum (<a href="#langkah-3">3️⃣</a>).</td></tr>
+    <tr><td>Negasi "semua lulus" = "semua tidak lulus"</td><td>Quantifier harus dibalik: "ada yang tidak lulus" (<a href="#langkah-7">7️⃣</a>).</td></tr>
+    <tr><td><code>∀x, A(x) ∧ B(x)</code> untuk "semua A adalah B"</td><td>Itu berarti semua elemen adalah A. Pakai <code>∀x, A(x) → B(x)</code> (<a href="#langkah-6">6️⃣</a>).</td></tr>
+    <tr><td><code>∃x, A(x) → B(x)</code> untuk "ada A yang B"</td><td>Sudah benar karena satu elemen bukan A. Pakai <code>∃x, A(x) ∧ B(x)</code> (<a href="#langkah-6">6️⃣</a>).</td></tr>
+    <tr><td>Menukar urutan ∀ dan ∃</td><td>Artinya berubah. Cek dengan tabel baris × kolom (<a href="#langkah-9">9️⃣</a>).</td></tr>
+    <tr><td>Lupa domain</td><td>Nilai statement bisa berubah kalau domain berubah, misalnya <code>x² ≥ x</code> di ℤ dan di ℝ (<a href="#langkah-2">2️⃣</a>).</td></tr>
+  </table>
+
+  <p class="intinya">Tulis quantifier, domain, dan connective dulu. Negasi selalu membalik quantifier.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Temanmu membuktikan "∀n bilangan asli, n² + n + 41 prima" dengan mencoba n = 1 sampai 10, dan semuanya prima. Apa yang salah?</summary>
+    <p>Beberapa contoh tidak membuktikan ∀. Statement ini memang salah: counterexample n = 40, karena 40² + 40 + 41 = 41² bukan prima.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Epp, S. S. (2020). <i>Discrete Mathematics with Applications</i> (5th ed.). Cengage. Bab 3.1–3.3: Predicates and quantified statements; Statements with multiple quantifiers.</li>
   <li>Rosen, K. H. (2019). <i>Discrete Mathematics and Its Applications</i> (8th ed.). McGraw-Hill Education. Bab 1.4–1.5: Predicates and quantifiers; Nested quantifiers.</li>
   <li>Catatan kuliah <i>Predicate Logic</i> (Chapter 3), exercises 20–27.</li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

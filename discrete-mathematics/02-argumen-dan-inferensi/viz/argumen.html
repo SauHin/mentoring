@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cek Validitas Argumen</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/logic.css?v=4323dfa7">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/logic.css?v=a616e7a3">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
   <style>
     .ar-grid { display: grid; gap: 12px 16px; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
     @media (max-width: 700px) { .ar-grid { grid-template-columns: minmax(0, 1fr); } }
@@ -17,7 +18,9 @@
 <body class="viz">
 
 <h1>Cek validitas argumen</h1>
-<p>Argumen <b>valid</b> kalau <b>setiap</b> baris yang semua premise-nya T (<b>critical row</b>) juga punya conclusion T. Cukup satu critical row dengan conclusion F, argumennya tidak valid.</p>
+<p>Visualisasi ini membuat truth table untuk premise dan conclusion, lalu menandai <b>critical row</b> (baris yang semua premise-nya T). Argumen valid kalau conclusion T di setiap critical row.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh <b>Modus ponens</b>, lalu <b>Converse error</b>. Kamu juga bisa mengetik premise sendiri, satu per baris.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> baris biru adalah critical row dengan conclusion T, baris merah adalah critical row dengan conclusion F, dan baris pudar bukan critical row. Satu baris merah sudah membuat argumen tidak valid.</p>
 
 <div class="controls"><label class="pick">Contoh <select class="field" id="presets"></select></label></div>
 

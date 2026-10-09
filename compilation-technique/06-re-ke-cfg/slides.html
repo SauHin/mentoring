@@ -5,67 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RE ke CFG</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
   <style>
-    .deck .slide.full { padding-bottom: 3vh; }
-    .deck .slide.full h2 { margin-bottom: 0.3em; }
-    .deck .slide.full iframe { min-height: 0; }
-    .steps li::marker { font-weight: 700; color: var(--go-ink); }
+    .tight td, .tight th { padding: 0.35em 0.7em; }
   </style>
 </head>
 <body class="deck">
 
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
-  <h1>Context-free grammar dan RE → CFG</h1>
-  <p>Compilation technique · soal "construct a CFG for RE berikut" dan "tentukan language dari grammar ini".</p>
+  <h1>Context-free grammar dan RE ke CFG</h1>
+  <p class="sub">Compilation technique · materi 06 · prasyarat: regular expression (materi 01)</p>
+  <p>Target: kamu bisa menulis CFG dari RE, dan menentukan language dari sebuah grammar.</p>
+  <p class="coba-link">Label di atas setiap judul (misalnya "Notes 3️⃣") menunjuk section notes yang membahas hal yang sama secara lengkap.</p>
 </section>
 
 <section class="slide">
-  <h2>Context-free grammar: G = (V, T, P, S)</h2>
-  <p class="sub">Grammar adalah aturan untuk <b>menghasilkan</b> string. Parser memakai grammar untuk mengecek apakah urutan token membentuk program yang valid.</p>
-  <table>
+  <p class="kicker">Notes 1️⃣ · Context-free grammar</p>
+  <h2>CFG G = (V, T, P, S): variabel, terminal, produksi, dan start symbol</h2>
+  <p class="sub"><mark>Context-free grammar</mark> adalah aturan untuk menghasilkan string. Parser memakainya untuk mengecek program.</p>
+  <table class="tight">
     <tr><th>Komponen</th><th>Arti</th><th>Contoh</th></tr>
-    <tr><td><b>V</b> (variabel)</td><td>Simbol yang masih harus diganti. Ditulis huruf besar.</td><td>S, A, E</td></tr>
-    <tr><td><b>T</b> (terminal)</td><td>Simbol akhir di string. Ditulis huruf kecil, digit, atau token.</td><td>a, b, +, id</td></tr>
-    <tr><td><b>P</b> (produksi)</td><td>Aturan <code>A → α</code>: variabel A boleh diganti α. Beberapa alternatif dipisah <code>|</code>.</td><td><code>S → aSb | ab</code></td></tr>
-    <tr><td><b>S</b> (start symbol)</td><td>Variabel tempat setiap derivation dimulai</td><td>S</td></tr>
+    <tr><td><b>V</b> (variabel)</td><td>Simbol yang masih harus diganti, ditulis huruf besar</td><td>S, A, E</td></tr>
+    <tr><td><b>T</b> (terminal)</td><td>Simbol akhir di string: huruf kecil, digit, atau token</td><td>a, b, +, id</td></tr>
+    <tr><td><b>P</b> (produksi)</td><td>Aturan <code>A → α</code>: A boleh diganti α. Alternatif dipisah <code>|</code></td><td><code>S → aSb | ab</code></td></tr>
+    <tr><td><b>S</b></td><td>Start symbol, tempat setiap derivation dimulai</td><td>S</td></tr>
   </table>
-  <p class="label">Disebut <b>context-free</b> karena ruas kiri setiap produksi hanya satu variabel: A boleh diganti tanpa melihat simbol di sekitarnya.</p>
+  <p>Disebut context-free karena ruas kiri produksi hanya satu variabel: A diganti tanpa melihat simbol di sekitarnya.</p>
 </section>
 
 <section class="slide">
-  <h2>Derivation menghasilkan string</h2>
-  <p class="sub">Mulai dari S, ganti satu variabel dengan salah satu alternatifnya (<code>⇒</code>), sampai semua simbol terminal. Himpunan semua string yang bisa dihasilkan adalah <b>L(G)</b>.</p>
-  <pre><code>S → aSb | ab
+  <p class="kicker">Notes 2️⃣ · Derivation</p>
+  <h2>Derivation mengganti satu variabel per langkah, sampai semua simbol terminal</h2>
+  <p class="sub"><mark>Derivation</mark> ditulis dengan <code>⇒</code>. Semua string terminal yang bisa dihasilkan dari S disebut L(G).</p>
+<pre class="kode"><code>S → aSb | ab
 
 S ⇒ ab                         (n = 1)
 S ⇒ aSb ⇒ aabb                 (n = 2)
 S ⇒ aSb ⇒ aaSbb ⇒ aaabbb       (n = 3)</code></pre>
   <ul>
-    <li>Polanya: setiap pemakaian <code>aSb</code> menambah satu a di kiri dan satu b di kanan. Jadi <b>L(G) = {aⁿbⁿ | n ≥ 1}</b>.</li>
-    <li>Language ini <b>tidak bisa</b> ditulis sebagai RE: DFA tidak bisa menghitung jumlah a yang tidak terbatas. Jadi CFG lebih kuat dari RE.</li>
+    <li>Setiap pemakaian <code>aSb</code> menambah satu a di kiri dan satu b di kanan, jadi <b>L(G) = {aⁿbⁿ | n ≥ 1}</b>.</li>
+    <li>Language ini tidak bisa ditulis sebagai RE, karena DFA tidak bisa menghitung jumlah a yang tidak terbatas.</li>
   </ul>
 </section>
 
 <section class="slide">
-  <h2>Chomsky hierarchy</h2>
-  <p class="sub">Grammar dikelompokkan berdasarkan batasan bentuk produksinya. Makin ketat batasannya, makin sederhana mesin yang bisa mengenalinya.</p>
-  <table>
+  <p class="kicker">Notes 3️⃣ · Chomsky hierarchy</p>
+  <h2>CFG lebih kuat dari RE: setiap regular language juga context-free</h2>
+  <p class="sub"><mark>Chomsky hierarchy</mark> mengelompokkan grammar berdasarkan batasan bentuk produksinya.</p>
+  <table class="tight">
     <tr><th>Type</th><th>Grammar</th><th>Mesin</th><th>Bentuk produksi</th></tr>
     <tr><td>0</td><td>Unrestricted</td><td>Turing machine</td><td>α → β, tanpa batasan</td></tr>
     <tr><td>1</td><td>Context-sensitive</td><td>Linear-bounded automaton</td><td>α → β dengan |α| ≤ |β|</td></tr>
     <tr><td>2</td><td>Context-free</td><td>Pushdown automaton</td><td>A → β, ruas kiri satu variabel</td></tr>
     <tr><td>3</td><td>Regular</td><td>Finite automaton</td><td>A → aB atau A → a</td></tr>
   </table>
-  <p>Setiap regular language juga context-free, tetapi tidak sebaliknya. Karena itu <b>setiap RE bisa diubah menjadi CFG</b>.</p>
+  <p>Makin ketat batasannya, makin sederhana mesinnya. Karena regular ⊂ context-free, <b>setiap RE bisa diubah menjadi CFG</b>.</p>
 </section>
 
 <section class="slide">
-  <h2>Aturan dasar RE → CFG</h2>
-  <p class="sub">Setiap operator RE punya padanan produksi. Semua soal RE → CFG hanya merangkai aturan-aturan ini.</p>
-  <table>
+  <p class="kicker">Notes 4️⃣ · Aturan dasar</p>
+  <h2>Setiap operator RE punya padanan produksi</h2>
+  <p class="sub">Semua soal RE ke CFG hanya merangkai aturan-aturan ini.</p>
+  <table class="tight">
     <tr><th>RE</th><th>Produksi</th><th>Kenapa</th></tr>
     <tr><td><code>ε</code></td><td><code>S → ε</code></td><td>S menghasilkan string kosong</td></tr>
     <tr><td><code>a</code></td><td><code>S → a</code></td><td>satu terminal</td></tr>
@@ -73,72 +77,76 @@ S ⇒ aSb ⇒ aaSbb ⇒ aaabbb       (n = 3)</code></pre>
     <tr><td><code>ab</code></td><td><code>S → ab</code></td><td>concatenation = ditulis berdampingan</td></tr>
     <tr><td><code>a*</code></td><td><code>S → aS | ε</code></td><td>tambah satu a lalu ulangi, atau berhenti</td></tr>
     <tr><td><code>a⁺</code></td><td><code>S → aS | a</code></td><td>minimal satu a, jadi berhentinya di a</td></tr>
-    <tr><td><code>∅</code></td><td><code>S → S</code> (tidak pernah selesai)</td><td>tidak ada string yang dihasilkan</td></tr>
+    <tr><td><code>∅</code></td><td><code>S → S</code></td><td>tidak pernah menghasilkan string terminal</td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Resep: pecah RE dari luar ke dalam</h2>
-  <p class="sub">S mewakili seluruh RE. Setiap bagian yang berupa union atau star mendapat variabel baru, dan variabel baru itu dipecah lagi dengan cara yang sama.</p>
-  <ol class="steps">
-    <li><b>Concatenation</b>: tulis bagian-bagiannya berdampingan. Bagian berupa string biasa ditulis langsung, bagian union atau star diwakili variabel baru.</li>
-    <li><b>Union</b>: setiap alternatif menjadi satu alternatif produksi.</li>
-    <li><b>Star</b> <code>X = (r)*</code>: <code>X → rX | ε</code>. Kalau r berupa union <code>r₁|r₂</code>, tulis <code>X → r₁X | r₂X | ε</code>.</li>
-    <li>Ulangi untuk setiap variabel baru sampai semua bagian RE punya produksi.</li>
-    <li>Tulis G = (V, T, P, S) lengkap: daftar variabel, terminal, dan produksi.</li>
+  <p class="kicker">Notes 5️⃣ · Resep</p>
+  <h2>Pecah RE dari luar ke dalam, dan beri variabel baru untuk setiap union atau star</h2>
+  <p class="sub">S mewakili seluruh RE. Setiap variabel baru dipecah lagi dengan cara yang sama.</p>
+  <ol>
+    <li><strong>Concatenation:</strong> tulis bagian-bagiannya berdampingan. String biasa langsung, union atau star diwakili variabel baru.</li>
+    <li><strong>Union:</strong> setiap alternatif menjadi alternatif produksi.</li>
+    <li><strong>Star <code>X = (r)*</code>:</strong> <code>X → rX | ε</code>. Kalau r = r₁|r₂, tulis <code>X → r₁X | r₂X | ε</code>.</li>
+    <li><strong>Ulangi</strong> untuk setiap variabel baru sampai semua bagian punya produksi.</li>
+    <li><strong>Tulis G = (V, T, P, S)</strong> lengkap.</li>
   </ol>
 </section>
 
 <section class="slide">
-  <h2>Contoh slide: (ab + ba)*(abb)*</h2>
-  <p class="sub">Strukturnya concatenation dari dua star. Jadi <code>S → AB</code>, dengan A untuk <code>(ab+ba)*</code> dan B untuk <code>(abb)*</code>.</p>
+  <p class="kicker">Notes 5️⃣ · Resep</p>
+  <h2>Contoh <code>(ab + ba)*(abb)*</code>: concatenation dari dua star, jadi <code>S → AB</code></h2>
+  <p class="sub">A mewakili <code>(ab+ba)*</code> dan B mewakili <code>(abb)*</code>. Kedua versi di bawah sama benarnya.</p>
   <div class="cols">
     <div>
       <p><b>Jawaban di slide dosen</b></p>
-<pre><code>S → AB
+<pre class="kode"><code>S → AB
 A → CA | ε
 C → ab | ba
 B → DB | ε
 D → abb</code></pre>
     </div>
     <div>
-      <p><b>Versi ringkas (sama benarnya)</b></p>
-<pre><code>S → AB
+      <p><b>Versi ringkas</b></p>
+<pre class="kode"><code>S → AB
 A → abA | baA | ε
 B → abbB | ε</code></pre>
     </div>
   </div>
-  <p>Versi dosen memberi variabel sendiri untuk isi star (C dan D). Versi ringkas langsung memasukkan isinya. Keduanya menghasilkan language yang sama. V = {S, A, B} (atau {S, A, B, C, D}), T = {a, b}.</p>
+  <p>Versi dosen memberi variabel sendiri untuk isi star (C dan D). V = {S, A, B} (atau {S, A, B, C, D}), T = {a, b}.</p>
 </section>
 
 <section class="slide">
-  <h2>Latihan dosen: a*b*(a|c)*</h2>
-  <p class="sub">Tiga star berturut-turut. Setiap star butuh variabelnya <b>sendiri</b>, karena urutannya harus dijaga: semua a dulu, lalu b, lalu campuran a dan c.</p>
-<pre><code>S → ABC
+  <p class="kicker">Notes 6️⃣ · Satu variabel per star</p>
+  <h2>Setiap star butuh variabelnya sendiri, supaya urutan bagian RE tetap terjaga</h2>
+  <p class="sub">Latihan dosen <code>a*b*(a|c)*</code>: semua a dulu, lalu b, lalu campuran a dan c.</p>
+  <div class="cols">
+<pre class="kode"><code>S → ABC
 A → aA | ε
 B → bB | ε
 C → aC | cC | ε</code></pre>
-  <div class="callout warn"><strong>Jangan pakai satu variabel</strong><code>S → aS | bS | cS | ε</code> menghasilkan <code>cb</code>. Di <code>a*b*(a|c)*</code>, setelah c (dari bagian <code>(a|c)*</code>) tidak boleh ada b lagi, jadi grammar itu menerima string yang salah.</div>
+    <ul>
+      <li><strong>Salah:</strong> <code>S → aS | bS | cS | ε</code> menghasilkan <code>cb</code>.</li>
+      <li>Di <code>a*b*(a|c)*</code>, setelah c tidak boleh ada b lagi, jadi grammar satu variabel menerima string yang salah.</li>
+    </ul>
+  </div>
 </section>
 
 <section class="slide full">
-  <h2>Coba sendiri: RE → CFG langkah demi langkah</h2>
+  <h2>Coba sendiri: RE ke CFG langkah demi langkah</h2>
   <iframe src="viz/re-ke-cfg.html" title="Visualisasi RE ke CFG"></iframe>
 </section>
 
 <section class="slide">
-  <h2>Arah sebaliknya: language dari grammar</h2>
-  <p class="sub">Soal "tentukan L(G)" dikerjakan seperti membaca RE: hasilkan string terpendek, lalu cari pola dari produksi yang bisa diulang.</p>
+  <p class="kicker">Notes 7️⃣ · Language dari grammar</p>
+  <h2>Language dari grammar: tulis string terpendek, lalu cari produksi yang bisa diulang</h2>
+  <p class="sub">Contoh: <code>S → aAa</code>, <code>A → aAa | b</code>.</p>
   <div class="cols">
-    <div>
-<pre><code>S → aAa
-A → aAa | b
-
-S ⇒ aAa ⇒ aba
+<pre class="kode"><code>S ⇒ aAa ⇒ aba
 S ⇒ aAa ⇒ aaAaa ⇒ aabaa</code></pre>
-    </div>
     <ul>
-      <li>Produksi <code>A → aAa</code> menambah satu a di kiri dan kanan. <code>A → b</code> menghentikannya.</li>
+      <li><code>A → aAa</code> menambah satu a di kiri dan kanan. <code>A → b</code> menghentikannya.</li>
       <li>S sudah menyumbang satu a di setiap sisi, jadi n ≥ 1.</li>
       <li><b>L(G) = {aⁿbaⁿ | n ≥ 1}</b>.</li>
     </ul>
@@ -146,26 +154,50 @@ S ⇒ aAa ⇒ aaAaa ⇒ aabaa</code></pre>
 </section>
 
 <section class="slide">
-  <h2>Kesalahan yang sering muncul</h2>
-  <p class="sub">Kesalahan RE → CFG biasanya membuat grammar menghasilkan string yang terlalu banyak atau terlalu sedikit.</p>
-  <table>
-    <tr><th>Kesalahan</th><th>Akibatnya</th><th>Perbaikan</th></tr>
-    <tr><td>Star tanpa <code>| ε</code>: <code>A → aA</code></td><td>Derivation tidak pernah selesai, A tidak menghasilkan string apa pun</td><td><code>A → aA | ε</code></td></tr>
-    <tr><td>Dua star memakai satu variabel</td><td>Urutan hilang, misalnya <code>cb</code> diterima untuk <code>a*b*(a|c)*</code></td><td>Satu variabel per star</td></tr>
-    <tr><td><code>(a|b)c</code> ditulis <code>S → a | bc</code></td><td>Prioritas salah: hasilnya <code>a</code> atau <code>bc</code></td><td><code>S → Ac</code>, <code>A → a | b</code></td></tr>
-    <tr><td>Hanya menulis P, tanpa V, T, S</td><td>Jawaban tidak lengkap kalau soal meminta G</td><td>Tulis G = (V, T, P, S)</td></tr>
+  <p class="kicker">Notes 8️⃣ · Kesalahan umum</p>
+  <h2>Kesalahan paling sering: grammar menghasilkan string terlalu banyak atau terlalu sedikit</h2>
+  <p class="sub">Setiap baris menyebut akibatnya dan cara memperbaikinya.</p>
+  <table class="tight">
+    <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>Star tanpa ε: <code>A → aA</code></td><td>Derivation tidak pernah selesai</td><td><code>A → aA | ε</code></td></tr>
+    <tr><td>Dua star memakai satu variabel</td><td><code>cb</code> diterima untuk <code>a*b*(a|c)*</code></td><td>Satu variabel per star</td></tr>
+    <tr><td><code>(a|b)c</code> ditulis <code>S → a | bc</code></td><td>Hasilnya <code>a</code> atau <code>bc</code></td><td><code>S → Ac</code>, <code>A → a | b</code></td></tr>
+    <tr><td>a⁺ ditulis <code>S → aS | ε</code></td><td>ε ikut diterima</td><td><code>S → aS | a</code></td></tr>
+    <tr><td>Hanya menulis P</td><td>Jawaban tidak lengkap</td><td>Tulis G = (V, T, P, S)</td></tr>
   </table>
 </section>
 
 <section class="slide">
   <h2>Ringkasan</h2>
+  <p class="sub">CFG menghasilkan string dari S, dan setiap RE bisa ditulis sebagai CFG.</p>
   <ul>
-    <li>CFG G = (V, T, P, S). Produksi <code>A → α</code> mengganti satu variabel. L(G) = semua string terminal yang bisa diturunkan dari S.</li>
-    <li>Regular ⊂ context-free: setiap RE bisa ditulis sebagai CFG, tetapi aⁿbⁿ hanya bisa ditulis sebagai CFG.</li>
-    <li>RE → CFG: concatenation = berdampingan, union = alternatif, star = variabel baru <code>X → rX | ε</code>.</li>
-    <li>Language dari grammar: tulis string terpendek dan cari bagian yang berulang.</li>
+    <li><strong>CFG:</strong> G = (V, T, P, S). L(G) = semua string terminal yang bisa diturunkan dari S.</li>
+    <li><strong>Hierarchy:</strong> regular ⊂ context-free. aⁿbⁿ hanya bisa ditulis sebagai CFG.</li>
+    <li><strong>RE ke CFG:</strong> concatenation = berdampingan, union = alternatif, star = variabel baru <code>X → rX | ε</code>.</li>
+    <li><strong>L(G):</strong> tulis string terpendek dan cari bagian yang berulang.</li>
   </ul>
-  <p class="label">Jawaban ketiga latihan dosen ada di notes. Materi berikutnya: derivation, parse tree, dan ambiguity.</p>
+</section>
+
+<section class="slide">
+  <h2>Soal</h2>
+  <p class="sub">Latihan slide dosen: construct a CFG for RE below. Lalu satu soal language.</p>
+  <ol class="soal-list">
+    <li><code>a* b* (a|c)*</code></li>
+    <li><code>(a|c)* ba</code></li>
+    <li><code>((00 + 01)* 01) + (101 (0 + 10)*)</code></li>
+    <li>Tentukan L(G) untuk <code>S → aSbb | abb</code>.</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2>Jawaban</h2>
+  <p class="sub">Pembahasan ada di notes (nomor section di kurung).</p>
+  <ol class="soal-list">
+    <li><code>S → ABC</code>, <code>A → aA | ε</code>, <code>B → bB | ε</code>, <code>C → aC | cC | ε</code> (<a href="notes.html#langkah-6">6️⃣</a>).</li>
+    <li><code>S → Aba</code>, <code>A → aA | cA | ε</code> (<a href="notes.html#langkah-5">5️⃣</a>).</li>
+    <li><code>S → A01 | 101B</code>, <code>A → 00A | 01A | ε</code>, <code>B → 0B | 10B | ε</code> (<a href="notes.html#langkah-5">5️⃣</a>).</li>
+    <li>{aⁿb²ⁿ | n ≥ 1}: abb, aabbbb, … (<a href="notes.html#langkah-7">7️⃣</a>).</li>
+  </ol>
 </section>
 
 <script src="../../_shared/slides.js?v=805bba15"></script>

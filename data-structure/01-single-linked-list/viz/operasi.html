@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Operasi Single Linked List</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/listviz.css?v=27d84745">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/listviz.css?v=3f7fc4dc">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Operasi single linked list</h1>
-<p>Pilih operasi, lalu jalankan <b>step by step</b>. Pointer yang baru berubah berwarna <b>oranye</b>. Nyalakan <b>mode tebak</b> untuk menebak tiap langkah sebelum ditampilkan.</p>
+<p>Visualisasi ini menjalankan setiap operasi single linked list langkah demi langkah, dengan gambar list dan baris kode yang sedang jalan.</p>
+<p class="coba"><strong>Coba:</strong> isi <b>Nilai</b> (dan <b>Posisi</b> untuk insertAt/deleteAt), klik salah satu operasi, lalu klik <b>Langkah berikutnya</b>. Centang <b>Mode tebak</b> untuk menebak dulu.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> panah yang baru berubah berwarna oranye. Urutan perubahan panah menentukan apakah ada alamat yang hilang.</p>
 
-<script src="../../../_shared/listviz.js?v=07dfe637"></script>
+<script src="../../../_shared/listviz.js?v=5942227c"></script>
 <script>
 const CODE = {
   struct: `typedef struct Node {
@@ -226,7 +229,17 @@ const OPS = {
   printList: () => printList(),
 };
 const check = checkCommon;
-listViz({ doubly: false });
+listViz({
+  doubly: false,
+  hints: {
+    insertFront: 'panah newNode→next dipasang dulu ke node pertama lama, baru head dipindah ke node baru (notes 6️⃣).',
+    insertBack: 'cur berjalan sampai node yang next-nya NULL (pola B), lalu next node itu diarahkan ke node baru (notes 7️⃣).',
+    insertAt: 'cur berhenti di posisi pos − 1, lalu node baru disambung dulu sebelum cur→next ditimpa (notes 8️⃣).',
+    deleteAt: 'alamat node yang dihapus disimpan di del dulu, panahnya dilompati, dan free dipanggil paling akhir (notes 9️⃣).',
+    search: 'cur berjalan dari head sampai ketemu nilai yang dicari, atau sampai NULL (notes 10).',
+    printList: 'cur mengunjungi semua node sampai NULL, dan setiap data dicetak (notes 10).',
+  },
+});
 </script>
 </body>
 </html>

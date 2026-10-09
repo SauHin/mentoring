@@ -5,46 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Stack dan Queue · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-
-<span class="chip">Data structure · 03</span>
-<h1>Stack dan queue</h1>
-<p class="lead">Linked list yang hanya boleh diakses di ujung tertentu. Dua struktur ini muncul di hampir setiap soal kasus.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/stack.html">Visualisasi stack</a> · <a href="viz/queue.html">Visualisasi queue</a> · Lanjut: <a href="../04-priority-queue/notes.html">Priority queue</a></p>
-<div class="callout"><strong>Prasyarat</strong>Pahami dulu <a href="../01-single-linked-list/notes.html">single linked list</a> (insertFront, delete node pertama, pola "sambung dulu, putus kemudian") dan pointer <code>tail</code> dari <a href="../02-double-linked-list/notes.html">double linked list</a>.</div>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li><b>Stack</b> = LIFO: push dan pop di top (head). <b>Queue</b> = FIFO: enqueue di tail, dequeue di head. Semuanya <b>O(1)</b>.</li>
-    <li>Bungkus pointer ujung dalam struct (<code>Stack</code>, <code>Queue</code>) dan kirim alamatnya ke fungsi. Dengan begitu satu program bisa punya banyak antrean.</li>
-    <li>Edge case wajib: mengambil dari struktur kosong, dequeue node terakhir (<code>tail = NULL</code>), cancel node pertama atau terakhir.</li>
-    <li>Cancel (keluar dari tengah antrean) memakai dua pointer yang berjalan beriringan: <code>prev</code> dan <code>cur</code>.</li>
+<header>
+  <h1>Stack dan queue</h1>
+  <p class="tujuan">Linked list yang hanya boleh diakses di ujung tertentu. Target: kamu bisa menulis push, pop, enqueue, dequeue, dan cancel sendiri, lalu memilih stack atau queue untuk sebuah soal kasus.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/stack.html">stack</a>, <a href="viz/queue.html">queue</a> · Prasyarat: <a href="../01-single-linked-list/notes.html">single linked list</a>, tail dari <a href="../02-double-linked-list/notes.html">double linked list</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Stack: LIFO</a></li>
+      <li><a href="#langkah-2">Queue: FIFO</a></li>
+      <li><a href="#langkah-3">Satu struct = satu stack atau queue</a></li>
+      <li><a href="#langkah-4">Kode stack: push dan pop</a></li>
+      <li><a href="#langkah-5">Kode queue: enqueue dan dequeue</a></li>
+      <li><a href="#langkah-6">Cancel: keluar dari tengah antrean</a></li>
+      <li><a href="#langkah-7">Pola queue: gabung bergantian</a></li>
+      <li><a href="#langkah-8">Pola stack: yang terbaru dulu</a></li>
+      <li><a href="#langkah-9">Versi array</a></li>
+      <li><a href="#langkah-10">Time complexity</a></li>
+      <li><a href="#langkah-11">Bug yang sering muncul</a></li>
+      <li><a href="#langkah-12">Program lengkap</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Stack dan queue: list dengan aturan</h2>
-<p>Stack dan queue tidak menyimpan data dengan cara baru. Isinya tetap linked list. Yang baru adalah <b>aturannya</b>: data hanya boleh masuk dan keluar di ujung tertentu.</p>
-<table>
-  <tr><th></th><th>Stack</th><th>Queue</th></tr>
-  <tr><td>Aturan</td><td><b>LIFO</b> (last in, first out)</td><td><b>FIFO</b> (first in, first out)</td></tr>
-  <tr><td>Contoh nyata</td><td>Tumpukan piring, tombol back, undo</td><td>Antrean kasir, printer, "first come first serve"</td></tr>
-  <tr><td>Masuk</td><td><code>push</code> di top</td><td><code>enqueue</code> di belakang (tail)</td></tr>
-  <tr><td>Keluar</td><td><code>pop</code> dari top</td><td><code>dequeue</code> dari depan (head)</td></tr>
-  <tr><td>Lihat tanpa mengambil</td><td><code>peek</code>: <code>s.top-&gt;data</code></td><td><code>peek</code>: <code>q.head-&gt;data</code></td></tr>
-</table>
-<p>Kenapa aksesnya dibatasi? Banyak soal hanya butuh "data yang paling baru" atau "data yang paling lama menunggu". Kalau hanya ujung list yang dipakai, semua operasi menjadi O(1), dan tidak ada loop traverse yang bisa salah.</p>
+<main>
 
-<h2>2. Satu struct = satu stack atau queue</h2>
-<p>Materi 01 dan 02 memakai <code>head</code> global, jadi program hanya bisa punya <b>satu</b> list. Soal kasus sering butuh dua atau tiga antrean sekaligus. Solusinya: bungkus pointer ujung dalam struct, lalu buat satu variabel untuk setiap antrean.</p>
-<pre><code>typedef struct Node {
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Stack: yang terakhir masuk keluar duluan</h2></summary>
+  <p class="rantai">
+    <span class="dari">insertFront dan delete node pertama di single linked list (materi 01)</span>
+    <span class="ke">kode stack (<a href="#langkah-4">4️⃣</a>), undo, tombol back, dan cek tanda kurung (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Tumpukan piring: piring baru ditaruh di atas, dan yang diambil selalu piring paling atas.</p>
+    <p class="batas">piring di tengah masih bisa kamu tarik paksa. Stack benar-benar hanya mengizinkan akses ke elemen paling atas.</p>
+  </aside>
+
+  <p><mark>Stack</mark> adalah struktur data yang hanya bisa diisi dan diambil dari satu ujung, yang disebut <b>top</b>. Aturannya <b>LIFO</b> (last in, first out): yang terakhir masuk keluar duluan.</p>
+  <ul>
+    <li><strong>Masuk:</strong> <code>push</code>, menaruh data di top.</li>
+    <li><strong>Keluar:</strong> <code>pop</code>, mengambil data dari top.</li>
+    <li><strong>Lihat tanpa mengambil:</strong> <code>peek</code>, yaitu <code>s.top-&gt;data</code>.</li>
+  </ul>
+  <p>Kenapa aksesnya dibatasi? Banyak soal hanya butuh "data yang paling baru". Kalau hanya ujung list yang dipakai, semua operasi cepat dan tidak ada loop traverse yang bisa salah.</p>
+
+  <p class="intinya">Stack = LIFO. Push dan pop sama-sama di top.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Push 1, 2, 3 ke stack kosong, lalu pop dua kali. Data apa yang keluar, dan apa yang tersisa?</summary>
+    <p>Keluar 3, lalu 2. Yang tersisa hanya 1.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Queue: yang pertama masuk keluar duluan</h2></summary>
+  <p class="rantai">
+    <span class="dari">stack (<a href="#langkah-1">1️⃣</a>) dan tail di double linked list (materi 02)</span>
+    <span class="ke">kode queue (<a href="#langkah-5">5️⃣</a>), antrean layanan, dan priority queue (materi 04)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Antrean kasir: yang datang duluan dilayani duluan, dan orang baru berdiri di belakang.</p>
+    <p class="batas">di antrean nyata ada yang menyerobot. Di queue murni tidak ada, kecuali lewat operasi khusus seperti cancel (<a href="#langkah-6">6️⃣</a>).</p>
+  </aside>
+
+  <p><mark>Queue</mark> adalah struktur data yang diisi dari belakang dan diambil dari depan. Aturannya <b>FIFO</b> (first in, first out): yang pertama masuk keluar duluan.</p>
+  <table>
+    <tr><th></th><th>Stack</th><th>Queue</th></tr>
+    <tr><td>Aturan</td><td>LIFO (last in, first out)</td><td>FIFO (first in, first out)</td></tr>
+    <tr><td>Contoh nyata</td><td>Tumpukan piring, tombol back, undo</td><td>Antrean kasir, printer, "first come first serve"</td></tr>
+    <tr><td>Masuk</td><td><code>push</code> di top</td><td><code>enqueue</code> di belakang (tail)</td></tr>
+    <tr><td>Keluar</td><td><code>pop</code> dari top</td><td><code>dequeue</code> dari depan (head)</td></tr>
+    <tr><td>Lihat tanpa mengambil</td><td><code>s.top-&gt;data</code></td><td><code>q.head-&gt;data</code></td></tr>
+  </table>
+
+  <p class="intinya">Queue = FIFO. Masuk di belakang, keluar dari depan.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Soal: "pelanggan dilayani sesuai urutan datang". Pakai stack atau queue?</summary>
+    <p><b>Queue</b>, karena yang datang duluan harus keluar duluan (FIFO).</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Satu struct = satu stack atau queue, dan fungsi menerima alamatnya</h2></summary>
+  <p class="rantai">
+    <span class="dari">head global di materi 01–02, dan pointer ke struct (<code>-&gt;</code>)</span>
+    <span class="ke">semua kode di materi ini, dan soal kasus dengan beberapa antrean (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Buku antrean per loket: satu buku untuk loket A, satu untuk loket B. Petugas yang mencatat butuh buku aslinya, bukan fotokopinya.</p>
+    <p class="batas">fotokopi masih bisa kamu tempel balik. Salinan struct di fungsi hilang begitu fungsi selesai.</p>
+  </aside>
+
+  <p>Materi 01 dan 02 memakai <code>head</code> global, jadi program hanya bisa punya satu list. Soal kasus sering butuh dua atau tiga antrean, jadi pointer ujungnya dibungkus dalam struct. Fungsi menerima <mark>pointer ke struct</mark> (<code>Queue* q</code>), supaya perubahan head dan tail terlihat di main.</p>
+<pre class="kode"><code>typedef struct Node {
     int data;
     struct Node* next;
 } Node;
@@ -64,159 +141,323 @@ int main() {
     enqueue(&amp;a, 10);        // kirim alamat a
     ...
 }</code></pre>
-<table>
-  <tr><th>Kode</th><th>Kenapa</th></tr>
-  <tr><td><code>typedef struct { ... } Queue;</code></td><td>Struct ini tidak menunjuk dirinya sendiri (beda dengan <code>Node</code>), jadi tidak perlu nama <code>struct Queue</code> di dalamnya.</td></tr>
-  <tr><td><code>Queue a = {NULL, NULL};</code></td><td>Variabel lokal tidak otomatis kosong. Tanpa inisialisasi, head dan tail berisi garbage value.</td></tr>
-  <tr><td>Parameter <code>Queue* q</code>, dipanggil dengan <code>&amp;a</code></td><td>Fungsi butuh <b>alamat</b> <code>a</code>, supaya perubahan head dan tail terlihat di main.</td></tr>
-  <tr><td><code>q-&gt;head</code> di fungsi, <code>a.head</code> di main</td><td><code>q</code> berisi alamat struct, jadi pakai <code>-&gt;</code>. <code>a</code> adalah struct itu sendiri, jadi pakai titik.</td></tr>
-</table>
-<div class="callout warn"><strong>Bug klasik: struct dikirim tanpa alamat</strong>
-<pre><code>void enqueue(Queue q, int x) {   // q = SALINAN dari a
-    ...
-    q.head = q.tail = newNode;   // yang berubah salinannya
-}                                // salinan hilang di sini</code></pre>
-<p>Program tetap bisa di-compile, tapi <code>a.head</code> di main tetap NULL. Node baru juga bocor (memory leak), karena alamatnya hanya tersimpan di salinan.</p></div>
+  <aside class="catatan">
+    <details>
+      <summary>Kenapa setiap baris ditulis begitu</summary>
+  <table>
+    <tr><th>Kode</th><th>Kenapa</th></tr>
+    <tr><td><code>Queue a = {NULL, NULL};</code></td><td>Variabel lokal tidak otomatis kosong. Tanpa inisialisasi, head dan tail berisi garbage value.</td></tr>
+    <tr><td>Parameter <code>Queue* q</code>, dipanggil dengan <code>&amp;a</code></td><td>Fungsi butuh alamat a, supaya yang berubah adalah a, bukan salinannya.</td></tr>
+    <tr><td><code>q-&gt;head</code> di fungsi, <code>a.head</code> di main</td><td>q berisi alamat struct, jadi pakai <code>-&gt;</code>. a adalah struct itu sendiri, jadi pakai titik.</td></tr>
+  </table>
+    </details>
+  </aside>
 
-<h2>3. Stack</h2>
-<h3>Kenapa top diletakkan di head</h3>
-<pre><code>top → [30] → [20] → [10] → NULL</code></pre>
-<p>Di single linked list, insert dan delete di <b>depan</b> sama-sama O(1). Kalau top diletakkan di node terakhir, push masih bisa O(1) (dengan tail), tapi pop harus mengubah <code>next</code> milik node sebelum node terakhir. Node itu harus dicari dari head: O(n).</p>
-<p>Jadi <b>push = insertFront</b> dan <b>pop = delete node pertama</b>. Kodenya sama dengan materi 01, hanya <code>head</code> diganti <code>s-&gt;top</code>.</p>
+  <aside class="jebakan">
+    <p>Kalau parameternya <mark class="jebakan"><code>Queue q</code></mark> (tanpa <code>*</code>), fungsi mengubah <b>salinan</b>. Program tetap bisa di-compile, tapi <code>a.head</code> di main tetap NULL, dan node baru bocor (memory leak).</p>
+  </aside>
 
-<h3><code>push(s, x)</code> dan <code>pop(s)</code>: O(1)</h3>
-<pre><code>void push(Stack* s, int x) {
+  <p class="intinya">Satu variabel Queue = satu antrean. Fungsi menerima <code>Queue* q</code> dan dipanggil dengan <code>&amp;a</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kode ini di-compile tanpa error, tapi tidak mencetak apa pun. Kenapa?
+<pre class="kode"><code>void push(Stack s, int x) {
     Node* newNode = createNode(x);
-    newNode->next = s->top;   // 1. sambung ke top lama
-    s->top = newNode;         // 2. baru pindahkan top
+    newNode-&gt;next = s.top;
+    s.top = newNode;
+}
+...
+Stack st = {NULL};
+push(st, 5);
+while (st.top != NULL) printf("%d ", pop(&amp;st));</code></pre></summary>
+    <p>push menerima <b>salinan</b> st. Yang berubah adalah <code>s.top</code> milik salinan, lalu salinan hilang saat fungsi selesai. <code>st.top</code> di main tetap NULL, jadi loop tidak jalan, dan node 5 bocor. Perbaikan: <code>void push(Stack* s, int x)</code>, pakai <code>s-&gt;top</code>, dan panggil <code>push(&amp;st, 5)</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Kode stack: top diletakkan di node pertama, jadi push dan pop tidak perlu traverse</h2></summary>
+  <p class="rantai">
+    <span class="dari">insertFront dan deleteAt(0) di single linked list (materi 01)</span>
+    <span class="ke">pola stack (<a href="#langkah-8">8️⃣</a>) dan soal kasus (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menaruh dan mengambil piring selalu di atas tumpukan, bukan di bawah.</p>
+    <p class="batas">piring paling bawah masih bisa kamu lihat. Di single linked list, node terakhir hanya bisa dicapai dengan traverse dari head.</p>
+  </aside>
+
+  <p>Top diletakkan di <b>head</b>, karena di single linked list insert dan delete di depan sama-sama cepat. Kalau top di node terakhir, pop harus mengubah next milik node sebelumnya, yang harus dicari dari head. Jadi <b>push = insertFront</b> dan <b>pop = delete node pertama</b>.</p>
+<pre class="kode"><code>top → [30] → [20] → [10] → NULL</code></pre>
+<pre class="kode"><code>void push(Stack* s, int x) {
+    Node* newNode = createNode(x);
+    newNode-&gt;next = s-&gt;top;   // 1. sambung ke top lama
+    s-&gt;top = newNode;         // 2. baru pindahkan top
 }
 
-int pop(Stack* s) {           // syarat: s->top != NULL
-    Node* del = s->top;       // simpan alamat
-    int x = del->data;        // simpan data sebelum free
-    s->top = del->next;
+int pop(Stack* s) {           // syarat: s-&gt;top != NULL
+    Node* del = s-&gt;top;       // simpan alamat
+    int x = del-&gt;data;        // simpan data sebelum free
+    s-&gt;top = del-&gt;next;
     free(del);
     return x;
 }</code></pre>
-<ul>
-  <li><b>Push ke stack kosong:</b> <code>newNode-&gt;next = s-&gt;top</code> berisi NULL. Hasilnya sudah benar, jadi tidak perlu if.</li>
-  <li><b>Pop node terakhir:</b> <code>s-&gt;top = del-&gt;next</code> berisi NULL. Stack otomatis kosong, juga tanpa if.</li>
-  <li><b>Pop stack kosong</b> (stack underflow): <code>del</code> NULL, jadi <code>del-&gt;data</code> crash. Fungsi pop tidak mengecek ini. Yang memanggil pop harus mengecek dulu: <code>while (s.top != NULL) ...</code></li>
-  <li><code>pop</code> mengembalikan data, karena soal hampir selalu butuh nilai yang keluar: dicetak, dibandingkan, atau dipindah ke struktur lain.</li>
-</ul>
+  <ul>
+    <li><strong>Push ke stack kosong / pop node terakhir:</strong> otomatis benar tanpa if, karena <code>s-&gt;top</code> berisi NULL.</li>
+    <li><strong>pop mengembalikan data:</strong> soal hampir selalu butuh nilai yang keluar, misalnya untuk dicetak.</li>
+  </ul>
 
-<h2>4. Queue</h2>
-<h3>Kenapa masuk di tail, keluar di head</h3>
-<pre><code>keluar ← head → [10] → [20] → [30] ← tail ← masuk</code></pre>
-<table>
-  <tr><th>Pilihan arah</th><th>enqueue</th><th>dequeue</th></tr>
-  <tr><td><b>Masuk di tail, keluar di head</b></td><td>O(1): <code>tail-&gt;next = newNode</code></td><td>O(1): <code>head = head-&gt;next</code></td></tr>
-  <tr><td>Masuk di head, keluar di tail</td><td>O(1)</td><td>O(n): tail baru = node sebelum tail, harus dicari dari head</td></tr>
-</table>
+  <aside class="jebakan">
+    <p>Pop dari stack kosong disebut <mark>stack underflow</mark>: del bernilai NULL, jadi <code>del-&gt;data</code> crash. Cek dulu sebelum memanggil pop: <code>while (s.top != NULL) ...</code></p>
+  </aside>
 
-<h3><code>enqueue(q, x)</code> dan <code>dequeue(q)</code>: O(1)</h3>
-<pre><code>void enqueue(Queue* q, int x) {
+  <aside class="coba">
+    <p>Buka <a href="viz/stack.html">visualisasi stack</a>, push beberapa nilai, lalu pop. Node yang terakhir di-push selalu yang pertama di-pop.</p>
+  </aside>
+
+  <p class="intinya">push = insertFront, pop = delete node pertama. Cek <code>s.top != NULL</code> sebelum pop.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Mulai dari stack kosong: <code>push(1)</code>, <code>push(2)</code>, <code>pop()</code>, <code>push(3)</code>, <code>pop()</code>, <code>pop()</code>. Apa return value dari setiap pop?</summary>
+    <p><b>2, 3, 1.</b> Setelah push 1 dan 2, top = 2, jadi pop pertama mengembalikan 2. Lalu 3 di-push di atas 1, jadi pop berikutnya 3, lalu 1.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Kode queue: masuk di tail, keluar di head, dan tail ikut NULL saat antrean kosong</h2></summary>
+  <p class="rantai">
+    <span class="dari">insertBack dengan tail (materi 02) dan pop (<a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">cancel (<a href="#langkah-6">6️⃣</a>) dan gabung antrean (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Antrean dengan dua petugas: satu di belakang mencatat orang baru, satu di depan memanggil orang berikutnya.</p>
+    <p class="batas">kalau antrean kosong, petugas belakang sadar sendiri. Di kode, tail harus diubah ke NULL secara manual.</p>
+  </aside>
+
+  <p>Arahnya dipilih supaya keduanya cepat di single linked list. Masuk di head dan keluar di tail tidak bisa, karena tail baru (node sebelum tail) harus dicari dari head.</p>
+<pre class="kode"><code>keluar ← head → [10] → [20] → [30] ← tail ← masuk</code></pre>
+<pre class="kode"><code>void enqueue(Queue* q, int x) {
     Node* newNode = createNode(x);
-    if (q->tail == NULL) {          // queue kosong
-        q->head = q->tail = newNode;
+    if (q-&gt;tail == NULL) {          // queue kosong
+        q-&gt;head = q-&gt;tail = newNode;
     } else {
-        q->tail->next = newNode;    // 1. node terakhir menunjuk node baru
-        q->tail = newNode;          // 2. tail pindah
+        q-&gt;tail-&gt;next = newNode;    // 1. node terakhir menunjuk node baru
+        q-&gt;tail = newNode;          // 2. tail pindah
     }
 }
 
-int dequeue(Queue* q) {             // syarat: q->head != NULL
-    Node* del = q->head;
-    int x = del->data;
-    q->head = del->next;
-    if (q->head == NULL)            // node terakhir baru saja keluar
-        q->tail = NULL;
+int dequeue(Queue* q) {             // syarat: q-&gt;head != NULL
+    Node* del = q-&gt;head;
+    int x = del-&gt;data;
+    q-&gt;head = del-&gt;next;
+    if (q-&gt;head == NULL)            // node terakhir baru saja keluar
+        q-&gt;tail = NULL;
     free(del);
     return x;
 }</code></pre>
-<table>
-  <tr><th>Kasus</th><th>Yang harus terjadi</th></tr>
-  <tr><td>Enqueue ke queue kosong</td><td>Tidak ada node terakhir untuk disambung. Node baru menjadi head <b>dan</b> tail.</td></tr>
-  <tr><td>Dequeue node terakhir</td><td>head menjadi NULL, dan tail juga harus diubah ke NULL.</td></tr>
-  <tr><td>Dequeue queue kosong</td><td>Crash. Cek <code>q.head != NULL</code> sebelum memanggil dequeue.</td></tr>
-</table>
-<div class="callout warn"><strong>Kenapa <code>tail = NULL</code> wajib?</strong>Tanpa baris itu, tail masih menunjuk node yang sudah di-free (<b>dangling pointer</b>). Enqueue berikutnya melihat <code>tail != NULL</code>, lalu menulis <code>tail-&gt;next</code> ke memory yang sudah di-free. head tetap NULL, jadi node baru tidak pernah tercetak.</div>
+  <table>
+    <tr><th>Kasus</th><th>Yang harus terjadi</th></tr>
+    <tr><td>Enqueue ke queue kosong</td><td>Tidak ada node terakhir untuk disambung. Node baru menjadi head <b>dan</b> tail.</td></tr>
+    <tr><td>Dequeue node terakhir</td><td>head menjadi NULL, dan tail juga harus NULL.</td></tr>
+    <tr><td>Dequeue queue kosong</td><td>Crash. Cek <code>q.head != NULL</code> dulu.</td></tr>
+  </table>
 
-<h2>5. Cancel: keluar dari tengah antrean</h2>
-<p>Soal antrean sering punya pelanggan yang membatalkan. Ini <b>delete berdasarkan nilai</b>, bukan berdasarkan posisi. Turunkan dengan resep dari materi 01:</p>
-<ol>
-  <li><b>Gambar.</b> <code>[10] → [20] → [30]</code>, cancel 20, hasilnya <code>[10] → [30]</code>.</li>
-  <li><b>Panah yang berubah:</b> <code>next</code> milik <code>[10]</code>. Pemilik panah adalah node <b>sebelum</b> node yang dihapus.</li>
-  <li><b>Cari node yang dibutuhkan.</b> Single linked list tidak bisa mundur. Jadi saat <code>cur</code> mencari x, simpan juga node sebelumnya di <code>prev</code>.</li>
-  <li><b>Urutan:</b> <code>prev-&gt;next = cur-&gt;next</code> dulu, baru <code>free(cur)</code>.</li>
-  <li><b>Edge case:</b> x di node pertama (tidak ada prev), x di node terakhir (tail berubah), x satu-satunya node, dan x tidak ada.</li>
-</ol>
-<pre><code>void cancel(Queue* q, int x) {
+  <aside class="jebakan">
+    <p>Tanpa <mark class="jebakan"><code>tail = NULL</code></mark>, tail menunjuk node yang sudah di-free (dangling pointer, materi 02). Enqueue berikutnya menulis ke memory itu, dan data baru tidak pernah tercetak.</p>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/queue.html">visualisasi queue</a>. Dequeue sampai antrean kosong, lalu perhatikan tail ikut berubah jadi NULL.</p>
+  </aside>
+
+  <p class="intinya">enqueue di tail, dequeue di head. Kalau antrean jadi kosong, tail juga harus NULL.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Urutan yang sama seperti soal stack, tapi dengan queue: <code>enqueue(1)</code>, <code>enqueue(2)</code>, <code>dequeue()</code>, <code>enqueue(3)</code>, <code>dequeue()</code>, <code>dequeue()</code>.</summary>
+    <p><b>1, 2, 3.</b> Queue selalu mengeluarkan data sesuai urutan masuk, apa pun selingan operasinya.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Cancel: dua pointer berjalan beriringan untuk menghapus berdasarkan nilai</h2></summary>
+  <p class="rantai">
+    <span class="dari">resep 5 langkah dan deleteAt (materi 01)</span>
+    <span class="ke">soal antrean dengan pembatalan (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mencari teman di barisan sambil memegang bahu orang di depanmu: begitu temanmu ketemu, orang yang kamu pegang langsung digandengkan ke orang setelah temanmu.</p>
+    <p class="batas">di barisan nyata kamu bisa menoleh ke belakang. Di single linked list tidak bisa, jadi node sebelumnya harus diingat sepanjang jalan.</p>
+  </aside>
+
+  <p>Cancel adalah delete berdasarkan <b>nilai</b>. Pemilik panah yang berubah adalah node sebelum node yang dihapus, jadi saat <code>cur</code> mencari x, node sebelumnya disimpan di <code>prev</code>. Pola ini disebut <mark>dua pointer beriringan</mark>.</p>
+<pre class="kode"><code>void cancel(Queue* q, int x) {
     Node* prev = NULL;
-    Node* cur = q->head;
-    while (cur != NULL &amp;&amp; cur->data != x) {   // NULL dicek duluan
+    Node* cur = q-&gt;head;
+    while (cur != NULL &amp;&amp; cur-&gt;data != x) {   // NULL dicek duluan
         prev = cur;
-        cur = cur->next;
+        cur = cur-&gt;next;
     }
     if (cur == NULL) return;          // x tidak ada
     if (prev == NULL)
-        q->head = cur->next;          // cur node pertama
+        q-&gt;head = cur-&gt;next;          // cur node pertama
     else
-        prev->next = cur->next;
-    if (cur == q->tail)
-        q->tail = prev;               // cur node terakhir
+        prev-&gt;next = cur-&gt;next;
+    if (cur == q-&gt;tail)
+        q-&gt;tail = prev;               // cur node terakhir
     free(cur);
 }</code></pre>
-<table>
-  <tr><th>Posisi x</th><th><code>prev</code></th><th>Yang berubah</th></tr>
-  <tr><td>Di tengah</td><td>ada</td><td><code>prev-&gt;next</code> melompati cur</td></tr>
-  <tr><td>Node pertama</td><td>NULL</td><td><code>head</code> pindah ke node ke-2</td></tr>
-  <tr><td>Node terakhir</td><td>ada</td><td><code>prev-&gt;next</code> menjadi NULL dan <code>tail</code> mundur ke prev</td></tr>
-  <tr><td>Satu-satunya node</td><td>NULL</td><td><code>head</code> dan <code>tail</code> menjadi NULL</td></tr>
-  <tr><td>Tidak ada</td><td>-</td><td>Tidak ada (cur NULL, langsung return)</td></tr>
-</table>
-<p class="label">Kenapa tidak memakai pola C (berhenti di <code>pos - 1</code>)? Karena yang dicari nilai, bukan posisi. Kita baru tahu posisi x setelah membandingkan <code>cur-&gt;data</code>, jadi node sebelumnya harus diingat sepanjang jalan.</p>
+  <table>
+    <tr><th>Posisi x</th><th>prev</th><th>Yang berubah</th></tr>
+    <tr><td>Di tengah</td><td>ada</td><td><code>prev-&gt;next</code> melompati cur</td></tr>
+    <tr><td>Node pertama</td><td>NULL</td><td>head pindah ke node ke-2</td></tr>
+    <tr><td>Node terakhir</td><td>ada</td><td><code>prev-&gt;next</code> jadi NULL, dan tail mundur ke prev</td></tr>
+    <tr><td>Satu-satunya node</td><td>NULL</td><td>head dan tail jadi NULL</td></tr>
+    <tr><td>Tidak ada</td><td>-</td><td>Tidak ada (cur NULL, langsung return)</td></tr>
+  </table>
 
-<h2>6. Pola yang sering muncul di soal</h2>
-<h3>Gabung dua antrean bergantian</h3>
-<pre><code>// a = 4 7,  b = 2 6 8 9
+  <aside class="catatan">
+    <details>
+      <summary>Kenapa tidak memakai pola C (berhenti di <code>pos - 1</code>)?</summary>
+      <p>Karena yang dicari nilai, bukan posisi. Posisi x baru diketahui setelah <code>cur-&gt;data</code> dibandingkan, jadi node sebelumnya harus diingat sepanjang jalan.</p>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/queue.html">visualisasi queue</a> dan klik <b>cancel</b> dengan nilai di tengah, lalu di ujung. Perhatikan prev yang mengikuti cur.</p>
+  </aside>
+
+  <p class="intinya">prev mengikuti cur. Saat x ketemu, <code>prev-&gt;next = cur-&gt;next</code>, dan head/tail dipindah kalau x di ujung.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tambahkan <code>int size</code> ke struct Queue, supaya jumlah isi antrean bisa dibaca tanpa traverse. Baris apa saja yang berubah?</summary>
+<pre class="kode"><code>typedef struct {
+    Node* head;
+    Node* tail;
+    int size;
+} Queue;
+
+Queue a = {NULL, NULL, 0};
+// enqueue: q-&gt;size++;  di akhir fungsi
+// dequeue: q-&gt;size--;  sebelum return
+// cancel:  q-&gt;size--;  tepat sebelum free(cur), bukan sebelum return pertama</code></pre>
+    <p>Di cancel, size hanya berkurang kalau x ketemu. Kalau ditulis di awal fungsi, size berkurang walaupun x tidak ada.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Pola queue: gabung dua antrean bergantian dengan dequeue dan enqueue</h2></summary>
+  <p class="rantai">
+    <span class="dari">enqueue dan dequeue (<a href="#langkah-5">5️⃣</a>)</span>
+    <span class="ke">soal kasus dua loket atau dua jalur (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Dua jalur mobil yang menyatu jadi satu lajur: satu mobil dari kiri, satu dari kanan, bergantian.</p>
+    <p class="batas">di jalan, jalur yang kosong tetap ada. Di kode, kalau satu antrean habis, sisa antrean lain langsung masuk berurutan.</p>
+  </aside>
+
+  <p>Soal sering meminta dua antrean dilayani <b>bergantian</b>. Data benar-benar dipindah lewat dequeue dan enqueue, jadi a dan b kosong di akhir.</p>
+<pre class="kode"><code>// a = 4 7,  b = 2 6 8 9
 while (a.head != NULL || b.head != NULL) {
     if (a.head != NULL) enqueue(&amp;c, dequeue(&amp;a));
     if (b.head != NULL) enqueue(&amp;c, dequeue(&amp;b));
 }
 // c = 4 2 7 6 8 9,  a dan b kosong</code></pre>
-<table>
-  <tr><th>Putaran</th><th>a</th><th>b</th><th>c</th></tr>
-  <tr><td>awal</td><td>4 7</td><td>2 6 8 9</td><td>-</td></tr>
-  <tr><td>1</td><td>7</td><td>6 8 9</td><td>4 2</td></tr>
-  <tr><td>2</td><td>-</td><td>8 9</td><td>4 2 7 6</td></tr>
-  <tr><td>3</td><td>-</td><td>9</td><td>4 2 7 6 8</td></tr>
-  <tr><td>4</td><td>-</td><td>-</td><td>4 2 7 6 8 9</td></tr>
-</table>
-<ul>
-  <li>Kondisi loop memakai <code>||</code>: loop jalan selama <b>salah satu</b> antrean masih berisi.</li>
-  <li>Kalau <code>a</code> habis duluan, if pertama bernilai false di setiap putaran berikutnya, jadi sisa <code>b</code> masuk berurutan. Tidak perlu loop tambahan untuk sisa.</li>
-  <li>Data benar-benar berpindah lewat dequeue dan enqueue. Ini penting kalau soal mengecek bahwa kode memakai queue, bukan hanya mencetak angka.</li>
-</ul>
+  <ul>
+    <li><strong>Kondisi loop</strong> memakai <code>||</code> (atau): loop jalan selama salah satu antrean masih berisi.</li>
+    <li><strong>Sisa antrean:</strong> kalau a habis duluan, if pertama selalu false, jadi sisa b masuk berurutan tanpa loop tambahan.</li>
+  </ul>
 
-<h3>Balik urutan dengan stack</h3>
-<pre><code>for (int i = 0; i &lt; n; i++) {
+  <aside class="hitung">
+    <details>
+      <summary>Trace: a = 4 7, b = 2 6 8 9</summary>
+      <table>
+        <tr><th>Putaran</th><th>a</th><th>b</th><th>c</th></tr>
+        <tr><td>awal</td><td>4 7</td><td>2 6 8 9</td><td>-</td></tr>
+        <tr><td>1</td><td>7</td><td>6 8 9</td><td>4 2</td></tr>
+        <tr><td>2</td><td>-</td><td>8 9</td><td>4 2 7 6</td></tr>
+        <tr><td>3</td><td>-</td><td>9</td><td>4 2 7 6 8</td></tr>
+        <tr><td>4</td><td>-</td><td>-</td><td>4 2 7 6 8 9</td></tr>
+      </table>
+    </details>
+  </aside>
+
+  <p class="intinya">Gabung bergantian = loop dengan <code>||</code>, lalu satu if per antrean di dalamnya.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Gabungkan dua antrean dengan pola <b>2 dari a, lalu 1 dari b</b>. Contoh: a = 1 2 3 4 5, b = 6 7, hasilnya 1 2 6 3 4 7 5.</summary>
+<pre class="kode"><code>while (a.head != NULL || b.head != NULL) {
+    for (int k = 0; k &lt; 2 &amp;&amp; a.head != NULL; k++)
+        enqueue(&amp;c, dequeue(&amp;a));
+    if (b.head != NULL)
+        enqueue(&amp;c, dequeue(&amp;b));
+}</code></pre>
+    <p>Kondisi <code>a.head != NULL</code> ikut di dalam for, supaya loop berhenti kalau a habis di tengah giliran.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Pola stack: kalau yang terbaru diproses duluan, pakai stack</h2></summary>
+  <p class="rantai">
+    <span class="dari">push dan pop (<a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">cek tanda kurung (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Tombol undo di editor: yang dibatalkan selalu aksi terakhir, lalu aksi sebelumnya, dan seterusnya.</p>
+    <p class="batas">editor asli menyimpan detail aksi yang rumit. Di soal, setiap aksi cukup disimpan sebagai satu node.</p>
+  </aside>
+
+  <p>Kalau soal meminta sesuatu <b>dibalik</b> atau <b>dibatalkan</b>, yang diproses duluan adalah yang terakhir masuk. Itu LIFO, jadi pakai stack.</p>
+<pre class="kode"><code>for (int i = 0; i &lt; n; i++) {
     scanf("%d", &amp;x);
     push(&amp;s, x);
 }
 while (s.top != NULL)
     printf("%d ", pop(&amp;s));      // input 1 2 3, output 3 2 1</code></pre>
+  <ul>
+    <li><strong>Undo:</strong> setiap aksi di-push. Undo = pop aksi terakhir.</li>
+    <li><strong>Tombol back:</strong> setiap halaman yang ditinggalkan di-push. Back = pop.</li>
+    <li><strong>Tanda kurung:</strong> kurung yang terakhir dibuka harus ditutup duluan. Soal lengkapnya ada di <a href="../05-soal-kasus/notes.html">materi 05</a>.</li>
+  </ul>
 
-<h3>Undo, back, dan tanda kurung</h3>
-<ul>
-  <li><b>Undo:</b> setiap aksi di-push. Undo = pop aksi terakhir.</li>
-  <li><b>Tombol back:</b> setiap halaman yang ditinggalkan di-push. Back = pop.</li>
-  <li><b>Tanda kurung:</b> kurung yang terakhir dibuka harus ditutup duluan. Soal lengkapnya ada di <a href="../05-soal-kasus/notes.html">materi 05</a>.</li>
-</ul>
+  <p class="intinya">"Balik", "batalkan", atau "yang terakhir duluan" → stack.</p>
 
-<h2>7. Versi array (singkat)</h2>
-<p>Stack dan queue juga bisa dibuat dengan array. Ini sering ditanyakan di teori, tapi soal coding biasanya mewajibkan linked list.</p>
-<pre><code>#define MAX 100
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Cetak isi stack dari top ke bawah tanpa mengubah stack.</summary>
+<pre class="kode"><code>for (Node* cur = s.top; cur != NULL; cur = cur-&gt;next)
+    printf("%d ", cur-&gt;data);</code></pre>
+    <p>Mencetak cukup dengan traverse. Kalau memakai pop, stack menjadi kosong setelah dicetak.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Versi array: ukurannya tetap, dan queue butuh index melingkar</h2></summary>
+  <p class="rantai">
+    <span class="dari">array dan operator <code>%</code> (algorithm and programming)</span>
+    <span class="ke">soal teori tentang stack dan queue berbasis array</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Meja putar di restoran: setelah piring paling ujung, putarannya kembali ke awal.</p>
+    <p class="batas">meja putar benar-benar melingkar. Array tetap lurus di memory, dan "melingkar" hanya didapat dari perhitungan <code>% MAX</code>.</p>
+  </aside>
+
+  <p>Stack dan queue juga bisa dibuat dengan array. Ini sering ditanyakan di teori, tapi soal coding biasanya mewajibkan linked list. Queue array memakai <mark>circular index</mark>: index yang kembali ke 0 setelah sampai ujung array, dihitung dengan <code>% MAX</code>.</p>
+<pre class="kode"><code>#define MAX 100
 
 int stack[MAX];
 int top = -1;                    // -1 = stack kosong
@@ -238,43 +479,104 @@ int dequeue() {                            // syarat: count &gt; 0
     count--;
     return x;
 }</code></pre>
-<ul>
-  <li>Queue array memakai <b>circular index</b> (<code>% MAX</code>). Tanpa itu, <code>front</code> terus bergeser ke kanan, dan slot di awal array yang sudah kosong tidak pernah dipakai lagi.</li>
-  <li>Array punya batas <code>MAX</code>. Push ke stack penuh (stack overflow) menulis di luar array.</li>
-</ul>
-<table>
-  <tr><th></th><th>Array</th><th>Linked list</th></tr>
-  <tr><td>Ukuran</td><td>Tetap (<code>MAX</code>)</td><td>Bertambah sesuai kebutuhan</td></tr>
-  <tr><td>Cek penuh</td><td>Wajib</td><td>Tidak perlu (kecuali memory habis)</td></tr>
-  <tr><td>Soal "wajib memakai linked list"</td><td>Tidak memenuhi</td><td>Memenuhi</td></tr>
-</table>
+  <table>
+    <tr><th></th><th>Array</th><th>Linked list</th></tr>
+    <tr><td>Ukuran</td><td>Tetap (<code>MAX</code>)</td><td>Bertambah sesuai kebutuhan</td></tr>
+    <tr><td>Cek penuh</td><td>Wajib. Push ke stack penuh (stack overflow) menulis di luar array.</td><td>Tidak perlu (kecuali memory habis)</td></tr>
+    <tr><td>Soal "wajib memakai linked list"</td><td>Tidak memenuhi</td><td>Memenuhi</td></tr>
+  </table>
 
-<h2>8. Time complexity</h2>
-<table>
-  <tr><th>Operasi</th><th>Kompleksitas</th><th>Alasan</th></tr>
-  <tr><td><code>push</code>, <code>pop</code>, <code>peek</code></td><td><b>O(1)</b></td><td>Hanya menyentuh top</td></tr>
-  <tr><td><code>enqueue</code>, <code>dequeue</code></td><td><b>O(1)</b></td><td>Head dan tail langsung tersedia</td></tr>
-  <tr><td><code>cancel(x)</code></td><td>O(n)</td><td>x harus dicari dari head</td></tr>
-  <tr><td>Gabung bergantian</td><td>O(n + m)</td><td>Setiap node dipindah tepat satu kali</td></tr>
-</table>
+  <p class="intinya">Tanpa <code>% MAX</code>, front terus bergeser ke kanan, dan slot di awal array yang sudah kosong tidak pernah dipakai lagi.</p>
 
-<h2>9. Bug yang sering muncul</h2>
-<table>
-  <tr><th>Bug</th><th>Akibat</th><th>Perbaikan</th></tr>
-  <tr><td>Parameter <code>Queue q</code>, bukan <code>Queue* q</code></td><td>Fungsi mengubah salinan, queue di main tetap kosong</td><td>Terima <code>Queue* q</code>, panggil dengan <code>&amp;a</code></td></tr>
-  <tr><td><code>Queue a;</code> tanpa <code>= {NULL, NULL}</code></td><td>head dan tail berisi garbage value, program crash</td><td>Selalu inisialisasi</td></tr>
-  <tr><td>Pop atau dequeue saat kosong</td><td>Membaca <code>NULL-&gt;data</code>, crash</td><td>Cek <code>s.top != NULL</code> atau <code>q.head != NULL</code> dulu</td></tr>
-  <tr><td>Dequeue node terakhir tanpa <code>tail = NULL</code></td><td>Enqueue berikutnya menulis ke node yang sudah di-free</td><td>Kalau head menjadi NULL, set tail = NULL</td></tr>
-  <tr><td>Cancel node terakhir tanpa memindah tail</td><td>Node baru disambung ke node yang sudah di-free</td><td><code>if (cur == q-&gt;tail) q-&gt;tail = prev;</code></td></tr>
-  <tr><td><code>while (cur-&gt;data != x &amp;&amp; cur != NULL)</code></td><td>Crash kalau x tidak ada, karena <code>cur-&gt;data</code> dibaca saat cur NULL</td><td>Cek NULL duluan</td></tr>
-  <tr><td>Membaca <code>del-&gt;data</code> setelah free</td><td>Garbage value</td><td>Salin data ke variabel dulu</td></tr>
-</table>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> MAX = 4, front = 3, count = 2. Di index berapa enqueue berikutnya menulis?</summary>
+    <p>(front + count) % MAX = (3 + 2) % 4 = <b>1</b>. Index kembali ke awal array.</p>
+  </details>
+</details>
+</section>
 
-<h2>10. Full code</h2>
-<div class="callout tip"><strong>Bisa di-compile sebagai C atau C++</strong>Sudah diuji dengan MinGW gcc (C) dan g++ (C++98). Simpan sebagai <code>.c</code> atau <code>.cpp</code> di Dev-C++.</div>
+<section class="langkah" id="langkah-10">
 <details>
-  <summary>Lihat full code</summary>
-<pre><code>#include &lt;stdio.h&gt;
+  <summary><h2>Time complexity: semua operasi utama O(1), karena hanya menyentuh ujung</h2></summary>
+  <p class="rantai">
+    <span class="dari">Big-O (materi 01)</span>
+    <span class="ke">memilih struktur data di soal kasus</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mengambil piring paling atas selalu secepat apa pun tinggi tumpukannya.</p>
+    <p class="batas">tumpukan piring yang terlalu tinggi bisa roboh. Linked list tidak punya batas tinggi, selama memory masih ada.</p>
+  </aside>
+
+  <p>Stack dan queue cepat karena operasi utamanya hanya menyentuh <mark class="kaitan">ujung list, yang langsung tersedia lewat top, head, dan tail</mark>.</p>
+  <table>
+    <tr><th>Operasi</th><th>Kompleksitas</th><th>Alasan</th></tr>
+    <tr><td><code>push</code>, <code>pop</code>, <code>peek</code></td><td>O(1)</td><td>Hanya menyentuh top</td></tr>
+    <tr><td><code>enqueue</code>, <code>dequeue</code></td><td>O(1)</td><td>Head dan tail langsung tersedia</td></tr>
+    <tr><td><code>cancel(x)</code></td><td>O(n)</td><td>x harus dicari dari head</td></tr>
+    <tr><td>Gabung bergantian</td><td>O(n + m)</td><td>Setiap node dipindah tepat satu kali</td></tr>
+  </table>
+
+  <p class="intinya">Hanya ujung → O(1). Mencari nilai di tengah → O(n).</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa gabung dua antrean berukuran n dan m butuh O(n + m)?</summary>
+    <p>Setiap node di a dan b dipindah tepat satu kali, dan setiap pemindahan (dequeue + enqueue) butuh waktu tetap. Totalnya n + m pemindahan.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-11">
+<details>
+  <summary><h2>Bug yang sering muncul: saat kosong, saat node terakhir keluar, atau struct tanpa alamat</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">membaca kodemu sendiri saat antrean "hilang" atau program crash</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Petugas antrean yang lupa mencoret nama orang yang sudah pergi: nama baru ditulis di samping nama yang salah.</p>
+    <p class="batas">petugas bisa sadar dan memperbaiki. Program tidak sadar, dan diam-diam menulis ke memory yang sudah di-free.</p>
+  </aside>
+
+  <p>Semua bug di bawah <b>lolos compile</b>.</p>
+  <table>
+    <tr><th>Bug</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>Parameter <code>Queue q</code>, bukan <code>Queue* q</code></td><td>Queue di main tetap kosong</td><td><code>Queue* q</code> dan <code>&amp;a</code> (<a href="#langkah-3">3️⃣</a>)</td></tr>
+    <tr><td><code>Queue a;</code> tanpa <code>= {NULL, NULL}</code></td><td>Garbage value, crash</td><td>Selalu inisialisasi</td></tr>
+    <tr><td>Pop atau dequeue saat kosong</td><td>Crash</td><td>Cek <code>s.top</code> / <code>q.head</code> dulu</td></tr>
+    <tr><td>Dequeue node terakhir tanpa <code>tail = NULL</code></td><td>Enqueue berikutnya menulis ke node yang sudah di-free</td><td><code>tail = NULL</code> (<a href="#langkah-5">5️⃣</a>)</td></tr>
+    <tr><td>Cancel node terakhir tanpa memindah tail</td><td>Node baru tidak pernah tercetak</td><td><code>q-&gt;tail = prev</code> (<a href="#langkah-6">6️⃣</a>)</td></tr>
+    <tr><td><code>while (cur-&gt;data != x &amp;&amp; cur != NULL)</code></td><td>Crash kalau x tidak ada</td><td>Cek NULL duluan</td></tr>
+    <tr><td>Membaca <code>del-&gt;data</code> setelah free</td><td>Garbage value</td><td>Salin data ke variabel dulu</td></tr>
+  </table>
+
+  <p class="intinya">Antrean di main tetap kosong → cek <code>*</code> di parameter. Data baru hilang → cek tail setelah node terakhir keluar.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Baris <code>if (q-&gt;head == NULL) q-&gt;tail = NULL;</code> dihapus dari dequeue. Apa yang terjadi pada urutan <code>enqueue(5)</code>, <code>dequeue()</code>, <code>enqueue(7)</code>, lalu printQueue?</summary>
+    <p>Setelah dequeue, head = NULL, tapi tail masih menunjuk node 5 yang sudah di-free. <code>enqueue(7)</code> melihat <code>tail != NULL</code>, jadi menulis <code>tail-&gt;next</code> ke memory yang sudah di-free, lalu tail pindah ke node 7. head tetap NULL, jadi printQueue mencetak baris kosong, dan node 7 bocor.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-12">
+<details>
+  <summary><h2>Program lengkap: stack, queue, gabung, dan cancel dalam satu file</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua kode di materi ini</span>
+    <span class="ke">soal kasus (materi 05)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Resep lengkap satu menu: semua langkah yang tadinya dipelajari terpisah, sekarang disusun jadi satu.</p>
+    <p class="batas">resep bisa dibaca dari tengah. Program C dijalankan dari <code>main</code>, jadi fungsinya ditulis sebelum dipanggil.</p>
+  </aside>
+
+  <p>Sudah diuji dengan MinGW gcc (C) dan g++ (C++98). Simpan sebagai <code>.c</code> atau <code>.cpp</code> di Dev-C++. Pilih <b>Bertahap</b> untuk mencoba menulis setiap fungsi sendiri.</p>
+  <details>
+    <summary>Lihat full code</summary>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 
 typedef struct Node {
@@ -293,22 +595,22 @@ typedef struct {
 
 Node* createNode(int x) {
     Node* n = (Node*)malloc(sizeof(Node));
-    n->data = x;
-    n->next = NULL;
+    n-&gt;data = x;
+    n-&gt;next = NULL;
     return n;
 }
 
 /* ---------- Stack: masuk dan keluar di top ---------- */
 void push(Stack* s, int x) {
     Node* newNode = createNode(x);
-    newNode->next = s->top;
-    s->top = newNode;
+    newNode-&gt;next = s-&gt;top;
+    s-&gt;top = newNode;
 }
 
-int pop(Stack* s) {                  // syarat: s->top != NULL
-    Node* del = s->top;
-    int x = del->data;
-    s->top = del->next;
+int pop(Stack* s) {                  // syarat: s-&gt;top != NULL
+    Node* del = s-&gt;top;
+    int x = del-&gt;data;
+    s-&gt;top = del-&gt;next;
     free(del);
     return x;
 }
@@ -316,45 +618,45 @@ int pop(Stack* s) {                  // syarat: s->top != NULL
 /* ---------- Queue: masuk di tail, keluar di head ---------- */
 void enqueue(Queue* q, int x) {
     Node* newNode = createNode(x);
-    if (q->tail == NULL) {
-        q->head = q->tail = newNode;
+    if (q-&gt;tail == NULL) {
+        q-&gt;head = q-&gt;tail = newNode;
     } else {
-        q->tail->next = newNode;
-        q->tail = newNode;
+        q-&gt;tail-&gt;next = newNode;
+        q-&gt;tail = newNode;
     }
 }
 
-int dequeue(Queue* q) {              // syarat: q->head != NULL
-    Node* del = q->head;
-    int x = del->data;
-    q->head = del->next;
-    if (q->head == NULL)
-        q->tail = NULL;
+int dequeue(Queue* q) {              // syarat: q-&gt;head != NULL
+    Node* del = q-&gt;head;
+    int x = del-&gt;data;
+    q-&gt;head = del-&gt;next;
+    if (q-&gt;head == NULL)
+        q-&gt;tail = NULL;
     free(del);
     return x;
 }
 
 void cancel(Queue* q, int x) {
     Node* prev = NULL;
-    Node* cur = q->head;
-    while (cur != NULL &amp;&amp; cur->data != x) {
+    Node* cur = q-&gt;head;
+    while (cur != NULL &amp;&amp; cur-&gt;data != x) {
         prev = cur;
-        cur = cur->next;
+        cur = cur-&gt;next;
     }
     if (cur == NULL) return;
     if (prev == NULL)
-        q->head = cur->next;
+        q-&gt;head = cur-&gt;next;
     else
-        prev->next = cur->next;
-    if (cur == q->tail)
-        q->tail = prev;
+        prev-&gt;next = cur-&gt;next;
+    if (cur == q-&gt;tail)
+        q-&gt;tail = prev;
     free(cur);
 }
 
 void printQueue(Queue* q) {
-    for (Node* cur = q->head; cur != NULL; cur = cur->next) {
-        if (cur != q->head) printf(" ");
-        printf("%d", cur->data);
+    for (Node* cur = q-&gt;head; cur != NULL; cur = cur-&gt;next) {
+        if (cur != q-&gt;head) printf(" ");
+        printf("%d", cur-&gt;data);
     }
     printf("\n");
 }
@@ -365,7 +667,7 @@ int main() {
     push(&amp;s, 10);
     push(&amp;s, 20);
     push(&amp;s, 30);
-    printf("top: %d\n", s.top->data);        // 30 (peek)
+    printf("top: %d\n", s.top-&gt;data);        // 30 (peek)
     while (s.top != NULL)
         printf("%d ", pop(&amp;s));               // 30 20 10
     printf("\n");
@@ -392,86 +694,24 @@ int main() {
         dequeue(&amp;c);
     return 0;
 }</code></pre>
+  </details>
+
+  <p class="intinya">Program lengkap = struct Node, Stack, Queue + operasi + main. Antrean dikosongkan di akhir supaya tidak ada memory leak.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa baris terakhir output adalah <code>2 7 6 8 5</code>?</summary>
+    <p>Setelah gabung, c = 4 2 7 6 8 9. cancel 9 menghapus node terakhir (tail mundur ke 8). cancel 4 menghapus node pertama (head pindah ke 2). enqueue 5 menyambung 5 di belakang 8.</p>
+  </details>
 </details>
+</section>
 
-<h2>11. Latihan</h2>
-
-<p><b>1.</b> Mulai dari stack kosong: <code>push(1)</code>, <code>push(2)</code>, <code>pop()</code>, <code>push(3)</code>, <code>pop()</code>, <code>pop()</code>. Apa saja return value dari setiap pop?</p>
-<details>
-  <summary>Jawaban</summary>
-  <p><b>2, 3, 1.</b> Setelah push 1 dan 2, top = 2, jadi pop pertama mengembalikan 2. Lalu 3 di-push di atas 1, jadi pop berikutnya 3, lalu 1.</p>
-</details>
-
-<p><b>2.</b> Urutan yang sama, tapi dengan queue: <code>enqueue(1)</code>, <code>enqueue(2)</code>, <code>dequeue()</code>, <code>enqueue(3)</code>, <code>dequeue()</code>, <code>dequeue()</code>.</p>
-<details>
-  <summary>Jawaban</summary>
-  <p><b>1, 2, 3.</b> Queue selalu mengeluarkan data sesuai urutan masuk, apa pun selingan operasinya.</p>
-</details>
-
-<p><b>3. Temukan bug.</b> Kode ini di-compile tanpa error, tapi tidak mencetak apa pun. Kenapa?</p>
-<pre><code>void push(Stack s, int x) {
-    Node* newNode = createNode(x);
-    newNode->next = s.top;
-    s.top = newNode;
-}
-...
-Stack st = {NULL};
-push(st, 5);
-while (st.top != NULL) printf("%d ", pop(&amp;st));</code></pre>
-<details>
-  <summary>Jawaban</summary>
-  <p><code>push</code> menerima <b>salinan</b> <code>st</code>. Yang berubah adalah <code>s.top</code> milik salinan, lalu salinan hilang saat fungsi selesai. <code>st.top</code> di main tetap NULL, jadi loop tidak jalan. Node 5 juga bocor. Perbaikan: <code>void push(Stack* s, int x)</code>, pakai <code>s-&gt;top</code>, dan panggil <code>push(&amp;st, 5)</code>.</p>
-</details>
-
-<p><b>4. Temukan bug.</b> Baris <code>if (q-&gt;head == NULL) q-&gt;tail = NULL;</code> dihapus dari dequeue. Apa yang terjadi pada urutan <code>enqueue(5)</code>, <code>dequeue()</code>, <code>enqueue(7)</code>, lalu <code>printQueue</code>?</p>
-<details>
-  <summary>Jawaban</summary>
-  <p>Setelah dequeue, head = NULL, tapi tail masih menunjuk node 5 yang sudah di-free. <code>enqueue(7)</code> melihat <code>tail != NULL</code>, jadi menulis <code>tail-&gt;next</code> ke memory yang sudah di-free, lalu tail pindah ke node 7. head tetap NULL, jadi printQueue mencetak baris kosong, dan node 7 bocor.</p>
-</details>
-
-<p><b>5. Turunkan sendiri.</b> Tambahkan <code>int size</code> ke struct <code>Queue</code>, supaya jumlah isi antrean bisa dibaca dalam O(1). Baris apa saja yang berubah?</p>
-<details>
-  <summary>Jawaban</summary>
-<pre><code>typedef struct {
-    Node* head;
-    Node* tail;
-    int size;
-} Queue;
-
-Queue a = {NULL, NULL, 0};
-// enqueue: q->size++;  di akhir fungsi
-// dequeue: q->size--;  sebelum return
-// cancel:  q->size--;  tepat sebelum free(cur), bukan sebelum return pertama</code></pre>
-  <p>Di cancel, size hanya berkurang kalau x ketemu. Kalau ditulis di awal fungsi, size berkurang walaupun x tidak ada.</p>
-</details>
-
-<p><b>6. Turunkan sendiri.</b> Gabungkan dua antrean dengan pola <b>2 dari a, lalu 1 dari b</b>. Contoh: a = 1 2 3 4 5, b = 6 7, hasilnya 1 2 6 3 4 7 5.</p>
-<details>
-  <summary>Jawaban</summary>
-<pre><code>while (a.head != NULL || b.head != NULL) {
-    for (int k = 0; k &lt; 2 &amp;&amp; a.head != NULL; k++)
-        enqueue(&amp;c, dequeue(&amp;a));
-    if (b.head != NULL)
-        enqueue(&amp;c, dequeue(&amp;b));
-}</code></pre>
-  <p>Kondisi <code>a.head != NULL</code> ikut di dalam for, supaya loop berhenti kalau a habis di tengah giliran.</p>
-</details>
-
-<p><b>7.</b> Cetak isi stack dari top ke bawah <b>tanpa</b> mengubah stack.</p>
-<details>
-  <summary>Jawaban</summary>
-<pre><code>for (Node* cur = s.top; cur != NULL; cur = cur->next)
-    printf("%d ", cur->data);</code></pre>
-  <p>Mencetak cukup dengan traverse. Kalau memakai pop, stack menjadi kosong setelah dicetak.</p>
-</details>
-
-<h2>Daftar pustaka</h2>
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2022). <i>Introduction to Algorithms</i> (4th ed.). MIT Press. Bab 10: Elementary data structures (stacks, queues, linked lists).</li>
   <li>Weiss, M. A. (1997). <i>Data Structures and Algorithm Analysis in C</i> (2nd ed.). Addison-Wesley. Bab 3.3: The stack ADT, dan bab 3.4: The queue ADT.</li>
   <li>Kernighan, B. W., &amp; Ritchie, D. M. (1988). <i>The C Programming Language</i> (2nd ed.). Prentice Hall. Bab 6: Structures (struct dan pointer ke struct).</li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Loop Tracer</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/cviz.css?v=e24d9524">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/cviz.css?v=b2fc1b00">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Loop tracer</h1>
-<p>Jalankan loop <b>step by step</b> dan lihat <b>trace table</b> terisi: satu baris per putaran. Kalau kamu bisa mengisi trace table sendiri, kamu bisa membaca loop apa pun. Nyalakan <b>mode tebak</b> untuk latihan.</p>
+<p>Visualisasi ini menjalankan loop baris demi baris dan mencatat setiap putaran di trace table.</p>
+<p class="coba"><strong>Coba:</strong> pilih program di menu <b>Program</b>, lalu klik <b>Langkah berikutnya</b>. Centang <b>Mode tebak</b> kalau mau menebak dulu sebelum setiap langkah tampil.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> baris kode yang menyala, kotak memory yang berubah, dan trace table yang bertambah satu baris di setiap putaran.</p>
 
-<script src="../../../_shared/cviz.js?v=bf27ea59"></script>
+<script src="../../../_shared/cviz.js?v=a6fad534"></script>
 <script>
 // Urutan eksekusi for: exp1 sekali, lalu cek exp2 → body → exp3 → cek exp2 lagi ...
 const flowFor = cvFlow(320, 330, [
@@ -22,15 +25,16 @@ const flowFor = cvFlow(320, 330, [
   cvNode('cond', 'dec', 150, 104, 170, 62, 'exp2: i <= n'),
   cvNode('body', 'proc', 150, 190, 190, 34, 'body: total += i'),
   cvNode('upd', 'proc', 150, 256, 150, 34, 'exp3: i++'),
-  cvNode('end', 'term', 275, 190, 70, 30, 'keluar'),
+  cvNode('end', 'term', 285, 190, 64, 30, 'keluar'),
   cvLine('M150 43V73'), cvLine('M150 135V173', 'true', 157, 156), cvLine('M150 207V239'),
-  cvLine('M75 256H30V104H65'), cvLine('M235 104H275V175', 'false', 240, 94),
+  cvLine('M75 256H30V104H65'), cvLine('M235 104H285V175', 'false', 240, 94),
 ]);
 
 cviz({
   programs: {
     for: {
       title: 'for: jumlah 1..n',
+      perhatikan: 'di flowchart, exp1 menyala sekali saja, lalu exp2, body, dan exp3 bergantian. Setelah loop, i = 6, bukan 5 (notes 5️⃣).',
       input: '5',
       watch: ['i', 'total'],
       panes: {
@@ -65,6 +69,7 @@ printf("%d\\n", total);`,
     },
     while: {
       title: 'while: loop yang sama',
+      perhatikan: 'trace table-nya sama persis dengan program for. for dan while hanya beda tempat menulis keempat bagian (notes 4️⃣).',
       input: '5',
       watch: ['i', 'total'],
       code: `int n, i, total = 0;
@@ -97,6 +102,7 @@ printf("%d\\n", total);`,
     },
     dowhile: {
       title: 'while vs do-while',
+      perhatikan: 'kondisinya sama (x &lt; 5), tapi body while jalan 0 kali dan body do-while jalan 1 kali (notes 8️⃣).',
       code: `int x = 10;
 while (x < 5) {
     printf("while: %d\\n", x);
@@ -115,6 +121,7 @@ do {
     },
     break: {
       title: 'break',
+      perhatikan: 'saat i = 5, loop langsung selesai walaupun 5 &lt;= 10 masih true. Output-nya 1 2 3 4 (notes 12).',
       watch: ['i'],
       code: `for (int i = 1; i <= 10; i++) {
     if (i == 5) break;
@@ -136,6 +143,7 @@ do {
     },
     continue: {
       title: 'continue',
+      perhatikan: 'saat i = 5, printf dilewati, tapi loop tetap lanjut ke i = 6. Output-nya tanpa angka 5 (notes 13).',
       watch: ['i'],
       code: `for (int i = 1; i <= 10; i++) {
     if (i == 5) continue;
@@ -158,6 +166,7 @@ do {
     },
     nested: {
       title: 'Nested loop: segitiga',
+      perhatikan: 'j berputar penuh dulu, baru i naik satu. Banyak baris trace table = banyak bintang = 10 (notes 11).',
       input: '4',
       watch: ['i', 'j'],
       code: `int n;
@@ -190,6 +199,7 @@ for (int i = 1; i <= n; i++) {
     },
     sentinel: {
       title: 'Sentinel: rata-rata sampai 0',
+      perhatikan: 'di buffer keyboard, setiap scanf mengambil satu angka. Angka 0 hanya dicek, tidak ikut dijumlahkan (notes 10).',
       input: '8 6 10 0',
       watch: ['x', 'total', 'count'],
       code: `int x, total = 0, count = 0;
@@ -222,6 +232,7 @@ printf("%.2f\\n", (float)total / count);`,
     },
     semicolon: {
       title: 'Bug: titik koma setelah for',
+      perhatikan: 'trace table terisi, tapi output kosong selama loop berjalan. printf baru jalan sekali setelah loop dan mencetak 3 (notes 14).',
       watch: ['i'],
       code: `int i;
 for (i = 0; i < 3; i++);

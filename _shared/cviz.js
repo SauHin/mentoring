@@ -8,6 +8,7 @@
 //     input,                     // isi keyboard (stdin), opsional. Bisa diubah pembaca.
 //     code | panes,              // `kode C`  atau  { Pseudocode: `...`, Flowchart: '<svg>...', C: `...` }
 //     watch,                     // kolom trace table, misalnya ['i', 'total']
+//     perhatikan,                // isi p.perhatikan saat program ini dipilih (apa yang dilihat + kesimpulannya)
 //     run: function* (m) { ... } // simulasi program; setiap yield m.step(...) = satu langkah
 //   } } })
 //
@@ -206,6 +207,7 @@ function cviz({ programs, layout }) {
   const hex = (a) => '0x' + a.toString(16);
   const keys = Object.keys(programs);
   let prog, m, gen, running = false, guessing = false, timer = null, st = null, hot = new Set(), count = 0, input, inputOpen = false;
+  const hint = document.querySelector('.viz > .perhatikan');
   window.cvizMissing = [];                              // dicek oleh tes: langkah yang barisnya tidak ditemukan
 
   // Satu kartu untuk langkah (penjelasan + tombol), satu panel untuk state program. Tidak ada kartu di dalam kartu.
@@ -360,6 +362,8 @@ function cviz({ programs, layout }) {
   function load(key) {
     prog = programs[key];
     $('cv-prog').value = key;
+    // Petunjuk "Perhatikan" milik program ini menggantikan petunjuk umum di atas halaman.
+    if (hint) hint.innerHTML = `<strong>Perhatikan:</strong> ${prog.perhatikan || hint.dataset.umum}`;
     stop();
     input = prog.inputEdit ?? prog.input;
     if (input !== undefined && !input.endsWith('\n')) input += '\n'; // Enter terakhir yang diketik
@@ -426,7 +430,9 @@ function cviz({ programs, layout }) {
   };
   addEventListener('resize', () => requestAnimationFrame(drawArrows));
   window.cvizRun = (key) => { load(key); let n = 0; while (running && n++ < 2000) advance(); return m; }; // untuk tes
-  load(keys[0]);
+  if (hint) hint.dataset.umum = hint.innerHTML.replace(/^<strong>Perhatikan:<\/strong>\s*/, '');
+  // Link dari notes atau slide bisa langsung membuka satu program: viz/loop.html#nested
+  load(programs[location.hash.slice(1)] ? location.hash.slice(1) : keys[0]);
 }
 
 /* ---------- Flowchart sederhana: dipakai halaman yang punya panel Flowchart ---------- */

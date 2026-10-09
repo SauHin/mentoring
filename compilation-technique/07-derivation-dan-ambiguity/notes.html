@@ -5,126 +5,374 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Derivation, Parse Tree, dan Ambiguity · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../_shared/automata.css?v=45a95657">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=db2dcc70">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Compilation technique · 07</span>
-<h1>Derivation, parse tree, dan ambiguity</h1>
-<p class="lead">Parser mengecek apakah urutan token bisa diturunkan dari grammar. Bukti penurunannya ditulis sebagai derivation (LMD atau RMD) atau digambar sebagai parse tree.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/derivation.html">Visualisasi: derivation dan parse tree</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li>LMD: selalu ganti variabel paling kiri. RMD: paling kanan. Keduanya dimulai dari S.</li>
-    <li>LMD dan RMD untuk string yang sama menghasilkan parse tree yang sama, hanya urutannya berbeda.</li>
-    <li>Ambiguous = ada string dengan dua parse tree (dua LMD). Satu contoh string sudah cukup sebagai bukti.</li>
-    <li>Ekspresi tanpa ambiguity: satu variabel per tingkat prioritas, <code>E → E+T | T</code>, <code>T → T*F | F</code>, <code>F → (E) | id</code>.</li>
+<header>
+  <h1>Derivation, parse tree, dan ambiguity</h1>
+  <p class="tujuan">Parser mengecek apakah urutan token bisa diturunkan dari grammar. Bukti penurunannya ditulis sebagai derivation (LMD atau RMD) atau digambar sebagai parse tree. Target: kamu bisa menulis LMD, RMD, dan parse tree, lalu membuktikan grammar ambiguous atau tidak.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/derivation.html">derivation dan parse tree</a> · Prasyarat: <a href="../06-re-ke-cfg/notes.html">CFG (materi 06)</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Parser di dalam compiler</a></li>
+      <li><a href="#langkah-2">Leftmost dan rightmost derivation</a></li>
+      <li><a href="#langkah-3">Parse tree</a></li>
+      <li><a href="#langkah-4">Parse tree dan AST</a></li>
+      <li><a href="#langkah-5">Ambiguous grammar</a></li>
+      <li><a href="#langkah-6">Menghilangkan ambiguity</a></li>
+      <li><a href="#langkah-7">Top-down dan bottom-up</a></li>
+      <li><a href="#langkah-8">Error recovery</a></li>
+      <li><a href="#langkah-9">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Parser di dalam compiler</h2>
-<p>Parser (syntax analyzer) menerima token dari lexer, mengecek apakah urutannya mengikuti grammar, membangun parse tree (atau AST), dan melaporkan syntax error. Lexer hanya mengecek kata, parser mengecek susunan kata.</p>
-<pre><code>if ( x &gt; 0 )     token valid, susunan valid
-if ( &gt; x 0 )     token valid, susunan tidak valid → syntax error</code></pre>
-<p>Parser dibagi dua kelompok: <b>top-down</b> (tree dibangun dari root) dan <b>bottom-up</b> (dari leaf). Keduanya membaca input dari kiri ke kanan, satu token per langkah. Parser yang efisien hanya bisa dibuat untuk sebagian CFG: LL untuk top-down, LR untuk bottom-up.</p>
+<main>
 
-<h2>2. Derivation</h2>
-<p>Satu langkah derivation <code>⇒</code> mengganti satu variabel dengan ruas kanan salah satu produksinya. Contoh grammar kalimat dari slide:</p>
-<pre><code>&lt;sentence&gt;  → &lt;subject&gt; &lt;predicate&gt;
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Lexer mengecek setiap kata, parser mengecek susunan kata-kata itu</h2></summary>
+  <p class="rantai">
+    <span class="dari">lexer dan token (materi 01), CFG (materi 06)</span>
+    <span class="ke">derivation (<a href="#langkah-2">2️⃣</a>) dan strategi parsing (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Guru bahasa mengecek susunan kalimat setelah ejaan setiap kata dicek.</p>
+    <p class="batas">guru bisa memaklumi kalimat yang agak salah. Parser menolak susunan yang tidak ada di grammar.</p>
+  </aside>
+
+  <p><mark>Parser</mark> (syntax analyzer) menerima token dari lexer, mengecek apakah urutannya mengikuti grammar, membangun parse tree (atau AST), dan melaporkan syntax error.</p>
+<pre class="kode"><code>source program → lexer → token → parser → parse tree / AST → semantic analysis
+
+if ( x &gt; 0 )     token valid, susunan valid
+if ( &gt; x 0 )     token valid, susunan tidak valid: syntax error</code></pre>
+  <p>Parser meminta token satu per satu ke lexer, membaca dari kiri ke kanan. Grammar bahasa pemrograman ditulis sebagai CFG, biasanya dalam notasi BNF.</p>
+
+  <p class="intinya">Lexer: kata valid atau tidak. Parser: susunan valid atau tidak.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Pada <code>x = 5 + ;</code>, lexer atau parser yang melaporkan error?</summary>
+    <p><b>Parser.</b> Setiap token (<code>x</code>, <code>=</code>, <code>5</code>, <code>+</code>, <code>;</code>) valid, tapi setelah <code>+</code> grammar mengharapkan operand, bukan <code>;</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>LMD selalu mengganti variabel paling kiri, RMD selalu paling kanan</h2></summary>
+  <p class="rantai">
+    <span class="dari">derivation (materi 06)</span>
+    <span class="ke">parse tree (<a href="#langkah-3">3️⃣</a>), top-down dan bottom-up (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mengisi formulir dari kolom paling kiri, atau dari kolom paling kanan: hasil akhirnya formulir yang sama.</p>
+    <p class="batas">urutan mengisi formulir bebas. Di LMD dan RMD, aturan pemilihannya harus konsisten di setiap baris.</p>
+  </aside>
+
+  <p>Kalau sentential form punya lebih dari satu variabel, kamu harus memilih mana yang diganti. <mark>Leftmost derivation</mark> (LMD) selalu memilih yang paling kiri, rightmost derivation (RMD) yang paling kanan.</p>
+<pre class="kode"><code>S → AB    A → a    B → b
+
+LMD: S ⇒ AB ⇒ aB ⇒ ab      (A diganti dulu)
+RMD: S ⇒ AB ⇒ Ab ⇒ ab      (B diganti dulu)</code></pre>
+  <table>
+    <tr><th></th><th>LMD</th><th>RMD</th></tr>
+    <tr><td>Variabel yang diganti</td><td>paling kiri</td><td>paling kanan</td></tr>
+    <tr><td>Sentential form</td><td>left-sentential form</td><td>right-sentential form (canonical)</td></tr>
+    <tr><td>Dipakai oleh</td><td>top-down parser (recursive descent, LL)</td><td>bottom-up parser (LR membangun kebalikan RMD)</td></tr>
+    <tr><td>Hasil akhir dan parse tree</td><td colspan="2">sama</td></tr>
+  </table>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide: RMD untuk "dog eat dog"</summary>
+<pre class="kode"><code>&lt;sentence&gt;  → &lt;subject&gt; &lt;predicate&gt;
 &lt;subject&gt;   → &lt;noun&gt;
 &lt;predicate&gt; → &lt;verb&gt; &lt;object&gt;
 &lt;object&gt;    → &lt;noun&gt;
 &lt;noun&gt;      → dog | rice | people
-&lt;verb&gt;      → eat | hit</code></pre>
-<p>RMD untuk "dog eat dog":</p>
-<pre><code>&lt;sentence&gt; ⇒ &lt;subject&gt; &lt;predicate&gt;
+&lt;verb&gt;      → eat | hit
+
+&lt;sentence&gt; ⇒ &lt;subject&gt; &lt;predicate&gt;
            ⇒ &lt;subject&gt; &lt;verb&gt; &lt;object&gt;
            ⇒ &lt;subject&gt; &lt;verb&gt; &lt;noun&gt;
            ⇒ &lt;subject&gt; &lt;verb&gt; dog
            ⇒ &lt;subject&gt; eat dog
            ⇒ &lt;noun&gt; eat dog
            ⇒ dog eat dog</code></pre>
-<p>"hit the dog" tidak bisa diturunkan (tidak ada subject di depan, dan "the" bukan terminal), jadi kalimat itu salah menurut grammar ini.</p>
-<table>
-  <tr><th></th><th>Leftmost derivation (LMD)</th><th>Rightmost derivation (RMD)</th></tr>
-  <tr><td>Variabel yang diganti</td><td>paling kiri</td><td>paling kanan</td></tr>
-  <tr><td>Sentential form</td><td>left-sentential form</td><td>right-sentential form (canonical)</td></tr>
-  <tr><td>Dipakai oleh</td><td>top-down parser (recursive descent, LL)</td><td>bottom-up parser (LR membangun kebalikan RMD)</td></tr>
-  <tr><td>Hasil akhir dan parse tree</td><td colspan="2">sama</td></tr>
-</table>
+      <p>"hit the dog" tidak bisa diturunkan (tidak ada subject di depan, dan "the" bukan terminal), jadi kalimat itu salah menurut grammar ini.</p>
+    </details>
+  </aside>
 
-<h2>3. Parse tree dan AST</h2>
-<p>Parse tree: root = start symbol, setiap node dalam = variabel, anak-anaknya = ruas kanan produksi yang dipakai, leaf = terminal (atau ε). Membaca leaf dari kiri ke kanan menghasilkan string-nya. Contoh <code>(a+b)*c</code> dengan <code>E → E+E | E*E | (E) | a | b | c | d</code>:</p>
-<div class="au-fig" data-grammar="E → E+E | E*E | (E) | a | b | c | d" data-input="(a+b)*c"></div>
-<p>AST membuang detail grammar (variabel perantara, kurung) dan hanya menyimpan operator dan operand. Parse tree menjelaskan <b>bagaimana</b> program di-parse, AST menjelaskan <b>apa arti</b> program itu.</p>
+  <p class="intinya">LMD: kiri dulu. RMD: kanan dulu. Keduanya dari S ke string.</p>
 
-<h2>4. Ambiguity</h2>
-<p>Grammar ambiguous kalau ada string di L(G) yang punya lebih dari satu parse tree, atau lebih dari satu LMD (atau RMD). Kalau setiap string punya paling banyak satu parse tree, grammar itu unambiguous.</p>
-<div class="au-figs">
-  <figure><div class="au-fig" data-grammar="E → E+E | E*E | id" data-input="id+id*id" data-which="0"></div><figcaption>id + (id * id)</figcaption></figure>
-  <figure><div class="au-fig" data-grammar="E → E+E | E*E | id" data-input="id+id*id" data-which="1"></div><figcaption>(id + id) * id</figcaption></figure>
-</div>
-<p>Ambiguity berbahaya karena compiler harus memberi satu arti. Grammar ekspresi di atas ditulis ulang menjadi:</p>
-<pre><code>E → E + T | T
-T → T * F | F
-F → ( E ) | id</code></pre>
-<ul>
-  <li>Setiap tingkat prioritas punya variabel sendiri. Operator dengan prioritas lebih tinggi berada lebih dalam di tree, jadi dikerjakan lebih dulu.</li>
-  <li>Rekursi di kiri (<code>E → E + T</code>) membuat operator left associative.</li>
-  <li>Tidak ada algoritma umum yang bisa mengubah sembarang ambiguous grammar menjadi unambiguous. Bahkan menentukan apakah sebuah grammar ambiguous pun tidak bisa diputuskan oleh algoritma.</li>
-</ul>
-<div class="callout"><strong>Inherently ambiguous</strong>Sebuah context-free language disebut inherently ambiguous kalau <b>semua</b> grammar-nya ambiguous. Contoh dari slide: L = {aⁿbⁿcᵐdᵐ | n, m ≥ 1} ∪ {aⁿbᵐcᵐdⁿ | n, m ≥ 1}, dengan grammar <code>S → AB | C</code>, <code>A → aAb | ab</code>, <code>B → cBd | cd</code>, <code>C → aCd | aDd</code>, <code>D → bDc | bc</code>. String <code>aabbccdd</code> masuk ke kedua bagian, jadi selalu punya dua tree. Coba di visualisasi.</div>
-
-<h2>5. Strategi parsing dan error handling</h2>
-<table>
-  <tr><th></th><th>Top-down</th><th>Bottom-up</th></tr>
-  <tr><td>Mulai dari</td><td>start symbol</td><td>token input</td></tr>
-  <tr><td>Derivation</td><td>leftmost</td><td>kebalikan rightmost</td></tr>
-  <tr><td>Aksi</td><td>memprediksi produksi, expand</td><td>shift dan reduce</td></tr>
-  <tr><td>Parser</td><td>recursive descent, LL</td><td>LR, SLR, LALR, canonical LR</td></tr>
-  <tr><td>Grammar</td><td>tidak boleh left recursive, sering perlu left factoring</td><td>kelas grammar lebih luas, termasuk left recursive</td></tr>
-  <tr><td>Implementasi</td><td>lebih sederhana</td><td>lebih rumit</td></tr>
-</table>
-<p>Saat input melanggar grammar, parser memakai salah satu strategi pemulihan:</p>
-<table>
-  <tr><th>Strategi</th><th>Cara kerja</th><th>Kelebihan</th><th>Kekurangan</th></tr>
-  <tr><td>Panic mode</td><td>Buang token sampai bertemu synchronizing token (<code>;</code>, <code>}</code>)</td><td>Sederhana, tidak pernah infinite loop</td><td>Bisa melewati banyak input, jadi error lain tidak terdeteksi</td></tr>
-  <tr><td>Phrase level</td><td>Perbaikan lokal: sisipkan, hapus, atau ganti token</td><td>Kesalahan kecil diperbaiki tanpa banyak input hilang</td><td>Sulit memilih perbaikan yang tepat</td></tr>
-  <tr><td>Error productions</td><td>Tambahkan produksi untuk kesalahan yang umum</td><td>Pesan error informatif</td><td>Kesalahan harus diperkirakan dulu</td></tr>
-  <tr><td>Global correction</td><td>Cari jumlah perubahan minimum supaya input valid</td><td>Optimal secara teori</td><td>Terlalu mahal untuk compiler nyata</td></tr>
-</table>
-
-<h2>6. Latihan</h2>
-<p><b>1.</b> (Latihan dosen) Grammar <code>E → E + T | T</code>, <code>T → T * F | F</code>, <code>F → ( E ) | id</code>, string <code>id + id * id</code>. Buat LMD, RMD, parse tree, lalu jelaskan apakah grammar ini menegakkan prioritas perkalian.</p>
-<details><summary>Jawaban</summary>
-<pre><code>LMD: E ⇒ E+T ⇒ T+T ⇒ F+T ⇒ id+T ⇒ id+T*F ⇒ id+F*F ⇒ id+id*F ⇒ id+id*id
-RMD: E ⇒ E+T ⇒ E+T*F ⇒ E+T*id ⇒ E+F*id ⇒ E+id*id ⇒ T+id*id ⇒ F+id*id ⇒ id+id*id</code></pre>
-<div class="au-fig" data-grammar="E → E+T | T;T → T*F | F;F → (E) | id" data-input="id+id*id"></div>
-<p>Ya. <code>*</code> hanya bisa dihasilkan dari T, dan T berada di bawah E. Jadi <code>id * id</code> selalu menjadi satu subtree di bawah <code>+</code>: perkalian dikelompokkan lebih dulu. Untuk string ini hanya ada satu parse tree.</p>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan <code>E → E+E | E*E | (E) | a | b | c | d</code>, buat LMD untuk <code>(a+b)*c</code>.</summary>
+<pre class="kode"><code>E ⇒ E*E ⇒ (E)*E ⇒ (E+E)*E ⇒ (a+E)*E ⇒ (a+b)*E ⇒ (a+b)*c</code></pre>
+    <p>Parse tree-nya (<a href="#langkah-3">3️⃣</a>):</p>
+    <div class="au-fig" data-grammar="E → E+E | E*E | (E) | a | b | c | d" data-input="(a+b)*c"></div>
+  </details>
 </details>
-<p><b>2.</b> Dengan grammar <code>E → E+E | E*E | (E) | a | b | c | d</code>, buat LMD untuk <code>(a+b)*c</code>.</p>
-<details><summary>Jawaban</summary><pre><code>E ⇒ E*E ⇒ (E)*E ⇒ (E+E)*E ⇒ (a+E)*E ⇒ (a+b)*E ⇒ (a+b)*c</code></pre></details>
-<p><b>3.</b> Tunjukkan bahwa <code>S → aS | Sa | a</code> ambiguous.</p>
-<details><summary>Jawaban</summary><p>String <code>aa</code> punya dua LMD: <code>S ⇒ aS ⇒ aa</code> dan <code>S ⇒ Sa ⇒ aa</code>. Dua LMD berbeda = dua parse tree, jadi ambiguous.</p></details>
-<p><b>4.</b> Buat RMD untuk <code>id * ( id + id )</code> dengan grammar di soal 1.</p>
-<details><summary>Jawaban</summary><pre><code>E ⇒ T ⇒ T*F ⇒ T*(E) ⇒ T*(E+T) ⇒ T*(E+F) ⇒ T*(E+id) ⇒ T*(T+id)
-  ⇒ T*(F+id) ⇒ T*(id+id) ⇒ F*(id+id) ⇒ id*(id+id)</code></pre></details>
+</section>
 
-<h2>Daftar pustaka</h2>
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Parse tree mencatat produksi yang dipakai, tanpa urutan penggantian</h2></summary>
+  <p class="rantai">
+    <span class="dari">LMD dan RMD (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">AST (<a href="#langkah-4">4️⃣</a>) dan ambiguity (<a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Silsilah keluarga: siapa anak dari siapa, tanpa mencatat siapa lahir duluan.</p>
+    <p class="batas">silsilah bisa punya banyak cabang. Anak sebuah node parse tree persis ruas kanan produksi yang dipakai.</p>
+  </aside>
+
+  <p><mark>Parse tree</mark>: root = start symbol, node dalam = variabel, anak-anaknya = ruas kanan produksi yang dipakai, leaf = terminal (atau ε). Membaca leaf dari kiri ke kanan menghasilkan string-nya. Karena urutan penggantian tidak dicatat, <b>LMD dan RMD menghasilkan tree yang sama</b>.</p>
+  <div class="au-fig" data-grammar="E → E+T | T;T → T*F | F;F → (E) | id" data-input="id+id*id"></div>
+  <p><code>id * id</code> ada di bawah satu T, jadi perkalian dikelompokkan lebih dulu. Grammar ini menegakkan prioritas <code>*</code> di atas <code>+</code>.</p>
+
+  <aside class="coba">
+    <p>Di <a href="viz/derivation.html">visualisasi</a>, jalankan LMD lalu RMD untuk string yang sama. Tree yang terbentuk sama.</p>
+  </aside>
+
+  <p class="intinya">Parse tree = produksi yang dipakai. Satu tree bisa ditulis sebagai satu LMD dan satu RMD.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Grammar <code>E → E + T | T</code>, <code>T → T * F | F</code>, <code>F → ( E ) | id</code>, string <code>id + id * id</code>. Buat LMD, RMD, dan parse tree. Apakah grammar ini menegakkan prioritas perkalian?</summary>
+<pre class="kode"><code>LMD: E ⇒ E+T ⇒ T+T ⇒ F+T ⇒ id+T ⇒ id+T*F ⇒ id+F*F ⇒ id+id*F ⇒ id+id*id
+RMD: E ⇒ E+T ⇒ E+T*F ⇒ E+T*id ⇒ E+F*id ⇒ E+id*id ⇒ T+id*id ⇒ F+id*id ⇒ id+id*id</code></pre>
+    <p>Parse tree-nya adalah gambar di atas. <b>Ya</b>, prioritas ditegakkan: <code>*</code> hanya bisa dihasilkan dari T, dan T berada di bawah E. Jadi <code>id * id</code> selalu menjadi satu subtree di bawah <code>+</code>. Langkah pertama keduanya sama (<code>E → E + T</code>), karena operator dengan prioritas terendah harus di puncak tree.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Parse tree menjelaskan bagaimana program di-parse, AST menjelaskan apa artinya</h2></summary>
+  <p class="rantai">
+    <span class="dari">parse tree (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">semantic analysis dan code generation</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Ringkasan buku dibanding buku lengkap.</p>
+    <p class="batas">ringkasan bisa kehilangan isi penting. AST hanya membuang detail grammar, arti program tetap utuh.</p>
+  </aside>
+
+  <p><mark>AST</mark> (abstract syntax tree) membuang variabel perantara dan kurung, lalu hanya menyimpan operator dan operand.</p>
+  <table>
+    <tr><th></th><th>Parse tree</th><th>AST</th></tr>
+    <tr><td>Isi</td><td>Semua simbol grammar, termasuk E, T, F dan kurung</td><td>Hanya operator dan operand</td></tr>
+    <tr><td>Ukuran</td><td>Lebih besar</td><td>Lebih kecil</td></tr>
+    <tr><td>Dipakai saat</td><td>Parsing</td><td>Semantic analysis dan code generation</td></tr>
+  </table>
+<pre class="kode"><code>AST untuk a + b * c:      +
+                         / \
+                        a   *
+                           / \
+                          b   c</code></pre>
+
+  <p class="intinya">AST = parse tree tanpa detail grammar.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Jelaskan bentuk AST untuk <code>(a+b)*c</code>.</summary>
+    <p><code>*</code> di root, anak kiri <code>+</code> (dengan anak a dan b), anak kanan c. Kurung hilang, karena strukturnya sudah menunjukkan bahwa <code>a+b</code> dikelompokkan dulu.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Grammar ambiguous kalau ada satu string dengan dua parse tree</h2></summary>
+  <p class="rantai">
+    <span class="dari">parse tree (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">menghilangkan ambiguity (<a href="#langkah-6">6️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>"Saya melihat orang dengan teropong": siapa yang memegang teropong?</p>
+    <p class="batas">manusia bisa bertanya balik. Compiler harus memilih satu arti tanpa bertanya.</p>
+  </aside>
+
+  <p>Grammar <mark>ambiguous</mark> kalau ada string di L(G) dengan lebih dari satu parse tree (atau lebih dari satu LMD). Satu contoh string sudah cukup sebagai bukti. Dengan <code>E → E + E | E * E | id</code>:</p>
+  <div class="au-figs">
+    <figure><div class="au-fig" data-grammar="E → E+E | E*E | id" data-input="id+id*id" data-which="0"></div><figcaption>+ di puncak: id + (id * id)</figcaption></figure>
+    <figure><div class="au-fig" data-grammar="E → E+E | E*E | id" data-input="id+id*id" data-which="1"></div><figcaption>* di puncak: (id + id) * id</figcaption></figure>
+  </div>
+  <p>Ambiguity berbahaya karena kedua tree memberi hasil hitung berbeda, padahal compiler harus memberi satu arti.</p>
+
+  <aside class="coba">
+    <p>Di <a href="viz/derivation.html">visualisasi</a>, pilih mode cek ambiguity. Kalau ada dua tree, keduanya bisa dibandingkan.</p>
+  </aside>
+
+  <p class="intinya">Dua parse tree (atau dua LMD) untuk satu string = ambiguous.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tunjukkan bahwa <code>S → aS | Sa | a</code> ambiguous.</summary>
+    <p>String <code>aa</code> punya dua LMD: <code>S ⇒ aS ⇒ aa</code> dan <code>S ⇒ Sa ⇒ aa</code>. Dua LMD berbeda = dua parse tree, jadi ambiguous.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Ambiguity pada ekspresi dihilangkan dengan satu variabel untuk setiap tingkat prioritas</h2></summary>
+  <p class="rantai">
+    <span class="dari">ambiguous grammar (<a href="#langkah-5">5️⃣</a>), prioritas operator di C</span>
+    <span class="ke">left recursion (materi 09)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Struktur organisasi: staf (*) di bawah manajer (+). Pekerjaan staf selesai dulu sebelum dilaporkan ke manajer.</p>
+    <p class="batas">organisasi bisa dirombak. Grammar ini memaksa pengelompokan yang sama untuk setiap ekspresi.</p>
+  </aside>
+
+  <p>Tidak ada algoritma umum yang bisa menghilangkan ambiguity. Untuk ekspresi, triknya:</p>
+<pre class="kode"><code>E → E + T | T       (prioritas terendah)
+T → T * F | F
+F → ( E ) | id      (paling kuat)</code></pre>
+  <ul>
+    <li><strong>Prioritas:</strong> * hanya muncul di level T, yang berada di bawah E. Jadi perkalian dikelompokkan dulu.</li>
+    <li><strong>Associativity:</strong> rekursi di kiri (<code>E → E + T</code>) membuat <code>a + b + c</code> dibaca <code>(a + b) + c</code>, yaitu <mark>left associative</mark>.</li>
+    <li><strong>Kurung:</strong> <code>( E )</code> kembali ke level teratas, jadi bisa mengubah prioritas.</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Dari slide: language yang semua grammar-nya ambiguous</summary>
+    <p><strong>Inherently ambiguous:</strong> context-free language yang <b>semua</b> grammar-nya ambiguous. Contoh dari slide: L = {aⁿbⁿcᵐdᵐ | n, m ≥ 1} ∪ {aⁿbᵐcᵐdⁿ | n, m ≥ 1}, dengan grammar <code>S → AB | C</code>, <code>A → aAb | ab</code>, <code>B → cBd | cd</code>, <code>C → aCd | aDd</code>, <code>D → bDc | bc</code>. String <code>aabbccdd</code> masuk ke kedua bagian, jadi selalu punya dua tree. Menentukan apakah sebuah grammar ambiguous pun tidak bisa diputuskan oleh algoritma.</p>
+    </details>
+  </aside>
+
+  <p class="intinya">Satu level per prioritas, rekursi kiri untuk left associative, kurung kembali ke level teratas.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Buat RMD untuk <code>id * ( id + id )</code> dengan grammar di atas.</summary>
+<pre class="kode"><code>E ⇒ T ⇒ T*F ⇒ T*(E) ⇒ T*(E+T) ⇒ T*(E+F) ⇒ T*(E+id) ⇒ T*(T+id)
+  ⇒ T*(F+id) ⇒ T*(id+id) ⇒ F*(id+id) ⇒ id*(id+id)</code></pre>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Top-down membangun tree dari root, bottom-up dari leaf</h2></summary>
+  <p class="rantai">
+    <span class="dari">LMD dan RMD (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">left factoring dan left recursion (materi 08, 09)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menyusun puzzle dari gambar besarnya dulu (top-down), atau dari potongan kecil yang cocok (bottom-up).</p>
+    <p class="batas">puzzle boleh disusun campuran. Satu parser memakai satu arah saja.</p>
+  </aside>
+
+  <p><mark>Top-down parsing</mark> mulai dari start symbol dan menebak produksi. Keduanya membaca input dari kiri ke kanan, satu token per langkah. Parser yang efisien hanya bisa dibuat untuk sebagian CFG: LL untuk top-down, LR untuk bottom-up.</p>
+  <table>
+    <tr><th></th><th>Top-down</th><th>Bottom-up</th></tr>
+    <tr><td>Mulai dari</td><td>start symbol</td><td>token input</td></tr>
+    <tr><td>Derivation</td><td>leftmost</td><td>kebalikan rightmost</td></tr>
+    <tr><td>Aksi</td><td>memprediksi produksi, expand</td><td>shift dan reduce</td></tr>
+    <tr><td>Parser</td><td>recursive descent, LL</td><td>LR, SLR, LALR, canonical LR</td></tr>
+    <tr><td>Grammar</td><td>tidak boleh left recursive, sering perlu left factoring</td><td>kelas grammar lebih luas, termasuk left recursive</td></tr>
+    <tr><td>Implementasi</td><td>lebih sederhana</td><td>lebih rumit</td></tr>
+  </table>
+
+  <p class="intinya">Top-down = LMD, dari root. Bottom-up = kebalikan RMD, dari leaf.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Parser LL memakai derivation yang mana? Parser LR?</summary>
+    <p>LL (top-down) memakai <b>LMD</b>. LR (bottom-up) membangun <b>kebalikan RMD</b>: langkah terakhir RMD dikerjakan pertama.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Error recovery: empat cara parser melanjutkan setelah syntax error</h2></summary>
+  <p class="rantai">
+    <span class="dari">tugas parser (<a href="#langkah-1">1️⃣</a>)</span>
+    <span class="ke">pesan error yang kamu lihat saat compile program C</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Salah jalan: putar balik ke persimpangan terdekat, atau perbaiki belokan terakhir saja.</p>
+    <p class="batas">di jalan kamu tahu tujuanmu. Parser hanya bisa menebak maksud programmer.</p>
+  </aside>
+
+  <p>Saat input melanggar grammar, parser tidak langsung berhenti, supaya error lain tetap ditemukan. Strategi paling sederhana adalah <mark>panic mode</mark>:</p>
+  <table>
+    <tr><th>Strategi</th><th>Cara kerja</th><th>Kelebihan</th><th>Kekurangan</th></tr>
+    <tr><td>Panic mode</td><td>Buang token sampai bertemu synchronizing token (<code>;</code>, <code>}</code>)</td><td>Sederhana, tidak pernah infinite loop</td><td>Bisa melewati banyak input</td></tr>
+    <tr><td>Phrase level</td><td>Perbaikan lokal: sisipkan, hapus, atau ganti token</td><td>Kesalahan kecil diperbaiki tanpa banyak input hilang</td><td>Sulit memilih perbaikan yang tepat</td></tr>
+    <tr><td>Error productions</td><td>Tambahkan produksi untuk kesalahan yang umum</td><td>Pesan error informatif</td><td>Kesalahan harus diperkirakan dulu</td></tr>
+    <tr><td>Global correction</td><td>Cari jumlah perubahan minimum supaya input valid</td><td>Optimal secara teori</td><td>Terlalu mahal untuk compiler nyata</td></tr>
+  </table>
+
+  <p class="intinya">Panic mode membuang token sampai titik aman. Strategi lain mencoba memperbaiki input.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa panic mode tidak pernah infinite loop?</summary>
+    <p>Setiap kali dipakai, panic mode membuang minimal satu token. Input terus berkurang, jadi parser pasti mencapai synchronizing token atau akhir input.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: salah memilih variabel dan salah membaca definisi ambiguous</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">mengecek derivation-mu sendiri</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Dua rute ke rumah yang sama tidak berarti ada dua rumah.</p>
+    <p class="batas">di peta, dua rute memang wajar. Di grammar, LMD dan RMD untuk satu tree juga wajar. Yang membuat ambiguous adalah dua tree.</p>
+  </aside>
+
+  <p>Cek setiap baris derivation: variabel mana yang diganti, dan apakah sesuai aturan LMD atau RMD.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Kenapa salah</th><th>Perbaikan</th></tr>
+    <tr><td>LMD yang mengganti variabel di tengah</td><td>LMD harus selalu variabel paling kiri</td><td>Cek setiap baris</td></tr>
+    <tr><td>RMD ditulis dari string ke S</td><td>RMD tetap derivation: dari S ke string</td><td>Mulai dari S, ganti variabel paling kanan</td></tr>
+    <tr><td>"LMD dan RMD berbeda, jadi ambiguous"</td><td>LMD dan RMD dari tree yang sama selalu berbeda urutan</td><td>Ambiguous = 2 parse tree (atau 2 LMD) untuk satu string</td></tr>
+    <tr><td>"Satu string punya 1 tree, jadi unambiguous"</td><td>String lain bisa saja punya 2 tree</td><td>Unambiguous harus berlaku untuk semua string</td></tr>
+  </table>
+
+  <p class="intinya">Bandingkan LMD dengan LMD (atau tree dengan tree), bukan LMD dengan RMD.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Temanmu bilang <code>E → E + T | T</code>, <code>T → T * F | F</code>, <code>F → ( E ) | id</code> ambiguous karena LMD dan RMD untuk <code>id + id * id</code> berbeda. Benarkah?</summary>
+    <p><b>Tidak.</b> LMD dan RMD itu menghasilkan parse tree yang sama, jadi bukan bukti ambiguity. Untuk membuktikan ambiguous, dibutuhkan dua LMD berbeda (dua tree) untuk satu string, dan grammar ini tidak punya.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 4.1–4.3.</li>
   <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Addison-Wesley. Bab 5.2 dan 5.4.</li>
   <li>Nasari, M. (2025). <i>Context-free grammar</i>, <i>Syntax analysis: parsing fundamentals</i>, dan <i>Parsing strategies</i> [slide kuliah COMP6062 Compilation Techniques, sesi 7–9].</li>
 </ol>
 
-</article>
+</main>
 <script src="../../_shared/automata.js?v=9b7b4edb"></script>
 <script src="../../_shared/grammar.js?v=8fdcf09f"></script>
 <script>renderParseTrees();</script>

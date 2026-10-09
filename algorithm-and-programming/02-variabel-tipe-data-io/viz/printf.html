@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Printf Playground</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
   <style>
     .viz { max-width: 860px; }
     .pf-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
@@ -14,12 +15,12 @@
     .pf-grid .field { width: 100%; font-family: var(--mono); }
     .presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 16px; }
     .presets .label { margin-right: 4px; }
-    .presets .btn { font-family: var(--mono); padding: 0.25rem 0.65rem; font-size: 0.88rem; box-shadow: 0 3px 0 var(--edge); }
+    .presets .btn { font-family: var(--mono); padding: 0.25rem 0.65rem; font-size: 0.88rem; }
     /* Satu kartu: hasil di atas, arti tiap bagian di bawah garis tipis. */
-    .pf-out { border-radius: 22px; }
     .pf-out .parts { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
-    .ruler, .result { font-family: var(--mono); font-size: 1.15rem; white-space: pre; margin: 0; line-height: 1.6; }
-    .ruler { color: var(--ink-3); font-size: 0.85rem; }
+    /* Penggaris dan hasil memakai ukuran huruf yang sama, supaya nomor kolom sejajar dengan karakternya. */
+    .ruler, .result { font-family: var(--mono); font-size: 1.15rem; white-space: pre; margin: 0; padding: 0; line-height: 1.6; background: none; border-radius: 0; }
+    .ruler { color: var(--ink-3); }
     .result span { background: color-mix(in srgb, var(--hot) 25%, var(--surface)); border-radius: 3px; }
     .result .pad { background: color-mix(in srgb, var(--focus) 18%, var(--surface)); }
     .parts { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -31,7 +32,9 @@
 <body class="viz">
 
 <h1>Printf playground</h1>
-<p>Tidak perlu menghafal tabel format. Ketik format, lihat hasilnya, lalu baca penjelasan tiap bagian. Pola umumnya: <code>%[flags][width][.precision]type</code>.</p>
+<p>Visualisasi ini menunjukkan hasil satu format specifier printf, kolom demi kolom, beserta arti tiap bagiannya.</p>
+<p class="coba"><strong>Coba:</strong> klik salah satu tombol di baris <b>Contoh</b>, atau ketik format dan nilai sendiri.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> kotak biru adalah spasi tambahan dari width. Width hanya menambah kolom, tidak pernah memotong output. Pola umumnya <code>%[flags][width][.precision]type</code> (notes 8️⃣).</p>
 
 <div class="controls pf-grid">
   <label>Format (satu specifier) <input class="field" id="fmt" value="%8.2f" spellcheck="false"></label>
@@ -46,7 +49,7 @@
   <ul class="parts" id="parts" aria-label="Arti tiap bagian"></ul>
 </div>
 
-<script src="../../../_shared/cviz.js?v=bf27ea59"></script>
+<script src="../../../_shared/cviz.js?v=a6fad534"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -56,7 +59,7 @@ const PRESETS = [
   ['%c', '65'], ['%s', 'BINUS'], ['%10s', 'BINUS'], ['%-10s', 'BINUS'], ['%.3s', 'BINUS'],
   ['%x', '255'], ['%o', '8'], ['%%', ''],
 ];
-$('presets').innerHTML = '<span class="label">Coba:</span>' + PRESETS.map(([f, v]) => `<button class="btn btn-sm" data-f="${esc(f)}" data-v="${esc(v)}">${esc(f)}</button>`).join('');
+$('presets').innerHTML = '<span class="label">Contoh:</span>' + PRESETS.map(([f, v]) => `<button class="btn btn-sm" data-f="${esc(f)}" data-v="${esc(v)}">${esc(f)}</button>`).join('');
 document.querySelectorAll('[data-f]').forEach((b) => (b.onclick = () => { $('fmt').value = b.dataset.f; $('val').value = b.dataset.v; update(); }));
 
 const TYPES = {

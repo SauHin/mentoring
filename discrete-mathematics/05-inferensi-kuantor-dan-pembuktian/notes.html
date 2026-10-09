@@ -5,111 +5,340 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inference dengan Quantifier dan Teknik Pembuktian · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Discrete mathematics · 05</span>
-<h1>Inference dengan quantifier dan teknik pembuktian</h1>
-<p class="lead">Materi 02 membahas argumen untuk proposisi. Di sini argumennya memakai ∀ dan ∃. Bukti matematika adalah <b>argumen valid</b> yang disusun dari aturan-aturan ini.</p>
-<p><a href="slides.html">Slide</a> · <a href="../04-predikat-dan-kuantor/viz/kuantor.html">Visualisasi: quantifier playground</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li><b>Instantiation</b> = turun dari quantifier ke satu elemen. <b>Generalization</b> = naik dari elemen ke quantifier.</li>
-    <li>"Semua A adalah B, c adalah A, jadi c adalah B" = <b>universal modus ponens</b>.</li>
-    <li>Empat teknik bukti: <b>direct</b>, <b>contrapositive</b>, <b>contradiction</b>, <b>induction</b>.</li>
-    <li>Contoh hanya membuktikan ∃. Untuk ∀, ambil elemen <b>sembarang</b> (arbitrary), lalu buktikan secara umum.</li>
+<header>
+  <h1>Inference dengan quantifier dan teknik pembuktian</h1>
+  <p class="tujuan">Materi 02 membahas argumen untuk proposisi. Di sini argumennya memakai ∀ dan ∃, dan bukti matematika adalah <b>argumen valid</b> yang disusun dari aturan-aturan ini. Target: kamu bisa menulis langkah inference dengan quantifier, lalu memilih dan menulis direct proof, contrapositive, contradiction, atau induction.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Prasyarat: <a href="../02-argumen-dan-inferensi/notes.html">argumen (materi 02)</a> dan <a href="../04-predikat-dan-kuantor/notes.html">quantifier (materi 04)</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Kenapa truth table tidak cukup</a></li>
+      <li><a href="#langkah-2">Empat aturan quantifier</a></li>
+      <li><a href="#langkah-3">Universal modus ponens dan tollens</a></li>
+      <li><a href="#langkah-4">Pola semua bukti: ambil x sembarang</a></li>
+      <li><a href="#langkah-5">Direct proof</a></li>
+      <li><a href="#langkah-6">Proof by contrapositive</a></li>
+      <li><a href="#langkah-7">Proof by contradiction</a></li>
+      <li><a href="#langkah-8">Mathematical induction</a></li>
+      <li><a href="#langkah-9">Menulis inductive step</a></li>
+      <li><a href="#langkah-10">Memilih teknik</a></li>
+      <li><a href="#langkah-11">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Kenapa butuh aturan baru</h2>
-<p>"Setiap mahasiswa SCE wajib mengambil discrete math. Jackson mahasiswa SCE. Jadi Jackson wajib mengambil discrete math." Argumen ini jelas benar, tapi <b>tidak bisa</b> dibuktikan dengan truth table. Ketiga kalimatnya hanya menjadi p, q, r yang tidak berhubungan.</p>
-<p>Solusinya: turunkan ∀ ke Jackson dulu, baru pakai modus ponens.</p>
-<pre><code>1. ∀x, SCE(x) → DM(x)       premise
-2. SCE(Jackson)             premise
+<main>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Truth table tidak bisa melihat hubungan antara "semua" dan satu elemen</h2></summary>
+  <p class="rantai">
+    <span class="dari">critical row dan modus ponens (materi 02), ∀ (materi 04)</span>
+    <span class="ke">empat aturan quantifier (<a href="#langkah-2">2️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Peraturan "semua siswa wajib berseragam" baru bisa dipakai untuk menegur Andi setelah kamu menyebut "Andi adalah siswa".</p>
+    <p class="batas">guru langsung paham hubungannya. Truth table tidak, karena ketiga kalimat hanya menjadi p, q, r yang terpisah.</p>
+  </aside>
+
+  <p>"Setiap mahasiswa SCE wajib mengambil discrete math. Jackson mahasiswa SCE. Jadi Jackson wajib mengambil discrete math." Argumen ini jelas benar, tapi truth table tidak bisa membuktikannya. Solusinya: <mark>universal instantiation</mark>, yaitu menurunkan ∀ ke satu elemen (Jackson), lalu memakai modus ponens.</p>
+<pre class="kode"><code>1. ∀x, SCE(x) → DM(x)           premise
+2. SCE(Jackson)                 premise
 3. SCE(Jackson) → DM(Jackson)   universal instantiation dari 1
-4. DM(Jackson)              modus ponens dari 2 dan 3</code></pre>
+4. DM(Jackson)                  modus ponens dari 2 dan 3</code></pre>
 
-<h2>2. Empat aturan quantifier</h2>
-<table>
-  <tr><th>Aturan</th><th>Bentuk</th><th>Artinya</th></tr>
-  <tr><td><b>Universal instantiation</b></td><td><code>∀x P(x)  ∴ P(c)</code></td><td>Kalau berlaku untuk semua, berlaku untuk c mana pun</td></tr>
-  <tr><td><b>Universal generalization</b></td><td><code>P(c) untuk c sembarang  ∴ ∀x P(x)</code></td><td>Kalau terbukti untuk c <b>tanpa memakai sifat khusus c</b>, berlaku untuk semua</td></tr>
-  <tr><td><b>Existential instantiation</b></td><td><code>∃x P(x)  ∴ P(c) untuk suatu c</code></td><td>Beri nama pada "yang ada itu". Nama c harus baru</td></tr>
-  <tr><td><b>Existential generalization</b></td><td><code>P(c)  ∴ ∃x P(x)</code></td><td>Satu contoh cukup untuk ∃ (witness)</td></tr>
-</table>
-<div class="callout warn"><strong>Hati-hati dengan generalization</strong>"Sembarang" berarti c tidak dipilih secara khusus. Membuktikan P(2) lalu menyimpulkan ∀x P(x) itu <b>salah</b>. Contoh benar: "ambil x real sembarang. x² = x·x ≥ 0, jadi ∀x ∈ ℝ, x² ≥ 0".</div>
+  <p class="intinya">Turunkan ∀ ke elemen yang dibicarakan dulu, baru pakai rules of inference dari materi 02.</p>
 
-<h3>Contoh dari kuliah</h3>
-<p><b>Tom dan Jerry.</b> "Tidak ada kucing yang bisa menangkap Jerry. Tom kucing. Jadi Tom tidak bisa menangkap Jerry."</p>
-<pre><code>1. ∀x, Cat(x) → ~Catch(x)   premise
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> "Semua dosen punya NIP. Pak Budi dosen. Jadi Pak Budi punya NIP." Tulis langkah formalnya.</summary>
+<pre class="kode"><code>1. ∀x, Dosen(x) → NIP(x)        premise
+2. Dosen(Budi)                  premise
+3. Dosen(Budi) → NIP(Budi)      universal instantiation dari 1
+4. NIP(Budi)                    modus ponens dari 2 dan 3</code></pre>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Instantiation turun ke satu elemen, generalization naik kembali ke quantifier</h2></summary>
+  <p class="rantai">
+    <span class="dari">universal instantiation (<a href="#langkah-1">1️⃣</a>), witness (materi 04)</span>
+    <span class="ke">pola bukti (<a href="#langkah-4">4️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Lift: instantiation turun dari lantai "semua" ke lantai "satu orang", generalization naik lagi.</p>
+    <p class="batas">lift boleh naik kapan saja. Naik ke ∀ hanya boleh kalau elemennya sembarang, bukan dipilih khusus.</p>
+  </aside>
+
+  <p><mark>Generalization</mark> adalah langkah naik dari satu elemen ke quantifier. Bersama instantiation, ada empat aturan:</p>
+  <table>
+    <tr><th>Aturan</th><th>Bentuk</th><th>Artinya</th></tr>
+    <tr><td><b>Universal instantiation</b></td><td><code>∀x P(x)  ∴ P(c)</code></td><td>Berlaku untuk semua, jadi berlaku untuk c mana pun</td></tr>
+    <tr><td><b>Universal generalization</b></td><td><code>P(c) untuk c sembarang  ∴ ∀x P(x)</code></td><td>Terbukti untuk c <b>tanpa memakai sifat khusus c</b>, jadi berlaku untuk semua</td></tr>
+    <tr><td><b>Existential instantiation</b></td><td><code>∃x P(x)  ∴ P(c) untuk suatu c</code></td><td>Beri nama pada "yang ada itu". Nama c harus baru</td></tr>
+    <tr><td><b>Existential generalization</b></td><td><code>P(c)  ∴ ∃x P(x)</code></td><td>Satu witness cukup untuk ∃</td></tr>
+  </table>
+
+  <aside class="jebakan">
+    <p>Membuktikan P(2) lalu menyimpulkan ∀x P(x) itu <mark class="jebakan">salah</mark>, karena 2 dipilih khusus. Contoh benar: "ambil x real sembarang. x² = x·x ≥ 0, jadi ∀x ∈ ℝ, x² ≥ 0".</p>
+  </aside>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dari kuliah: Tom dan Jerry, Sam dapat A, jual saham</summary>
+      <p><b>Tom dan Jerry.</b> "Tidak ada kucing yang bisa menangkap Jerry. Tom kucing. Jadi Tom tidak bisa menangkap Jerry."</p>
+<pre class="kode"><code>1. ∀x, Cat(x) → ~Catch(x)   premise
 2. Cat(Tom)                 premise
 3. Cat(Tom) → ~Catch(Tom)   universal instantiation dari 1
 4. ~Catch(Tom)              modus ponens dari 2 dan 3</code></pre>
-<p><b>Sam dapat A.</b> "Siapa pun yang nilainya &gt; 80 dapat A. Ada mahasiswa yang nilainya &gt; 80, dan Sam salah satunya."</p>
-<pre><code>1. ∀x, M(x) → A(x)          premise
+      <p><b>Sam dapat A.</b> "Siapa pun yang nilainya &gt; 80 dapat A. Ada mahasiswa yang nilainya &gt; 80, dan Sam salah satunya."</p>
+<pre class="kode"><code>1. ∀x, M(x) → A(x)          premise
 2. ∃x, M(x)                 premise
 3. M(Sam)                   existential instantiation (c = Sam)
 4. M(Sam) → A(Sam)          universal instantiation dari 1
 5. A(Sam)                   modus ponens dari 3 dan 4</code></pre>
-<p><b>Jual saham.</b> "Kalau semua orang menjual saham, pasti ada yang menjual saham." Dari <code>∀x Sell(x)</code> turunkan ke <code>Sell(c)</code> (universal instantiation), lalu naikkan ke <code>∃x Sell(x)</code> (existential generalization). Ini berlaku asal domainnya tidak kosong.</p>
+      <p><b>Jual saham.</b> "Kalau semua orang menjual saham, pasti ada yang menjual saham." Dari <code>∀x Sell(x)</code> turun ke <code>Sell(c)</code> (universal instantiation), lalu naik ke <code>∃x Sell(x)</code> (existential generalization). Ini berlaku asal domainnya tidak kosong.</p>
+    </details>
+  </aside>
 
-<h3>Universal modus ponens dan tollens</h3>
-<p>Langkah instantiation + modus ponens begitu sering muncul, sehingga digabung menjadi satu aturan:</p>
-<table>
-  <tr><th>Nama</th><th>Bentuk</th><th>Status</th></tr>
-  <tr><td>Universal modus ponens</td><td><code>∀x, P(x) → Q(x);  P(a)  ∴ Q(a)</code></td><td>Valid</td></tr>
-  <tr><td>Universal modus tollens</td><td><code>∀x, P(x) → Q(x);  ~Q(a)  ∴ ~P(a)</code></td><td>Valid</td></tr>
-  <tr><td>Converse error</td><td><code>∀x, P(x) → Q(x);  Q(a)  ∴ P(a)</code></td><td><b>Tidak valid</b></td></tr>
-  <tr><td>Inverse error</td><td><code>∀x, P(x) → Q(x);  ~P(a)  ∴ ~Q(a)</code></td><td><b>Tidak valid</b></td></tr>
-</table>
-<p>Contoh converse error: "Semua kucing berbulu. Rex berbulu. Jadi Rex kucing." Padahal Rex bisa saja anjing.</p>
+  <p class="intinya">Turun: instantiation. Naik ke ∃: cukup satu witness. Naik ke ∀: hanya dari elemen sembarang.</p>
 
-<h2>3. Teknik pembuktian</h2>
-<p>Hampir semua teorema berbentuk <code>∀x, P(x) → Q(x)</code>. Polanya selalu sama: <b>ambil x sembarang yang memenuhi P(x)</b>, lalu tunjukkan Q(x). Bedanya ada di cara menunjukkan Q(x).</p>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Premise: (1) untuk setiap bilangan x, kalau x &gt; 1 maka x − 1 &gt; 0. (2) Setiap bilangan di D lebih dari 1. Buktikan: untuk setiap x di D, x − 1 &gt; 0.</summary>
+<pre class="kode"><code>1. ∀x, x &gt; 1 → x − 1 &gt; 0     premise
+2. ∀x ∈ D, x &gt; 1             premise
+3. c &gt; 1, c ∈ D sembarang     universal instantiation dari 2
+4. c &gt; 1 → c − 1 &gt; 0          universal instantiation dari 1
+5. c − 1 &gt; 0                  modus ponens dari 3 dan 4
+6. ∀x ∈ D, x − 1 &gt; 0          universal generalization (c sembarang)</code></pre>
+  </details>
+</details>
+</section>
 
-<h3>Direct proof</h3>
-<p>Asumsikan P(x), lalu turunkan langkah demi langkah sampai Q(x).</p>
-<p><b>Contoh (trik Euler):</b> buktikan <code>0 + 1 + … + n = n(n + 1)/2</code>. Tulis jumlahnya dua kali, maju dan mundur:</p>
-<pre><code>  S =   0   +   1   + … + (n−1) +   n
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Universal modus ponens dan tollens valid, converse error dan inverse error tetap tidak</h2></summary>
+  <p class="rantai">
+    <span class="dari">modus ponens, tollens, dan dua jebakan (materi 02)</span>
+    <span class="ke">bukti di section berikutnya</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menerapkan pasal undang-undang ke satu terdakwa: aturan umum + satu kasus = kesimpulan untuk kasus itu.</p>
+    <p class="batas">hakim bisa menimbang keadaan khusus. Universal modus ponens tidak punya pengecualian.</p>
+  </aside>
+
+  <p>"Universal instantiation lalu modus ponens" begitu sering muncul, sehingga digabung menjadi <mark>universal modus ponens</mark>.</p>
+  <table>
+    <tr><th>Nama</th><th>Bentuk</th><th>Status</th></tr>
+    <tr><td>Universal modus ponens</td><td><code>∀x, P(x) → Q(x);  P(a)  ∴ Q(a)</code></td><td>Valid</td></tr>
+    <tr><td>Universal modus tollens</td><td><code>∀x, P(x) → Q(x);  ~Q(a)  ∴ ~P(a)</code></td><td>Valid</td></tr>
+    <tr><td>Converse error</td><td><code>∀x, P(x) → Q(x);  Q(a)  ∴ P(a)</code></td><td><b>Tidak valid</b></td></tr>
+    <tr><td>Inverse error</td><td><code>∀x, P(x) → Q(x);  ~P(a)  ∴ ~Q(a)</code></td><td><b>Tidak valid</b></td></tr>
+  </table>
+  <p>Contoh converse error: "Semua kucing berbulu. Rex berbulu. Jadi Rex kucing." Padahal Rex bisa saja anjing.</p>
+
+  <p class="intinya">Sama dengan materi 02, hanya ditambah ∀ di depan: dari P(a) atau ~Q(a) saja yang valid.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Mana yang valid? (a) Semua programmer suka kopi. Ani tidak suka kopi. Jadi Ani bukan programmer. (b) Semua programmer suka kopi. Budi suka kopi. Jadi Budi programmer.</summary>
+    <p>(a) <b>Valid</b>: universal modus tollens. (b) <b>Tidak valid</b>: converse error.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Pola semua bukti ∀: ambil x sembarang yang memenuhi P(x), lalu tunjukkan Q(x)</h2></summary>
+  <p class="rantai">
+    <span class="dari">universal conditional (materi 04), universal generalization (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">direct, contrapositive, contradiction (<a href="#langkah-5">5️⃣</a>, <a href="#langkah-6">6️⃣</a>, <a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Membuktikan resep berhasil untuk "telur apa pun" tanpa memilih telur terbaik.</p>
+    <p class="batas">di dapur, telur jelek tetap mungkin muncul. Di bukti, x sembarang berarti kamu hanya boleh memakai sifat yang dijamin P(x).</p>
+  </aside>
+
+  <p>Hampir semua teorema berbentuk <code>∀x, P(x) → Q(x)</code>. Elemen <mark>sembarang</mark> (arbitrary) adalah elemen yang tidak dipilih khusus, jadi hasilnya berlaku untuk semua x lewat universal generalization. Bedanya hanya di cara menunjukkan Q(x):</p>
+  <table>
+    <tr><th>Teknik</th><th>Asumsikan</th><th>Lalu tunjukkan</th></tr>
+    <tr><td>Direct proof</td><td>P(x)</td><td>Q(x)</td></tr>
+    <tr><td>Proof by contrapositive</td><td>~Q(x)</td><td>~P(x)</td></tr>
+    <tr><td>Proof by contradiction</td><td>P(x) <b>dan</b> ~Q(x)</td><td>Sebuah contradiction <code>C ∧ ~C</code></td></tr>
+  </table>
+
+  <p class="intinya">Kalimat pembuka bukti ∀: "Ambil x sembarang yang memenuhi P(x)."</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> "Ambil n = 4. n² = 16 genap, dan n genap. Jadi ∀n, n² genap → n genap." Apa yang salah dari bukti ini?</summary>
+    <p>4 adalah nilai yang dipilih khusus, bukan sembarang. Bukti ini hanya menunjukkan satu contoh. Yang benar ada di <a href="#langkah-6">6️⃣</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Direct proof: berangkat dari yang diketahui, turunkan langkah demi langkah sampai kesimpulan</h2></summary>
+  <p class="rantai">
+    <span class="dari">pola bukti (<a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">induction (<a href="#langkah-8">8️⃣</a>) membuktikan rumus yang sama dengan cara lain</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Jalan lurus dari rumah ke sekolah, tanpa memutar.</p>
+    <p class="batas">di jalan nyata kamu sudah tahu rutenya. Di bukti, kadang kamu harus mencoba beberapa jalan sampai ketemu.</p>
+  </aside>
+
+  <p><mark>Direct proof</mark> mengasumsikan P(x), lalu memakai definisi dan aljabar sampai Q(x). Contoh slide (trik Euler): buktikan <code>0 + 1 + … + n = n(n + 1)/2</code>.</p>
+<pre class="kode"><code>  S =   0   +   1   + … + (n−1) +   n
   S =   n   + (n−1) + … +   1   +   0
  2S =   n   +   n   + … +   n   +   n     (n + 1 suku)
- 2S = n(n + 1)   →   S = n(n + 1)/2</code></pre>
+ 2S = n(n + 1), jadi S = n(n + 1)/2</code></pre>
+  <p>Jumlahnya ditulis dua kali, maju dan mundur. Setiap kolom berjumlah n, dan ada (n + 1) kolom.</p>
 
-<h3>Proof by contrapositive</h3>
-<p>Kadang P → Q sulit, tapi <code>~Q → ~P</code> mudah. Keduanya ekuivalen (materi 01), jadi cukup buktikan yang mudah.</p>
-<p><b>Contoh:</b> "Untuk n bilangan bulat, kalau n² genap maka n genap." Contrapositive: kalau n ganjil maka n² ganjil.</p>
-<pre><code>n ganjil  →  n = 2k + 1
-n² = 4k² + 4k + 1 = 2(2k² + 2k) + 1   →  ganjil  ∎</code></pre>
+  <p class="intinya">Direct: P(x), lalu definisi dan aljabar, sampai Q(x).</p>
 
-<h3>Proof by contradiction</h3>
-<p>Asumsikan pernyataannya <b>salah</b>, yaitu P benar dan Q salah. Turunkan sampai muncul kontradiksi <code>C ∧ ~C</code> (sesuatu yang benar dan salah sekaligus). Karena kontradiksi tidak mungkin, asumsinya pasti salah.</p>
-<p><b>Contoh yang sama:</b> misalkan n² genap tetapi n ganjil. Maka n = 2k + 1, jadi n² = 2(2k² + 2k) + 1 ganjil. Ini bertentangan dengan "n² genap". ∎</p>
-<p>Kenapa valid? Truth table menunjukkan <code>(~S → (C ∧ ~C)) ≡ S</code>. Coba cek di <a href="../01-logika-proposisi/viz/tabel-kebenaran.html">visualisasi truth table</a>.</p>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Buktikan dengan direct proof: jumlah dua bilangan genap adalah genap.</summary>
+    <p>Ambil a dan b genap sembarang. Menurut definisi genap, a = 2k dan b = 2m untuk suatu bilangan bulat k, m. Maka a + b = 2k + 2m = 2(k + m), dan k + m bilangan bulat, jadi a + b genap. ∎</p>
+  </details>
+</details>
+</section>
 
-<h3>Mathematical induction</h3>
-<p>Untuk statement <code>∀n ≥ 1, P(n)</code>. Dua langkah:</p>
-<ol>
-  <li><b>Basis step:</b> tunjukkan P(1) benar.</li>
-  <li><b>Inductive step:</b> asumsikan P(k) benar (<b>inductive hypothesis</b>), lalu tunjukkan P(k + 1) benar.</li>
-</ol>
-<p>Kenapa valid? Seperti domino, atau naik tangga. P(1) benar, dan P(1) → P(2), jadi P(2) benar (modus ponens). Lalu P(2) → P(3), dan seterusnya. Secara formal: <code>[P(1) ∧ ∀k (P(k) → P(k + 1))] → ∀n P(n)</code>.</p>
-<p><b>Contoh:</b> <code>1 + 2 + … + n = n(n + 1)/2</code>.</p>
-<pre><code>Basis:     n = 1  →  1 = 1·2/2  ✓
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Proof by contrapositive: kalau P → Q sulit, buktikan ~Q → ~P yang ekuivalen</h2></summary>
+  <p class="rantai">
+    <span class="dari">contrapositive selalu ekuivalen (materi 01 dan 04)</span>
+    <span class="ke">memilih teknik (<a class="no" href="#langkah-10">10</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Pintu depan macet, jadi kamu masuk lewat pintu belakang ke ruangan yang sama.</p>
+    <p class="batas">pintu belakang kadang ke ruangan lain. Contrapositive selalu ke "ruangan" yang sama, tapi converse tidak.</p>
+  </aside>
+
+  <p><mark>Proof by contrapositive</mark> membuktikan <code>~Q → ~P</code> dengan direct proof. Contoh: "Untuk n bilangan bulat, kalau n² genap maka n genap." "n² genap" tidak memberi rumus untuk n, tapi "n ganjil" langsung memberi n = 2k + 1.</p>
+<pre class="kode"><code>Contrapositive: kalau n ganjil, maka n² ganjil.
+n ganjil, jadi n = 2k + 1
+n² = 4k² + 4k + 1 = 2(2k² + 2k) + 1, jadi n² ganjil  ∎</code></pre>
+
+  <p class="intinya">Pakai contrapositive kalau ~Q memberi rumus yang bisa diolah, sedangkan P tidak.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> q bilangan real positif. Buktikan atau bantah: kalau q irrational, maka √q irrational.</summary>
+    <p><b>Benar</b>, buktikan dengan contrapositive: kalau √q rational, maka q rational. Misalkan √q = a/b dengan a, b bulat dan b ≠ 0. Maka q = a²/b², yang juga pecahan bulat, jadi rational. ∎</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tunjukkan bahwa <code>∀x, P(x) → Q(x)</code> ekuivalen dengan contrapositive-nya.</summary>
+    <p>Untuk setiap x, <code>P(x) → Q(x) ≡ ~Q(x) → ~P(x)</code> (logical equivalence). Kalau dua predicate bernilai sama untuk setiap x, maka ∀ dari keduanya juga bernilai sama.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Proof by contradiction: anggap pernyataannya salah, lalu tunjukkan itu mustahil</h2></summary>
+  <p class="rantai">
+    <span class="dari">negasi conditional <code>p ∧ ~q</code> (materi 01), contradiction rule (materi 02)</span>
+    <span class="ke">memilih teknik (<a class="no" href="#langkah-10">10</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Alibi: kalau tersangka ada di lokasi, berarti dia di dua kota sekaligus. Itu mustahil, jadi dia tidak di lokasi.</p>
+    <p class="batas">alibi bisa dipalsukan. Contradiction logika <code>C ∧ ~C</code> tidak mungkin terjadi sama sekali.</p>
+  </aside>
+
+  <p><mark>Proof by contradiction</mark> mengasumsikan pernyataannya salah, yaitu <b>P benar dan Q salah</b>, lalu menurunkan <code>C ∧ ~C</code>. Karena itu mustahil, asumsinya pasti salah.</p>
+  <p>Contoh yang sama: misalkan n² genap <b>tetapi</b> n ganjil. Maka n = 2k + 1, jadi n² = 2(2k² + 2k) + 1 ganjil. Ini bertentangan dengan "n² genap". ∎</p>
+
+  <aside class="catatan">
+    <p><strong>Kenapa valid?</strong> Truth table menunjukkan <code>(~S → (C ∧ ~C)) ≡ S</code>. Cek di <a href="../01-logika-proposisi/viz/tabel-kebenaran.html">visualisasi truth table</a>.</p>
+  </aside>
+
+  <p class="intinya">Asumsikan P <b>dan</b> ~Q, turunkan sampai bertentangan, maka P → Q benar.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tunjukkan <code>~(∀x, P(x) → Q(x)) ≡ ∃x, P(x) ∧ ~Q(x)</code>. Kenapa ini penting untuk contradiction?</summary>
+    <p><code>~∀x (P → Q) ≡ ∃x ~(P → Q) ≡ ∃x (P ∧ ~Q)</code>. Langkah pertama memakai negasi quantifier, langkah kedua memakai <code>~(p → q) ≡ p ∧ ~q</code>. Karena itu, asumsi awal proof by contradiction adalah "ada x dengan P(x) dan ~Q(x)".</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Mathematical induction: basis step menjatuhkan domino pertama, inductive step menjamin sisanya</h2></summary>
+  <p class="rantai">
+    <span class="dari">modus ponens (materi 02), loop (algorithm and programming)</span>
+    <span class="ke">menulis inductive step (<a href="#langkah-9">9️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Domino: domino pertama didorong, dan setiap domino menjatuhkan domino berikutnya.</p>
+    <p class="batas">domino nyata bisa meleset. Inductive step menjamin setiap domino menjatuhkan berikutnya, tanpa kecuali.</p>
+  </aside>
+
+  <p><mark>Mathematical induction</mark> membuktikan <code>∀n ≥ 1, P(n)</code> dengan dua langkah:</p>
+  <ol>
+    <li><strong>Basis step:</strong> tunjukkan P(1) benar.</li>
+    <li><strong>Inductive step:</strong> asumsikan P(k) benar (<b>inductive hypothesis</b>), lalu tunjukkan P(k + 1) benar.</li>
+  </ol>
+  <p>Kenapa valid: P(1) benar dan P(1) → P(2), jadi P(2) benar (modus ponens). Lalu P(2) → P(3), dan seterusnya. Secara formal: <code>[P(1) ∧ ∀k (P(k) → P(k + 1))] → ∀n P(n)</code>.</p>
+
+  <p class="intinya">Basis = domino pertama jatuh. Inductive step = P(k) menjatuhkan P(k + 1).</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Buktikan dengan induksi: 2ⁿ ≥ n + 1 untuk setiap n ≥ 1.</summary>
+<pre class="kode"><code>Basis:     n = 1: 2¹ = 2 ≥ 1 + 1  ✓
+Hipotesis: 2ᵏ ≥ k + 1
+Langkah:   2ᵏ⁺¹ = 2 · 2ᵏ ≥ 2(k + 1) = 2k + 2 ≥ k + 2 = (k + 1) + 1  ✓</code></pre>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Menulis inductive step: pecah P(k + 1) menjadi bagian P(k) ditambah suku baru</h2></summary>
+  <p class="rantai">
+    <span class="dari">induction (<a href="#langkah-8">8️⃣</a>), trik Euler (<a href="#langkah-5">5️⃣</a>)</span>
+    <span class="ke">soal induksi di ujian</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menambah satu baris bata di atas tembok yang sudah berdiri.</p>
+    <p class="batas">tembok nyata bisa roboh. Inductive hypothesis dianggap benar dan tidak perlu diperiksa ulang.</p>
+  </aside>
+
+  <p>Tulis dulu P(k + 1) yang <b>ingin dicapai</b>. Lalu pecah sisi kirinya menjadi "bagian P(k)" + "suku baru", dan ganti bagian P(k) dengan hipotesis. Contoh: <code>1 + 2 + … + n = n(n + 1)/2</code>.</p>
+<pre class="kode"><code>Basis:     n = 1: 1 = 1·2/2  ✓
 Hipotesis: 1 + … + k = k(k + 1)/2
-Langkah:   1 + … + k + (k + 1) = k(k + 1)/2 + (k + 1)
+Langkah:   1 + … + k + (k + 1) = k(k + 1)/2 + (k + 1)     (bagian P(k) diganti hipotesis)
                                = (k + 1)(k + 2)/2         ✓ ini bentuk P(k + 1)</code></pre>
-<div class="callout tip"><strong>Trik menulis inductive step</strong>Tulis dulu P(k + 1) yang <b>ingin dicapai</b> di kertas. Lalu pecah sisi kirinya menjadi "bagian P(k)" + "suku baru", dan ganti bagian P(k) dengan hipotesis.</div>
 
-<h3>Kode bisa mengecek, tapi tidak membuktikan</h3>
-<p>Program di bawah mengecek rumus untuk n = 1 sampai 1000. Ini berguna untuk mencari counterexample, tapi tidak membuktikan ∀n. Bisa saja rumusnya gagal di n = 1001.</p>
-<pre><code>#include &lt;stdio.h&gt;
+  <aside class="hitung">
+    <details>
+      <summary>Kode bisa mengecek, tapi tidak membuktikan</summary>
+      <p>Program ini mengecek rumus untuk n = 1 sampai 1000. Berguna untuk mencari counterexample, tapi tidak membuktikan ∀n: bisa saja rumusnya gagal di n = 1001.</p>
+<pre class="kode"><code>#include &lt;stdio.h&gt;
 
 int main() {
     long long jumlah = 0;
@@ -124,72 +353,100 @@ int main() {
     printf("Cocok untuk n = 1..1000 (bukan bukti!)\n");
     return 0;
 }</code></pre>
-<p>Struktur induksi mirip loop ini: <b>basis</b> = nilai awal, <b>inductive step</b> = setiap putaran mempertahankan sifatnya.</p>
+      <p>Struktur induksi mirip loop ini: basis = nilai awal, inductive step = setiap putaran mempertahankan sifatnya.</p>
+    </details>
+  </aside>
 
-<h3>Kapan memakai teknik yang mana</h3>
-<table>
-  <tr><th>Teknik</th><th>Cocok jika</th></tr>
-  <tr><td>Direct</td><td>P memberi informasi yang bisa langsung diolah (rumus, definisi)</td></tr>
-  <tr><td>Contrapositive</td><td>~Q lebih mudah diolah daripada P. Contoh: "n ganjil" memberi n = 2k + 1, sedangkan "n² genap" sulit diolah</td></tr>
-  <tr><td>Contradiction</td><td>Kesimpulannya berbentuk "tidak ada …" atau "… irrational" (tidak bisa ditulis sebagai pecahan)</td></tr>
-  <tr><td>Induction</td><td>Pernyataannya berlaku untuk semua n = 1, 2, 3, … (jumlah deret, habis dibagi, rekursi)</td></tr>
-  <tr><td>Counterexample</td><td>Ingin menunjukkan statement ∀ itu <b>salah</b></td></tr>
-</table>
+  <p class="intinya">Target P(k + 1) ditulis dulu. Bagian P(k) diganti hipotesis, lalu sederhanakan sampai sama dengan target.</p>
 
-<h2>4. Kesalahan yang sering muncul</h2>
-<table>
-  <tr><th>Kesalahan</th><th>Yang benar</th></tr>
-  <tr><td>"Benar untuk n = 1, 2, 3, jadi benar untuk semua n"</td><td>Itu proof by example. Pakai x sembarang atau induksi</td></tr>
-  <tr><td>Induksi tanpa basis step</td><td>Domino yang tidak pernah didorong tidak akan jatuh</td></tr>
-  <tr><td>Di inductive step, langsung mengasumsikan P(k + 1)</td><td>Yang diasumsikan hanya P(k). P(k + 1) harus diturunkan</td></tr>
-  <tr><td>Membuktikan converse: memulai dari Q lalu sampai ke P</td><td>Mulai dari P (direct) atau dari ~Q (contrapositive)</td></tr>
-  <tr><td>Di contradiction, hanya mengasumsikan ~Q</td><td>Asumsikan P <b>dan</b> ~Q, karena ~(P → Q) ≡ P ∧ ~Q</td></tr>
-</table>
-
-<h2>5. Latihan</h2>
-
-<p><b>1.</b> Tunjukkan bahwa <code>∀x, P(x) → Q(x)</code> ekuivalen dengan contrapositive-nya.</p>
-<details><summary>Jawaban</summary><p>Untuk setiap x, <code>P(x) → Q(x) ≡ ~Q(x) → ~P(x)</code> (logical equivalence). Kalau dua predicate bernilai sama untuk setiap x, maka ∀ dari keduanya juga bernilai sama.</p></details>
-
-<p><b>2.</b> Tunjukkan <code>~(∀x, P(x) → Q(x)) ≡ ∃x, P(x) ∧ ~Q(x)</code>.</p>
-<details><summary>Jawaban</summary><p><code>~∀x (P → Q) ≡ ∃x ~(P → Q) ≡ ∃x (P ∧ ~Q)</code>. Langkah pertama memakai negasi quantifier, langkah kedua memakai <code>~(p → q) ≡ p ∧ ~q</code>.</p></details>
-
-<p><b>3.</b> Premise: (1) untuk setiap bilangan x, kalau x &gt; 1 maka x − 1 &gt; 0. (2) Setiap bilangan di D lebih dari 1. Buktikan: untuk setiap x di D, x − 1 &gt; 0.</p>
-<details><summary>Jawaban</summary>
-<pre><code>1. ∀x, x &gt; 1 → x − 1 &gt; 0     premise
-2. ∀x ∈ D, x &gt; 1             premise
-3. c &gt; 1, c ∈ D sembarang     universal instantiation dari 2
-4. c &gt; 1 → c − 1 &gt; 0          universal instantiation dari 1
-5. c − 1 &gt; 0                  modus ponens dari 3 dan 4
-6. ∀x ∈ D, x − 1 &gt; 0          universal generalization (c sembarang)</code></pre></details>
-
-<p><b>4.</b> q bilangan real positif. Buktikan atau bantah: kalau q irrational, maka √q irrational.</p>
-<details><summary>Jawaban</summary><p><b>Benar</b>, buktikan dengan contrapositive: kalau √q rational, maka q rational. Misalkan √q = a/b dengan a, b bulat dan b ≠ 0. Maka q = a²/b², yang juga pecahan bulat, jadi rational. ∎</p></details>
-
-<p><b>5.</b> Buktikan dengan induksi: jumlah n bilangan ganjil positif pertama = n². (1 + 3 + … + (2n − 1) = n²)</p>
-<details><summary>Jawaban</summary>
-<pre><code>Basis:     n = 1  →  1 = 1²  ✓
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Buktikan dengan induksi: 1 + 3 + … + (2n − 1) = n².</summary>
+<pre class="kode"><code>Basis:     n = 1: 1 = 1²  ✓
 Hipotesis: 1 + 3 + … + (2k − 1) = k²
-Langkah:   1 + 3 + … + (2k − 1) + (2k + 1) = k² + 2k + 1 = (k + 1)²  ✓</code></pre></details>
-
-<p><b>6.</b> Buktikan dengan induksi: n³ − n habis dibagi 3 untuk setiap n bulat positif.</p>
-<details><summary>Jawaban</summary>
-<pre><code>Basis:     n = 1  →  1 − 1 = 0, habis dibagi 3  ✓
+Langkah:   1 + 3 + … + (2k − 1) + (2k + 1) = k² + 2k + 1 = (k + 1)²  ✓</code></pre>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Buktikan dengan induksi: n³ − n habis dibagi 3 untuk setiap n bulat positif.</summary>
+<pre class="kode"><code>Basis:     n = 1: 1 − 1 = 0, habis dibagi 3  ✓
 Hipotesis: k³ − k = 3m untuk suatu bilangan bulat m
 Langkah:   (k + 1)³ − (k + 1) = k³ + 3k² + 3k + 1 − k − 1
                              = (k³ − k) + 3(k² + k)
-                             = 3m + 3(k² + k) = 3(m + k² + k)  ✓</code></pre></details>
+                             = 3m + 3(k² + k) = 3(m + k² + k)  ✓</code></pre>
+  </details>
+</details>
+</section>
 
-<p><b>7.</b> Mana yang valid? (a) Semua programmer suka kopi. Ani tidak suka kopi. Jadi Ani bukan programmer. (b) Semua programmer suka kopi. Budi suka kopi. Jadi Budi programmer.</p>
-<details><summary>Jawaban</summary><p>(a) <b>Valid</b>: universal modus tollens. (b) <b>Tidak valid</b>: converse error.</p></details>
+<section class="langkah" id="langkah-10">
+<details>
+  <summary><h2>Pilih teknik dari bentuk statement, dan ganti teknik kalau buntu</h2></summary>
+  <p class="rantai">
+    <span class="dari">empat teknik (<a href="#langkah-5">5️⃣</a> sampai <a href="#langkah-9">9️⃣</a>), counterexample (materi 04)</span>
+    <span class="ke">soal bukti di ujian</span>
+  </p>
 
-<h2>Daftar pustaka</h2>
+  <aside class="analogi">
+    <p>Memilih rute: jalan tol untuk jarak jauh, jalan kecil untuk masuk gang.</p>
+    <p class="batas">rute mana pun biasanya sampai. Di bukti, beberapa teknik tidak akan sampai, jadi ganti kalau buntu.</p>
+  </aside>
+
+  <p>Lihat bentuk P dan Q sebelum mulai menulis.</p>
+  <table>
+    <tr><th>Teknik</th><th>Cocok jika</th></tr>
+    <tr><td>Direct</td><td>P memberi informasi yang bisa langsung diolah (rumus, definisi)</td></tr>
+    <tr><td>Contrapositive</td><td>~Q lebih mudah diolah daripada P. Contoh: "n ganjil" memberi n = 2k + 1, sedangkan "n² genap" sulit diolah</td></tr>
+    <tr><td>Contradiction</td><td>Kesimpulannya berbentuk "tidak ada …" atau "… irrational" (tidak bisa ditulis sebagai pecahan)</td></tr>
+    <tr><td>Induction</td><td>Pernyataannya berlaku untuk semua n = 1, 2, 3, … (jumlah deret, habis dibagi, rekursi)</td></tr>
+    <tr><td>Counterexample</td><td>Ingin menunjukkan statement ∀ itu <b>salah</b></td></tr>
+  </table>
+
+  <p class="intinya">Deret atau n = 1, 2, 3: induction. "Tidak ada": contradiction. ~Q lebih mudah: contrapositive. Menyalahkan ∀: counterexample.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Teknik apa untuk "Tidak ada bilangan bulat terbesar"? Tulis buktinya.</summary>
+    <p><b>Contradiction.</b> Misalkan ada bilangan bulat terbesar N. Maka N + 1 juga bilangan bulat, dan N + 1 &gt; N. Ini bertentangan dengan "N terbesar", jadi asumsinya salah. ∎</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-11">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: membuktikan dengan contoh dan salah mengasumsikan</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">mengecek buktimu sendiri</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mesin yang lolos uji coba tiga kali belum tentu tidak pernah rusak.</p>
+    <p class="batas">pabrik bisa menerima sedikit produk rusak. Bukti ∀ tidak menerima satu pengecualian pun.</p>
+  </aside>
+
+  <p>Sebelum menulis, tulis dulu apa yang diasumsikan dan apa yang harus ditunjukkan.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Kenapa salah dan perbaikannya</th></tr>
+    <tr><td>"Benar untuk n = 1, 2, 3, jadi benar untuk semua n"</td><td>Itu proof by example. Pakai x sembarang atau induksi (<a href="#langkah-4">4️⃣</a>).</td></tr>
+    <tr><td>Induksi tanpa basis step</td><td>Domino yang tidak pernah didorong tidak akan jatuh (<a href="#langkah-8">8️⃣</a>).</td></tr>
+    <tr><td>Di inductive step, langsung mengasumsikan P(k + 1)</td><td>Yang diasumsikan hanya P(k). P(k + 1) harus diturunkan (<a href="#langkah-9">9️⃣</a>).</td></tr>
+    <tr><td>Memulai dari Q lalu sampai ke P</td><td>Itu membuktikan converse. Mulai dari P (direct) atau dari ~Q (contrapositive) (<a href="#langkah-6">6️⃣</a>).</td></tr>
+    <tr><td>Di contradiction, hanya mengasumsikan ~Q</td><td>Asumsikan P <b>dan</b> ~Q, karena <code>~(P → Q) ≡ P ∧ ~Q</code> (<a href="#langkah-7">7️⃣</a>).</td></tr>
+  </table>
+
+  <p class="intinya">Contoh hanya untuk ∃ atau counterexample. Induksi butuh basis. Contradiction mengasumsikan P dan ~Q.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Bukti induksi temanmu dimulai dengan "Asumsikan P(k + 1) benar, maka …". Apa yang salah?</summary>
+    <p>P(k + 1) adalah yang harus dibuktikan, jadi tidak boleh diasumsikan. Yang boleh diasumsikan hanya P(k), lalu P(k + 1) diturunkan darinya.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Epp, S. S. (2020). <i>Discrete Mathematics with Applications</i> (5th ed.). Cengage. Bab 3.4: Arguments with quantified statements. Bab 4: Elementary number theory and methods of proof. Bab 5.2–5.3: Mathematical induction.</li>
   <li>Rosen, K. H. (2019). <i>Discrete Mathematics and Its Applications</i> (8th ed.). McGraw-Hill Education. Bab 1.6–1.8: Rules of inference; Introduction to proofs; Proof methods and strategy. Bab 5.1: Mathematical induction.</li>
   <li>Catatan kuliah <i>Predicate Logic</i> (Chapter 3), exercises 25–32.</li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

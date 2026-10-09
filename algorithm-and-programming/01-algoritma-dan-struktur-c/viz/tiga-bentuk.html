@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Satu Algoritma, Tiga Bentuk</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/cviz.css?v=e24d9524">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/cviz.css?v=b2fc1b00">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Satu algoritma, tiga bentuk</h1>
-<p>Pseudocode, flowchart, dan kode C di bawah adalah <b>algoritma yang sama</b>. Jalankan <b>step by step</b> dan lihat langkah yang sama menyala di ketiganya. Ubah isi keyboard untuk mencoba input lain.</p>
+<p>Pseudocode, flowchart, dan kode C di bawah adalah algoritma yang sama, ditulis dalam tiga bentuk.</p>
+<p class="coba"><strong>Coba:</strong> pilih program di menu <b>Program</b>, lalu klik <b>Langkah berikutnya</b>. Buka <b>Ubah input</b> untuk mencoba angka lain.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> langkah yang sama menyala bersamaan di ketiga panel. Hanya deklarasi variabel yang tidak punya pasangan di pseudocode.</p>
 
-<script src="../../../_shared/cviz.js?v=bf27ea59"></script>
+<script src="../../../_shared/cviz.js?v=a6fad534"></script>
 <script>
 /* ---------- Sequence: rata-rata 3 bilangan ---------- */
 const flowAvg = cvFlow(300, 300, [
@@ -57,6 +60,7 @@ cviz({
   programs: {
     avg: {
       title: 'Sequence: rata-rata 3 bilangan',
+      perhatikan: 'ketiga panel menyala di langkah yang sama dan urutannya lurus tanpa cabang. Itulah sequence (notes 5️⃣). Baris <code>float a, b, c, avg;</code> hanya ada di C (notes 3️⃣).',
       input: '70 80 95',
       panes: {
         Pseudocode: `Start
@@ -90,6 +94,7 @@ int main() {
     },
     odd: {
       title: 'Selection: ganjil atau genap',
+      perhatikan: 'di flowchart, hanya satu dari dua cabang yang menyala. Itulah selection (notes 5️⃣). Ubah input jadi angka genap untuk melihat cabang lainnya.',
       input: '7',
       panes: {
         Pseudocode: `Start
@@ -133,6 +138,7 @@ int main() {
     },
     loop: {
       title: 'Repetition: DOWHILE',
+      perhatikan: 'Print dan <code>stars = stars + 1</code> menyala berulang sampai <code>stars &lt; 5</code> salah. Itulah repetition (notes 5️⃣). Trace table mencatat satu baris per putaran.',
       watch: ['stars'],
       panes: {
         Pseudocode: `Start

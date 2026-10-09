@@ -5,12 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Repetition</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
   <style>
-    .deck .slide.full { padding-bottom: 3vh; }
-    .deck .slide.full h2 { margin-bottom: 0.3em; }
-    .deck .slide.full iframe { min-height: 0; }
+    .alur { width: 100%; max-width: 780px; height: auto; }
+    .alur .kotak { fill: var(--card-2); }
+    .alur .sekali { fill: color-mix(in srgb, var(--c-jingga) 28%, var(--kertas)); }
+    .alur text { fill: var(--tinta); font: 600 16px var(--mono); text-anchor: middle; dominant-baseline: central; }
+    .alur .ket { font: 500 14px var(--huruf); fill: var(--pudar); }
+    .alur .garis { fill: none; stroke: var(--pudar); stroke-width: 1.8; marker-end: url(#alur-tip); }
+    .alur .ulang { stroke: var(--c-biru); stroke-width: 2.4; marker-end: url(#alur-tip-b); }
   </style>
 </head>
 <body class="deck">
@@ -18,141 +23,361 @@
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
   <h1>Repetition (loop)</h1>
-  <p>Algorithm and programming · satu konsep, empat bagian, tiga cara menulis.</p>
+  <p class="sub">Algorithm and programming · materi 03</p>
+  <p>Target: kamu bisa menebak output loop apa pun dengan trace table, dan menulis loop sendiri dari pola soal.</p>
+  <p class="coba-link">Label di atas setiap judul (misalnya "Notes 3️⃣") menunjuk section notes yang membahas hal yang sama secara lengkap.</p>
 </section>
 
 <section class="slide">
-  <h2>Empat bagian setiap loop</h2>
-  <p class="sub">Semua loop, apa pun bentuknya, terdiri dari empat bagian ini. Saat menulis loop, isi keempatnya satu per satu.</p>
-  <table>
-    <tr><th>Bagian</th><th>Pertanyaan</th><th>Kalau salah atau lupa</th></tr>
-    <tr><td><b>Inisialisasi</b></td><td>Variabel loop mulai dari nilai berapa?</td><td>Hasil acak, karena variabel berisi garbage value</td></tr>
-    <tr><td><b>Kondisi</b></td><td>Kapan loop masih lanjut?</td><td>Loop jalan kurang atau lebih satu kali (off-by-one)</td></tr>
-    <tr><td><b>Body</b></td><td>Apa yang diulang?</td><td>-</td></tr>
-    <tr><td><b>Update</b></td><td>Apa yang berubah setiap putaran?</td><td>Kondisi tidak pernah salah, jadi terjadi <b>infinite loop</b></td></tr>
-  </table>
-</section>
-
-<section class="slide">
-  <h2>for dan while: loop yang sama</h2>
-  <p class="sub">for dan while punya empat bagian yang sama. Bedanya hanya di mana bagian-bagian itu ditulis.</p>
+  <p class="kicker">Notes 1️⃣ · Loop</p>
+  <h2>Loop menulis pola sekali, lalu komputer yang mengulangnya</h2>
+  <p class="sub"><mark>Loop</mark> adalah bagian program yang dijalankan berulang selama suatu kondisi masih terpenuhi.</p>
   <div class="cols">
-<pre><code>for (i = 1; i &lt;= n; i++) {
-    total += i;
-}</code></pre>
-<pre><code>i = 1;               // inisialisasi
-while (i &lt;= n) {     // kondisi
-    total += i;      // body
-    i++;             // update
-}</code></pre>
+    <div>
+      <p class="lbl-code">Tanpa loop: 100 baris</p>
+<pre><code>printf("1\n");
+printf("2\n");
+…
+printf("100\n");</code></pre>
+    </div>
+    <div>
+      <p class="lbl-code">Dengan loop: 2 baris (baris for dijelaskan di slide for)</p>
+<pre><code>for (int i = 1; i &lt;= 100; i++)
+    printf("%d\n", i);</code></pre>
+    </div>
   </div>
-  <p>for mengumpulkan inisialisasi, kondisi, dan update dalam satu baris. Pakai for kalau jumlah putaran sudah diketahui, dan while kalau loop berhenti karena suatu kejadian.</p>
-</section>
-
-<section class="slide">
-  <h2>Urutan eksekusi for</h2>
-  <p class="sub">exp1 hanya jalan sekali di awal. Setelah itu, kondisi, body, dan update diulang sampai kondisi bernilai false.</p>
-<pre><code>for (exp1; exp2; exp3) body;
-
-exp1 → exp2? → body → exp3 → exp2? → body → exp3 → … → exp2 false → keluar
- └ sekali    └──────────── diulang ────────────┘</code></pre>
   <ul>
-    <li>exp2 dicek <b>sebelum</b> setiap putaran, jadi body bisa jalan 0 kali kalau kondisinya sudah false sejak awal.</li>
-    <li>Setelah <code>for (i = 1; i &lt;= 5; i++)</code> selesai, i bernilai <b>6</b>, yaitu nilai pertama yang membuat kondisi false.</li>
-    <li>Loop <code>i &lt; b</code> yang dimulai dari a jalan <b>b − a</b> kali. Kalau ragu, buat trace table dengan angka kecil.</li>
+    <li>Cari <b>apa yang sama</b> di setiap ulangan (jadi isi loop) dan <b>apa yang berubah</b> (jadi variabel yang diubah).</li>
+    <li>Contoh <code>5 10 15 20 25</code>: yang sama <code>printf</code>, yang berubah angkanya, naik 5.</li>
   </ul>
 </section>
 
 <section class="slide">
-  <h2>Trace table: cara membaca loop apa pun</h2>
-  <p class="sub">Trace table mencatat nilai setiap variabel di akhir setiap putaran. Ini cara paling pasti untuk menebak output loop.</p>
+  <p class="kicker">Notes 2️⃣ · Empat bagian loop</p>
+  <h2>Setiap loop butuh empat bagian, dan kalau satu salah, loop rusak</h2>
+  <p class="sub"><mark>Body</mark> adalah perintah yang diulang. Tiga bagian lain mengatur kapan loop mulai, lanjut, dan berhenti.</p>
+  <table>
+    <tr><th>Bagian</th><th>Pertanyaan</th><th>Kalau salah atau lupa</th></tr>
+    <tr><td>Inisialisasi</td><td>Mulai dari nilai berapa?</td><td>Variabel berisi garbage value (sisa data lama di memory), jadi hasilnya acak</td></tr>
+    <tr><td>Kondisi</td><td>Kapan masih lanjut?</td><td>Loop jalan kurang atau lebih satu kali</td></tr>
+    <tr><td>Body</td><td>Apa yang diulang?</td><td>Tidak ada yang dikerjakan</td></tr>
+    <tr><td>Update</td><td>Apa yang berubah tiap putaran?</td><td>Kondisi tidak pernah berubah → loop tidak pernah berhenti</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 3️⃣ · while</p>
+  <h2><code>while</code> mengecek kondisi sebelum setiap putaran</h2>
+  <p class="sub"><mark>while</mark> menjalankan body selama kondisi true, misalnya untuk menjumlahkan 1 sampai n ke <code>total</code>.</p>
+  <div class="cols">
+<pre><code>i = 1;                // inisialisasi
+while (i &lt;= n) {      // kondisi
+    total += i;       // body
+    i++;              // update
+}</code></pre>
+    <ol>
+      <li>Cek kondisi.</li>
+      <li>True: jalankan body, lalu kembali ke langkah 1.</li>
+      <li>False: keluar dari loop.</li>
+    </ol>
+  </div>
+  <aside class="catatan"><p><code>i++</code> artinya <code>i = i + 1</code>. <code>total += i</code> artinya <code>total = total + i</code>.</p></aside>
+  <p>Kalau kondisi sudah false sejak awal, body jalan <b>0 kali</b>.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 4️⃣ · for</p>
+  <h2><code>for</code> menaruh inisialisasi, kondisi, dan update dalam satu baris</h2>
+  <p class="sub">Dua loop di bawah sama persis. Bedanya hanya tempat menulis keempat bagian.</p>
+  <div class="cols">
+    <div>
+      <p class="lbl-code">for</p>
+<pre><code>for (i = 1; i &lt;= n; i++) {
+    total += i;
+}</code></pre>
+    </div>
+    <div>
+      <p class="lbl-code">while</p>
+<pre><code>i = 1;
+while (i &lt;= n) {
+    total += i;
+    i++;
+}</code></pre>
+    </div>
+  </div>
+  <ul>
+    <li>Bentuk umum <code>for (exp1; exp2; exp3)</code>: exp1 = inisialisasi, exp2 = kondisi, exp3 = update.</li>
+    <li>Pakai for kalau jumlah putaran diketahui, while kalau loop berhenti karena suatu kejadian.</li>
+    <li><code>for (;;)</code> tidak pernah berhenti, karena exp2 yang kosong dianggap true.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 5️⃣ · Urutan eksekusi for</p>
+  <h2>exp1 jalan sekali, lalu exp2, body, dan exp3 berulang sampai exp2 false</h2>
+  <p class="sub">Diagram ini membaca <code>for (i = 1; i &lt;= n; i++) { total += i; }</code> langkah demi langkah.</p>
+  <figure>
+    <svg class="alur" viewBox="0 0 690 230" role="img" aria-label="Flowchart for: exp1, lalu exp2. Kalau true ke body, lalu exp3, lalu kembali ke exp2. Kalau false keluar.">
+      <defs>
+        <marker id="alur-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--pudar)"/></marker>
+        <marker id="alur-tip-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--c-biru)"/></marker>
+      </defs>
+      <rect class="sekali" x="10" y="86" width="140" height="44" rx="6"/><text x="80" y="108">exp1: i = 1</text>
+      <text class="ket" x="80" y="148">jalan sekali</text>
+      <polygon class="kotak" points="180,108 260,70 340,108 260,146"/><text x="260" y="108">exp2: i &lt;= n</text>
+      <rect class="kotak" x="400" y="86" width="176" height="44" rx="6"/><text x="488" y="108">body: total += i</text>
+      <rect class="kotak" x="400" y="176" width="176" height="44" rx="6"/><text x="488" y="198">exp3: i++</text>
+      <rect class="kotak" x="592" y="8" width="90" height="36" rx="18"/><text x="637" y="26">keluar</text>
+      <path class="garis" d="M150 108H178"/>
+      <path class="garis" d="M340 108H398"/><text class="ket" x="368" y="94">true</text>
+      <path class="garis ulang" d="M488 130V174"/>
+      <path class="garis ulang" d="M400 198H260V148"/><text class="ket" x="330" y="214">putaran berikutnya</text>
+      <path class="garis" d="M260 70V26H590"/><text class="ket" x="292" y="50">false</text>
+    </svg>
+    <figcaption>Kotak oranye hanya dilewati sekali. Panah biru dari exp3 kembali ke exp2 adalah putaran berikutnya.</figcaption>
+  </figure>
+  <ul>
+    <li>exp2 dicek <b>sebelum</b> body, jadi body bisa jalan 0 kali.</li>
+    <li>exp3 jalan <b>setelah</b> body, jadi putaran pertama memakai i = 1, bukan 2.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 5️⃣ · Urutan eksekusi for</p>
+  <h2>Setelah loop selesai, <code>i</code> berisi nilai pertama yang membuat exp2 false</h2>
+  <p class="sub">Trace <code>for (i = 1; i &lt;= 3; i++) printf("%d ", i);</code>, satu baris untuk setiap kali exp2 dicek.</p>
+  <table>
+    <tr><th>exp2 dicek ke-</th><th>i</th><th><code>i &lt;= 3</code></th><th>Yang terjadi</th></tr>
+    <tr><td>1</td><td>1</td><td>true</td><td>cetak 1, lalu i++</td></tr>
+    <tr><td>2</td><td>2</td><td>true</td><td>cetak 2, lalu i++</td></tr>
+    <tr><td>3</td><td>3</td><td>true</td><td>cetak 3, lalu i++</td></tr>
+    <tr><td>4</td><td>4</td><td>false</td><td>keluar dari loop</td></tr>
+  </table>
+  <ul>
+    <li>exp2 dicek 4 kali, body jalan 3 kali: exp2 selalu dicek <b>satu kali lebih banyak</b>.</li>
+    <li>Jadi setelah <code>for (i = 1; i &lt;= 5; i++)</code>, nilai i adalah <mark class="jebakan">6, bukan 5</mark>.</li>
+  </ul>
+</section>
+
+<section class="slide full">
+  <p class="kicker">Notes 5️⃣ · Loop tracer</p>
+  <h2>Coba sendiri: exp1 menyala sekali, lalu exp2, body, dan exp3 bergantian</h2>
+  <iframe src="viz/loop.html#for" title="Loop tracer: program for"></iframe>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 6️⃣ · Berapa kali loop jalan</p>
+  <h2>Kondisi <code>i &lt; b</code> berhenti sebelum b, sedangkan <code>i &lt;= b</code> ikut menjalankan b</h2>
+  <p class="sub"><mark>Off-by-one</mark> adalah bug saat loop jalan satu kali lebih banyak atau lebih sedikit, biasanya karena <code>&lt;</code> dan <code>&lt;=</code> tertukar.</p>
+  <p>Bentuk loop: <code>for (i = a; kondisi; i++)</code>, jadi a = nilai awal i dan b = batas di kondisi.</p>
+  <table>
+    <tr><th>Kondisi</th><th>Nilai i yang dijalankan</th><th>Banyak putaran</th><th>Contoh: a = 1, b = 3</th></tr>
+    <tr><td><code>i &lt; b</code></td><td>a, a + 1, …, b − 1 (b tidak ikut)</td><td><mark class="kunci">(b − a) kali</mark></td><td>i = 1, 2 → 2 kali</td></tr>
+    <tr><td><code>i &lt;= b</code></td><td>a, a + 1, …, b (b ikut)</td><td><mark class="kunci">(b − a + 1) kali</mark></td><td>i = 1, 2, 3 → 3 kali</td></tr>
+  </table>
+  <ul>
+    <li>Hasil 0 atau negatif berarti loop jalan 0 kali. Ragu? Trace dengan angka kecil.</li>
+    <li>Template jawaban: "Loop ini jalan ___ kali, karena i bernilai ___ sampai ___."</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 7️⃣ · Trace table</p>
+  <h2>Trace table menjawab "apa output-nya" tanpa menebak</h2>
+  <p class="sub"><mark>Trace table</mark> mencatat nilai setiap variabel yang berubah, satu baris per putaran. Contoh dari kuliah: faktorial.</p>
   <div class="cols">
 <pre><code>long number = 4, x = 1;
 while (number &gt;= 1)
     x *= number--;</code></pre>
     <table>
-      <tr><th>Putaran</th><th>number</th><th>x</th></tr>
-      <tr><td>1</td><td>4 → 3</td><td>4</td></tr>
-      <tr><td>2</td><td>3 → 2</td><td>12</td></tr>
-      <tr><td>3</td><td>2 → 1</td><td>24</td></tr>
-      <tr><td>4</td><td>1 → 0</td><td>24</td></tr>
+      <tr><th>Putaran</th><th>number sebelum</th><th>x</th><th>number sesudah</th></tr>
+      <tr><td>1</td><td>4</td><td>1 × 4 = 4</td><td>3</td></tr>
+      <tr><td>2</td><td>3</td><td>4 × 3 = 12</td><td>2</td></tr>
+      <tr><td>3</td><td>2</td><td>12 × 2 = 24</td><td>1</td></tr>
+      <tr><td>4</td><td>1</td><td>24 × 1 = 24</td><td>0</td></tr>
     </table>
   </div>
-  <p><code>number--</code> memakai nilai lama dulu, baru dikurangi. Loop berhenti saat number = 0, dan x berisi 4! = 24.</p>
+  <ul>
+    <li><code>number--</code> memakai nilai lama dulu, baru dikurangi 1. Jadi x dikali 4 lebih dulu.</li>
+    <li>Saat number = 0, <code>0 &gt;= 1</code> false. Loop berhenti dengan x = 24 = 4! (4 × 3 × 2 × 1).</li>
+  </ul>
 </section>
 
 <section class="slide full">
-  <h2>Coba sendiri: loop tracer</h2>
-  <iframe src="viz/loop.html" title="Loop tracer dengan trace table"></iframe>
+  <p class="kicker">Notes 7️⃣ · Loop tracer</p>
+  <h2>Latihan terbaik: centang Mode tebak, lalu isi trace table di kertas sebelum langkah berikutnya tampil</h2>
+  <iframe src="viz/loop.html#while" title="Loop tracer: program while"></iframe>
 </section>
 
 <section class="slide">
-  <h2>while vs do-while</h2>
-  <p class="sub">Bedanya hanya pada kapan kondisi dicek: sebelum body, atau sesudah body.</p>
+  <p class="kicker">Notes 8️⃣ · do-while</p>
+  <h2><code>do-while</code> menjalankan body dulu, jadi body pasti jalan minimal sekali</h2>
+  <p class="sub"><mark>do-while</mark> mengecek kondisi sesudah body. Contoh: minta nilai sampai valid, karena nilai harus dibaca dulu sebelum bisa dicek.</p>
   <div class="cols">
     <table>
-      <tr><th></th><th>while</th><th>do-while</th></tr>
-      <tr><td>Kondisi dicek</td><td><b>Sebelum</b> body</td><td><b>Sesudah</b> body</td></tr>
-      <tr><td>Body jalan minimal</td><td>0 kali</td><td><b>1 kali</b></td></tr>
+      <tr><th></th><th>while / for</th><th>do-while</th></tr>
+      <tr><td>Kondisi dicek</td><td>Sebelum body</td><td><b>Sesudah</b> body</td></tr>
+      <tr><td>Body minimal</td><td>0 kali</td><td><b>1 kali</b></td></tr>
+      <tr><td>Cocok untuk</td><td>Hitungan, kejadian</td><td>Menu, validasi input</td></tr>
     </table>
 <pre><code>do {
+    printf("Nilai (0-100): ");
     scanf("%d", &amp;nilai);
-} while (nilai &lt; 0 || nilai &gt; 100);</code></pre>
+} while (nilai &lt; 0 || nilai &gt; 100);  // || = atau</code></pre>
   </div>
-  <p>do-while cocok untuk menu dan validasi input: input harus dibaca dulu sebelum bisa dicek. Jangan lupa <code>;</code> setelah <code>while (…)</code>.</p>
+  <aside class="jebakan"><p><code>do-while</code> wajib diakhiri <code>;</code> setelah <code>while (…)</code>. <code>while</code> biasa tidak.</p></aside>
 </section>
 
 <section class="slide">
-  <h2>Pola loop: kenali, lalu tulis sendiri</h2>
-  <p class="sub">Sebagian besar soal loop adalah salah satu pola di bawah. Kenali polanya, lalu sesuaikan kerangkanya dengan soal.</p>
+  <p class="kicker">Notes 9️⃣ · Akumulator</p>
+  <h2>Akumulator harus diisi sebelum loop: jumlah mulai dari 0, perkalian dari 1</h2>
+  <p class="sub"><mark>Akumulator</mark> adalah variabel yang mengumpulkan hasil dari setiap putaran.</p>
   <table>
-    <tr><th>Pola</th><th>Kerangka</th></tr>
-    <tr><td>Ulangi N kali</td><td><code>for (i = 0; i &lt; n; i++)</code></td></tr>
-    <tr><td>Akumulasi (jumlah, kali)</td><td><code>total = 0;</code> sebelum loop, <code>total += x;</code> di dalam loop</td></tr>
-    <tr><td>Hitung yang memenuhi syarat</td><td><code>if (syarat) count++;</code> di dalam loop</td></tr>
-    <tr><td>Cari nilai max</td><td><code>max = data[0];</code> lalu <code>if (x &gt; max) max = x;</code></td></tr>
-    <tr><td>Sentinel (berhenti di nilai khusus)</td><td>baca dulu, lalu <code>while (x != 0) { proses; baca lagi; }</code></td></tr>
-    <tr><td>Nested loop</td><td>Loop luar untuk baris, loop dalam untuk isi setiap baris</td></tr>
+    <tr><th>Pola</th><th>Sebelum loop</th><th>Di body</th></tr>
+    <tr><td>Ulangi N kali</td><td colspan="2"><code>for (i = 0; i &lt; n; i++) { … }</code></td></tr>
+    <tr><td>Jumlah</td><td><code>total = 0;</code></td><td><code>total += x;</code></td></tr>
+    <tr><td>Hasil kali</td><td><code>hasil = 1;</code></td><td><code>hasil *= x;</code></td></tr>
+    <tr><td>Hitung yang memenuhi syarat</td><td><code>count = 0;</code></td><td><code>if (syarat) count++;</code></td></tr>
+    <tr><td>Cari max</td><td><code>max = data pertama;</code></td><td><code>if (x &gt; max) max = x;</code></td></tr>
   </table>
+  <ul>
+    <li>Tanpa <code>= 0</code>, total mulai dari garbage value. Hasilnya acak, dan compiler diam saja.</li>
+    <li>max diisi data pertama, bukan 0, supaya tetap benar kalau semua data negatif.</li>
+  </ul>
 </section>
 
 <section class="slide">
-  <h2>break vs continue</h2>
-  <p class="sub">Keduanya mengubah alur loop dari dalam body, tapi efeknya berbeda.</p>
+  <p class="kicker">Notes <span class="no">10</span> · Sentinel</p>
+  <h2>Sentinel menghentikan loop tanpa perlu tahu jumlah data</h2>
+  <p class="sub"><mark>Sentinel</mark> adalah nilai khusus (di sini 0) yang menandakan input selesai. Input contoh: <code>8 6 10 0</code>.</p>
   <div class="cols">
-<pre><code>for (i = 1; i &lt;= 10; i++) {
-    if (i == 5) break;      // atau continue
+<pre><code>int x, total = 0, count = 0;
+scanf("%d", &amp;x);        // baca pertama
+while (x != 0) {
+    total += x;
+    count++;
+    scanf("%d", &amp;x);    // baca lagi
+}</code></pre>
+    <table>
+      <tr><th>x dicek</th><th><code>x != 0</code></th><th>total</th><th>count</th></tr>
+      <tr><td>8</td><td>true</td><td>8</td><td>1</td></tr>
+      <tr><td>6</td><td>true</td><td>14</td><td>2</td></tr>
+      <tr><td>10</td><td>true</td><td>24</td><td>3</td></tr>
+      <tr><td>0</td><td>false</td><td>24</td><td>3</td></tr>
+    </table>
+  </div>
+  <ul>
+    <li>Baca sebelum loop, karena kondisi butuh nilai x.</li>
+    <li>Baca lagi di <b>akhir</b> body, supaya 0 dicek dulu dan tidak ikut diproses. Rata-ratanya 24 / 3 = 8.</li>
+  </ul>
+  <p class="coba-link">🧪 Coba: <a href="viz/loop.html#sentinel">loop tracer, program Sentinel</a></p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes <span class="no">11</span> · Nested loop</p>
+  <h2>Loop dalam selesai penuh untuk setiap satu putaran loop luar</h2>
+  <p class="sub"><mark>Nested loop</mark> adalah loop di dalam body loop lain. Di sini loop luar = baris, loop dalam = isi baris (n = 4).</p>
+  <div class="cols">
+<pre><code>for (int i = 1; i &lt;= n; i++) {
+    for (int j = 1; j &lt;= i; j++) {
+        printf("*");
+    }
+    printf("\n");
+}</code></pre>
+<div>
+      <p class="lbl-code">Output, dengan catatan j di kanan</p>
+<pre><code>*       ← i = 1: j = 1
+**      ← i = 2: j = 1, 2
+***     ← i = 3: j = 1..3
+****    ← i = 4: j = 1..4</code></pre>
+    </div>
+  </div>
+  <ul>
+    <li>Total bintang 1 + 2 + 3 + 4 = 10. Kalau luar 3 kali dan dalam 4 kali, body dalam jalan 3 × 4 = 12 kali.</li>
+    <li>Pakai nama berbeda (i dan j). Kalau sama, loop dalam mengubah i milik loop luar.</li>
+  </ul>
+  <p class="coba-link">🧪 Coba: <a href="viz/loop.html#nested">loop tracer, program Nested loop</a></p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes <span class="no">12</span> · break</p>
+  <h2><code>break</code> keluar dari loop saat itu juga, walaupun kondisi masih true</h2>
+  <p class="sub"><mark>break</mark> adalah perintah untuk berhenti total dari loop.</p>
+  <div class="cols">
+<pre><code>int i;
+for (i = 1; i &lt;= 10; i++) {
+    if (i == 5) break;
     printf("%d ", i);
 }</code></pre>
-    <ul>
-      <li><b>break</b> keluar dari loop saat itu juga. Output: <code>1 2 3 4</code></li>
-      <li><b>continue</b> melewati sisa body untuk putaran ini saja, lalu lanjut ke putaran berikutnya. Output: <code>1 2 3 4 6 7 8 9 10</code></li>
-    </ul>
+    <div>
+      <p class="lbl-code">Output</p>
+<pre><code>1 2 3 4</code></pre>
+      <p>Setelah loop: i = 5</p>
+    </div>
   </div>
+  <ul>
+    <li>Sisa body dan <code>i++</code> terakhir tidak jalan, jadi i tetap 5.</li>
+    <li>Dipakai untuk keluar dari <code>for (;;)</code> yang sengaja tanpa kondisi (juga di <code>switch</code>, di luar materi ini).</li>
+  </ul>
 </section>
 
 <section class="slide">
-  <h2>Bug yang sering muncul</h2>
-  <p class="sub">Semua bug ini lolos compile. Kenali gejalanya supaya cepat menemukan penyebabnya.</p>
+  <p class="kicker">Notes <span class="no">13</span> · continue</p>
+  <h2><code>continue</code> hanya melewati sisa putaran ini, dan loop tetap lanjut</h2>
+  <p class="sub"><mark>continue</mark> adalah perintah untuk lompat ke putaran berikutnya. Di for, exp3 tetap jalan.</p>
   <table>
-    <tr><th>Kode</th><th>Gejala</th><th>Penyebab</th></tr>
-    <tr><td><code>for (i = 0; i &lt; 3; i++);</code></td><td>Body jalan sekali, setelah loop selesai</td><td><code>;</code> menjadi body kosong</td></tr>
-    <tr><td><code>while (x = 5)</code></td><td>Infinite loop</td><td><code>=</code> menyimpan 5, bukan membandingkan (<code>==</code>)</td></tr>
-    <tr><td><code>i &lt; 10</code> untuk 1..10</td><td>10 tidak ikut diproses</td><td>Off-by-one: seharusnya <code>i &lt;= 10</code></td></tr>
-    <tr><td><code>int total;</code> tanpa <code>= 0</code></td><td>Hasil acak</td><td>Garbage value ikut dijumlahkan</td></tr>
-    <tr><td>Nested loop memakai <code>i</code> yang sama</td><td>Loop luar kacau</td><td>Loop dalam mengubah i milik loop luar</td></tr>
+    <tr><th>Di body loop i = 1..10</th><th>Efek</th><th>Output</th></tr>
+    <tr><td><code>if (i == 5) break;</code></td><td>Keluar dari loop sekarang juga</td><td><code>1 2 3 4</code></td></tr>
+    <tr><td><code>if (i == 5) continue;</code></td><td>Lewati sisa body putaran ini saja</td><td><code>1 2 3 4 6 7 8 9 10</code></td></tr>
+  </table>
+  <aside class="jebakan"><p>Di while, <code>i++</code> yang ditulis di bawah continue ikut terlewat. Loop mencetak 1 2 3 4, lalu macet di i = 5.</p></aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes <span class="no">14</span> · Bug loop</p>
+  <h2>Bug loop lolos compile, jadi kenali dari gejalanya</h2>
+  <p class="sub"><mark>Infinite loop</mark> adalah loop yang kondisinya tidak pernah false, jadi program macet atau mencetak tanpa henti.</p>
+  <table>
+    <tr><th>Gejala</th><th>Penyebab</th><th>Perbaikan</th></tr>
+    <tr><td>Body jalan sekali, setelah loop</td><td><code>;</code> setelah <code>for (…)</code></td><td>Hapus <code>;</code></td></tr>
+    <tr><td>Infinite loop</td><td><code>while (x = 5)</code>, atau update lupa</td><td>Pakai <code>==</code>, tulis update</td></tr>
+    <tr><td>Kurang atau lebih satu</td><td><code>&lt;</code> dan <code>&lt;=</code> tertukar</td><td>Trace dengan angka kecil</td></tr>
+    <tr><td>Hasil acak</td><td>Akumulator tanpa <code>= 0</code></td><td><code>int total = 0;</code></td></tr>
+    <tr><td>Desimal hilang</td><td><code>total / count</code>, keduanya int</td><td><code>(float)total / count</code></td></tr>
+    <tr><td>Loop luar kacau</td><td>Nested loop memakai i yang sama</td><td>Pakai j untuk loop dalam</td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Ringkasan</h2>
+  <h2>Ringkasan: satu konsep, empat bagian, tiga cara menulis</h2>
   <ul>
-    <li>Setiap loop = <b>inisialisasi + kondisi + body + update</b>.</li>
-    <li>for, while, dan do-while adalah loop yang sama dengan tempat penulisan yang berbeda. do-while selalu jalan minimal sekali.</li>
-    <li>Ragu berapa kali loop jalan atau apa output-nya? <b>Buat trace table</b>.</li>
-    <li>Kenali <b>polanya</b> (akumulasi, max, sentinel, nested), lalu tulis sendiri.</li>
+    <li>Setiap loop = <b>inisialisasi + kondisi + body + update</b> (2️⃣).</li>
+    <li>while dan for cek dulu (bisa 0 kali). do-while jalan dulu (minimal 1 kali) (3️⃣ 4️⃣ 8️⃣).</li>
+    <li>for: exp1 sekali, lalu exp2, body, exp3 berulang. Setelah loop, i = nilai yang membuat exp2 false (5️⃣).</li>
+    <li>Dengan <code>&lt;</code> loop jalan (b − a) kali, dengan <code>&lt;=</code> jalan (b − a + 1) kali. Ragu? Buat <b>trace table</b> (6️⃣ 7️⃣).</li>
+    <li>Pola: akumulator, sentinel, nested. break berhenti total, continue melewati satu putaran (9️⃣ sampai <span class="no">13</span>).</li>
   </ul>
-  <p class="label">Latihan (berapa kali jalan, tebak output, ganjil 11..188, hari dalam minggu) ada di notes.</p>
+</section>
+
+<section class="slide">
+  <h2>Soal latihan: kerjakan dulu, jawabannya di slide berikutnya</h2>
+  <ol class="soal-list">
+    <li>Berapa kali body <code>for (i = 2; i &lt; 8; i++)</code> jalan?</li>
+    <li>Apa output <code>x = 10; while (x &gt; 0) { printf("%d ", x); x -= 3; }</code>?</li>
+    <li>Apa output <code>for (i = 1; i &lt;= 6; i++) { if (i % 2 == 0) continue; printf("%d ", i); }</code>?</li>
+    <li>Kenapa <code>for (i = 0; i &lt; 3; i++); printf("%d", i);</code> hanya mencetak <code>3</code>?</li>
+  </ol>
+  <p class="coba-link">Soal lain (termasuk soal dari kuliah) ada di akhir setiap section notes.</p>
+</section>
+
+<section class="slide">
+  <h2>Jawaban soal latihan</h2>
+  <ol class="soal-list">
+    <li><b>6 kali.</b> Kondisinya <code>&lt;</code>, jadi (b − a) = 8 − 2 = 6. Nilai i: 2, 3, 4, 5, 6, 7.</li>
+    <li><code>10 7 4 1</code>. x berubah 10 → 7 → 4 → 1 → −2, dan −2 &gt; 0 false.</li>
+    <li><code>1 3 5</code>. Angka genap dilewati continue, tapi loop tetap lanjut sampai i = 6.</li>
+    <li><code>;</code> setelah <code>for (…)</code> menjadi body kosong. Loop berputar tanpa mencetak sampai i = 3, lalu printf jalan sekali.</li>
+  </ol>
 </section>
 
 <script src="../../_shared/slides.js?v=805bba15"></script>

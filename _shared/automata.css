@@ -1,6 +1,6 @@
 /* Gaya visualisasi Compilation technique (dipakai bersama automata.js dan grammar.js). */
 .viz { max-width: 1240px; }
-/* Biru untuk teks firstpos: --c-biru terlalu terang di atas putih (kontras < 4.5:1). */
+/* Biru untuk teks firstpos: --c-biru terlalu terang di atas putih (kontras < 4.5:1). lastpos memakai --c-mint (hijau) supaya beda. */
 :root { --fp-ink: #2c56d1; --x-ink: #b42318; }
 [data-theme='dark'] { --fp-ink: #7b9cff; --x-ink: #ff7a6e; }
 .ops { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -13,7 +13,7 @@
 .au-field { display: grid; gap: 6px; flex: 1 1 260px; }
 .viz label.au-field { display: grid; align-items: start; }
 .au-field .field, .au-input textarea { width: 100%; font-family: var(--mono); font-size: 1rem; }
-.au-input textarea { resize: vertical; border: 1.5px solid var(--line); border-radius: 12px; padding: 8px 10px; background: var(--surface); color: var(--ink); }
+.au-input textarea { resize: vertical; border: 1.5px solid var(--line); border-radius: 6px; padding: 8px 10px; background: var(--surface); color: var(--ink); }
 .au-input .hint { margin: 0; font-size: 0.85rem; color: var(--ink-2); }
 .au-keys { display: flex; flex-wrap: wrap; gap: 6px; }
 .au-keys .btn { font-family: var(--mono); padding: 0.3rem 0.8rem; }
@@ -28,11 +28,11 @@
   .au-main:not(.stack) > .au-step { grid-column: 2; grid-row: 1; position: sticky; top: 12px; }
   .au-main:not(.stack) > .au-panel { grid-column: 1; grid-row: 1; }
 }
-.au-step { padding: 18px 20px; border-radius: 22px; }
+.au-step { padding: 18px 20px; border-radius: 10px; }
 .au-cap { margin: 0 0 14px; min-height: 3.3em; font-size: 1rem; }
 .au-cap code { background: var(--surface); }
 .au-count { margin: 10px 0 0; }
-.au-panel { padding: 16px 18px; border-radius: 22px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+.au-panel { padding: 16px 18px; border-radius: 10px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
 /* Dua bagian berdampingan di dalam panel (misalnya tabel dan diagram), satu kolom di HP. */
 .au-two { display: grid; gap: 14px 24px; align-items: start; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .au-two { grid-template-columns: auto minmax(0, 1fr); } }
@@ -41,7 +41,7 @@
 .au-title { font-weight: 600; font-size: 0.9rem; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .au-title .label { font-weight: 400; font-size: 0.8rem; }
 .au-scroll { overflow-x: auto; }
-.au-verdict { border-radius: 14px; padding: 10px 14px; margin: 0; }
+.au-verdict { border-radius: 10px; padding: 10px 14px; margin: 0; }
 .au-verdict.yes { background: color-mix(in srgb, var(--go) 14%, var(--surface)); }
 .au-verdict.no { background: color-mix(in srgb, var(--stop) 13%, var(--surface)); }
 
@@ -71,12 +71,12 @@
 .au-tn.term circle, .au-tn.term rect { fill: var(--surface); stroke-dasharray: 3 3; }
 .au-tn.hot circle, .au-tn.hot rect { fill: color-mix(in srgb, var(--hot) 32%, var(--surface)); stroke: var(--hot); stroke-width: 2.2; }
 .au-tn text.au-fp { fill: var(--fp-ink); text-anchor: end; font-size: 13px; }
-.au-tn text.au-lp { fill: var(--go-ink); text-anchor: start; font-size: 13px; }
+.au-tn text.au-lp { fill: var(--c-mint); text-anchor: start; font-size: 13px; }
 .au-tn text.au-nl { fill: var(--ink-3); font-size: 12px; font-weight: 700; }
 .au-tn text.au-pos { fill: var(--ink-2); font-size: 12px; font-weight: 700; }
 .au-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--ink-2); margin: 6px 0 0; }
 .au-legend .fp { color: var(--fp-ink); font-weight: 600; }
-.au-legend .lp { color: var(--go-ink); font-weight: 600; }
+.au-legend .lp { color: var(--c-mint); font-weight: 600; }
 
 /* Tabel transisi, followpos, dan langkah */
 .au-table { width: auto; font-family: var(--mono); font-size: 0.92rem; }
@@ -93,7 +93,7 @@
 /* Tabel segitiga (table-filling) */
 .au-tri { border-collapse: separate; border-spacing: 3px; width: auto; font-family: var(--mono); }
 .au-tri th { border: 0; padding: 2px 6px; color: var(--ink-2); font-size: 0.85rem; text-align: center; }
-.au-tri td { border: 0; width: 38px; height: 34px; padding: 0; text-align: center; border-radius: 8px; background: var(--card); font-weight: 700; font-size: 0.95rem; }
+.au-tri td { border: 0; width: 38px; height: 34px; padding: 0; text-align: center; border-radius: 4px; background: var(--card); font-weight: 700; font-size: 0.95rem; }
 .au-tri td.x { color: var(--x-ink); }
 .au-tri td.o { color: var(--go-ink); background: color-mix(in srgb, var(--go) 14%, var(--surface)); }
 .au-tri td.hot { background: color-mix(in srgb, var(--hot) 32%, var(--surface)); color: var(--ink); }
@@ -107,18 +107,18 @@
 
 /* Grammar */
 .au-gram { font-family: var(--mono); font-size: 1rem; margin: 0; display: grid; gap: 4px; }
-.au-gram div { padding: 2px 8px; border-radius: 8px; }
+.au-gram div { padding: 2px 8px; border-radius: 4px; }
 .au-gram div.hot { background: color-mix(in srgb, var(--hot) 22%, transparent); }
 .au-gram b { font-weight: 700; }
 .au-derive { font-family: var(--mono); font-size: 1rem; margin: 0; padding-left: 0; list-style: none; display: grid; gap: 2px; }
-.au-derive li { padding: 2px 8px; border-radius: 8px; color: var(--ink-2); }
+.au-derive li { padding: 2px 8px; border-radius: 4px; color: var(--ink-2); }
 .au-derive li.cur { background: color-mix(in srgb, var(--marker) 70%, transparent); color: var(--ink); }
 .au-derive .x { color: var(--hot); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
-.au-derive .n { color: var(--go-ink); font-weight: 700; }
+.au-derive .n { color: var(--c-mint); font-weight: 700; }
 
 /* Input string: simbol yang sudah dibaca dicoret, yang sedang dibaca disorot. */
 .au-tape { display: flex; flex-wrap: wrap; gap: 3px; font-family: var(--mono); font-size: 1.05rem; }
-.au-tape span { min-width: 28px; padding: 4px 8px; text-align: center; border-radius: 8px; background: var(--card); }
+.au-tape span { min-width: 28px; padding: 4px 8px; text-align: center; border-radius: 4px; background: var(--card); }
 .au-tape span.done { color: var(--ink-3); text-decoration: line-through; background: transparent; }
 .au-tape span.now { background: color-mix(in srgb, var(--hot) 30%, var(--surface)); font-weight: 700; }
 
@@ -135,7 +135,8 @@
 .deck .au-fig.tall .au-svg { max-height: 46vh; }
 .deck .au-fig.xtall .au-svg { max-height: 64vh; }
 .deck .au-fig.short .au-svg { max-height: 22vh; }
-.notes .au-fig { overflow-x: auto; }
+/* .notes = format notes lama, .catatan = gaya catatan */
+:is(.notes, .catatan) .au-fig { overflow-x: auto; }
 .au-figs { display: grid; gap: 0.6em 1.5em; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: end; }
 .au-figs figcaption { text-align: center; font-size: 0.8em; color: var(--ink-2); }
 .au-figs figure { margin: 0; }

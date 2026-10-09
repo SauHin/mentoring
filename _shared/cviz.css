@@ -14,15 +14,15 @@
 .cv-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .cv-title .label { font-weight: 400; font-size: 0.8rem; }
 .cv-code { margin: 0; font-size: 0.85rem; line-height: 1.55; padding: 14px 10px; }
-.cv-code .ln { display: block; padding: 0 0.5rem; border-radius: 6px; white-space: pre; }
+.cv-code .ln { display: block; padding: 0 0.5rem; border-radius: 3px; white-space: pre; }
 .cv-code .ln.on { background: var(--marker); }
-.cv-flow { background: var(--card); border-radius: 16px; padding: 12px; }
+.cv-flow { background: var(--card); border-radius: 6px; padding: 12px; }
 /* Kartu langkah: penjelasan langkah yang sedang jalan + tombol. */
-.cv-cap { padding: 18px 20px; border-radius: 22px; }
+.cv-cap { padding: 16px 18px; }
 .cv-cap p { margin: 0 0 14px; min-height: 3.3em; font-size: 1.02rem; }
 .cv-warn { color: var(--stop); font-weight: 600; }
 /* Satu panel untuk semua state program, dipisah garis tipis. */
-.cv-state { padding: 4px 18px; border-radius: 22px; }
+.cv-state { padding: 4px 18px; }
 .cv-sec { padding: 14px 0; border-top: 1px solid var(--line); }
 .cv-state > .cv-sec:first-child { border-top: 0; }
 
@@ -41,7 +41,7 @@
 .cv-row { display: flex; gap: 3px; align-items: flex-start; }
 .cv-rowlbl { width: 28px; padding-top: 10px; color: var(--ink-2); font-family: var(--mono); font-size: 0.75rem; }
 .cv-box { min-width: 58px; text-align: center; }
-.cv-val { background: var(--card-2); border-radius: 10px; padding: 8px 8px; font-family: var(--mono); font-weight: 600; font-size: 1rem; min-height: 2.4em; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.cv-val { background: var(--card-2); border-radius: 4px; padding: 8px 8px; font-family: var(--mono); font-weight: 600; font-size: 1rem; min-height: 2.4em; display: flex; align-items: center; justify-content: center; gap: 4px; }
 .cv-val small { font-weight: 400; color: var(--ink-2); font-size: 0.7rem; }
 .cv-box.hot .cv-val { background: color-mix(in srgb, var(--hot) 30%, var(--surface)); }
 .cv-box.ptr .cv-val { background: color-mix(in srgb, var(--focus) 22%, var(--surface)); }
@@ -52,26 +52,26 @@
 
 /* Input & output */
 .cv-buf { display: flex; flex-wrap: wrap; gap: 3px; font-family: var(--mono); }
-.cv-ch { min-width: 24px; padding: 4px 6px; text-align: center; border-radius: 6px; background: var(--card); }
+.cv-ch { min-width: 24px; padding: 4px 6px; text-align: center; border-radius: 3px; background: var(--card); }
 .cv-ch.done { color: var(--ink-3); text-decoration: line-through; background: transparent; }
 .cv-ch.read { background: color-mix(in srgb, var(--hot) 30%, var(--surface)); }
 .cv-ch.next { box-shadow: inset 0 0 0 2px var(--focus); }
-.cv-input { background: none; padding: 0; margin: 10px 0 0; }
+.cv-input { margin: 10px 0 0; }
 .cv-input summary { font-size: 0.9rem; color: var(--go-ink); width: max-content; }
 .cv-input[open] { display: grid; gap: 8px; }
 .cv-input .btn { justify-self: start; }
-.cv-input textarea { font-family: var(--mono); font-size: 0.9rem; border: 1.5px solid var(--line); border-radius: 12px; padding: 6px 10px; background: var(--surface); color: var(--ink); resize: vertical; }
+.cv-input textarea { font-family: var(--mono); font-size: 0.9rem; border: 1px solid var(--btn-edge); border-radius: 6px; padding: 6px 10px; background: var(--surface); color: var(--ink); resize: vertical; }
 .cv-out { margin: 0; min-height: 3em; white-space: pre-wrap; font-size: 0.9rem; }
 .cv-caret { display: inline-block; width: 8px; height: 1em; vertical-align: text-bottom; background: var(--ink-3); }
 
 /* Trace table */
-.cv-trace table { font-size: 0.88rem; }
+.cv-trace table { margin: 0; font-size: 0.88rem; }
 .cv-trace td, .cv-trace th { padding: 4px 10px; font-family: var(--mono); }
 .cv-trace tr.last td { background: color-mix(in srgb, var(--hot) 18%, transparent); }
 
 /* Flowchart */
-.cv-flowsvg { width: 100%; height: auto; display: block; }
-.cv-fn rect, .cv-fn polygon { fill: var(--card-2); }
+.cv-flowsvg { width: 100%; height: auto; max-height: 340px; display: block; margin: 0 auto; }
+.cv-fn rect, .cv-fn polygon { fill: var(--kertas); stroke: var(--btn-edge); }
 .cv-fn text { fill: var(--ink); font-size: 13px; text-anchor: middle; dominant-baseline: central; font-family: var(--mono); }
 .cv-fn.on rect, .cv-fn.on polygon { fill: color-mix(in srgb, var(--hot) 40%, var(--surface)); }
 .cv-fl { fill: none; stroke: var(--ink-3); stroke-width: 1.6; }

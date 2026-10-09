@@ -5,43 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Priority Queue</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
   <style>
     .d { width: 100%; max-width: 820px; height: auto; }
-    .d .box { fill: var(--card-2); }
-    .d .sep { stroke: var(--bg); stroke-width: 3; }
-    .d .val { fill: var(--ink); font-size: 22px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
-    .d .lbl { fill: var(--ink-2); font-size: 17px; text-anchor: middle; }
-    .d .cell { fill: var(--ink-3); font-size: 14px; text-anchor: middle; }
-    .d .ar { fill: none; stroke-width: 2.5; stroke: var(--go-ink); marker-end: url(#d-n); }
-    .d .ptr { stroke: var(--ink-3); stroke-width: 1.5; }
-    .deck .slide.full { padding-bottom: 3vh; }
-    .deck .slide.full h2 { margin-bottom: 0.3em; }
-    .deck .slide.full iframe { min-height: 0; }
+    .d .box { fill: var(--callout); stroke: var(--pudar); stroke-width: 1.2; }
+    .d .sep { stroke: var(--pudar); stroke-width: 1.2; }
+    .d .val { fill: var(--tinta); font-size: 22px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+    .d .lbl { fill: var(--pudar); font-size: 17px; text-anchor: middle; font-family: var(--mono); }
+    .d .cell { fill: var(--pudar); font-size: 14px; text-anchor: middle; }
+    .d .ar { fill: none; stroke-width: 2.5; stroke: var(--c-mint); marker-end: url(#d-n); }
+    .d .ptr { stroke: var(--pudar); stroke-width: 1.5; }
     .tight td, .tight th { padding: 0.35em 0.7em; }
-    .steps li::marker { font-weight: 700; color: var(--go-ink); }
     @media (min-width: 900px) { .cols.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); } }
   </style>
 </head>
 <body class="deck">
-
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <marker id="d-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--go-ink)"/></marker>
+    <marker id="d-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="rgb(15 123 108)"/></marker>
   </defs>
 </svg>
 
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
   <h1>Priority queue</h1>
-  <p>Data structure · antrean yang melayani berdasarkan <b>prioritas</b>, baru kemudian urutan datang.</p>
-  <p class="label">Prasyarat: queue dan struct (materi 03), serta insertAt di single linked list (materi 01).</p>
+  <p class="sub">Data structure · materi 04 · prasyarat: queue dan struct (materi 03), insertAt (materi 01)</p>
+  <p>Target: kamu bisa menulis pqPush dan pqPop sendiri, dan memilih <code>&gt;</code> atau <code>&gt;=</code> dengan benar.</p>
+  <p class="coba-link">Label di atas setiap judul (misalnya "Notes 3️⃣") menunjuk section notes yang membahas hal yang sama secara lengkap.</p>
 </section>
 
 <section class="slide">
-  <h2>Kapan queue biasa tidak cukup</h2>
-  <p class="sub">Di IGD, pasien kritis dilayani duluan walaupun datang belakangan. Queue biasa hanya melihat urutan datang. Priority queue melihat prioritas dulu, lalu urutan datang untuk prioritas yang sama.</p>
+  <p class="kicker">Notes 1️⃣ · Kapan butuh priority queue</p>
+  <h2>Priority queue melayani berdasarkan prioritas, lalu urutan datang untuk yang seri</h2>
+  <p class="sub"><mark>Priority queue</mark> adalah antrean yang mendahulukan prioritas tertinggi. Contoh di IGD, angka besar didahulukan:</p>
   <div class="cols">
     <table class="tight">
       <tr><th>Datang ke-</th><th>Pasien</th><th>Prioritas</th></tr>
@@ -50,37 +48,42 @@
       <tr><td>3</td><td>Cici</td><td>3</td></tr>
       <tr><td>4</td><td>Dodi</td><td>5</td></tr>
     </table>
-    <div>
-      <p><b>Queue biasa:</b> Ana, Budi, Cici, Dodi.</p>
-      <p><b>Priority queue:</b> Budi, Dodi, Cici, Ana. Budi dan Dodi sama-sama 5, dan Budi datang duluan.</p>
-      <div class="callout"><strong>Kata kunci di soal</strong>"prioritas", "didahulukan", "paling parah dulu". Hampir selalu ada aturan tambahan: "kalau prioritasnya sama, yang datang duluan dilayani duluan".</div>
-    </div>
+    <ul>
+      <li><b>Queue biasa:</b> Ana, Budi, Cici, Dodi.</li>
+      <li><b>Priority queue:</b> Budi, Dodi, Cici, Ana. Budi dan Dodi sama-sama 5, dan Budi datang duluan.</li>
+      <li>Kata kunci di soal: "prioritas", "didahulukan", "VIP". Cek apakah angka besar atau angka kecil yang didahulukan.</li>
+    </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Ide: jaga list selalu terurut</h2>
-  <p class="sub">Kalau node selalu tersusun dari prioritas tertinggi, pasien berikutnya selalu ada di head. Kerja kerasnya pindah ke enqueue: node baru disisipkan di posisi yang tepat.</p>
-  <svg class="d" viewBox="0 0 820 140" role="img" aria-label="Priority queue terurut: Budi 5, Dodi 5, Cici 3, Ana 2">
-    <text class="lbl" x="57" y="20">head</text><line class="ptr" x1="57" y1="28" x2="57" y2="46"/>
-    <g transform="translate(20 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">5</text><text class="cell" x="55" y="80">Budi</text></g>
-    <g transform="translate(210 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">5</text><text class="cell" x="55" y="80">Dodi</text></g>
-    <g transform="translate(400 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">3</text><text class="cell" x="55" y="80">Cici</text></g>
-    <g transform="translate(590 50)"><rect class="box" width="110" height="56" rx="10"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">2</text><text class="cell" x="55" y="80">Ana</text></g>
-    <path class="ar" d="M112 78H206"/><path class="ar" d="M302 78H396"/><path class="ar" d="M492 78H586"/><path class="ar" d="M682 78H740"/>
-    <text class="cell" x="772" y="83">NULL</text>
-  </svg>
+  <p class="kicker">Notes 2️⃣ · List terurut</p>
+  <h2>Kalau list selalu terurut, pasien berikutnya selalu ada di head</h2>
+  <p class="sub">Kerja kerasnya pindah ke pqPush: node baru disisipkan di posisi yang tepat.</p>
+  <figure>
+    <svg class="d" viewBox="0 0 820 140" role="img" aria-label="Priority queue terurut: Budi 5, Dodi 5, Cici 3, Ana 2">
+      <text class="lbl" x="57" y="20">head</text><line class="ptr" x1="57" y1="28" x2="57" y2="46"/>
+      <g transform="translate(20 50)"><rect class="box" width="110" height="56" rx="8"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">5</text><text class="cell" x="55" y="80">Budi</text></g>
+      <g transform="translate(210 50)"><rect class="box" width="110" height="56" rx="8"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">5</text><text class="cell" x="55" y="80">Dodi</text></g>
+      <g transform="translate(400 50)"><rect class="box" width="110" height="56" rx="8"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">3</text><text class="cell" x="55" y="80">Cici</text></g>
+      <g transform="translate(590 50)"><rect class="box" width="110" height="56" rx="8"/><line class="sep" x1="74" y1="0" x2="74" y2="56"/><text class="val" x="37" y="28">2</text><text class="cell" x="55" y="80">Ana</text></g>
+      <path class="ar" d="M112 78H206"/><path class="ar" d="M302 78H396"/><path class="ar" d="M492 78H586"/><path class="ar" d="M682 78H740"/>
+      <text class="cell" x="772" y="83">NULL</text>
+    </svg>
+    <figcaption>Angka di node = prioritas, nama di bawahnya = pasien.</figcaption>
+  </figure>
   <table class="tight">
-    <tr><th>Cara menyimpan</th><th>enqueue</th><th>dequeue</th></tr>
-    <tr><td>List tidak terurut</td><td>O(1): insert di belakang</td><td>O(n): cari prioritas tertinggi dulu</td></tr>
+    <tr><th>Cara menyimpan</th><th>pqPush</th><th>pqPop</th></tr>
+    <tr><td>List tidak terurut</td><td>O(1): insert di belakang</td><td>O(n): cari prioritas tertinggi</td></tr>
     <tr><td><b>List terurut (materi ini)</b></td><td>O(n): cari posisi sisip</td><td><b>O(1)</b>: ambil head</td></tr>
-    <tr><td>Heap (materi lanjutan)</td><td>O(log n)</td><td>O(log n)</td></tr>
+    <tr><td>Heap (di luar materi ini)</td><td>O(log n)</td><td>O(log n)</td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Node menyimpan data dan prioritas</h2>
-  <p class="sub">Soal priority queue hampir selalu punya nama (string) dan prioritas. Keduanya disimpan di node yang sama.</p>
+  <p class="kicker">Notes 3️⃣ · Node</p>
+  <h2>Node menyimpan nama dan prioritas, dan nama disalin dengan strcpy</h2>
+  <p class="sub">Array tidak bisa di-assign dengan <code>=</code>, jadi isi nama disalin huruf demi huruf.</p>
   <div class="cols">
 <pre><code>typedef struct Node {
     char name[21];
@@ -94,86 +97,90 @@ typedef struct {
 
 Node* createNode(char name[], int prio) {
     Node* n = (Node*)malloc(sizeof(Node));
-    strcpy(n->name, name);
-    n->prio = prio;
-    n->next = NULL;
+    strcpy(n-&gt;name, name);
+    n-&gt;prio = prio;
+    n-&gt;next = NULL;
     return n;
 }</code></pre>
     <ul>
-      <li><code>char name[21]</code> muat 20 huruf ditambah <code>'\0'</code>, penanda akhir string. Sesuaikan dengan batas panjang di soal.</li>
-      <li>Array tidak bisa di-assign dengan <code>=</code>. Isi string disalin dengan <code>strcpy</code> dari <code>&lt;string.h&gt;</code>.</li>
-      <li><code>PQueue</code> cukup menyimpan head. Node baru bisa masuk di mana saja, jadi tail tidak membantu.</li>
+      <li><code>char name[21]</code> muat 20 huruf ditambah <code>'\0'</code>.</li>
+      <li><code>n-&gt;name = name</code> error. Pakai <code>strcpy</code> dari <code>&lt;string.h&gt;</code>.</li>
+      <li>PQueue cukup menyimpan head, karena node baru bisa masuk di mana saja.</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Turunkan <code>pqPush</code> dengan resep</h2>
-  <p class="sub">Contoh: Eka (3) datang ke antrean Budi 5, Dodi 5, Cici 3, Ana 2. Eka harus masuk setelah Cici, karena Cici juga 3 dan datang lebih dulu.</p>
-  <ol class="steps">
-    <li><b>Panah yang berubah:</b> Cici → Ana diganti Cici → Eka dan Eka → Ana. Pemilik panah adalah <b>Cici</b>, node tepat sebelum posisi sisip.</li>
-    <li><b>Cari node itu:</b> <code>cur</code> harus berhenti di node terakhir yang prioritasnya <b>&gt;= 3</b>. Jadi loop terus selama node sesudah cur masih &gt;= prioritas baru.</li>
-    <li><b>Urutan:</b> sambung dulu (<code>newNode-&gt;next = cur-&gt;next</code>), baru putus (<code>cur-&gt;next = newNode</code>). Sama dengan insertAt.</li>
-    <li><b>Edge case:</b> antrean kosong, atau prioritas baru lebih tinggi dari head. Di dua kasus ini tidak ada node sebelum posisi sisip, dan head berubah. Tangani sebelum loop.</li>
+  <p class="kicker">Notes 4️⃣ · Menurunkan pqPush</p>
+  <h2>pqPush berhenti di node terakhir yang prioritasnya sama atau lebih tinggi</h2>
+  <p class="sub">Contoh: Eka (3) datang ke antrean Budi 5, Dodi 5, Cici 3, Ana 2. Eka harus masuk setelah Cici.</p>
+  <ol>
+    <li><b>Panah yang berubah:</b> Cici → Ana diganti Cici → Eka dan Eka → Ana. Pemilik panah: <b>Cici</b>.</li>
+    <li><b>Cari node itu:</b> cur maju selama node sesudah cur masih <b>&gt;= 3</b>.</li>
+    <li><b>Urutan:</b> sambung dulu (<code>newNode-&gt;next = cur-&gt;next</code>), baru putus (<code>cur-&gt;next = newNode</code>).</li>
+    <li><b>Edge case:</b> antrean kosong, atau prioritas baru lebih tinggi dari head. Head berubah, jadi tangani sebelum loop.</li>
   </ol>
 </section>
 
 <section class="slide">
-  <h2>Kode <code>pqPush</code></h2>
-  <p class="sub">Bagian atas menangani kasus head berubah. Bagian bawah adalah pola "cari node sebelum posisi, lalu sambung dulu, putus kemudian".</p>
+  <p class="kicker">Notes 4️⃣ · Kode pqPush</p>
+  <h2>pqPush = kasus head di atas, lalu pola insertAt di bawah</h2>
+  <p class="sub">Bagian atas menangani head yang berubah. Bagian bawah mencari node sebelum posisi, lalu sambung dulu, putus kemudian.</p>
   <div class="cols">
 <pre><code>void pqPush(PQueue* pq, char name[], int prio) {
     Node* newNode = createNode(name, prio);
-    if (pq->head == NULL || prio > pq->head->prio) {
-        newNode->next = pq->head;   // masuk paling depan
-        pq->head = newNode;
+    if (pq-&gt;head == NULL || prio &gt; pq-&gt;head-&gt;prio) {
+        newNode-&gt;next = pq-&gt;head;
+        pq-&gt;head = newNode;
         return;
     }
-    Node* cur = pq->head;
-    while (cur->next != NULL &amp;&amp; cur->next->prio >= prio)
-        cur = cur->next;
-    newNode->next = cur->next;      // sambung dulu
-    cur->next = newNode;            // putus kemudian
+    Node* cur = pq-&gt;head;
+    while (cur-&gt;next != NULL &amp;&amp; cur-&gt;next-&gt;prio &gt;= prio)
+        cur = cur-&gt;next;
+    newNode-&gt;next = cur-&gt;next;      // sambung dulu
+    cur-&gt;next = newNode;            // putus kemudian
 }</code></pre>
     <ul>
-      <li><code>pq-&gt;head == NULL</code> dicek lebih dulu. Kalau head NULL, <code>||</code> berhenti di situ, jadi <code>pq-&gt;head-&gt;prio</code> tidak pernah dibaca.</li>
-      <li>Loop membaca <code>cur-&gt;next-&gt;prio</code>, bukan <code>cur-&gt;prio</code>. Node baru masuk setelah cur, jadi yang dibandingkan adalah node sesudahnya.</li>
-      <li>Kalau semua node &gt;= prio, loop berhenti di node terakhir, dan node baru masuk di belakang.</li>
+      <li><code>pq-&gt;head == NULL</code> dicek duluan, jadi <code>pq-&gt;head-&gt;prio</code> tidak dibaca saat head NULL.</li>
+      <li>Loop membaca <code>cur-&gt;next-&gt;prio</code>, karena node baru masuk setelah cur.</li>
+      <li>Kalau semua node &gt;= prio, node baru masuk paling belakang.</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2><code>&gt;</code> atau <code>&gt;=</code>: siapa duluan saat prioritas sama?</h2>
-  <p class="sub">Satu karakter ini menentukan apakah pasien baru antre dengan benar atau menyalip pasien lain yang prioritasnya sama.</p>
+  <p class="kicker">Notes 5️⃣ · &gt; atau &gt;=</p>
+  <h2>Loop memakai <code>&gt;=</code> supaya pasien baru tidak menyalip pasien yang setara</h2>
+  <p class="sub">Node baru melewati semua node yang sama atau lebih penting. Kasus head memakai <code>&gt;</code>: geser head hanya kalau benar-benar lebih penting.</p>
   <table class="tight">
-    <tr><th>Kondisi loop</th><th><code>cur</code> berhenti di</th><th>Hasil setelah Eka (3) masuk</th><th></th></tr>
-    <tr><td><code>cur-&gt;next-&gt;prio &gt;= prio</code></td><td>Cici</td><td>Budi, Dodi, Cici, <b>Eka</b>, Ana</td><td>Benar</td></tr>
-    <tr><td><code>cur-&gt;next-&gt;prio &gt; prio</code></td><td>Dodi</td><td>Budi, Dodi, <b>Eka</b>, Cici, Ana</td><td>Salah: Eka menyalip Cici</td></tr>
+    <tr><th>Kondisi loop</th><th>cur berhenti di</th><th>Hasil setelah Eka (3) masuk</th></tr>
+    <tr><td><code>cur-&gt;next-&gt;prio &gt;= prio</code></td><td>Cici</td><td>Budi, Dodi, Cici, <b>Eka</b>, Ana (benar)</td></tr>
+    <tr><td><code>cur-&gt;next-&gt;prio &gt; prio</code></td><td>Dodi</td><td>Budi, Dodi, <b>Eka</b>, Cici, Ana (Eka menyalip Cici)</td></tr>
   </table>
-  <ul>
-    <li>Aturannya: node baru <b>melewati</b> semua node yang prioritasnya sama atau lebih tinggi. Karena itu kondisi loop memakai <code>&gt;=</code>.</li>
-    <li>Kondisi di head memakai kebalikannya, <code>prio &gt; pq-&gt;head-&gt;prio</code>. Node baru hanya menggeser head kalau benar-benar lebih penting. Kalau ditulis <code>&gt;=</code>, pasien baru dengan prioritas sama menyalip head.</li>
-  </ul>
-  <div class="callout tip"><strong>Kalau angka kecil = prioritas tinggi</strong>Balik kedua perbandingan: <code>prio &lt; pq-&gt;head-&gt;prio</code> dan <code>cur-&gt;next-&gt;prio &lt;= prio</code>.</div>
+  <table class="tight">
+    <tr><th>Aturan di soal</th><th>Kasus head</th><th>Kondisi loop</th></tr>
+    <tr><td>Angka besar didahulukan</td><td><code>prio &gt; pq-&gt;head-&gt;prio</code></td><td><code>cur-&gt;next-&gt;prio &gt;= prio</code></td></tr>
+    <tr><td>Angka kecil didahulukan</td><td><code>prio &lt; pq-&gt;head-&gt;prio</code></td><td><code>cur-&gt;next-&gt;prio &lt;= prio</code></td></tr>
+  </table>
 </section>
 
 <section class="slide full">
-  <h2>Coba sendiri: masukkan prioritas yang sama</h2>
+  <p class="kicker">Notes 5️⃣ · Priority queue dengan linked list</p>
+  <h2>Coba sendiri: masukkan prioritas yang sama, dan pasien baru tidak menyalip</h2>
   <iframe src="viz/priority-queue.html" title="Visualisasi priority queue dengan linked list"></iframe>
 </section>
 
 <section class="slide">
-  <h2><code>pqPop</code>: ambil head, salin namanya</h2>
-  <p class="sub">Karena list selalu terurut, yang dilayani selalu head. Kodenya sama dengan dequeue, tanpa tail. Bedanya, data berupa string harus disalin sebelum node di-free.</p>
+  <p class="kicker">Notes 6️⃣ · pqPop</p>
+  <h2>pqPop mengambil head, lalu menyalin nama ke array pemanggil sebelum free</h2>
+  <p class="sub">List selalu terurut, jadi yang dilayani selalu head. Kodenya sama dengan dequeue, tanpa tail.</p>
   <div class="cols">
 <pre><code>void pqPop(PQueue* pq, char out[]) {
-    Node* del = pq->head;
-    strcpy(out, del->name);
-    pq->head = del->next;
+    Node* del = pq-&gt;head;
+    strcpy(out, del-&gt;name);
+    pq-&gt;head = del-&gt;next;
     free(del);
 }
-
 // pemakaian
 char name[21];
 if (pq.head != NULL) {
@@ -181,62 +188,100 @@ if (pq.head != NULL) {
     printf("%s\n", name);
 }</code></pre>
     <ul>
-      <li><code>out</code> adalah alamat array <code>name</code> milik main, karena array selalu dikirim sebagai alamat. Jadi strcpy langsung mengisi array di main.</li>
-      <li>Jangan <code>return del-&gt;name</code>. Yang di-return hanya alamat array di dalam node. Setelah free, malloc berikutnya bisa memakai memory itu, jadi nama berubah menjadi nama pasien lain.</li>
-      <li><code>peek</code>: cukup baca <code>pq.head-&gt;name</code>, tanpa mengeluarkan node.</li>
+      <li><code>out</code> adalah alamat array <code>name</code> milik main, karena array selalu dikirim sebagai alamat.</li>
+      <li><code>peek</code>: cukup baca <code>pq.head-&gt;name</code>.</li>
     </ul>
   </div>
+  <aside class="jebakan"><p>Jangan <code>return del-&gt;name</code>. Setelah free, malloc berikutnya bisa memakai memory itu, dan nama berubah jadi nama pasien lain.</p></aside>
 </section>
 
 <section class="slide">
-  <h2>Aturan berlapis: kumpulkan di <code>higher()</code></h2>
-  <p class="sub">Soal sering punya beberapa aturan, misalnya "prioritas tinggi dulu, kalau sama yang lebih tua dulu". Tulis semua aturan di satu fungsi, lalu pqPush cukup memanggilnya.</p>
+  <p class="kicker">Notes 7️⃣ · Aturan berlapis</p>
+  <h2>Kalau aturannya lebih dari satu, kumpulkan semuanya di fungsi <code>higher()</code></h2>
+  <p class="sub"><mark>Fungsi pembanding</mark> memutuskan apakah a harus dilayani sebelum b, dan pqPush cukup memanggilnya.</p>
   <div class="cols flip">
 <pre><code>// 1 kalau a harus dilayani sebelum b
 int higher(Node* a, Node* b) {
-    if (a->prio != b->prio)
-        return a->prio > b->prio;
-    if (a->age != b->age)
-        return a->age > b->age;
+    if (a-&gt;prio != b-&gt;prio)
+        return a-&gt;prio &gt; b-&gt;prio;
+    if (a-&gt;age != b-&gt;age)
+        return a-&gt;age &gt; b-&gt;age;
     return 0;    // sama persis
 }
-
 // di pqPush:
-if (pq->head == NULL || higher(newNode, pq->head))
+if (pq-&gt;head == NULL || higher(newNode, pq-&gt;head))
 ...
-while (cur->next != NULL &amp;&amp;
-       !higher(newNode, cur->next))</code></pre>
+while (cur-&gt;next != NULL &amp;&amp;
+       !higher(newNode, cur-&gt;next))</code></pre>
     <ul>
-      <li>Setiap aturan diperiksa berurutan. Aturan berikutnya hanya dipakai kalau aturan sebelumnya seri.</li>
-      <li>"Yang datang duluan" tidak perlu ditulis. <code>return 0</code> membuat node baru berjalan melewati node yang setara, jadi ia masuk di belakangnya.</li>
+      <li>Aturan berikutnya hanya dipakai kalau aturan sebelumnya seri.</li>
+      <li>"Yang datang duluan" tidak perlu ditulis: <code>return 0</code> membuat node baru masuk di belakang node yang setara.</li>
       <li>Aturan alfabet: <code>return strcmp(a-&gt;name, b-&gt;name) &lt; 0;</code></li>
-      <li><code>!higher(newNode, cur-&gt;next)</code> sama artinya dengan <code>&gt;=</code> di versi satu aturan.</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Bug yang sering muncul</h2>
-  <p class="sub">Bug priority queue biasanya ada di perbandingan, di kasus head, atau di string.</p>
+  <p class="kicker">Notes 8️⃣ · Antrean IGD</p>
+  <h2>Soal IGD: baca perintah dengan <code>%s</code>, lalu pilih pqPush atau pqPop</h2>
+  <p class="sub">DATANG nama p = pasien masuk. PANGGIL = cetak nama yang dilayani, atau "Tidak ada pasien" kalau kosong.</p>
+  <div class="cols">
+    <table class="tight">
+      <tr><th>Input</th><th>Output</th></tr>
+      <tr><td>DATANG Ana 2<br>DATANG Budi 5<br>DATANG Cici 3<br>PANGGIL<br>DATANG Dodi 3<br>DATANG Eka 5<br>PANGGIL<br>PANGGIL<br>PANGGIL</td><td>Budi<br><br><br><br><br><br>Eka<br>Cici<br>Dodi</td></tr>
+    </table>
+    <ul>
+      <li>PANGGIL ketiga mengeluarkan Cici, bukan Dodi: keduanya 3, dan Cici datang duluan.</li>
+      <li>Perintah dibandingkan dengan <code>strcmp(cmd, "DATANG") == 0</code>, karena <code>==</code> pada string membandingkan alamat.</li>
+      <li>Cek <code>igd.head != NULL</code> sebelum pqPop. Full code ada di notes 8️⃣.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 9️⃣ · Bug</p>
+  <h2>Bug priority queue sering lolos sample output, jadi uji dengan prioritas seri di tengah</h2>
+  <p class="sub">Bug biasanya ada di perbandingan, di kasus head, atau di string.</p>
   <table class="tight">
     <tr><th>Bug</th><th>Akibat</th><th>Perbaikan</th></tr>
-    <tr><td>Loop memakai <code>&gt;</code>, bukan <code>&gt;=</code></td><td>Pasien baru menyalip pasien dengan prioritas sama</td><td>Lewati node yang sama atau lebih tinggi: <code>&gt;=</code></td></tr>
-    <tr><td>Kasus head memakai <code>&gt;=</code></td><td>Pasien baru menyalip head yang prioritasnya sama</td><td>Pakai <code>&gt;</code> di kasus head</td></tr>
-    <tr><td>Tidak ada kasus head</td><td>Node baru yang paling penting tetap masuk setelah head</td><td>Cek <code>prio &gt; pq-&gt;head-&gt;prio</code> sebelum loop</td></tr>
-    <tr><td><code>n-&gt;name = name;</code></td><td>Error compile: array tidak bisa di-assign</td><td><code>strcpy(n-&gt;name, name);</code></td></tr>
-    <tr><td><code>return del-&gt;name</code> setelah free</td><td>Nama bisa berubah menjadi nama pasien lain</td><td>Salin dengan strcpy sebelum free</td></tr>
+    <tr><td>Loop memakai <code>&gt;</code></td><td>Pasien baru menyalip pasien setara</td><td><code>&gt;=</code> di loop</td></tr>
+    <tr><td>Kasus head memakai <code>&gt;=</code></td><td>Pasien baru menyalip head yang setara</td><td><code>&gt;</code> di kasus head</td></tr>
+    <tr><td>Tidak ada kasus head</td><td>Pasien paling penting tetap di belakang head</td><td>Cek head sebelum loop</td></tr>
+    <tr><td><code>n-&gt;name = name;</code></td><td>Error compile</td><td><code>strcpy</code></td></tr>
+    <tr><td><code>return del-&gt;name</code> setelah free</td><td>Nama berubah jadi nama pasien lain</td><td>strcpy sebelum free</td></tr>
   </table>
 </section>
 
 <section class="slide">
-  <h2>Ringkasan</h2>
+  <h2>Ringkasan: priority queue = list terurut + pqPush yang tidak menyalip</h2>
   <ul>
-    <li>Priority queue melayani berdasarkan <b>prioritas</b>. Untuk prioritas yang sama, yang datang duluan dilayani duluan.</li>
-    <li>Simpan list <b>selalu terurut</b>: pqPush mencari posisi (O(n)), pqPop cukup mengambil head (O(1)).</li>
-    <li>pqPush = kasus head + pola insertAt. Loop melewati node yang <code>&gt;=</code>, kasus head memakai <code>&gt;</code>.</li>
-    <li>Aturan berlapis ditulis di satu fungsi <code>higher()</code>. String disalin dengan <code>strcpy</code>.</li>
+    <li>Prioritas dulu, urutan datang untuk yang seri (1️⃣).</li>
+    <li>List selalu terurut: pqPush mencari posisi (O(n)), pqPop ambil head (O(1)) (2️⃣ 6️⃣).</li>
+    <li>pqPush = kasus head + pola insertAt. Loop <code>&gt;=</code>, kasus head <code>&gt;</code> (4️⃣ 5️⃣).</li>
+    <li>Nama disalin dengan strcpy, termasuk sebelum free (3️⃣ 6️⃣).</li>
+    <li>Aturan berlapis ditulis di satu fungsi <code>higher()</code> (7️⃣).</li>
   </ul>
-  <p class="label">Latihan dan full program (antrean IGD) ada di notes. Materi berikutnya: mengerjakan soal kasus.</p>
+</section>
+
+<section class="slide">
+  <h2>Soal latihan: kerjakan dulu, jawabannya di slide berikutnya</h2>
+  <ol class="soal-list">
+    <li>Antrean kosong (angka besar didahulukan): A 2, B 4, C 2, D 4, E 1. Apa isi list?</li>
+    <li>Kenapa loop pqPush memakai <code>&gt;=</code>, sedangkan kasus head memakai <code>&gt;</code>?</li>
+    <li>Ubah kasus head dan kondisi loop untuk soal "prioritas 1 paling penting".</li>
+    <li>Kenapa <code>return del-&gt;name;</code> setelah <code>free(del)</code> berbahaya?</li>
+  </ol>
+  <p class="coba-link">Soal lain (list tidak terurut, higher alfabet, bug yang lolos sample) ada di akhir setiap section notes.</p>
+</section>
+
+<section class="slide">
+  <h2>Jawaban soal latihan</h2>
+  <ol class="soal-list">
+    <li><b>B 4, D 4, A 2, C 2, E 1.</b> Di prioritas yang sama, urutannya tetap urutan datang.</li>
+    <li>Loop melewati yang sama atau lebih penting (pasien baru antre di belakang yang setara). Head hanya digeser kalau pasien baru benar-benar lebih penting.</li>
+    <li><code>prio &lt; pq-&gt;head-&gt;prio</code> untuk head, dan <code>cur-&gt;next-&gt;prio &lt;= prio</code> untuk loop.</li>
+    <li>Memory node yang di-free bisa dipakai malloc berikutnya, jadi nama bisa berubah jadi nama pasien lain (use-after-free).</li>
+  </ol>
 </section>
 
 <script src="../../_shared/slides.js?v=805bba15"></script>

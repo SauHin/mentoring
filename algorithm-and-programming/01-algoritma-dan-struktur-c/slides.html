@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Algoritma dan Struktur Program C</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
   <style>
-    .deck .slide.full { padding-bottom: 3vh; }
-    .deck .slide.full h2 { margin-bottom: 0.3em; }
-    .deck .slide.full iframe { min-height: 0; }
-    .big3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8em; }
+    .big3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8em; margin: 0.4em 0; }
     .big3 .card { padding: 0.8em 1em; }
     .big3 strong { display: block; font-size: 1.1em; margin-bottom: 0.2em; }
+    .shape { width: 3.2em; height: 1.5em; vertical-align: middle; }
+    .shape rect, .shape polygon { fill: var(--kertas); stroke: var(--pudar); stroke-width: 1.5; }
   </style>
 </head>
 <body class="deck">
@@ -21,51 +21,48 @@
 <section class="slide">
   <img class="logo" src="../../_shared/logo.svg" alt="">
   <h1>Algoritma dan struktur program C</h1>
-  <p>Algorithm and programming · cara mengubah masalah menjadi langkah-langkah (algoritma), lalu menjadi program C.</p>
+  <p class="sub">Algorithm and programming · materi 01</p>
+  <p>Target: kamu bisa mengubah masalah menjadi langkah-langkah (algoritma), lalu menulisnya sebagai program C.</p>
+  <p class="coba-link">Label di atas setiap judul (misalnya "Notes 3️⃣") menunjuk section notes yang membahas hal yang sama secara lengkap.</p>
 </section>
 
 <section class="slide">
-  <h2>Algoritma = resep</h2>
-  <p class="sub">Algoritma adalah urutan langkah untuk menyelesaikan masalah. Contoh masalah: hitung rata-rata tiga angka.</p>
+  <p class="kicker">Notes 1️⃣ · Algoritma</p>
+  <h2>Algoritma yang baik benar, tidak ambigu, dan pasti berhenti</h2>
+  <p class="sub"><mark>Algoritma</mark> adalah urutan langkah yang jelas untuk menyelesaikan satu masalah. Contoh: rata-rata tiga angka.</p>
   <div class="cols">
     <table>
       <tr><th>Algoritma 1</th><th>Algoritma 2</th></tr>
       <tr><td>Read A<br>Read B<br>Read C<br>avg = (A+B+C) / 3<br>Print avg</td><td>Read A, B, C<br>sum = A + B + C<br>avg = sum / 3<br>Print avg</td></tr>
     </table>
     <ul>
-      <li>Setiap langkah harus <b>jelas</b>, <b>berurutan</b>, dan algoritmanya <b>pasti berhenti</b>.</li>
-      <li>Kedua algoritma di samping berbeda, tapi sama-sama benar. Satu masalah bisa punya banyak algoritma.</li>
+      <li>Kedua algoritma berbeda, tapi sama-sama benar. Satu masalah bisa punya banyak algoritma.</li>
       <li>Yang dinilai adalah hasilnya benar untuk semua input, bukan kemiripan dengan contoh.</li>
+      <li>"Garam secukupnya" bukan langkah algoritma, karena ambigu.</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Dari masalah ke program: 7 langkah</h2>
-  <p class="sub">Jangan langsung menulis kode. Jawab dulu pertanyaan di setiap langkah, karena kesalahan di awal paling mahal untuk diperbaiki.</p>
+  <p class="kicker">Notes 2️⃣ · Tujuh langkah</p>
+  <h2>Tentukan input, output, dan rumusnya dulu, baru menulis kode</h2>
+  <p class="sub"><mark>Model</mark> adalah rumus atau aturan yang menghubungkan input dengan output.</p>
   <table>
     <tr><th>Langkah</th><th>Pertanyaan kunci</th></tr>
     <tr><td>1. Definisi masalah</td><td>Input-nya apa? Output-nya apa?</td></tr>
-    <tr><td>2. Model</td><td>Rumus atau aturan apa yang menghubungkan input dan output?</td></tr>
+    <tr><td>2. Model</td><td>Rumus atau aturan apa yang dipakai?</td></tr>
     <tr><td>3. Desain algoritma</td><td>Langkahnya apa dan bagaimana urutannya? Tulis sebagai pseudocode atau flowchart.</td></tr>
-    <tr><td>4–5. Tulis kode, compile</td><td>Apakah aturan penulisan C sudah benar? Kalau belum, muncul <b>syntax error</b>.</td></tr>
-    <tr><td>6. Run dan test</td><td>Apakah hasilnya benar? Kalau salah, ada <b>logic error</b>.</td></tr>
+    <tr><td>4–5. Tulis kode, compile</td><td>Apakah aturan penulisan C sudah benar?</td></tr>
+    <tr><td>6. Run dan test</td><td>Apakah hasilnya benar?</td></tr>
     <tr><td>7. Dokumentasi</td><td>Apakah orang lain bisa memahami program ini?</td></tr>
   </table>
+  <p>Kesalahan di langkah awal paling mahal, karena semua langkah sesudahnya ikut salah.</p>
 </section>
 
 <section class="slide">
-  <h2>Dua jenis error</h2>
-  <p class="sub">Bedanya ada pada siapa yang bisa menemukan error itu: compiler, atau kamu sendiri.</p>
-  <div class="cols">
-    <div class="callout warn"><strong>Syntax error</strong>Kode melanggar aturan penulisan C, misalnya lupa <code>;</code>, menulis <code>Printf</code>, atau tanda kutip tidak ditutup.<br><br>Compiler <b>menolak</b> program dan menunjukkan baris yang salah.</div>
-    <div class="callout warn"><strong>Logic error</strong>Program jalan, tapi hasilnya salah. Contoh: <code>a + b + c / 3</code> hanya membagi c, karena <code>/</code> dikerjakan sebelum <code>+</code>.<br><br>Compiler <b>tidak memberi tahu</b>. Test dengan input yang jawabannya sudah kamu tahu.</div>
-  </div>
-</section>
-
-<section class="slide">
-  <h2>Pseudocode → C: tinggal mencocokkan</h2>
-  <p class="sub">Pseudocode adalah algoritma yang ditulis dengan bahasa sehari-hari. Setiap baris pseudocode punya padanan langsung di C.</p>
+  <p class="kicker">Notes 3️⃣ · Pseudocode</p>
+  <h2>Setiap baris pseudocode punya pasangan langsung di C</h2>
+  <p class="sub"><mark>Pseudocode</mark> adalah algoritma yang ditulis mirip kode, tapi bebas dari aturan bahasa pemrograman.</p>
   <table>
     <tr><th>Pseudocode</th><th>C</th></tr>
     <tr><td>Read x</td><td><code>scanf("%d", &amp;x);</code></td></tr>
@@ -74,12 +71,26 @@
     <tr><td>IF … THEN … ELSE … ENDIF</td><td><code>if (…) { … } else { … }</code></td></tr>
     <tr><td>DOWHILE … ENDDO</td><td><code>while (…) { … }</code></td></tr>
   </table>
-  <p class="label">Bagian yang hanya ada di C: deklarasi tipe (<code>int x;</code>), <code>#include</code>, <code>main()</code>, dan <code>;</code> di akhir statement.</p>
+  <p>Yang hanya ada di C: deklarasi tipe (<code>int x;</code>), <code>#include</code>, <code>main()</code>, dan <code>;</code>. Itu aturan bahasa, bukan logika. Detail <code>scanf</code> dan <code>printf</code> ada di materi 02.</p>
 </section>
 
 <section class="slide">
-  <h2>Hanya ada 3 struktur</h2>
-  <p class="sub">Semua program, sebesar apa pun, hanya disusun dari tiga struktur ini.</p>
+  <p class="kicker">Notes 4️⃣ · Flowchart</p>
+  <h2>Bentuk simbol flowchart menunjukkan jenis langkahnya</h2>
+  <p class="sub"><mark>Flowchart</mark> adalah gambar algoritma: setiap langkah berupa simbol, dan panah menunjukkan urutannya.</p>
+  <table>
+    <tr><th>Simbol</th><th>Nama</th><th>Untuk</th></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Persegi panjang bersudut bulat"><rect x="2" y="3" width="60" height="24" rx="12"/></svg></td><td>Terminal</td><td>Start dan End</td></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Jajar genjang"><polygon points="12,3 62,3 52,27 2,27"/></svg></td><td>Input/Output</td><td>Read dan Print</td></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Persegi panjang"><rect x="2" y="3" width="60" height="24" rx="3"/></svg></td><td>Process</td><td>Hitung dan simpan nilai</td></tr>
+    <tr><td><svg class="shape" viewBox="0 0 64 30" role="img" aria-label="Belah ketupat"><polygon points="32,1 62,15 32,29 2,15"/></svg></td><td>Decision</td><td>Kondisi ya/tidak (IF, kondisi loop)</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 5️⃣ · Tiga struktur</p>
+  <h2>Semua program hanya disusun dari tiga struktur</h2>
+  <p class="sub"><mark>Structure theorem</mark> menyatakan bahwa program sebesar apa pun bisa dibangun dari sequence, selection, dan repetition.</p>
   <div class="big3">
     <div class="card"><strong>Sequence</strong>Langkah dijalankan berurutan dari atas ke bawah.</div>
     <div class="card"><strong>Selection</strong>Program memilih satu cabang sesuai kondisi: <code>if … else</code>.</div>
@@ -89,13 +100,15 @@
 </section>
 
 <section class="slide full">
-  <h2>Coba sendiri: satu algoritma, tiga bentuk</h2>
+  <p class="kicker">Notes 5️⃣ · Satu algoritma, tiga bentuk</p>
+  <h2>Coba sendiri: langkah yang sama menyala di pseudocode, flowchart, dan C</h2>
   <iframe src="viz/tiga-bentuk.html" title="Visualisasi pseudocode, flowchart, dan C"></iframe>
 </section>
 
 <section class="slide">
-  <h2>Anatomi program C</h2>
-  <p class="sub">Ini program C terkecil yang bisa jalan. Setiap baris punya tugas sendiri.</p>
+  <p class="kicker">Notes 6️⃣ · Anatomi program C</p>
+  <h2>Program C selalu mulai dari <code>main</code>, dan setiap statement diakhiri <code>;</code></h2>
+  <p class="sub"><mark>Statement</mark> adalah satu perintah di C. Ini program C terkecil yang bisa jalan.</p>
   <div class="cols">
 <pre><code>#include &lt;stdio.h&gt;
 
@@ -105,17 +118,16 @@ int main() {
 }</code></pre>
     <ul>
       <li><code>#include &lt;stdio.h&gt;</code> memasukkan daftar fungsi input/output, termasuk <code>printf</code>.</li>
-      <li>Program <b>selalu</b> mulai dari <code>main</code>.</li>
-      <li><code>;</code> menandai akhir statement. Enter tidak dihitung sebagai akhir statement.</li>
       <li><code>return 0</code> memberi tahu sistem bahwa program selesai tanpa error.</li>
-      <li>C bersifat <b>case sensitive</b>: <code>main</code> dan <code>Main</code> dianggap berbeda.</li>
+      <li>C itu <b>case sensitive</b>: <code>main</code> dan <code>Main</code> dianggap berbeda. Komentar (<code>//</code>, <code>/* */</code>) diabaikan compiler.</li>
     </ul>
   </div>
 </section>
 
 <section class="slide">
-  <h2>Escape sequence: tebak output-nya</h2>
-  <p class="sub">Beberapa karakter tidak bisa diketik langsung di dalam string. Karakter itu ditulis dengan backslash (<code>\</code>) diikuti satu huruf.</p>
+  <p class="kicker">Notes 7️⃣ · Escape sequence</p>
+  <h2>Backslash mengubah karakter sesudahnya menjadi karakter khusus</h2>
+  <p class="sub"><mark>Escape sequence</mark> adalah <code>\</code> diikuti satu karakter, untuk menulis karakter yang tidak bisa diketik langsung di dalam string.</p>
   <div class="cols">
     <div>
 <pre><code>printf("A\tB\nC\\D \"E\"");</code></pre>
@@ -125,7 +137,7 @@ int main() {
       </table>
     </div>
     <div>
-      <p class="label">Output:</p>
+      <p class="lbl-code">Output</p>
 <pre><code>A       B
 C\D "E"</code></pre>
     </div>
@@ -133,14 +145,15 @@ C\D "E"</code></pre>
 </section>
 
 <section class="slide">
-  <h2>Identifier: valid atau tidak?</h2>
-  <p class="sub">Identifier adalah nama yang kamu buat sendiri, misalnya nama variabel dan nama fungsi. Ada tiga aturan.</p>
+  <p class="kicker">Notes 8️⃣ · Identifier</p>
+  <h2>Identifier diawali huruf atau <code>_</code>, dan tidak boleh berupa keyword</h2>
+  <p class="sub"><mark>Identifier</mark> adalah nama yang kamu buat sendiri, misalnya nama variabel dan nama fungsi.</p>
   <div class="cols">
-    <ul>
-      <li>Diawali <b>huruf</b> atau <b><code>_</code></b>.</li>
+    <ol>
+      <li>Diawali <b>huruf</b> atau <code>_</code>.</li>
       <li>Hanya berisi huruf, angka, dan <code>_</code>.</li>
-      <li>Bukan <b>keyword</b> C (<code>int</code>, <code>for</code>, <code>if</code>, …).</li>
-    </ul>
+      <li>Bukan <b>keyword</b>, yaitu kata yang sudah dipakai C (<code>int</code>, <code>for</code>, <code>if</code>, …).</li>
+    </ol>
     <table>
       <tr><th>Nama</th><th>Hasil</th></tr>
       <tr><td><code>x1</code>, <code>_total</code>, <code>jumlahData</code></td><td>Valid</td></tr>
@@ -152,8 +165,9 @@ C\D "E"</code></pre>
 </section>
 
 <section class="slide">
-  <h2>Header file: tahu isinya, tidak perlu hafal</h2>
-  <p class="sub">Header file berisi daftar fungsi siap pakai. Cukup tahu header mana yang dipakai untuk keperluan apa, lalu cari detailnya saat butuh.</p>
+  <p class="kicker">Notes 9️⃣ · Header file</p>
+  <h2>Cukup tahu header mana yang dipakai, isinya tidak perlu dihafal</h2>
+  <p class="sub"><mark>Header file</mark> berisi daftar fungsi siap pakai, dan <code>#include</code> artinya "aku memakai fungsi dari daftar ini".</p>
   <table>
     <tr><th>Header</th><th>Isinya</th><th>Contoh fungsi</th></tr>
     <tr><td><code>stdio.h</code></td><td>Input/output</td><td><code>printf</code>, <code>scanf</code></td></tr>
@@ -162,17 +176,71 @@ C\D "E"</code></pre>
     <tr><td><code>string.h</code></td><td>String</td><td><code>strlen</code>, <code>strcpy</code></td></tr>
     <tr><td><code>time.h</code></td><td>Waktu</td><td><code>time</code></td></tr>
   </table>
+  <p>Lupa <code>#include &lt;math.h&gt;</code> saat memakai <code>sqrt</code> hanya memberi warning, tapi hasilnya bisa aneh.</p>
 </section>
 
 <section class="slide">
-  <h2>Ringkasan</h2>
+  <p class="kicker">Notes <span class="no">10</span> · Syntax error</p>
+  <h2>Syntax error ditolak compiler, dan pesannya bisa menunjuk baris sesudahnya</h2>
+  <p class="sub"><mark>Syntax error</mark> adalah kesalahan penulisan yang melanggar aturan bahasa C.</p>
+  <table>
+    <tr><th>Kode</th><th>Kenapa salah</th></tr>
+    <tr><td><code>printf("Hi")</code> tanpa <code>;</code></td><td>Statement belum ditutup</td></tr>
+    <tr><td><code>Printf("Hi");</code></td><td>Case sensitive: fungsinya <code>printf</code></td></tr>
+    <tr><td><code>printf('Hi');</code></td><td>String pakai kutip ganda. Kutip tunggal hanya untuk satu karakter.</td></tr>
+  </table>
+  <aside class="jebakan"><p>Kalau <code>;</code> lupa, compiler baru sadar saat membaca baris berikutnya. Cek juga baris sebelum nomor yang ditunjuk.</p></aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes <span class="no">11</span> · Logic error</p>
+  <h2>Logic error lolos compile, jadi hanya testing yang bisa menemukannya</h2>
+  <p class="sub"><mark>Logic error</mark> adalah kesalahan di algoritma: program jalan tanpa protes, tapi hasilnya salah.</p>
+  <div class="cols">
+    <table>
+      <tr><th></th><th>Syntax error</th><th>Logic error</th></tr>
+      <tr><td>Yang menemukan</td><td>Compiler</td><td>Kamu, lewat testing</td></tr>
+      <tr><td>Program jalan?</td><td>Tidak</td><td>Ya, tapi salah</td></tr>
+    </table>
+    <div>
+      <p class="lbl-code">a = 3, b = 6, c = 9</p>
+<pre><code>a + b + c / 3     // = 3 + 6 + 3 = 12
+(a + b + c) / 3   // = 18 / 3 = 6</code></pre>
+    </div>
+  </div>
+  <p><code>/</code> dikerjakan sebelum <code>+</code>, jadi hanya c yang dibagi 3. Test selalu dengan input yang jawabannya sudah kamu tahu.</p>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan: dari masalah, ke algoritma, ke program C</h2>
   <ul>
-    <li>Algoritma adalah langkah yang <b>jelas, berurutan, dan pasti berhenti</b>. Banyak versi bisa sama-sama benar.</li>
-    <li>Semua program disusun dari <b>sequence, selection, dan repetition</b>.</li>
-    <li>Tulis <b>pseudocode dulu</b>, lalu terjemahkan baris demi baris ke C.</li>
-    <li>Syntax error ditemukan oleh compiler. Logic error harus kamu temukan sendiri dengan <b>testing</b>.</li>
+    <li>Algoritma = langkah yang <b>jelas, berurutan, dan pasti berhenti</b>. Banyak versi bisa sama-sama benar (1️⃣).</li>
+    <li>Tentukan input, output, dan model dulu. Tulis <b>pseudocode atau flowchart</b>, lalu terjemahkan ke C (2️⃣ 3️⃣ 4️⃣).</li>
+    <li>Semua program disusun dari <b>sequence, selection, dan repetition</b> (5️⃣).</li>
+    <li>Program C mulai dari <code>main</code>, statement diakhiri <code>;</code>, dan C case sensitive (6️⃣ sampai 9️⃣).</li>
+    <li>Syntax error ditemukan compiler. Logic error harus kamu temukan sendiri dengan <b>testing</b> (<span class="no">10</span> <span class="no">11</span>).</li>
   </ul>
-  <p class="label">Latihan (pseudocode → C, cari error) ada di notes.</p>
+</section>
+
+<section class="slide">
+  <h2>Soal latihan: kerjakan dulu, jawabannya di slide berikutnya</h2>
+  <ol class="soal-list">
+    <li>Simbol flowchart apa untuk "Read panjang" dan untuk "n % 2 == 0?"</li>
+    <li>Mana yang identifier valid: <code>_total</code>, <code>1time</code>, <code>total-harga</code>, <code>Total</code>?</li>
+    <li>Tebak output <code>printf("1\t2\n3");</code></li>
+    <li>Program jalan, tapi rata-ratanya salah. Ini syntax error atau logic error, dan bagaimana menemukannya?</li>
+  </ol>
+  <p class="coba-link">Soal lain (pseudocode → C, cari error, dua algoritma max) ada di akhir setiap section notes.</p>
+</section>
+
+<section class="slide">
+  <h2>Jawaban soal latihan</h2>
+  <ol class="soal-list">
+    <li>"Read panjang" = Input/Output (jajar genjang). "n % 2 == 0?" = Decision (belah ketupat), karena jawabannya ya atau tidak.</li>
+    <li>Valid: <code>_total</code> dan <code>Total</code>. <code>1time</code> diawali angka, dan <code>-</code> di <code>total-harga</code> dibaca sebagai operator minus.</li>
+    <li><code>1</code>, tab, <code>2</code>, lalu pindah baris dan <code>3</code>.</li>
+    <li>Logic error, karena programnya tetap jalan. Temukan dengan test memakai input yang jawabannya sudah kamu tahu.</li>
+  </ol>
 </section>
 
 <script src="../../_shared/slides.js?v=805bba15"></script>

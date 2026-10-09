@@ -5,10 +5,10 @@
 .bottom { display: grid; gap: 16px; margin-top: 16px; }
 @media (min-width: 760px) { .bottom { grid-template-columns: 1.15fr 1fr; } }
 .code { margin: 0; font-size: 0.85rem; line-height: 1.55; }
-.code .ln { display: block; padding: 0 0.5rem; border-radius: 6px; white-space: pre; }
+.code .ln { display: block; padding: 0 0.5rem; border-radius: 3px; white-space: pre; }
 .code .ln.on { background: var(--marker); }
 .code .ln.was { background: var(--card-2); } /* mode tebak: baris terakhir yang sudah jalan */
-.side { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; border-radius: 22px; align-self: start; }
+.side { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; align-self: start; }
 .side .ops { margin-top: 4px; }
 .side p { margin: 0; }
 #caption { font-size: 1.05rem; min-height: 3.3em; }
@@ -16,7 +16,7 @@
 #output { font-weight: 600; font-variant-numeric: tabular-nums; }
 /* Legenda warna di pojok gambar, bukan di kartu terpisah. */
 .stage-wrap { position: relative; }
-.stage-wrap > svg { display: block; width: 100%; height: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+.stage-wrap > svg { display: block; width: 100%; height: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
 .legend { position: absolute; left: 16px; top: 10px; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; }
 @media (max-width: 700px) { .legend { position: static; margin-top: 8px; } } /* gambar terlalu kecil untuk ditimpa legenda */
 .legend span::before { content: ''; display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--c); }
@@ -33,10 +33,10 @@
 .node.found .val { fill: #fff; }
 .node.found .null { stroke: rgb(255 255 255 / 0.6); }
 .arrow { fill: none; stroke-width: 2; }
-.arrow.next { stroke: var(--go-ink); }
+.arrow.next { stroke: var(--c-mint); } /* hijau: sama dengan panah next di notes dan slide */
 .arrow.prev { stroke: var(--focus); }
 .arrow.hot { stroke: var(--hot); stroke-width: 3.5; }
-.dot.next, .tip.next { fill: var(--go-ink); }
+.dot.next, .tip.next { fill: var(--c-mint); }
 .dot.prev, .tip.prev { fill: var(--focus); }
 .dot.hot, .tip.hot { fill: var(--hot); }
 .ptr { fill: var(--ink-2); font-size: 17px; font-weight: 500; text-anchor: middle; }

@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cek RE</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=db2dcc70">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Cek RE kamu</h1>
-<p>Pilih soal, tulis RE-mu, lalu lihat apakah RE itu menerima string yang <b>tepat</b>: semua string yang seharusnya masuk, dan tidak satu pun yang seharusnya ditolak. Pengecekan memakai semua string sampai panjang tertentu.</p>
+<p>Visualisasi ini membandingkan RE-mu dengan kunci jawaban untuk semua string sampai panjang tertentu, lalu menunjukkan string yang salah.</p>
+<p class="coba"><strong>Coba:</strong> pilih soal di menu <b>Soal</b>, lalu tulis RE-mu di kolom isian. Mulai dengan jawaban yang sengaja salah, misalnya hanya satu urutan untuk Latihan 1.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> string merah diterima padahal seharusnya ditolak, dan string biru ditolak padahal seharusnya diterima. Jawabanmu tepat kalau tidak ada string yang salah.</p>
 
 <div class="controls">
   <label class="pick">Soal <select class="field" id="pre"></select></label>
@@ -87,7 +90,7 @@ function check() {
   $('wrong').innerHTML = wrong.map(({ s, got }) => `<span class="${got ? 'bad' : 'ok'}" title="${got ? 'diterima, padahal seharusnya ditolak' : 'ditolak, padahal seharusnya diterima'}">${escHTML(show(s))} ${got ? '✗ diterima' : '✓ seharusnya diterima'}</span>`).join('');
   $('verdict').className = `au-verdict ${wrong.length ? 'no' : 'yes'}`;
   $('verdict').innerHTML = wrong.length
-    ? `<b>Belum tepat.</b> Merah = RE kamu menerima string yang seharusnya ditolak. Hijau = RE kamu menolak string yang seharusnya diterima.${extra.length ? ` RE kamu memakai simbol di luar alfabet: ${extra.map(escHTML).join(', ')}.` : ''}`
+    ? `<b>Belum tepat.</b> Merah = RE kamu menerima string yang seharusnya ditolak. Biru = RE kamu menolak string yang seharusnya diterima.${extra.length ? ` RE kamu memakai simbol di luar alfabet: ${extra.map(escHTML).join(', ')}.` : ''}`
     : `<b>Tepat</b> untuk semua ${total} string sampai panjang ${P.len}. Ingat: satu bahasa bisa ditulis dengan banyak RE yang berbeda.`;
 }
 $('pre').innerHTML = PRESETS.map((p, i) => `<option value="${i}">${p.name}</option>`).join('');

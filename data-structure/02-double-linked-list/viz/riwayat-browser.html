@@ -5,33 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Browser History</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
   <style>
-    .browser { display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 999px; margin-bottom: 12px; }
-    .icon { width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+    .browser { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 10px; margin-bottom: 12px; }
+    .icon { width: 40px; height: 40px; border: 0; border-radius: 6px; background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--btn-edge); display: grid; place-items: center; cursor: pointer; }
     .icon:disabled { color: var(--ink-3); opacity: 0.5; cursor: not-allowed; }
     .icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-    .addr { flex: 1; background: var(--surface); border-radius: 999px; padding: 0.55rem 1.1rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .addr { flex: 1; background: var(--surface); border-radius: 6px; padding: 0.5rem 0.9rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sites { display: flex; flex-wrap: wrap; gap: 10px; }
     .track { display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 36px 8px 12px; }
-    .pg { position: relative; flex: none; background: var(--card-2); border-radius: 14px; padding: 0.6rem 1rem; font-weight: 600; }
+    .pg { position: relative; flex: none; background: var(--card-2); border-radius: 6px; padding: 0.6rem 1rem; font-weight: 600; }
     .pg.on { background: color-mix(in srgb, var(--focus) 24%, var(--surface)); }
     .pg.on::before { content: 'cur'; position: absolute; left: 50%; top: -30px; translate: -50% 0; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); }
     .link { flex: none; width: 56px; height: 28px; }
-    .link .n { stroke: var(--go-ink); } .link .p { stroke: var(--focus); }
+    .link .n { stroke: var(--c-mint); } .link .p { stroke: var(--focus); } /* hijau = next, biru = prev, sama dengan notes */
     .link path { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .nil { flex: none; color: var(--ink-3); font-size: 0.9rem; padding: 0 10px; }
     #msg { min-height: 3.2em; margin: 12px 0; }
     .code { font-size: 0.85rem; line-height: 1.55; }
-    .code .ln { display: block; padding: 0 0.5rem; border-radius: 6px; white-space: pre; }
+    .code .ln { display: block; padding: 0 0.5rem; border-radius: 3px; white-space: pre; }
     .code .ln.on { background: var(--marker); }
   </style>
 </head>
 <body class="viz">
 
 <h1>Browser history</h1>
-<p>Tombol <b>back</b> dan <b>forward</b> di browser = double linked list. Tiap halaman adalah <b>node</b>, dan <code>cur</code> menunjuk halaman yang sedang dibuka.</p>
+<p>Visualisasi ini menunjukkan riwayat browser sebagai double linked list: setiap halaman adalah node, dan <code>cur</code> menunjuk halaman yang sedang dibuka.</p>
+<p class="coba"><strong>Coba:</strong> klik beberapa halaman di <b>Buka halaman</b>, tekan tombol panah kiri (back) dan panah kanan (forward), lalu buka halaman baru setelah menekan back.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> back dan forward hanya memindahkan <code>cur</code>. Membuka halaman baru dari tengah history membuang semua node sesudah cur, jadi tombol forward mati (notes 11).</p>
 
 <div class="card browser">
   <button class="icon" id="back" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>

@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Subset Construction</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=db2dcc70">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>NFA → DFA (subset construction)</h1>
-<p>Setiap state DFA adalah <b>himpunan</b> state NFA yang mungkin aktif. Proses satu baris tabel DFA untuk setiap simbol, sampai tidak ada himpunan baru. State NFA yang disorot = himpunan hasil langkah ini.</p>
+<p>Visualisasi ini mengisi tabel DFA satu sel per langkah. Setiap state DFA adalah <b>himpunan</b> state NFA yang mungkin aktif, dan prosesnya berhenti saat tidak ada himpunan baru.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh, lalu klik <b>Langkah berikutnya</b>. Nyalakan <b>Mode tebak</b> untuk menebak himpunan tujuan sebelum hasilnya muncul.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> state NFA yang disorot oranye adalah himpunan hasil langkah ini. Setiap himpunan yang belum pernah muncul menjadi baris baru di tabel DFA.</p>
 
 <div class="controls">
   <label class="pick">Contoh <select class="field" id="pre"></select></label>

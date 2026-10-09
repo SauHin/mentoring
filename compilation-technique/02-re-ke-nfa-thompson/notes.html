@@ -5,116 +5,333 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RE ke ε-NFA (Thompson) · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../_shared/automata.css?v=45a95657">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=db2dcc70">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Compilation technique · 02</span>
-<h1>RE → ε-NFA (Thompson)</h1>
-<p class="lead">Thompson's construction mengubah RE apa pun menjadi ε-NFA dengan cara mekanis: buat fragment kecil untuk setiap simbol, lalu sambungkan dengan pola union, concatenation, dan star.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/thompson.html">Visualisasi: Thompson langkah demi langkah</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li>Setiap fragment punya <b>satu start dan satu final</b>, jadi bisa disambung tanpa melihat isinya.</li>
-    <li>Simbol: 2 state. Union: start dan final baru, cabang ε. Concatenation: final kiri → ε → start kanan. Star: start dan final baru, 4 ε (masuk, ulangi, lewati, keluar).</li>
-    <li>Kerjakan dari dalam ke luar: star, lalu concatenation, lalu union.</li>
-    <li>Cek: jumlah state = 2 × (simbol + union + star).</li>
+<header>
+  <h1>RE ke ε-NFA (Thompson)</h1>
+  <p class="tujuan">Thompson's construction mengubah RE apa pun menjadi ε-NFA secara mekanis: buat fragment kecil untuk setiap simbol, lalu sambungkan dengan pola union, concatenation, dan star. Target: kamu bisa menggambar ε-NFA dari RE dan mengecek jumlah state-nya.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/thompson.html">Thompson langkah demi langkah</a> · Prasyarat: <a href="../01-regular-expression/notes.html">regular expression</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">NFA dan ε-NFA</a></li>
+      <li><a href="#langkah-2">Ide Thompson: fragment</a></li>
+      <li><a href="#langkah-3">Pola simbol</a></li>
+      <li><a href="#langkah-4">Pola union</a></li>
+      <li><a href="#langkah-5">Pola concatenation</a></li>
+      <li><a href="#langkah-6">Pola star</a></li>
+      <li><a href="#langkah-7">Resep mengerjakan soal</a></li>
+      <li><a href="#langkah-8">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. NFA dan ε-NFA</h2>
-<p>Finite automaton (FA) adalah mesin yang membaca string simbol demi simbol, lalu menjawab <b>accepted</b> atau <b>rejected</b>. Secara formal M = (Q, Σ, δ, q₀, F):</p>
-<table>
-  <tr><th>Komponen</th><th>Arti</th></tr>
-  <tr><td>Q</td><td>himpunan state yang terbatas</td></tr>
-  <tr><td>Σ</td><td>alphabet input</td></tr>
-  <tr><td>δ</td><td>fungsi transisi. Di NFA, δ(q, a) adalah <b>himpunan</b> state (boleh kosong, boleh lebih dari satu).</td></tr>
-  <tr><td>q₀</td><td>start state</td></tr>
-  <tr><td>F</td><td>himpunan final (accepting) state</td></tr>
-</table>
-<p><b>ε-NFA</b> adalah NFA yang juga boleh punya transisi berlabel ε: pindah state tanpa membaca input. String x diterima kalau <b>ada minimal satu jalur</b> dari start ke final yang label-labelnya (tanpa ε) membentuk x.</p>
-<div class="au-fig" data-auto="NFA untuk (a|b)*abb">a b
+<main>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>ε-NFA boleh pindah state tanpa membaca input, dan cukup satu jalur yang berhasil</h2></summary>
+  <p class="rantai">
+    <span class="dari">RE dan language (materi 01)</span>
+    <span class="ke">fragment Thompson (<a href="#langkah-2">2️⃣</a>) dan subset construction (materi 03)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Labirin dengan jalan pintas gratis: di persimpangan kamu boleh mencoba beberapa jalan, dan ada lorong yang bisa dilewati tanpa melangkah.</p>
+    <p class="batas">di labirin nyata kamu hanya menempuh satu jalan. NFA dianggap mencoba semua jalan sekaligus, dan diterima kalau satu saja sampai.</p>
+  </aside>
+
+  <p>Finite automaton membaca string simbol demi simbol, lalu menjawab accepted atau rejected. Di NFA, satu simbol boleh menuju <b>beberapa</b> state. <mark>ε-NFA</mark> adalah NFA yang juga boleh punya transisi berlabel ε, yaitu pindah state tanpa membaca input.</p>
+  <div class="au-fig" data-auto="NFA untuk (a|b)*abb">a b
 →0 {0,1} {0}
 1 - {2}
 2 - {3}
 *3 - -</div>
-<p>NFA di atas menerima <code>(a|b)*abb</code>. Input <code>aabb</code> diterima lewat jalur 0 →a 0 →a 1 →b 2 →b 3. Jalur lain, misalnya 0 →a 0 →a 0 →b 0 →b 0, berakhir di state bukan final, tetapi itu tidak masalah: satu jalur yang berhasil sudah cukup.</p>
+  <p>Input <code>aabb</code> diterima lewat jalur 0, 0, 1, 2, 3. Jalur lain yang berakhir di 0 tidak masalah: satu jalur ke final sudah cukup.</p>
 
-<h2>2. Empat pola Thompson</h2>
-<p>Teorema: untuk setiap RE R ada ε-NFA M dengan L(M) = L(R). Buktinya sekaligus menjadi cara membuatnya, yaitu induksi pada struktur RE.</p>
-<h3>Simbol a (dan ε)</h3>
-<div class="au-fig" data-thompson="a"></div>
-<p>Dua state dan satu transisi. Untuk ε, labelnya ε. Untuk ∅, dua state tanpa transisi (tidak ada jalur ke final).</p>
-<h3>Union R | S</h3>
-<div class="au-fig" data-thompson="a|b"></div>
-<p>Start baru bercabang ε ke start R dan start S, karena string boleh mengikuti salah satunya. Final R dan final S masing-masing ε ke final baru, supaya fragment hasilnya tetap punya satu final.</p>
-<h3>Concatenation RS</h3>
-<div class="au-fig" data-thompson="ab"></div>
-<p>Final R disambung ε ke start S. Start hasil = start R, final hasil = final S. Final R tidak lagi final.</p>
-<h3>Star R*</h3>
-<div class="au-fig" data-thompson="a*"></div>
-<table>
-  <tr><th>ε-transition</th><th>Di gambar</th><th>Fungsinya</th></tr>
-  <tr><td>masuk</td><td>0 → 1</td><td>mulai satu putaran R</td></tr>
-  <tr><td>ulangi</td><td>2 → 1</td><td>setelah R selesai, boleh membaca R lagi</td></tr>
-  <tr><td>lewati</td><td>0 → 3</td><td>nol kali: ε diterima</td></tr>
-  <tr><td>keluar</td><td>2 → 3</td><td>berhenti mengulang</td></tr>
-</table>
+  <aside class="hitung">
+    <details>
+      <summary>Definisi formal M = (Q, Σ, δ, q₀, F)</summary>
+      <table>
+        <tr><th>Komponen</th><th>Arti</th></tr>
+        <tr><td>Q</td><td>himpunan state yang terbatas</td></tr>
+        <tr><td>Σ</td><td>alphabet input</td></tr>
+        <tr><td>δ</td><td>fungsi transisi. Di NFA, δ(q, a) adalah <b>himpunan</b> state (boleh kosong, boleh lebih dari satu)</td></tr>
+        <tr><td>q₀</td><td>start state</td></tr>
+        <tr><td>F</td><td>himpunan final (accepting) state</td></tr>
+      </table>
+    </details>
+  </aside>
 
-<h2>3. Resep mengerjakan soal</h2>
-<ol>
-  <li><b>Pecah RE sesuai prioritas.</b> Star mengikat paling kuat, lalu concatenation, lalu union. Contoh: <code>(a|b)*abb</code> = <code>(a|b)*</code> · <code>a</code> · <code>b</code> · <code>b</code>.</li>
-  <li><b>Buat fragment simbol</b>, satu untuk setiap kemunculan simbol.</li>
-  <li><b>Gabungkan dari dalam ke luar.</b> Untuk <code>(a|b)*abb</code>: a, b → a|b → (a|b)* → sambung a → sambung b → sambung b.</li>
-  <li><b>Beri nomor</b> state dari kiri ke kanan (cabang atas lebih dulu dari cabang bawah).</li>
-  <li><b>Cek</b> jumlah state: 2 × (simbol + union + star). Hanya ada satu start dan satu final.</li>
-</ol>
-<h3>Contoh: (a|b)*a</h3>
-<div class="au-fig" data-thompson="(a|b)*a"></div>
-<p>3 simbol + 1 union + 1 star → 10 state. String terpendek yang diterima: <code>a</code> (jalur 0 → 7 → 8 → 9 lewat ε "lewati").</p>
-<h3>Contoh slide: (0+1)*1(0+1)</h3>
-<div class="au-fig" data-thompson="(0+1)*1(0+1)"></div>
-<p>5 simbol + 2 union + 1 star → 16 state.</p>
-<div class="callout"><strong>Gaya Aho: concatenation tanpa ε</strong>Di buku Aho (dan slide dosen sesi DFA &amp; NFA), final R langsung digabung dengan start S menjadi satu state. Hasilnya satu state lebih sedikit untuk setiap concatenation. Contoh: <code>(a|b)*a</code> menjadi 9 state (0 sampai 8). Kedua gaya benar karena ε di antara keduanya tidak membaca apa pun. Kalau soal tidak menyebut gaya, pakai gaya slide Thompson dosen (dengan ε).</div>
+  <p class="intinya">NFA: satu simbol bisa ke beberapa state. ε-NFA: ditambah transisi ε. Diterima kalau ada minimal satu jalur ke final.</p>
 
-<h2>4. Kesalahan yang sering muncul</h2>
-<table>
-  <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
-  <tr><td>Star tanpa ε "lewati"</td><td>ε ditolak, padahal R* boleh nol kali</td><td>Tambahkan start baru → final baru</td></tr>
-  <tr><td>Star tanpa ε "ulangi"</td><td>R hanya bisa dibaca sekali</td><td>Tambahkan final dalam → start dalam</td></tr>
-  <tr><td>Union tanpa final baru</td><td>Fragment punya dua final, jadi pola lain tidak bisa dipasang</td><td>Kedua final → ε → final baru</td></tr>
-  <tr><td><code>ab*</code> dibangun sebagai <code>(ab)*</code></td><td>Language berbeda</td><td>Star hanya mengikat simbol atau kurung tepat di kirinya</td></tr>
-  <tr><td>Final fragment dalam tetap ditandai final</td><td>NFA menerima string yang belum selesai</td><td>Hanya final fragment terluar yang final</td></tr>
-</table>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan NFA di atas, apakah <code>abab</code> diterima?</summary>
+    <p><b>Tidak.</b> Untuk sampai ke final 3, dua simbol terakhir harus <code>bb</code> setelah <code>a</code>. <code>abab</code> diakhiri <code>ab</code>, jadi setiap jalur berakhir di state 0 atau 2, dan keduanya bukan final.</p>
+  </details>
+</details>
+</section>
 
-<h2>5. Latihan</h2>
-<p>Gambar ε-NFA-nya di kertas, hitung jumlah state, lalu cocokkan di <a href="viz/thompson.html">visualisasi</a> (menu "Ubah RE").</p>
-<p><b>1.</b> <code>(a|b)*abb</code></p>
-<details><summary>Jawaban</summary><p>Simbol: a dan b di dalam star, lalu a, b, b. Jadi 5 simbol + 1 union + 1 star = 7 → <b>14 state</b>.</p></details>
-<p><b>2.</b> <code>aa*|bb*</code> (contoh slide NFA)</p>
-<details><summary>Jawaban</summary><p>4 simbol + 1 union + 2 star = 7 → <b>14 state</b>. Struktur: union dari (<code>a</code> lalu <code>a*</code>) dan (<code>b</code> lalu <code>b*</code>).</p></details>
-<p><b>3.</b> <code>(a|b)*(ab|bb)a*</code> (RE dari latihan sesi RE to DFA)</p>
-<details><summary>Jawaban</summary><p>Simbol: a, b, a, b, b, b, a = 7. Union: 2 (<code>a|b</code> dan <code>ab|bb</code>). Star: 2. Total 11 → <b>22 state</b>.</p></details>
-<p><b>4.</b> <code>(a|ε)bc*</code></p>
-<details><summary>Jawaban</summary><p>ε diperlakukan seperti simbol (2 state, transisi ε). Simbol + ε: a, ε, b, c = 4. Union 1, star 1. Total 6 → <b>12 state</b>.</p></details>
-<p><b>5.</b> Kenapa union butuh start dan final baru, sedangkan concatenation tidak?</p>
-<details><summary>Jawaban</summary><p>Hasil setiap pola harus punya tepat satu start dan satu final. Concatenation sudah punya satu start (milik R) dan satu final (milik S). Union punya dua start dan dua final, jadi butuh start baru yang bercabang ke keduanya dan final baru tempat keduanya bertemu.</p></details>
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Thompson merakit ε-NFA dari fragment yang masing-masing punya satu start dan satu final</h2></summary>
+  <p class="rantai">
+    <span class="dari">struktur RE: simbol dan tiga operator (materi 01)</span>
+    <span class="ke">empat pola (<a href="#langkah-3">3️⃣</a> sampai <a href="#langkah-6">6️⃣</a>)</span>
+  </p>
 
-<h2>Daftar pustaka</h2>
+  <aside class="analogi">
+    <p>Lego: setiap potongan punya satu tonjolan dan satu lubang, jadi bisa disambung tanpa melihat isinya.</p>
+    <p class="batas">lego bisa disambung ke segala arah. Fragment selalu disambung dari final ke start lewat ε.</p>
+  </aside>
+
+  <p><mark>Fragment</mark> adalah potongan ε-NFA untuk satu bagian RE, dengan <b>tepat satu start dan satu final</b>. Teorema: untuk setiap RE R ada ε-NFA M dengan L(M) = L(R), dan buktinya (induksi pada struktur RE) sekaligus menjadi cara membuatnya.</p>
+  <ul>
+    <li><strong>Sambungan:</strong> selalu ε. ε tidak membaca input, jadi sambungan tidak mengubah string yang diterima.</li>
+    <li><strong>Hasil:</strong> pasti benar untuk RE apa pun, tanpa menebak bentuk NFA.</li>
+  </ul>
+  <p class="rumus"><mark class="kunci">jumlah state = 2 × (simbol + union + star)</mark></p>
+  <p>Setiap simbol, union, dan star menyumbang 2 state. Concatenation menyumbang 0.</p>
+
+  <p class="intinya">Satu start dan satu final per fragment, sambungan ε, dan jumlah state bisa dihitung sebelum menggambar.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Berapa state ε-NFA Thompson untuk <code>ab|c</code>?</summary>
+    <p>3 simbol + 1 union + 0 star = 4, jadi <b>8 state</b>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Pola simbol: dua state dan satu transisi</h2></summary>
+  <p class="rantai">
+    <span class="dari">fragment (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">bahan dasar untuk union, concatenation, dan star</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Satu anak tangga: naik satu langkah dengan membaca satu simbol.</p>
+    <p class="batas">tangga bisa dinaiki tanpa syarat. Transisi hanya bisa dilewati kalau simbol input sama dengan labelnya.</p>
+  </aside>
+
+  <p>Setiap kemunculan simbol menjadi satu fragment terpisah, walaupun simbolnya sama.</p>
+  <div class="au-fig" data-thompson="a"></div>
+  <ul>
+    <li><strong>ε:</strong> sama, tapi labelnya ε. Diperlakukan seperti simbol saat menghitung state.</li>
+    <li><strong>∅:</strong> dua state tanpa transisi, jadi tidak ada jalur ke final.</li>
+  </ul>
+
+  <p class="intinya">Simbol = 2 state + 1 transisi. Simbol yang sama di dua tempat = dua fragment.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Berapa state untuk <code>(a|ε)bc*</code>?</summary>
+    <p>ε diperlakukan seperti simbol (2 state, transisi ε). Simbol + ε: a, ε, b, c = 4. Union 1, star 1. Total 6, jadi <b>12 state</b>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Pola union: start baru bercabang ε, dan kedua final bertemu di final baru</h2></summary>
+  <p class="rantai">
+    <span class="dari">fragment simbol (<a href="#langkah-3">3️⃣</a>), union di RE (materi 01)</span>
+    <span class="ke">resep lengkap (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Jalan bercabang yang bertemu lagi di depan: ambil kiri atau kanan, lalu bergabung di titik yang sama.</p>
+    <p class="batas">di jalan nyata kamu memilih satu cabang. NFA mencoba keduanya sekaligus.</p>
+  </aside>
+
+  <p>Untuk <code>R|S</code>, string boleh mengikuti R <b>atau</b> S:</p>
+  <div class="au-fig" data-thompson="a|b"></div>
+  <ul>
+    <li><strong>Start baru</strong> bercabang ε ke start R dan start S.</li>
+    <li><strong>Final baru:</strong> final R dan final S masing-masing ε ke sini, supaya hasilnya tetap punya satu final.</li>
+  </ul>
+
+  <p class="intinya">Union = +2 state (start dan final baru) + 4 ε.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa union butuh start dan final baru, sedangkan concatenation tidak?</summary>
+    <p>Hasil setiap pola harus punya tepat satu start dan satu final. Concatenation sudah punya satu start (milik R) dan satu final (milik S). Union punya dua start dan dua final, jadi butuh start baru yang bercabang ke keduanya dan final baru tempat keduanya bertemu.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Pola concatenation: final R disambung ε ke start S</h2></summary>
+  <p class="rantai">
+    <span class="dari">fragment (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">resep lengkap (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Gerbong kereta disambung: ujung gerbong pertama ke awal gerbong kedua.</p>
+    <p class="batas">gerbong bisa ditukar urutannya. Di concatenation, R harus selesai dulu baru S.</p>
+  </aside>
+
+  <p>Untuk <code>RS</code>: start hasil = start R, final hasil = final S. Final R tidak lagi final.</p>
+  <div class="au-fig" data-thompson="ab"></div>
+
+  <aside class="catatan">
+    <p><strong>Gaya Aho:</strong> di buku Aho (dan slide dosen sesi DFA &amp; NFA), final R langsung <b>digabung</b> dengan start S menjadi satu state, jadi setiap concatenation menghemat satu state. Contoh: <code>(a|b)*a</code> menjadi 9 state (0 sampai 8). Keduanya benar, karena ε di antara keduanya tidak membaca apa pun. Kalau soal tidak menyebut gaya, pakai gaya slide Thompson dosen (dengan ε).</p>
+  </aside>
+
+  <p class="intinya">Concatenation = +0 state, 1 ε dari final R ke start S.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Berapa state <code>abc</code> dengan gaya Thompson (ε) dan dengan gaya Aho (digabung)?</summary>
+    <p>Gaya Thompson: 3 simbol, jadi 6 state. Gaya Aho: 2 concatenation masing-masing menghemat 1 state, jadi 4 state.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Pola star: start dan final baru, dengan empat ε yang masing-masing punya tugas</h2></summary>
+  <p class="rantai">
+    <span class="dari">Kleene star (materi 01): nol kali atau lebih</span>
+    <span class="ke">resep lengkap (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Bundaran: boleh langsung keluar, atau berputar berkali-kali sebelum keluar.</p>
+    <p class="batas">bundaran selalu dilewati minimal sekali. Star boleh tidak dilewati sama sekali, lewat ε "lewati".</p>
+  </aside>
+
+  <p>Untuk <code>R*</code>, fragment R dibungkus start dan final baru:</p>
+  <div class="au-fig" data-thompson="a*"></div>
+  <table>
+    <tr><th>ε-transition</th><th>Di gambar</th><th>Fungsinya</th></tr>
+    <tr><td><b>masuk</b></td><td>0 ke 1</td><td>mulai satu putaran R</td></tr>
+    <tr><td><b>ulangi</b></td><td>2 ke 1</td><td>setelah R selesai, boleh membaca R lagi</td></tr>
+    <tr><td><b>lewati</b></td><td>0 ke 3</td><td>nol kali: ε diterima</td></tr>
+    <tr><td><b>keluar</b></td><td>2 ke 3</td><td>berhenti mengulang</td></tr>
+  </table>
+
+  <p class="intinya">Star = +2 state + 4 ε: masuk, ulangi, lewati, keluar.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> String apa yang ditolak kalau ε "lewati" lupa digambar di <code>a*</code>? Kalau ε "ulangi" yang lupa?</summary>
+    <p>Tanpa "lewati": ε ditolak, padahal <code>a*</code> boleh nol kali. Tanpa "ulangi": <code>aa</code> dan string lebih panjang ditolak, karena a hanya bisa dibaca sekali.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Resep: pecah RE sesuai prioritas, lalu rakit dari bagian terdalam ke luar</h2></summary>
+  <p class="rantai">
+    <span class="dari">empat pola (<a href="#langkah-3">3️⃣</a> sampai <a href="#langkah-6">6️⃣</a>), prioritas operator (materi 01)</span>
+    <span class="ke">tabel transisi untuk subset construction (materi 03)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menghitung ekspresi matematika dari kurung terdalam.</p>
+    <p class="batas">di matematika kamu boleh menyederhanakan dulu. Di Thompson, setiap bagian dibangun persis seperti RE-nya.</p>
+  </aside>
+
+  <ol>
+    <li><strong>Pecah RE sesuai prioritas</strong> (star, concatenation, union). <code>(a|b)*abb</code> = <code>(a|b)*</code> · <code>a</code> · <code>b</code> · <code>b</code>. Prioritas dulu, karena salah pecah menghasilkan language lain.</li>
+    <li><strong>Buat fragment simbol</strong>, satu untuk setiap kemunculan.</li>
+    <li><strong>Gabungkan dari dalam ke luar.</strong> Pola luar butuh fragment dalam yang sudah jadi, jadi urutannya tidak bisa dibalik.</li>
+    <li><strong>Beri nomor</strong> dari kiri ke kanan (cabang atas dulu). Nomor dipakai di tabel transisi.</li>
+    <li><strong>Cek</strong> jumlah state, satu start, satu final.</li>
+  </ol>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh: <code>(a|b)*a</code></summary>
+      <div class="au-fig" data-thompson="(a|b)*a"></div>
+      <p>Urutan: <code>a</code>, <code>b</code>, lalu <code>a|b</code>, lalu <code>(a|b)*</code>, lalu <code>a</code> kedua, terakhir concatenation. Cek: 3 simbol + 1 union + 1 star = 5, jadi 10 state. String terpendek yang diterima: <code>a</code>, lewat ε "lewati".</p>
+    </details>
+  </aside>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide: <code>(0+1)*1(0+1)</code></summary>
+      <div class="au-fig" data-thompson="(0+1)*1(0+1)"></div>
+      <p>Di sini + berarti union. 5 simbol + 2 union + 1 star = 8, jadi 16 state. Language-nya: string yang simbol keduanya dari kanan adalah 1.</p>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Di <a href="viz/thompson.html">visualisasi</a>, klik Langkah berikutnya untuk melihat urutan perakitannya. RE sendiri bisa diketik di "Ubah RE".</p>
+  </aside>
+
+  <p class="intinya">Pecah, buat fragment simbol, rakit dari dalam, beri nomor, cek jumlah state.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Berapa state untuk <code>(a|b)*abb</code>?</summary>
+    <p>Simbol: a dan b di dalam star, lalu a, b, b. Jadi 5 simbol + 1 union + 1 star = 7, sehingga <b>14 state</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Berapa state untuk <code>aa*|bb*</code> (contoh slide NFA)?</summary>
+    <p>4 simbol + 1 union + 2 star = 7, jadi <b>14 state</b>. Struktur: union dari (<code>a</code> lalu <code>a*</code>) dan (<code>b</code> lalu <code>b*</code>).</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Berapa state untuk <code>(a|b)*(ab|bb)a*</code> (latihan sesi RE to DFA)?</summary>
+    <p>Simbol: a, b, a, b, b, b, a = 7. Union: 2 (<code>a|b</code> dan <code>ab|bb</code>). Star: 2. Total 11, jadi <b>22 state</b>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: ε yang terlupa dan prioritas yang salah dibaca</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">mengecek gambarmu sendiri</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Lupa satu sambungan pipa: air tidak sampai, atau mengalir ke tempat lain.</p>
+    <p class="batas">pipa bocor kelihatan. ε yang hilang tidak terlihat sampai kamu menguji string seperti ε atau <code>aa</code>.</p>
+  </aside>
+
+  <p>Uji gambarmu dengan ε dan string terpendek setelah selesai.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>Star tanpa ε "lewati"</td><td>ε ditolak, padahal R* boleh nol kali</td><td>Tambahkan ε dari start baru ke final baru</td></tr>
+    <tr><td>Star tanpa ε "ulangi"</td><td>R hanya bisa dibaca sekali, jadi <code>aa</code> ditolak</td><td>Tambahkan ε dari final dalam ke start dalam</td></tr>
+    <tr><td>Union tanpa final baru</td><td>Fragment punya dua final, jadi pola lain tidak bisa dipasang</td><td>Kedua final ε ke satu final baru</td></tr>
+    <tr><td><code>ab*</code> dibangun sebagai <code>(ab)*</code></td><td>Language berbeda: <code>abab</code> diterima</td><td>Star hanya mengikat simbol atau kurung tepat di kirinya</td></tr>
+    <tr><td>Final fragment dalam tetap ditandai final</td><td>NFA menerima string yang belum selesai</td><td>Hanya final fragment terluar yang final</td></tr>
+  </table>
+
+  <p class="intinya">Star selalu 4 ε, union selalu 1 final baru, dan hanya ada satu final di akhir.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Gambar temanmu untuk <code>(a|b)*a</code> punya 9 state dan tidak ada ε di antara <code>(a|b)*</code> dan <code>a</code>. Apakah salah?</summary>
+    <p>Belum tentu. Itu gaya Aho (<a href="#langkah-5">5️⃣</a>): final <code>(a|b)*</code> digabung dengan start <code>a</code>. Hasilnya benar, tapi kalau soal meminta gaya slide Thompson, tulis ε dan 10 state.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Addison-Wesley. Bab 2.5 dan 3.2.</li>
   <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 3.7.4.</li>
   <li>Nasari, M. (2025). <i>RE to DFA</i> dan <i>DFA &amp; NFA</i> [slide kuliah COMP6062 Compilation Techniques, sesi 4–5].</li>
 </ol>
 
-</article>
+</main>
 <script src="../../_shared/automata.js?v=9b7b4edb"></script>
 <script>renderFigures();</script>
 </body>

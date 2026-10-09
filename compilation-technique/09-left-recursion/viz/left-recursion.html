@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Eliminasi Left Recursion</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=5a38879c">
-  <link rel="stylesheet" href="../../../_shared/automata.css?v=45a95657">
-  <script src="../../../_shared/theme.js?v=7b53acb8"></script>
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=f9a7d225">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=db2dcc70">
+  <script src="../../../_shared/theme.js?v=84b79b9c"></script>
 </head>
 <body class="viz">
 
 <h1>Eliminasi left recursion</h1>
-<p>Proses variabel satu per satu sesuai urutan. Untuk setiap variabel: <b>substitusi</b> variabel yang lebih awal kalau muncul di depan, lalu hapus <b>immediate left recursion</b>: <code>A → Aα | β</code> menjadi <code>A → βA'</code> dan <code>A' → αA' | ε</code>.</p>
+<p>Visualisasi ini memproses variabel satu per satu sesuai urutan. Untuk setiap variabel: <b>substitusi</b> variabel yang lebih awal kalau muncul di depan, lalu hapus <b>immediate left recursion</b>: <code>A → Aα | β</code> menjadi <code>A → βA'</code> dan <code>A' → αA' | ε</code>.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh, lalu klik <b>Langkah berikutnya</b>. Ganti urutan variabel di <b>Ubah grammar dan urutan</b> untuk melihat hasil yang berbeda.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> produksi oranye adalah yang baru berubah. Setiap A' selalu punya ε, dan β (alternatif yang tidak diawali A) selalu ada di depan.</p>
 
 <div class="controls">
   <label class="pick">Contoh <select class="field" id="pre"></select></label>

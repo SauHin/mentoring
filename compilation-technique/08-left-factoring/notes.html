@@ -5,50 +5,220 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Left Factoring · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
-  <link rel="stylesheet" href="../../_shared/style.css?v=5a38879c">
-  <script src="../../_shared/theme.js?v=7b53acb8"></script>
-  <script src="../../_shared/notes.js?v=c718c5b2" defer></script>
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9631e4b8">
+  <link rel="stylesheet" href="../../_shared/style.css?v=f9a7d225">
+  <script src="../../_shared/theme.js?v=84b79b9c"></script>
+  <script src="../../_shared/notes.js?v=1e490644" defer></script>
 </head>
-<body>
+<body class="catatan">
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
-<article class="notes">
 
-<span class="chip">Compilation technique · 08</span>
-<h1>Left factoring</h1>
-<p class="lead">Left factoring menulis ulang grammar supaya tidak ada dua alternatif dari variabel yang sama yang diawali simbol yang sama. Dengan begitu, parser top-down bisa memilih alternatif hanya dengan melihat satu token.</p>
-<p><a href="slides.html">Slide</a> · <a href="viz/left-factoring.html">Visualisasi: left factoring</a></p>
-
-<div class="card tldr">
-  <strong>TL;DR</strong>
-  <ul>
-    <li><code>A → αβ₁ | αβ₂ | γ</code> menjadi <code>A → αA' | γ</code> dan <code>A' → β₁ | β₂</code>.</li>
-    <li>α = awalan bersama <b>terpanjang</b> dari satu kelompok alternatif. Sisa yang kosong ditulis ε.</li>
-    <li>Ulangi pada A dan setiap variabel baru sampai tidak ada lagi awalan bersama.</li>
+<header>
+  <h1>Left factoring</h1>
+  <p class="tujuan">Left factoring menulis ulang grammar supaya tidak ada dua alternatif dari variabel yang sama yang diawali simbol yang sama. Dengan begitu, parser top-down bisa memilih alternatif hanya dengan melihat satu token. Target: kamu bisa melakukan left factoring sampai tuntas, termasuk sisa kosong dan variabel baru.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/left-factoring.html">left factoring langkah demi langkah</a> · Prasyarat: <a href="../07-derivation-dan-ambiguity/notes.html">top-down parsing (materi 07)</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
   </ul>
-</div>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Masalahnya: parser tidak bisa memilih</a></li>
+      <li><a href="#langkah-2">Rumus left factoring</a></li>
+      <li><a href="#langkah-3">Kelompok dan awalan terpanjang</a></li>
+      <li><a href="#langkah-4">Sisa kosong menjadi ε</a></li>
+      <li><a href="#langkah-5">Ulangi pada variabel baru</a></li>
+      <li><a href="#langkah-6">Contoh slide dan latihan dosen</a></li>
+      <li><a href="#langkah-7">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
 
-<h2>1. Kenapa perlu left factoring</h2>
-<p>Parser top-down (recursive descent, LL(1)) harus memilih produksi untuk sebuah variabel dengan melihat token berikutnya. Kalau <code>A → αβ₁ | αβ₂</code> dan input diawali α, kedua alternatif sama-sama cocok. Parser tidak bisa memilih tanpa membaca lebih jauh (backtracking), dan itu lambat.</p>
-<p>Left factoring menunda keputusan: parser membaca α dulu lewat <code>A → αA'</code>, lalu baru memilih β₁ atau β₂ di A', saat token-nya sudah berbeda.</p>
+<main>
 
-<h2>2. Algoritma</h2>
-<p>Untuk setiap variabel A yang punya dua alternatif atau lebih dengan awalan bersama yang tidak kosong:</p>
-<pre><code>A → αβ₁ | … | αβₙ | γ₁ | … | γₘ      (γ tidak diawali α)
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Kalau dua alternatif diawali simbol yang sama, satu token tidak cukup untuk memilih</h2></summary>
+  <p class="rantai">
+    <span class="dari">top-down parsing (materi 07)</span>
+    <span class="ke">rumus left factoring (<a href="#langkah-2">2️⃣</a>)</span>
+  </p>
 
-menjadi
+  <aside class="analogi">
+    <p>Dua jalan dengan gerbang depan yang sama: kamu baru tahu harus belok ke mana setelah melewati gerbang.</p>
+    <p class="batas">di jalan kamu bisa melihat jauh ke depan. Parser LL(1) hanya melihat satu token.</p>
+  </aside>
 
-A  → αA' | γ₁ | … | γₘ
-A' → β₁ | … | βₙ</code></pre>
-<ol>
-  <li>Kelompokkan alternatif A berdasarkan simbol pertamanya.</li>
-  <li>Untuk kelompok pertama yang berisi dua alternatif atau lebih, cari awalan bersama terpanjang α.</li>
-  <li>Terapkan rumus di atas dengan variabel baru (A', A'', … yang belum dipakai). Sisa yang kosong = ε.</li>
-  <li>Ulangi untuk kelompok berikutnya di A, lalu untuk setiap variabel baru.</li>
-</ol>
+  <p><mark>Lookahead</mark> adalah token berikutnya yang dilihat parser top-down (recursive descent, LL(1)) untuk memilih alternatif. Kalau <code>A → αβ₁ | αβ₂</code> dan input diawali α, kedua alternatif sama-sama cocok.</p>
+<pre class="kode"><code>stmt → if expr then stmt else stmt
+     | if expr then stmt</code></pre>
+  <p>Saat melihat <code>if</code>, parser belum tahu apakah nanti ada <code>else</code>. Tanpa perbaikan grammar, parser harus mencoba satu alternatif lalu mundur kalau salah (backtracking), dan itu lambat.</p>
 
-<h2>3. Contoh dari slide</h2>
-<h3>Contoh 1</h3>
-<pre><code>A → abB | aB | cdg | cdeB | cdfB | h
+  <p class="intinya">Awalan bersama = parser tidak bisa memilih dengan satu token.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Grammar <code>A → ab | ac</code>. Dengan lookahead <code>a</code>, kenapa parser tidak bisa memilih?</summary>
+    <p>Kedua alternatif diawali <code>a</code>. Perbedaannya (b atau c) baru muncul di token kedua.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Rumus: keluarkan awalan bersama α, lalu pindahkan sisanya ke variabel baru A'</h2></summary>
+  <p class="rantai">
+    <span class="dari">masalah lookahead (<a href="#langkah-1">1️⃣</a>), faktorisasi aljabar</span>
+    <span class="ke">resep (<a href="#langkah-3">3️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Faktorisasi aljabar: <code>ab + ac = a(b + c)</code>.</p>
+    <p class="batas">di aljabar urutan perkalian bisa ditukar. Di grammar, awalan harus tetap di depan.</p>
+  </aside>
+
+  <p><mark>Left factoring</mark> menunda keputusan: parser membaca α dulu lewat <code>A → αA'</code>, lalu memilih di A' saat token-nya sudah berbeda.</p>
+<pre class="kode"><code>Sebelum:  A → αβ₁ | … | αβₙ | γ₁ | … | γₘ      (γ tidak diawali α)
+
+Sesudah:  A  → αA' | γ₁ | … | γₘ
+          A' → β₁ | … | βₙ</code></pre>
+  <ul>
+    <li><strong>γ tidak berubah:</strong> hanya alternatif yang diawali α yang dipindah.</li>
+    <li><strong>Language sama:</strong> <code>αA'</code> tetap menghasilkan αβ₁, αβ₂, dan seterusnya.</li>
+  </ul>
+
+  <p class="intinya"><code>A → αβ₁ | αβ₂ | γ</code> menjadi <code>A → αA' | γ</code>, <code>A' → β₁ | β₂</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Terapkan rumus pada <code>A → xy | xz | w</code>.</summary>
+    <p><code>A → xA' | w</code>, <code>A' → y | z</code>. w tidak diawali x, jadi tetap di A.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Kelompokkan alternatif berdasarkan simbol pertama, lalu pakai awalan bersama terpanjang</h2></summary>
+  <p class="rantai">
+    <span class="dari">rumus (<a href="#langkah-2">2️⃣</a>)</span>
+    <span class="ke">sisa kosong (<a href="#langkah-4">4️⃣</a>) dan variabel baru (<a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mengelompokkan kontak HP berdasarkan huruf depan nama.</p>
+    <p class="batas">kontak cukup dikelompokkan sekali. Di sini setiap kelompok masih dicari awalan bersama terpanjangnya.</p>
+  </aside>
+
+  <p>Untuk setiap variabel A, kerjakan satu kelompok setiap kali:</p>
+  <ol>
+    <li><strong>Kelompokkan</strong> alternatif berdasarkan simbol pertamanya.</li>
+    <li><strong>Untuk kelompok berisi dua alternatif atau lebih,</strong> cari awalan bersama <mark class="kunci">terpanjang</mark> α.</li>
+    <li><strong>Terapkan rumus</strong> dengan variabel baru yang belum dipakai (A', A'', …).</li>
+    <li><strong>Lanjut ke kelompok berikutnya.</strong> Setiap kelompok mendapat variabel barunya sendiri.</li>
+  </ol>
+  <p>Kenapa terpanjang: kalau awalannya terlalu pendek, A' masih punya awalan bersama dan harus difaktorkan lagi. Hasilnya sama, tapi langkahnya lebih banyak.</p>
+
+  <p class="intinya">Satu kelompok = satu awalan terpanjang = satu variabel baru.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Cari awalan bersama terpanjang dari <code>A → abcd | abce | abx</code>, lalu faktorkan sekali.</summary>
+    <p>α = <code>ab</code> (di posisi ketiga ada c, c, dan x, jadi berhenti di ab). Hasil: <code>A → abA'</code>, <code>A' → cd | ce | x</code>. A' masih punya kelompok c, jadi perlu satu langkah lagi (<a href="#langkah-5">5️⃣</a>).</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Kalau alternatifnya persis sama dengan awalannya, sisanya ditulis ε</h2></summary>
+  <p class="rantai">
+    <span class="dari">rumus (<a href="#langkah-2">2️⃣</a>), ε (materi 01)</span>
+    <span class="ke">kesalahan umum (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Pesanan "nasi" dan "nasi + telur": setelah "nasi", pilihannya "tanpa tambahan" atau "telur".</p>
+    <p class="batas">pelayan bisa mengira-ngira. Grammar wajib menulis pilihan "tanpa tambahan" sebagai ε.</p>
+  </aside>
+
+  <p>Kalau satu alternatif adalah α itu sendiri, sisanya kosong. Tanpa ε, string α hilang dari language.</p>
+<pre class="kode"><code>A → ad | a | ab | abc | b
+
+A  → aA' | b
+A' → d | ε | b | bc        (sisa dari "a" adalah ε)</code></pre>
+
+  <p><strong>Cara mengecek:</strong> setiap alternatif lama harus bisa dibentuk lagi dari α ditambah satu sisa. Di sini <code>ad</code> = a + d, <code>a</code> = a + ε, <code>ab</code> = a + b, dan <code>abc</code> = a + bc.</p>
+
+  <p class="intinya">Sisa kosong = ε di variabel baru.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>S → iEtS | iEtSeS | a</code>, <code>E → b</code> (if-then-else: i = if, t = then, e = else).</summary>
+<pre class="kode"><code>S  → iEtSS' | a
+S' → ε | eS
+E  → b</code></pre>
+    <p>Awalan bersama terpanjang = <code>iEtS</code>. Sisa: kosong (ε) dan <code>eS</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Variabel baru bisa punya awalan bersama sendiri, jadi ulangi sampai tidak ada lagi</h2></summary>
+  <p class="rantai">
+    <span class="dari">resep (<a href="#langkah-3">3️⃣</a>), sisa ε (<a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">contoh lengkap (<a href="#langkah-6">6️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Membuka kardus di dalam kardus: setelah satu dibuka, cek apakah isinya masih kardus.</p>
+    <p class="batas">kardus bisa langsung dibuang. Variabel baru tetap harus dicek sampai tidak ada awalan bersama.</p>
+  </aside>
+
+  <p>Lanjutan contoh di <a href="#langkah-4">4️⃣</a>: A' masih punya kelompok <code>b, bc</code>.</p>
+<pre class="kode"><code>Langkah 1 (A, awalan a):   A  → aA' | b
+                           A' → d | ε | b | bc
+
+Langkah 2 (A', awalan b):  A' → d | ε | bA''
+                           A''→ ε | c</code></pre>
+  <p>Selesai kalau A, A', A'' tidak punya dua alternatif dengan simbol pertama yang sama.</p>
+
+  <aside class="coba">
+    <p>Di <a href="viz/left-factoring.html">visualisasi</a>, pilih contoh 3 dan klik Langkah berikutnya. A'' muncul di langkah kedua.</p>
+  </aside>
+
+  <p class="intinya">Setelah membuat A', cek A' dengan resep yang sama.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Lakukan left factoring pada <code>A → aAB | aBc | aAc</code>.</summary>
+<pre class="kode"><code>A   → aA'
+A'  → AA'' | Bc
+A'' → B | c</code></pre>
+    <p>Langkah 1: awalan a, sisa <code>AB</code>, <code>Bc</code>, <code>Ac</code>. Langkah 2: di A', <code>AB</code> dan <code>Ac</code> diawali A.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Contoh slide dan latihan dosen: terminal panjang seperti <code>int</code> dihitung satu simbol</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua langkah (<a href="#langkah-2">2️⃣</a> sampai <a href="#langkah-5">5️⃣</a>)</span>
+    <span class="ke">left recursion (materi 09), yang sering dikerjakan bersama</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mengerjakan soal ujian tahun lalu: polanya sama, isinya beda.</p>
+    <p class="batas">soal ujian bisa memakai terminal panjang seperti <code>int</code>. Perlakukan sebagai satu simbol, bukan tiga huruf.</p>
+  </aside>
+
+  <p>Contoh lengkap dari slide ada di toggle. Kerjakan dulu sendiri, lalu cocokkan. Di ujian, tulis kelompok, awalan, dan sisa di setiap langkah seperti di contoh, supaya langkahmu bisa diikuti dan dinilai.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide 1: dua kelompok (a dan c)</summary>
+<pre class="kode"><code>A → abB | aB | cdg | cdeB | cdfB | h
 
 A  → aA' | cdg | cdeB | cdfB | h       (kelompok a, α = a)
 A' → bB | B
@@ -56,8 +226,13 @@ A' → bB | B
 A  → aA' | cdA'' | h                   (kelompok c, α = cd)
 A' → bB | B
 A''→ g | eB | fB</code></pre>
-<h3>Contoh 2</h3>
-<pre><code>A → bB | b | Bac | Bb | c | cB | h
+      <p>h tidak punya pasangan, jadi tetap. A' dan A'' tidak punya awalan bersama, jadi selesai.</p>
+    </details>
+  </aside>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide 2: nama variabel baru bebas</summary>
+<pre class="kode"><code>A → bB | b | Bac | Bb | c | cB | h
 B → b
 
 A → bX | BY | cZ | h
@@ -65,57 +240,61 @@ X → B | ε
 Y → ac | b
 Z → ε | B
 B → b</code></pre>
-<p>Slide menamai variabel baru X, Y, Z. Visualisasi menamainya A', A'', A'''. Namanya bebas, asalkan belum dipakai.</p>
-<div class="callout">Perhatikan <code>bB</code> dan <code>Bb</code>. Karena B → b, keduanya sama-sama diawali b setelah B diturunkan. Left factoring biasa hanya melihat simbol yang tertulis, jadi keduanya tetap dianggap berbeda awalan (b dan B), sama seperti di slide.</div>
-<h3>Contoh 3</h3>
-<pre><code>A → ad | a | ab | abc | b
+      <p>Slide menamai variabel baru X, Y, Z. Visualisasi menamainya A', A'', A'''. Namanya bebas, asalkan belum dipakai.</p>
+      <p><code>bB</code> dan <code>Bb</code> sama-sama diawali b setelah B diturunkan (B → b). Left factoring biasa hanya melihat simbol yang tertulis, jadi keduanya tetap dianggap berbeda awalan (b dan B), sama seperti di slide.</p>
+    </details>
+  </aside>
 
-A  → aA' | b
-A' → d | ε | b | bc
+  <p class="intinya">Kerjakan per kelompok, beri ε untuk sisa kosong, dan cek setiap variabel baru.</p>
 
-A  → aA' | b
-A' → d | ε | bA''
-A''→ ε | c</code></pre>
-
-<h2>4. Kesalahan yang sering muncul</h2>
-<table>
-  <tr><th>Kesalahan</th><th>Perbaikan</th></tr>
-  <tr><td>Lupa ε ketika alternatif sama persis dengan awalannya</td><td><code>A → a | ab</code> menjadi <code>A → aA'</code>, <code>A' → ε | b</code></td></tr>
-  <tr><td>Tidak mengecek variabel baru</td><td>A' bisa punya awalan bersama sendiri (contoh 3)</td></tr>
-  <tr><td>Memindahkan alternatif lain ke A'</td><td>Hanya kelompok yang diawali α yang pindah</td></tr>
-  <tr><td>Satu variabel baru untuk dua kelompok</td><td>Setiap kelompok mendapat variabel baru sendiri</td></tr>
-</table>
-
-<h2>5. Latihan</h2>
-<p>Cek setiap jawaban di <a href="viz/left-factoring.html">visualisasi</a> (menu "Ubah grammar").</p>
-<p><b>1.</b> (Latihan dosen) <code>E → T + E | T</code>, <code>T → int | int * T | ( E )</code>.</p>
-<details><summary>Jawaban</summary>
-<pre><code>E  → T E'
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> <code>E → T + E | T</code>, <code>T → int | int * T | ( E )</code>.</summary>
+<pre class="kode"><code>E  → T E'
 E' → + E | ε
 T  → int T' | ( E )
 T' → ε | * T</code></pre>
+    <p>E: kedua alternatif diawali T, sisanya <code>+ E</code> dan ε. T: <code>int</code> dan <code>int * T</code> diawali int, sisanya ε dan <code>* T</code>. <code>( E )</code> tidak ikut. Setelah membaca T, parser cukup melihat apakah token berikutnya <code>+</code>.</p>
+  </details>
 </details>
-<p><b>2.</b> <code>S → iEtS | iEtSeS | a</code>, <code>E → b</code> (if-then-else, i = if, t = then, e = else).</p>
-<details><summary>Jawaban</summary>
-<pre><code>S  → iEtSS' | a
-S' → ε | eS
-E  → b</code></pre>
-<p>Awalan bersama terpanjang = <code>iEtS</code>. Sisa: kosong dan <code>eS</code>.</p>
-</details>
-<p><b>3.</b> <code>A → aAB | aBc | aAc</code></p>
-<details><summary>Jawaban</summary>
-<pre><code>A   → aA'
-A'  → AA'' | Bc
-A'' → B | c</code></pre>
-<p>Langkah 1: awalan a, sisa <code>AB</code>, <code>Bc</code>, <code>Ac</code>. Langkah 2: di A', <code>AB</code> dan <code>Ac</code> diawali A.</p>
-</details>
+</section>
 
-<h2>Daftar pustaka</h2>
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: language berubah atau awalan bersama masih tersisa</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">mengecek grammar-mu sendiri</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Memotong kertas tanpa mengukur: bagian yang penting ikut terbuang.</p>
+    <p class="batas">kertas bisa diganti. String yang hilang dari grammar mengubah language.</p>
+  </aside>
+
+  <p>Setelah selesai, cek bahwa setiap alternatif lama masih bisa dihasilkan.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>Lupa ε saat alternatif sama dengan awalannya</td><td>String <code>a</code> hilang dari language</td><td><code>A → a | ab</code> menjadi <code>A → aA'</code>, <code>A' → ε | b</code></td></tr>
+    <tr><td>Tidak mengecek variabel baru</td><td>A' masih punya awalan bersama</td><td>Ulangi resep pada setiap variabel baru (<a href="#langkah-5">5️⃣</a>)</td></tr>
+    <tr><td>Alternatif lain ikut dipindah ke A'</td><td>Language berubah, misalnya <code>h</code> menjadi <code>ah</code></td><td>Hanya kelompok yang diawali α yang pindah</td></tr>
+    <tr><td>Satu variabel baru untuk dua kelompok</td><td>Sisa kelompok a tercampur dengan sisa kelompok c</td><td>Setiap kelompok mendapat variabel baru sendiri</td></tr>
+  </table>
+
+  <p class="intinya">Cek ε, cek variabel baru, dan pastikan alternatif lain tidak ikut pindah.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Temanmu mengubah <code>A → a | ab</code> menjadi <code>A → aA'</code>, <code>A' → b</code>. Apa yang hilang?</summary>
+    <p>String <code>a</code> tidak bisa dihasilkan lagi. Yang benar: <code>A' → ε | b</code>.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
 <ol class="refs">
   <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 4.3.4.</li>
   <li>Nasari, M. (2025). <i>Syntax analysis: parsing fundamentals</i> [slide kuliah COMP6062 Compilation Techniques, sesi 8].</li>
 </ol>
 
-</article>
+</main>
 </body>
 </html>

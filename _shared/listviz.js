@@ -9,6 +9,7 @@
 //   pos        : false = sembunyikan input posisi (stack, queue)
 //   tag(id)    : teks di bawah node pengganti index, misalnya nama pasien
 //   noun       : kata untuk list kosong ('Stack', 'Queue', ...)
+//   hints      : { namaOperasi: 'teks' }, mengisi p.perhatikan di halaman saat operasi itu diklik
 // Generator memakai state global di bawah (nodes, head, tail, vars, ...) dan helper step/done/make.
 
 const $ = (id) => document.getElementById(id);
@@ -248,7 +249,7 @@ function reset(values) {
   setBusy(false);
 }
 
-function listViz({ doubly, values = [10, 20, 30, 40], head = 'head', tail = doubly, pos = true, valueLabel = 'Nilai', tag = null, noun = 'List' }) {
+function listViz({ doubly, values = [10, 20, 30, 40], head = 'head', tail = doubly, pos = true, valueLabel = 'Nilai', tag = null, noun = 'List', hints = {} }) {
   DOUBLY = doubly;
   HEAD = head; TAIL = tail; TAG = tag; NOUN = noun;
   W = doubly ? 120 : 100;
@@ -264,7 +265,7 @@ function listViz({ doubly, values = [10, 20, 30, 40], head = 'head', tail = doub
 <div class="stage-wrap">
   <svg id="stage" viewBox="0 0 ${VBW} 330" role="img" aria-label="Gambar ${doubly ? 'double' : 'single'} linked list"></svg>
   <p class="label legend">
-    <span style="--c: var(--go-ink)">next</span>
+    <span style="--c: var(--c-mint)">next</span>
     ${doubly ? '<span style="--c: var(--focus)">prev</span>' : ''}
     <span style="--c: var(--hot)">baru berubah</span>
   </p>
@@ -287,6 +288,9 @@ function listViz({ doubly, values = [10, 20, 30, 40], head = 'head', tail = doub
     const x = Number($('val').value), p = Number($('pos').value), op = b.dataset.op;
     const err = check(op, x, p, order.length);
     if (err) return ($('caption').textContent = err);
+    // Petunjuk "Perhatikan" milik operasi ini menggantikan petunjuk umum di atas halaman.
+    const hint = document.querySelector('.viz > .perhatikan');
+    if (hint && hints[op]) hint.innerHTML = `<strong>Perhatikan:</strong> ${hints[op]}`;
     start(() => OPS[op](x, p));
   }));
   $('next').onclick = advance;
