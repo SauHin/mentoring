@@ -46,7 +46,7 @@ Acuan tampilan: `_shared/gaya.css` (salinan `C:\Users\jonat\Music\belajar\catata
 - Algoritma: definisi satu kalimat → cara kerja bernomor → output, kelebihan, kekurangan. Metode yang mirip dibandingkan dalam tabel.
 - Soal hitungan: langkah berlabel tebal, nilai antara ditaruh di tabel.
 - Stabilo punya arti tetap: kuning (`mark`) = istilah baru, hijau (`mark.kaitan`) = kaitan, pink (`mark.jebakan`) = jebakan, biru (`mark.kunci`) = wajib diingat. Maksimal 2 per paragraf. Frasa kunci pakai `<b>`, maksimal 3 per paragraf. Label poin pakai `<strong>`.
-- Tabel biasa: header abu-abu, baris belang, tanpa warna per baris (sudah diatur `gaya.css`).
+- Tabel biasa: gaya tabel Notion, baris pertama dan kolom pertama abu-abu, tanpa warna per baris (sudah diatur `gaya.css`).
 - Notes ditutup dengan daftar pustaka (`ol.refs`).
 - Setiap `<details>` yang judulnya memuat "full code" otomatis punya mode **Bertahap** (`notes.js`).
 

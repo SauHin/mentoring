@@ -6,13 +6,21 @@
   --bg: var(--kertas);
   --surface: var(--kertas);
   --card: var(--callout);
-  --card-2: var(--kepala-tabel);
+  --card-2: #e6e5e3;              /* graBacTer: kotak di atas kartu */
   --line: var(--garis);
   --ink: var(--tinta);
   --ink-2: var(--pudar);
-  --ink-3: rgb(155 154 151);
+  --ink-3: #a19e99;               /* texTer */
   --go: rgb(35 131 226);          /* tombol utama: biru Notion */
-  --go-hover: rgb(0 117 211);
+  --go-hover: #0077d4;
+  --go-press: #006bc7;
+  /* Komponen Notion: hover tombol, popover, kartu galeri, bayangan. */
+  --hover: #efefee;               /* whiButHovBac */
+  --pop-bg: #fff;                 /* popBac */
+  --card-hover: #f9f8f7;          /* graBacPri */
+  --btn-shadow: inset 0 0 0 1px rgb(15 15 15 / .1), 0 1px 2px rgb(15 15 15 / .1);
+  --sha-md: 0 8px 12px rgb(25 25 25 / .027), 0 2px 6px rgb(25 25 25 / .027), 0 0 0 1px rgb(42 28 0 / .07);
+  --sha-lg: 0 20px 24px rgb(25 25 25 / .05), 0 5px 8px rgb(25 25 25 / .027), 0 0 0 1px rgb(42 28 0 / .07);
   --go-ink: rgb(35 131 226);      /* teks dan garis untuk pilihan aktif */
   --stop: rgb(224 62 62);
   --focus: rgb(35 131 226);
@@ -41,8 +49,14 @@
 }
 
 [data-theme='dark'] {
-  --card-2: rgb(74 74 72);        /* harus beda dari --card: kotak di atas kartu */
-  --ink-3: rgb(127 126 123);
+  --card-2: #5f5e59;              /* harus beda dari --card: kotak di atas kartu */
+  --ink-3: #7d7a75;
+  --hover: #2f2f2f;
+  --pop-bg: #252525;
+  --card-hover: #202020;
+  --btn-shadow: inset 0 0 0 1px rgb(15 15 15 / .2), 0 1px 2px rgb(15 15 15 / .1);
+  --sha-md: 0 0 0 1px #383836, 0 4px 12px -2px rgb(25 25 25 / .08);
+  --sha-lg: 0 0 0 1px #383836, 0 14px 28px -6px rgb(25 25 25 / .2), 0 2px 4px -1px rgb(25 25 25 / .118);
   --go-ink: rgb(82 156 202);
   --stop: rgb(255 115 105);
   --marker: rgb(35 131 226 / 0.32);
@@ -71,7 +85,7 @@ a:hover { text-decoration-color: currentColor; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
 code, pre { font-variant-ligatures: none; }
 /* Semua blok kode tampil seperti pre.kode di gaya.css. */
-pre { margin: 1.25em 0; padding: 1rem 1.25rem; overflow-x: auto; font: 0.85rem/1.6 var(--mono); tab-size: 4; background: var(--kode); border-radius: 6px; }
+pre { margin: 1em 0; padding: 24px 22px; overflow-x: auto; font: 14px/1.43 var(--mono); tab-size: 4; background: var(--kode); border-radius: 10px; }
 pre code { padding: 0; font: inherit; color: inherit; background: none; }
 .sx-kw { color: var(--sx-kw); font-weight: 600; }
 .sx-ty { color: var(--sx-ty); }
@@ -94,19 +108,19 @@ pre code { padding: 0; font: inherit; color: inherit; background: none; }
 /* Tombol datar seperti Notion: putih bergaris tipis, atau biru untuk aksi utama. */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  border: 0; border-radius: 6px; padding: 0.5rem 1rem; text-decoration: none;
-  font: 500 1rem/1.4 var(--font);
+  border: 0; border-radius: 6px; padding: 6px 12px; text-decoration: none;
+  font: 500 14px/20px var(--font);
   background: var(--btn-bg); color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--btn-edge);
+  box-shadow: var(--btn-shadow);
   cursor: pointer;
   transition: background 120ms ease-out;
 }
-.btn:hover { background: color-mix(in srgb, var(--ink) 6%, var(--btn-bg)); }
-.btn:active { background: color-mix(in srgb, var(--ink) 12%, var(--btn-bg)); }
+.btn:hover { background: var(--hover); }
+.btn:active { background: color-mix(in srgb, var(--ink) 8%, var(--hover)); }
 .btn-go { background: var(--go); color: #fff; box-shadow: none; }
 .btn-go:hover { background: var(--go-hover); }
-.btn-go:active { background: color-mix(in srgb, #000 15%, var(--go)); }
-.btn-sm { padding: 0.3rem 0.75rem; font-size: 0.92rem; }
+.btn-go:active { background: var(--go-press); }
+.btn-sm { padding: 4px 10px; }
 /* Nonaktif: tetap terlihat sebagai tombol (garis tipis), tapi tembus pandang dan teksnya abu.
    Jangan pakai latar abu: di dalam kartu abu, tombolnya hilang dan terbaca seperti teks biasa. */
 .btn:disabled { cursor: not-allowed; background: transparent; color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--btn-edge); }
@@ -117,7 +131,7 @@ pre code { padding: 0; font: inherit; color: inherit; background: none; }
   background: var(--surface); color: var(--ink);
   padding: 0.4rem 0.7rem; font: inherit;
 }
-.field:focus-visible { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px rgb(35 131 226 / 0.25); }
+.field:focus-visible { outline: none; border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus); }
 
 .chip { display: inline-block; background: var(--card); border-radius: 4px; padding: 1px 8px; font-size: 0.85rem; color: var(--ink-2); }
 .card .chip { background: var(--surface); }
@@ -132,23 +146,26 @@ input[type='range'], input[type='checkbox'], input[type='radio'] { accent-color:
 .callout p { margin: 0.3em 0 0; }
 
 /* Ajakan mencoba visualisasi di notes: callout 🧪, ukurannya sama dengan callout gaya.css. */
-aside.coba { position: relative; margin: 1.25em 0; padding: 1rem 1.2rem 1rem 3.1rem; background: var(--callout); border-radius: 10px; }
-aside.coba::before { content: "🧪"; position: absolute; top: 1rem; left: 1.05rem; font-size: 1.15rem; line-height: 1.3; }
+aside.coba { position: relative; margin: 1em 0; padding: 21px 21px 21px 45px; background: var(--callout); border-radius: 10px; }
+aside.coba::before { content: "🧪"; position: absolute; top: 21px; left: 13px; display: grid; place-items: center; width: 24px; height: 24px; font-size: 1.05rem; line-height: 1; }
 aside.coba > :first-child { margin-top: 0; }
 aside.coba > :last-child { margin-bottom: 0; }
 
-/* Tombol ikon kecil: toolbar slide, tema, Home. */
+/* Tombol ikon kecil: toolbar slide, tema, Home. Seperti tombol top bar Notion: tanpa latar, abu saat hover. */
 .tool {
   height: 32px; min-width: 32px; padding: 0 8px; border: 0; border-radius: 6px;
   display: grid; place-items: center; cursor: pointer;
-  background: var(--card); color: var(--ink-2);
+  background: transparent; color: var(--ink-2);
   font: 500 14px var(--font); font-variant-numeric: tabular-nums;
   transition: background 120ms ease-out, color 120ms ease-out;
 }
-.tool:hover { background: var(--card-2); color: var(--ink); }
+.tool:hover { background: var(--hover); color: var(--ink); }
+/* Tombol mengambang di atas isi halaman: popover Notion (latar + bayangan). */
+.theme-toggle, .to-top, .toc-btn, .deck .toolbar .tool, .deck .nav { background: var(--pop-bg); box-shadow: var(--sha-md); }
+.theme-toggle:hover, .to-top:hover, .toc-btn:hover, .deck .toolbar .tool:hover, .deck .nav:hover { background: var(--hover); }
 .tool svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 .tool .fill { fill: currentColor; stroke: none; }
-.tool.on { background: var(--stop); color: #fff; }
+.tool.on, .deck .toolbar .tool.on { background: var(--stop); color: #fff; }
 .theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 6; }
 a.tool { text-decoration: none; }
 
@@ -161,16 +178,15 @@ body.viz .topbar { position: static; padding: 0 0 14px; background: none; } /* v
 .topbar .tool svg { stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--ink-2); }
 .crumbs a { color: var(--ink-2); text-decoration: none; border-radius: 4px; padding: 4px 8px; }
-.crumbs a:hover { background: var(--card); color: var(--ink); }
+.crumbs a:hover { background: var(--hover); color: var(--ink); }
 
 /* Scratch pad (scratch.js): kanvas transparan di atas halaman. Hanya menangkap mouse/pena saat mode coret aktif. */
 .scratch { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; touch-action: none; } /* ukuran tampil = layar; resolusi internal = layar × devicePixelRatio */
 .drawing .scratch { pointer-events: auto; cursor: crosshair; }
 /* Mode coret: tidak ada seleksi teks, menu tekan-lama, atau highlight sentuh (terutama di HP). */
 .drawing, .drawing * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-.scratch-palette { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; border-radius: 8px; background: var(--card); }
+.scratch-palette { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; border-radius: 10px; background: var(--pop-bg); box-shadow: var(--sha-md); }
 .scratch-palette[hidden] { display: none; }
-.scratch-palette .tool { background: var(--surface); }
 .tool.sel { box-shadow: inset 0 0 0 2px var(--go-ink); color: var(--go-ink); }
 .swatch { width: 18px; height: 18px; border-radius: 999px; }
 .swatch.wide { width: 22px; height: 12px; border-radius: 4px; }
@@ -210,7 +226,7 @@ body.deck { max-width: none; margin: 0; padding: 0; }
 /* Callout gaya.css memakai rem; di slide ukurannya ikut huruf slide.
    Ikon sejajar baris pertama: margin paragraf di dalam callout dinolkan (.deck p memberi margin atas). */
 .deck :is(aside.catatan, aside.jebakan, aside.hitung, aside.coba, .intinya) { margin: 0.6em 0; padding: 0.6em 1em 0.6em 2.6em; }
-.deck :is(aside.catatan, aside.jebakan, aside.hitung, aside.coba, .intinya)::before { top: 0.6em; left: 0.85em; font-size: 1em; line-height: 1.5; }
+.deck :is(aside.catatan, aside.jebakan, aside.hitung, aside.coba, .intinya)::before { top: 0.6em; left: 0.75em; width: 1.5em; height: 1.5em; font-size: 1em; }
 .deck :is(aside.catatan, aside.jebakan, aside.hitung, aside.coba) > :first-child { margin-top: 0; }
 .deck :is(aside.catatan, aside.jebakan, aside.hitung, aside.coba) > :last-child { margin-bottom: 0; }
 .deck .logo { width: 3em; height: 3em; margin-bottom: 1em; }
@@ -241,10 +257,10 @@ body.deck { max-width: none; margin: 0; padding: 0; }
 
 /* Pilih slide */
 .deck .picker {
-  border: 0; padding: 0; border-radius: 12px;
+  border: 0; padding: 0; border-radius: 10px;
   width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 64px);
-  background: var(--surface); color: var(--ink);
-  box-shadow: 0 24px 60px -28px rgb(0 0 0 / 0.45), 0 0 0 1px var(--line);
+  background: var(--pop-bg); color: var(--ink);
+  box-shadow: var(--sha-lg);
 }
 .deck .picker::backdrop { background: rgb(0 0 0 / 0.35); }
 .deck .picker-body { padding: 20px; }
@@ -257,7 +273,7 @@ body.deck { max-width: none; margin: 0; padding: 0; }
   border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer;
   background: none; color: var(--ink); font: 500 0.95rem/1.3 var(--font);
 }
-.deck .picker button:hover { background: var(--card); }
+.deck .picker button:hover { background: var(--hover); }
 .deck .picker button.on { background: rgb(35 131 226 / 0.12); color: var(--go-ink); }
 .deck .picker button span { min-width: 1.6em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .deck .picker button.on span { color: var(--go-ink); font-weight: 700; }
@@ -267,12 +283,11 @@ body.deck { max-width: none; margin: 0; padding: 0; }
   position: fixed; top: 50%; translate: 0 -50%; z-index: 4;
   width: 48px; height: 48px; border: 0; border-radius: 8px;
   display: grid; place-items: center; cursor: pointer;
-  background: var(--card); color: var(--ink);
+  color: var(--ink);
   opacity: 0; pointer-events: none; transition: opacity 150ms ease-out, background 150ms ease-out;
 }
 .deck .nav-prev { left: 16px; }
 .deck .nav-next { right: 16px; }
-.deck .nav:hover { background: var(--card-2); }
 .deck .nav.near:not(:disabled), .deck .nav:focus-visible:not(:disabled) { opacity: 1; pointer-events: auto; }
 .deck .nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 /* Layar sentuh tidak punya mouse: tombol selalu tampil. */
@@ -305,12 +320,15 @@ a.no:hover { color: #fff; background: rgb(30 95 145); }
 /* Daftar matkul (homepage) dan daftar materi (halaman matkul). */
 .list { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .list > li { padding: 0; } /* home: kartu ada di <a> di dalam li */
+/* Kartu daftar: kartu galeri Notion (putih, garis bayangan tipis, abu saat hover). */
+.list .card { background: var(--surface); box-shadow: var(--sha-md); }
+.list .chip { background: var(--card); }
 .list > li.card { padding: 20px; }
 .list h2 { font-size: 1.2rem; margin: 0.5rem 0 0.25rem; }
 .list p { margin: 0 0 1rem; color: var(--ink-2); }
 .list .links { display: flex; flex-wrap: wrap; gap: 8px; }
 .list-link { display: block; color: inherit; text-decoration: none; transition: background 120ms ease-out; }
-.list-link:hover { background: var(--card-2); }
+.list-link:hover { background: var(--card-hover); }
 .list-link { position: relative; padding-right: 56px; }
 .list-link::after { /* panah kanan: tanda kartu bisa diklik (tidak ada hover di HP) */
   content: ''; position: absolute; right: 26px; top: 50%; width: 10px; height: 10px;
@@ -318,12 +336,10 @@ a.no:hover { color: #fff; background: rgb(30 95 145); }
   transform: translateY(-50%) rotate(45deg);
 }
 .list-link p { margin-bottom: 0; }
-/* Kartu matkul di home: ikon berwarna + latar bergradasi tipis dengan warna yang sama. */
-.course { display: flex; gap: 16px; align-items: center;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--a2) 12%, var(--surface)), var(--card) 70%); }
-.course:hover { background: linear-gradient(135deg, color-mix(in srgb, var(--a2) 20%, var(--surface)), var(--card-2) 70%); }
+/* Kartu matkul di home: ikon dengan warna Notion (latar ...BacSec, garis ...TexSec). */
+.course { display: flex; gap: 16px; align-items: center; }
 .course-icon { flex: none; width: 48px; height: 48px; border-radius: 10px; display: grid; place-items: center;
-  background: linear-gradient(135deg, var(--a1), var(--a2)); color: #fff; }
+  background: var(--a-bg); color: var(--a-ink); }
 .course-icon svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .course-body { flex: 1; min-width: 0; }
 /* Chip selalu sejajar baris pertama nama matkul, rata kanan. Kalau sempit, nama yang turun baris, bukan chip. */
@@ -338,12 +354,15 @@ a.no:hover { color: #fff; background: rgb(30 95 145); }
 }
 .list .course-head h2 { margin: 0; }
 .course-body p { margin-top: 0.35rem; }
-.course .chip { background: var(--surface); color: var(--ink-2); }
-.course { --a1: var(--card-2); --a2: var(--ink-3); } /* warna cadangan: kartu tetap terlihat walau kelas warna lupa diberi */
-.c-mint { --a1: #b8f5d6; --a2: #12b886; }
-.c-lilac { --a1: #dcc2ff; --a2: #8b5cf6; }
-.c-jingga { --a1: #ffe27a; --a2: #ff9f43; }
-.c-pink { --a1: #ffc1d3; --a2: #ff5a8a; }
+.course { --a-bg: var(--card); --a-ink: var(--ink-2); } /* warna cadangan: kartu tetap terlihat walau kelas warna lupa diberi */
+.c-mint { --a-bg: #e8f1ec; --a-ink: #50946e; }
+.c-lilac { --a-bg: #f3ebf9; --a-ink: #9a6bb4; }
+.c-jingga { --a-bg: #fbebde; --a-ink: #d27b2d; }
+.c-pink { --a-bg: #fae9f1; --a-ink: #c14c8a; }
+[data-theme='dark'] .c-mint { --a-bg: #263d30; }
+[data-theme='dark'] .c-lilac { --a-bg: #3c2d47; }
+[data-theme='dark'] .c-jingga { --a-bg: #53361f; }
+[data-theme='dark'] .c-pink { --a-bg: #4e2b3c; }
 .empty { margin-top: 2rem; }
 .empty p { margin: 0.3em 0 0; color: var(--ink-2); }
 
@@ -371,8 +390,8 @@ a.no:hover { color: #fff; background: rgb(30 95 145); }
   inset: auto 16px 116px auto; margin: 0; border: 0;
   width: min(320px, calc(100vw - 32px)); max-height: 60vh; overflow-y: auto;
   padding: 14px 18px; border-radius: 10px; font-size: 0.95rem;
-  background: var(--surface); color: var(--ink);
-  box-shadow: 0 24px 60px -28px rgb(0 0 0 / 0.45), 0 0 0 1px var(--line);
+  background: var(--pop-bg); color: var(--ink);
+  box-shadow: var(--sha-lg);
 }
 @media (min-width: 1200px) { .toc-btn { display: none; } }
 
