@@ -6,7 +6,7 @@ Notes, slide, dan visualisasi interaktif untuk tiap materi. Semuanya file HTML.
 Klik dua kali untuk membuka di browser. Tidak perlu install apa pun dan tidak perlu internet.
 
 Tampilan mengikuti gaya catatan Notion (`_shared/gaya.css`, salinan dari `belajar/catatan/gaya.css`):
-warna Notion terang/gelap, font sistem, callout, toggle, dan tabel belang.
+token warna dan ukuran dari design system Notion (terang/gelap), font sistem, callout, toggle, dan tabel Notion.
 Mode Siang/Malam bisa diganti (tombol tema), awalnya ikut pengaturan sistem.
 
 ## Daftar Materi
@@ -132,7 +132,7 @@ Dari `gaya.css` (notes dan slide):
 | `p.rumus` + `details.keterangan` | Rumus di tengah, lalu arti simbol (tertutup) |
 | `aside.catatan`, `aside.jebakan`, `aside.hitung`, `p.intinya` | Callout 💡, ⚠️, 📌 (contoh hitungan dalam toggle), 🔑 |
 | `details.soal` | Soal latihan, jawabannya tertutup |
-| `pre.kode`, `<table>`, `figure` + `figcaption` | Kode, tabel belang, gambar dengan keterangan |
+| `pre.kode`, `<table>`, `figure` + `figcaption` | Kode, tabel (header row dan header column abu-abu), gambar dengan keterangan |
 
 Dari `style.css`:
 
