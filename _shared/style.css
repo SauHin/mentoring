@@ -451,3 +451,30 @@ aside .reveal-bar { background: var(--callout); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Editor admin (editor.js): bar admin, toolbar format, login, dan blok yang bisa diedit ---------- */
+.edit-bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 8; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; max-width: calc(100vw - 32px); padding: 8px 10px; border-radius: 10px; background: var(--pop-bg); box-shadow: var(--sha-lg); font: 500 14px var(--font); color: var(--ink); }
+.edit-bar .label { padding: 0 4px; color: var(--ink-2); }
+.edit-tools { position: fixed; z-index: 9; display: flex; gap: 2px; padding: 4px; border-radius: 8px; background: var(--pop-bg); box-shadow: var(--sha-lg); }
+.edit-tools[hidden] { display: none; }
+.edit-tools .tool { height: 30px; min-width: 30px; font-size: 14px; color: var(--ink); }
+.edit-tools b { color: var(--frasa); }
+.edit-tools code { font-size: 12px; }
+.edit-tools .sw { display: block; width: 16px; height: 16px; border-radius: 4px; background: var(--stabilo-kuning); box-shadow: inset 0 0 0 1px var(--line); }
+.edit-tools .sw.kaitan { background: var(--stabilo-hijau); }
+.edit-tools .sw.jebakan { background: var(--stabilo-pink); }
+.edit-tools .sw.kunci { background: var(--stabilo-biru); }
+.edit-login { width: min(28rem, calc(100vw - 32px)); padding: 22px 24px; border: 0; border-radius: 12px; background: var(--pop-bg); color: var(--ink); box-shadow: var(--sha-lg); }
+.edit-login::backdrop { background: rgb(0 0 0 / 0.35); }
+.edit-login h2 { margin: 0 0 0.5rem; font-size: 1.2rem; }
+.edit-login p { margin: 0.5rem 0; font-size: 0.95rem; }
+.edit-field { display: grid; gap: 6px; margin: 0.8rem 0 0.4rem; font-weight: 600; font-size: 0.9rem; }
+.edit-field .field { width: 100%; font-family: var(--mono); }
+.edit-msg { min-height: 1.4em; color: var(--ink-2); }
+.edit-login .ops { display: flex; justify-content: flex-end; gap: 8px; margin-top: 0.8rem; }
+/* Blok yang bisa diedit: garis putus-putus saat disorot, biru saat diketik, oranye kalau belum disimpan, merah kalau ditolak. */
+.editing [contenteditable="true"] { outline: 1px dashed transparent; outline-offset: 2px; border-radius: 3px; cursor: text; }
+.editing [contenteditable="true"]:hover { outline-color: var(--ink-3); }
+.editing .edit-changed { outline: 2px solid var(--hot); }
+.editing .edit-bad { outline: 2px solid var(--stop); }
+.editing [contenteditable="true"]:focus { outline: 2px solid var(--focus); }

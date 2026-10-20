@@ -105,6 +105,31 @@ Tombol Home, breadcrumb "/ Nama matkul", dan scratch pad dibuat otomatis oleh `t
 
 **Matkul baru:** buat folder (nama pakai tanda hubung, misalnya `operating-system`), salin `compilation-technique/index.html` ke dalamnya, lalu tambahkan kartu di home.
 
+## Mengedit Lewat Web (Admin)
+
+Admin bisa mengedit isi notes, slide, dan halaman daftar langsung di situs, seperti di Notion (`_shared/editor.js`). Tanpa login, halaman hanya bisa dilihat.
+
+**Sekali saja: buat token.** Di GitHub, buka Settings, Developer settings, Personal access tokens, Fine-grained tokens, lalu Generate new token:
+
+- **Repository access:** Only select repositories, pilih `SauHin/mentoring`.
+- **Permissions:** Repository permissions, Contents: **Read and write**.
+- **Expiration:** beri tanggal kedaluwarsa, misalnya 90 hari.
+
+**Login:** buka halaman mana saja dengan `?admin` di belakang alamatnya, misalnya `https://sauhin.github.io/mentoring/?admin`, lalu tempel token. Token disimpan di browser itu saja. Pakai hanya di perangkat pribadi. Tombol **Keluar** menghapusnya.
+
+**Mengedit:** klik **Edit halaman** di bar bawah, lalu klik teks yang mau diubah: judul, paragraf, poin, sel tabel, summary toggle, keterangan gambar, atau blok kode. Blok yang berubah bergaris oranye.
+
+| Aksi | Cara |
+|------|------|
+| Frasa kunci, stabilo, `code` | Seleksi teks, lalu klik tombol di toolbar yang muncul (klik lagi untuk melepas). Ctrl+B = tebal, Ctrl+E = code |
+| Baris baru | Enter di blok kode = baris baru, di paragraf/poin/sel = `<br>`, di judul diabaikan |
+| Buka/tutup toggle | Klik segitiganya (klik teks summary = edit) |
+| Simpan | Tombol **Simpan** atau Ctrl+S. Setiap simpan = satu commit ke `master`, situs ter-update dalam ±1–2 menit |
+
+**Batasan:** belum bisa menambah atau menghapus blok, dan gambar dari mesin viz (`.au-fig`) serta halaman viz tidak bisa diedit. Kalau sebuah blok di GitHub sudah berbeda dari yang tampil (misalnya baru diubah dari komputer lain), blok itu ditandai merah dan tidak disimpan. Muat ulang halaman, lalu edit lagi.
+
+**Setelah mengedit lewat web, jalankan `git pull` sebelum mengubah file di komputer**, karena editan web langsung masuk ke `master`.
+
 ## Sebelum Commit
 
 Jalankan `python tools/cachebust.py`. Script ini menambahkan `?v=<hash>` ke setiap rujukan `_shared/*.css` dan `*.js`, supaya browser langsung memakai versi terbaru setelah deploy. Tanpa ini, GitHub Pages bisa memasangkan HTML baru dengan CSS lama selama 10 menit, dan halaman tampil rusak.
