@@ -533,7 +533,8 @@ function layoutAuto(A, { dx, dy = 96 } = {}) {
 }
 
 // Gambar automaton. g = { nodes: [{id,label,x,y,start,final}], edges: [{from,to,label,bend?,curve?}] }.
-// opt: hot/new = Set id state, hotEdges/shownEdges = Set index edge, shown = Set id state, box = kotak fragment.
+// opt: hot/new = Set id state, hotEdges/shownEdges = Set index edge, shown = Set id state, box = kotak fragment,
+// crop = ukuran gambar hanya selebar state yang tampil (gambar statis di notes).
 function drawAuto(g, opt = {}) {
   const pos = new Map(g.nodes.map((n) => [n.id, n]));
   const visible = (n) => !opt.shown || opt.shown.has(n.id);
@@ -601,7 +602,7 @@ function drawAuto(g, opt = {}) {
     seen(b.x, b.y); seen(b.x + b.w, b.y + b.h);
   }
   // Ukuran gambar tetap sama walau sebagian state belum tampil (mode bertahap), jadi gambar tidak melompat.
-  g.nodes.forEach((n) => { const s = nodeSize(n.label); seen(n.x - s.w / 2 - (n.start ? 44 : 0), n.y - s.h / 2); seen(n.x + s.w / 2, n.y + s.h / 2); });
+  if (!opt.crop) g.nodes.forEach((n) => { const s = nodeSize(n.label); seen(n.x - s.w / 2 - (n.start ? 44 : 0), n.y - s.h / 2); seen(n.x + s.w / 2, n.y + s.h / 2); });
   if (opt.extent) opt.extent.forEach(([x, y]) => seen(x, y));
   const pad = 16, xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
   const x0 = Math.min(...xs) - pad, y0 = Math.min(...ys) - pad, w = Math.max(...xs) - x0 + pad, h = Math.max(...ys) - y0 + pad;
@@ -726,13 +727,16 @@ function fromHash() {
 }
 
 /* ---------- Gambar di slide dan notes ---------- */
-// <div class="au-fig" data-thompson="(a|b)*a"></div>      ε-NFA hasil Thompson
+// <div class="au-fig" data-thompson="(a|b)*a"></div>      ε-NFA hasil Thompson (data-step="n" = fragment sampai langkah ke-n, indeks thompson().steps)
 // <div class="au-fig" data-auto>tabel transisi</div>        diagram dari tabel (format parseTable)
 // <div class="au-fig" data-tree="(a|b)*abb"></div>          syntax tree + nullable/firstpos/lastpos (data-plain = nomor posisi saja)
 function renderFigures(root = document) {
   root.querySelectorAll('[data-thompson]').forEach((el) => {
-    const src = el.dataset.thompson;
-    el.innerHTML = drawAuto(thompson(parseRE(src), src.includes('+') ? '+' : '|').geo, { label: `ε-NFA untuk ${src}` });
+    const src = el.dataset.thompson, T = thompson(parseRE(src), src.includes('+') ? '+' : '|');
+    const s = el.dataset.step ? T.steps[+el.dataset.step] : null;
+    el.innerHTML = drawAuto(T.geo, s
+      ? { shown: s.shown, shownEdges: s.shownEdges, hot: s.hot, hotEdges: s.hotEdges, startOverride: s.start, finalOverride: s.final, crop: true, label: `Fragment ε-NFA untuk ${src}, langkah ${+el.dataset.step + 1}` }
+      : { label: `ε-NFA untuk ${src}` });
   });
   root.querySelectorAll('[data-auto]').forEach((el) => { el.innerHTML = drawAuto(layoutAuto(parseTable(el.textContent)), { label: el.dataset.auto || 'Diagram transisi' }); });
   root.querySelectorAll('[data-tree]').forEach((el) => {

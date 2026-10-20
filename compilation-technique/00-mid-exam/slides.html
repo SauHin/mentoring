@@ -6,7 +6,7 @@
   <title>Mid Exam Compilation Technique</title>
   <link rel="icon" href="../../_shared/favicon.svg">
   <link rel="stylesheet" href="../../_shared/gaya.css?v=9273b841">
-  <link rel="stylesheet" href="../../_shared/style.css?v=7370d90c">
+  <link rel="stylesheet" href="../../_shared/style.css?v=61a3ae4d">
   <link rel="stylesheet" href="../../_shared/automata.css?v=07d09f84">
   <script src="../../_shared/theme.js?v=8e552fea"></script>
   <style>
@@ -310,7 +310,7 @@ F  → (E) | id</code></pre>
     <li><strong>(15%)</strong> Minimisasi: →A (0: C, 1: B), B (D, B), C (D, B), D (E, F), E (C, C), *F (E, E).</li>
     <li><strong>(10%)</strong> CFG untuk <code>(ab|c)*b(a|b)*</code>, lengkap dengan G.</li>
     <li><strong>(10%)</strong> (a) Left factoring <code>S → abS | abA | aB | c</code>, <code>A → d</code>, <code>B → e</code>. (b) Left recursion <code>S → Ab | c</code>, <code>A → Ad | Sa | e</code>, urutan S, A.</li>
-    <li><strong>(30%)</strong> <code>S → aBDh</code>, <code>B → cC</code>, <code>C → bC | ε</code>, <code>D → EF</code>, <code>E → g | ε</code>, <code>F → f | ε</code>: FIRST, FOLLOW, tabel LL(1), LL(1)?, trace <code>acbgh</code>.</li>
+    <li><strong>(30%)</strong> <code>S → (L) | a</code>, <code>L → L,S | S</code>: hapus left recursion, FIRST, FOLLOW, tabel LL(1), LL(1)?, trace <code>(a,(a))</code>.</li>
   </ol>
 </section>
 
@@ -394,61 +394,61 @@ F  → (E) | id</code></pre>
 
 <section class="slide">
   <p class="kicker">Notes 7️⃣ · Jawaban soal 6</p>
-  <h2>Soal 6: D bisa menjadi ε, jadi <code>D → EF</code> juga masuk kolom h, dan tabelnya tetap LL(1)</h2>
-  <p class="sub">FOLLOW(B) = FIRST(Dh) = {f, g, h}, karena D nullable.</p>
+  <h2>Soal 6: hapus left recursion di L dulu, lalu tabelnya LL(1)</h2>
+  <p class="sub">Langkahnya sama dengan kisi 6 contoh 1. Koma <code>,</code> adalah terminal.</p>
   <div class="pair">
+<pre class="kode"><code>L → L,S | S   menjadi
+L  → SL'
+L' → ,SL' | ε</code></pre>
     <table class="t xs">
       <tr><th></th><th>FIRST</th><th>FOLLOW</th></tr>
-      <tr><td>S</td><td>{a}</td><td>{$}</td></tr>
-      <tr><td>B</td><td>{c}</td><td>{f, g, h}</td></tr>
-      <tr><td>C</td><td>{b, ε}</td><td>{f, g, h}</td></tr>
-      <tr><td>D</td><td>{f, g, ε}</td><td>{h}</td></tr>
-      <tr><td>E</td><td>{g, ε}</td><td>{f, h}</td></tr>
-      <tr><td>F</td><td>{f, ε}</td><td>{h}</td></tr>
+      <tr><td>S</td><td>{(, a}</td><td>{), <code>,</code>, $}</td></tr>
+      <tr><td>L</td><td>{(, a}</td><td>{)}</td></tr>
+      <tr><td>L'</td><td>{<code>,</code>, ε}</td><td>{)}</td></tr>
     </table>
     <table class="t xs">
-      <tr><th>M</th><th>a</th><th>b</th><th>c</th><th>f</th><th>g</th><th>h</th></tr>
-      <tr><td>S</td><td>S → aBDh</td><td></td><td></td><td></td><td></td><td></td></tr>
-      <tr><td>B</td><td></td><td></td><td>B → cC</td><td></td><td></td><td></td></tr>
-      <tr><td>C</td><td></td><td>C → bC</td><td></td><td>C → ε</td><td>C → ε</td><td>C → ε</td></tr>
-      <tr><td>D</td><td></td><td></td><td></td><td>D → EF</td><td>D → EF</td><td>D → EF</td></tr>
-      <tr><td>E</td><td></td><td></td><td></td><td>E → ε</td><td>E → g</td><td>E → ε</td></tr>
-      <tr><td>F</td><td></td><td></td><td></td><td>F → f</td><td></td><td>F → ε</td></tr>
+      <tr><th>M</th><th>a</th><th>(</th><th>)</th><th>,</th></tr>
+      <tr><td>S</td><td>S → a</td><td>S → (L)</td><td></td><td></td></tr>
+      <tr><td>L</td><td>L → SL'</td><td>L → SL'</td><td></td><td></td></tr>
+      <tr><td>L'</td><td></td><td></td><td>L' → ε</td><td>L' → ,SL'</td></tr>
     </table>
   </div>
-  <p class="small">Kolom <code>$</code> kosong semua, jadi tidak ditampilkan. <a href="../10-first-dan-follow/viz/first-follow.html#src=S%20%E2%86%92%20aBDh%0AB%20%E2%86%92%20cC%0AC%20%E2%86%92%20bC%20%7C%20%CE%B5%0AD%20%E2%86%92%20EF%0AE%20%E2%86%92%20g%20%7C%20%CE%B5%0AF%20%E2%86%92%20f%20%7C%20%CE%B5">Cek FIRST/FOLLOW</a> · <a href="../11-tabel-ll1/viz/tabel-ll1.html#src=S%20%E2%86%92%20aBDh%0AB%20%E2%86%92%20cC%0AC%20%E2%86%92%20bC%20%7C%20%CE%B5%0AD%20%E2%86%92%20EF%0AE%20%E2%86%92%20g%20%7C%20%CE%B5%0AF%20%E2%86%92%20f%20%7C%20%CE%B5">Cek tabel</a></p>
+  <p class="small">FOLLOW(S) memuat <code>,</code> dari <code>L' → ,SL'</code> (FIRST(L') tanpa ε) dan <code>)</code> lewat FOLLOW(L'). Kolom $ kosong. <a href="../09-left-recursion/viz/left-recursion.html#src=S%20%E2%86%92%20%28L%29%20%7C%20a%0AL%20%E2%86%92%20L%2CS%20%7C%20S&amp;ord=">Cek (a)</a> · <a href="../11-tabel-ll1/viz/tabel-ll1.html#src=S%20%E2%86%92%20%28L%29%20%7C%20a%0AL%20%E2%86%92%20SL%27%0AL%27%20%E2%86%92%20%2CSL%27%20%7C%20%CE%B5">Cek tabel</a></p>
 </section>
 
 <section class="slide">
   <p class="kicker">Notes 7️⃣ · Jawaban soal 6</p>
-  <h2>Soal 6: trace <code>acbgh</code> berakhir di $ bertemu $, jadi accepted</h2>
-  <p class="sub">Produksi ε dipilih lewat FOLLOW, saat token sekarang tidak ada di FIRST-nya.</p>
-  <div class="cols">
+  <h2>Soal 6: trace <code>(a,(a))</code> berakhir di $ bertemu $, jadi accepted</h2>
+  <p class="sub">L' memakai <code>L' → ε</code> setiap kali input <code>)</code>, karena <code>)</code> ada di FOLLOW(L').</p>
+  <div class="pair">
     <table class="t xs">
       <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
-      <tr><td>S $</td><td>acbgh$</td><td>S → aBDh</td></tr>
-      <tr><td>a B D h $</td><td>acbgh$</td><td>POP</td></tr>
-      <tr><td>B D h $</td><td>cbgh$</td><td>B → cC</td></tr>
-      <tr><td>c C D h $</td><td>cbgh$</td><td>POP</td></tr>
-      <tr><td>C D h $</td><td>bgh$</td><td>C → bC</td></tr>
-      <tr><td>b C D h $</td><td>bgh$</td><td>POP</td></tr>
-      <tr><td>C D h $</td><td>gh$</td><td>C → ε</td></tr>
-      <tr><td>D h $</td><td>gh$</td><td>D → EF</td></tr>
-      <tr><td>E F h $</td><td>gh$</td><td>E → g</td></tr>
-      <tr><td>g F h $</td><td>gh$</td><td>POP</td></tr>
-      <tr><td>F h $</td><td>h$</td><td>F → ε</td></tr>
-      <tr><td>h $</td><td>h$</td><td>POP</td></tr>
+      <tr><td>S $</td><td>(a,(a))$</td><td>S → (L)</td></tr>
+      <tr><td>( L ) $</td><td>(a,(a))$</td><td>POP</td></tr>
+      <tr><td>L ) $</td><td>a,(a))$</td><td>L → SL'</td></tr>
+      <tr><td>S L' ) $</td><td>a,(a))$</td><td>S → a</td></tr>
+      <tr><td>a L' ) $</td><td>a,(a))$</td><td>POP</td></tr>
+      <tr><td>L' ) $</td><td>,(a))$</td><td>L' → ,SL'</td></tr>
+      <tr><td>, S L' ) $</td><td>,(a))$</td><td>POP</td></tr>
+      <tr><td>S L' ) $</td><td>(a))$</td><td>S → (L)</td></tr>
+      <tr><td>( L ) L' ) $</td><td>(a))$</td><td>POP</td></tr>
+    </table>
+    <table class="t xs">
+      <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+      <tr><td>L ) L' ) $</td><td>a))$</td><td>L → SL'</td></tr>
+      <tr><td>S L' ) L' ) $</td><td>a))$</td><td>S → a</td></tr>
+      <tr><td>a L' ) L' ) $</td><td>a))$</td><td>POP</td></tr>
+      <tr><td>L' ) L' ) $</td><td>))$</td><td>L' → ε</td></tr>
+      <tr><td>) L' ) $</td><td>))$</td><td>POP</td></tr>
+      <tr><td>L' ) $</td><td>)$</td><td>L' → ε</td></tr>
+      <tr><td>) $</td><td>)$</td><td>POP</td></tr>
       <tr><td>$</td><td>$</td><td>accepted</td></tr>
     </table>
-    <ul class="small">
-      <li><strong>C dengan g:</strong> g ada di FOLLOW(C), jadi <code>C → ε</code>.</li>
-      <li><strong>F dengan h:</strong> h ada di FOLLOW(F), jadi <code>F → ε</code>.</li>
-      <li><a href="../11-tabel-ll1/viz/trace-ll1.html#src=S%20%E2%86%92%20aBDh%0AB%20%E2%86%92%20cC%0AC%20%E2%86%92%20bC%20%7C%20%CE%B5%0AD%20%E2%86%92%20EF%0AE%20%E2%86%92%20g%20%7C%20%CE%B5%0AF%20%E2%86%92%20f%20%7C%20%CE%B5&amp;str=acbgh">Cek trace di viz</a></li>
-    </ul>
   </div>
+  <p class="small"><strong>Kesimpulan:</strong> 17 baris tanpa sel kosong, jadi grammar LL(1) dan <code>(a,(a))</code> accepted. <a href="../11-tabel-ll1/viz/trace-ll1.html#src=S%20%E2%86%92%20%28L%29%20%7C%20a%0AL%20%E2%86%92%20SL%27%0AL%27%20%E2%86%92%20%2CSL%27%20%7C%20%CE%B5&amp;str=%28a%2C%28a%29%29">Cek trace di viz</a></p>
 </section>
 
-<script src="../../_shared/automata.js?v=92a9c3c6"></script>
+<script src="../../_shared/automata.js?v=65345c5c"></script>
 <script src="../../_shared/grammar.js?v=7b39c7be"></script>
 <script>renderFigures();</script>
 <script src="../../_shared/slides.js?v=805bba15"></script>

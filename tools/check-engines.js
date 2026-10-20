@@ -137,3 +137,23 @@ assert.equal(sim.tb.conflicts.length, 0);
 assert.equal(run(sim, 'acbgh').rows.length, 13);
 assert.ok(run(sim, 'acbgh').accepted);
 assert.ok(run(ex, 'id*id').accepted);
+
+// Notes Mid Exam (format contoh per jenis soal): contoh tambahan dan simulasi soal 6.
+assert.equal(au.thompson(au.parseRE('(0+1)*1(0+1)'), '+').A.states.length, 16);
+assert.equal(au.thompson(au.parseRE('(ab)*(a|ε)')).A.states.length, 12);
+assert.deepEqual(au.followposSteps(au.parseRE('(a|ε)bc*')).steps.at(-1).rows.map(row), ['A={1,2}:B,C,∅', 'B={2}:∅,C,∅', 'C={3,4}:∅,∅,C']);
+assert.deepEqual(au.minimizeSteps(au.parseTable(`a b
+→A B C
+B B D
+C B D
+*D E D
+*E E D`), 'part').groups.map((g) => g.join('')).sort(), ['A', 'BC', 'DE']);
+assert.deepEqual(lf('A → ad | a | ab | abc | b'), ["A → aA' | b", "A' → d | ε | bA''", "A'' → ε | c"]);
+assert.deepEqual(lr('A → Aab | Aba | aB | a\nB → b | Bba'), ["A → aBA' | aA'", "A' → abA' | baA' | ε", "B → bB'", "B' → baB' | ε"]);
+assert.deepEqual(lr('S → (L) | a\nL → L,S | S', ['L', 'S']), ['S → (L) | a', "L → SL'", "L' → ,SL' | ε"]);
+const lst = ll("S → (L) | a\nL → SL'\nL' → ,SL' | ε");
+assert.deepEqual(sets(lst, 'first'), ['S={(, a}', 'L={(, a}', "L'={,, ε}"]);
+assert.deepEqual(sets(lst, 'follow'), ['S={), ,, $}', 'L={)}', "L'={)}"]);
+assert.deepEqual(cells(lst), ['a (L) . . .', "SL' SL' . . .", ". . ε ,SL' ."]);
+assert.equal(run(lst, '(a,(a))').rows.length, 17);
+assert.ok(run(lst, '(a,(a))').accepted);
