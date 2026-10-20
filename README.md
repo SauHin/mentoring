@@ -119,9 +119,20 @@ Admin bisa mengedit isi notes, slide, dan halaman daftar langsung di situs, sepe
 
 **Mengedit:** klik **Edit halaman** di bar bawah, lalu klik teks yang mau diubah: judul, paragraf, poin, sel tabel, summary toggle, keterangan gambar, atau blok kode. Blok yang berubah bergaris oranye.
 
+Seleksi teks untuk memunculkan toolbar seperti Notion:
+
+| Tombol | Fungsi | Shortcut |
+|--------|--------|----------|
+| **Teks ›** | Ubah jenis blok: Teks, Judul 3, Judul 4, Intinya 🔑 (hanya untuk paragraf dan judul 3/4) | |
+| **A** | Warna teks (10 warna) dan warna latar (10 warna), plus "Terakhir dipakai". Latar kuning, hijau, biru, pink = stabilo yang artinya tetap (istilah baru, kaitan, wajib diingat, jebakan) | |
+| **B** *I* <u>U</u> ~~S~~ | Tebal, miring, garis bawah, coret. Klik lagi untuk melepas | Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+Shift+S |
+| **</>** | `code` | Ctrl+E |
+| **Link** | Tempel alamat. Tanpa `https://` otomatis ditambah, alamat relatif diawali `./` atau `../` | Ctrl+K |
+| **Tx** | Hapus semua format di seleksi (link tetap) | |
+
 | Aksi | Cara |
 |------|------|
-| Frasa kunci, stabilo, `code` | Seleksi teks, lalu klik tombol di toolbar yang muncul (klik lagi untuk melepas). Ctrl+B = tebal, Ctrl+E = code |
+| Batalkan format | Ctrl+Z tepat setelah klik toolbar. Setelah mengetik lagi, Ctrl+Z membatalkan ketikan |
 | Baris baru | Enter di blok kode = baris baru, di paragraf/poin/sel = `<br>`, di judul diabaikan |
 | Buka/tutup toggle | Klik segitiganya (klik teks summary = edit) |
 | Simpan | Tombol **Simpan** atau Ctrl+S. Setiap simpan = satu commit ke `master`, situs ter-update dalam ±1–2 menit |

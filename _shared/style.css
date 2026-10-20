@@ -455,15 +455,37 @@ aside .reveal-bar { background: var(--callout); }
 /* ---------- Editor admin (editor.js): bar admin, toolbar format, login, dan blok yang bisa diedit ---------- */
 .edit-bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 8; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; max-width: calc(100vw - 32px); padding: 8px 10px; border-radius: 10px; background: var(--pop-bg); box-shadow: var(--sha-lg); font: 500 14px var(--font); color: var(--ink); }
 .edit-bar .label { padding: 0 4px; color: var(--ink-2); }
-.edit-tools { position: fixed; z-index: 9; display: flex; gap: 2px; padding: 4px; border-radius: 8px; background: var(--pop-bg); box-shadow: var(--sha-lg); }
+/* Toolbar format seperti Notion: satu baris tombol, lalu pop (jenis blok, warna, link) di bawahnya. */
+.edit-tools { position: fixed; z-index: 9; max-width: calc(100vw - 16px); padding: 4px; border-radius: 8px; background: var(--pop-bg); box-shadow: var(--sha-lg); color: var(--ink); font: 500 14px var(--font); }
 .edit-tools[hidden] { display: none; }
-.edit-tools .tool { height: 30px; min-width: 30px; font-size: 14px; color: var(--ink); }
-.edit-tools b { color: var(--frasa); }
-.edit-tools code { font-size: 12px; }
-.edit-tools .sw { display: block; width: 16px; height: 16px; border-radius: 4px; background: var(--stabilo-kuning); box-shadow: inset 0 0 0 1px var(--line); }
-.edit-tools .sw.kaitan { background: var(--stabilo-hijau); }
-.edit-tools .sw.jebakan { background: var(--stabilo-pink); }
-.edit-tools .sw.kunci { background: var(--stabilo-biru); }
+.edit-tools .row { display: flex; flex-wrap: wrap; align-items: center; gap: 1px; }
+.edit-tools .tool { height: 30px; min-width: 30px; padding: 0 7px; color: var(--ink); font-size: 15px; }
+.edit-tools .tool svg { width: 17px; height: 17px; stroke-linecap: round; stroke-linejoin: round; }
+.edit-tools .tool.on { background: var(--hover); color: var(--go-ink); }
+.edit-tools .tool:disabled { cursor: default; opacity: 0.6; }
+.edit-tools .tool:disabled:hover { background: transparent; }
+.edit-tools .turn { display: inline-flex; gap: 2px; padding: 0 4px 0 9px; white-space: nowrap; }
+.edit-tools .turn svg { width: 14px; height: 14px; }
+.edit-tools .sep { flex: none; width: 1px; height: 20px; margin: 0 4px; background: var(--line); }
+.edit-tools strong { font-weight: 700; }
+.edit-tools .a { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.edit-tools sub { font-size: 0.65em; line-height: 0; }
+.edit-pop { margin-top: 4px; padding: 6px 4px 4px; border-top: 1px solid var(--line); }
+.edit-pop[hidden] { display: none; }
+.edit-pop h5 { margin: 4px 4px 6px; font-size: 0.75rem; font-weight: 600; color: var(--ink-2); }
+.edit-pop .sws { display: grid; grid-template-columns: repeat(5, 30px); gap: 6px; margin: 0 4px 8px; }
+.edit-pop .sw { width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; display: grid; place-items: center; cursor: pointer; background: var(--kertas); box-shadow: inset 0 0 0 1px var(--line); font: 700 15px var(--font); color: var(--ink); }
+.edit-pop .sw:hover { box-shadow: inset 0 0 0 2px var(--ink-3); }
+.edit-pop .sw mark { display: block; width: 22px; height: 22px; padding: 0; border-radius: 4px; }
+.edit-pop .sw mark.none { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.edit-pop.menu { display: grid; min-width: 11rem; }
+.edit-pop.menu[hidden] { display: none; }
+.edit-pop .item { padding: 6px 10px; border: 0; border-radius: 6px; background: none; color: var(--ink); font: 500 14px var(--font); text-align: left; cursor: pointer; }
+.edit-pop .item:hover { background: var(--hover); }
+.edit-pop .item.on::after { content: " ✓"; color: var(--go-ink); }
+.edit-pop.link { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.edit-pop.link[hidden] { display: none; }
+.edit-pop.link .field { flex: 1 1 14rem; min-width: 0; font-family: var(--mono); font-size: 13px; }
 .edit-login { width: min(28rem, calc(100vw - 32px)); padding: 22px 24px; border: 0; border-radius: 12px; background: var(--pop-bg); color: var(--ink); box-shadow: var(--sha-lg); }
 .edit-login::backdrop { background: rgb(0 0 0 / 0.35); }
 .edit-login h2 { margin: 0 0 0.5rem; font-size: 1.2rem; }
@@ -478,3 +500,21 @@ aside .reveal-bar { background: var(--callout); }
 .editing .edit-changed { outline: 2px solid var(--hot); }
 .editing .edit-bad { outline: 2px solid var(--stop); }
 .editing [contenteditable="true"]:focus { outline: 2px solid var(--focus); }
+
+/* Warna teks dan latar dari toolbar editor (palet Notion). Warna teks diatur supaya kontrasnya minimal 4.5:1.
+   Latar kuning, hijau, biru, dan pink memakai stabilo gaya.css (mark, mark.kaitan, mark.kunci, mark.jebakan). */
+:root {
+  --tx-abu: #6f6c67; --tx-coklat: #8e5f4a; --tx-oranye: #b25c0b; --tx-kuning: #8f6200; --tx-hijau: #3d7a58;
+  --tx-biru: #2c6f96; --tx-ungu: #8a5aad; --tx-pink: #b4447f; --tx-merah: #c03d38;
+  --bg-abu: #f1f1ef; --bg-coklat: #f4eeee; --bg-oranye: #fbecdd; --bg-ungu: #f6f3f9; --bg-merah: #fdebec;
+}
+[data-theme='dark'] {
+  --tx-abu: #9b9b9b; --tx-coklat: #ba856f; --tx-oranye: #c77d48; --tx-kuning: #d6a03f; --tx-hijau: #529e72;
+  --tx-biru: #379ad3; --tx-ungu: #a77fdc; --tx-pink: #d96aa3; --tx-merah: #e46a67;
+  --bg-abu: #2f2f2f; --bg-coklat: #4a3228; --bg-oranye: #5c3b23; --bg-ungu: #3c2d49; --bg-merah: #522e2a;
+}
+.tx-abu { color: var(--tx-abu); } .tx-coklat { color: var(--tx-coklat); } .tx-oranye { color: var(--tx-oranye); }
+.tx-kuning { color: var(--tx-kuning); } .tx-hijau { color: var(--tx-hijau); } .tx-biru { color: var(--tx-biru); }
+.tx-ungu { color: var(--tx-ungu); } .tx-pink { color: var(--tx-pink); } .tx-merah { color: var(--tx-merah); }
+mark.abu { background: var(--bg-abu); } mark.coklat { background: var(--bg-coklat); } mark.oranye { background: var(--bg-oranye); }
+mark.ungu { background: var(--bg-ungu); } mark.merah { background: var(--bg-merah); }
