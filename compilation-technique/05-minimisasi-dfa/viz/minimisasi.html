@@ -6,7 +6,7 @@
   <title>Minimisasi DFA</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
   <link rel="stylesheet" href="../../../_shared/gaya.css?v=9273b841">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=8a32c630">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=7370d90c">
   <link rel="stylesheet" href="../../../_shared/automata.css?v=07d09f84">
   <script src="../../../_shared/theme.js?v=8e552fea"></script>
 </head>
@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/automata.js?v=92a9c3c6"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const PRESETS = [
@@ -159,7 +159,8 @@ $('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>
 $('pre').onchange = (e) => { $('src').value = PRESETS[e.target.value][1]; load(); };
 $('src').oninput = load;
 $('src').value = PRESETS[0][1];
-setMethod('table');
+const fromLink = fromHash();
+setMethod(fromLink && fromLink.get('method') === 'part' ? 'part' : 'table');
 </script>
 </body>
 </html>

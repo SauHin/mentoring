@@ -53,8 +53,11 @@ Satu materi untuk setiap tipe soal ujian, bukan mengikuti urutan sesi dosen. Vis
 
 Jawaban di mesin dicek terhadap contoh dan latihan di slide dosen: `node tools/check-engines.js` (tidak ada output = benar).
 
+Viz bisa dibuka dengan soal tertentu lewat hash, misalnya `viz/followpos.html#re=%28a%7Cb%29%2Aabb` (`fromHash` di `automata.js`). Nama parameter = id kolom input (`re`, `src`, `ord`, `str`), ditambah `method=part` di minimisasi dan `panic=1` di trace LL(1). Encode nilainya dengan `encodeURIComponent`, karena `+` di hash dibaca sebagai spasi. Notes Mid Exam memakai ini untuk link "Cek di viz".
+
 | No | Materi | Notes | Slide |
 |----|--------|-------|-------|
+| 00 | Persiapan Mid Exam: resep per kisi dan simulasi 100 menit | [notes](compilation-technique/00-mid-exam/notes.html) | [slides](compilation-technique/00-mid-exam/slides.html) |
 | 01 | Regular expression | [notes](compilation-technique/01-regular-expression/notes.html) | [slides](compilation-technique/01-regular-expression/slides.html) |
 | 02 | RE → ε-NFA (Thompson) | [notes](compilation-technique/02-re-ke-nfa-thompson/notes.html) | [slides](compilation-technique/02-re-ke-nfa-thompson/slides.html) |
 | 03 | NFA → DFA (subset construction) | [notes](compilation-technique/03-nfa-ke-dfa/notes.html) | [slides](compilation-technique/03-nfa-ke-dfa/slides.html) |
@@ -86,7 +89,7 @@ mentoring/
 │   └── 01-… sampai 05-…
 ├── compilation-technique/
 │   ├── index.html
-│   └── 01-… sampai 11-…        satu materi per tipe soal
+│   └── 00-mid-exam, 01-… sampai 11-…   persiapan ujian, lalu satu materi per tipe soal
 └── tools/                      cachebust.py, check-engines.js
 ```
 

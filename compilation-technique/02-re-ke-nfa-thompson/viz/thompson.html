@@ -6,7 +6,7 @@
   <title>RE ke ε-NFA (Thompson)</title>
   <link rel="icon" href="../../../_shared/favicon.svg">
   <link rel="stylesheet" href="../../../_shared/gaya.css?v=9273b841">
-  <link rel="stylesheet" href="../../../_shared/style.css?v=8a32c630">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=7370d90c">
   <link rel="stylesheet" href="../../../_shared/automata.css?v=07d09f84">
   <script src="../../../_shared/theme.js?v=8e552fea"></script>
 </head>
@@ -38,7 +38,7 @@
   </div>
 </div>
 
-<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/automata.js?v=92a9c3c6"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const PRESETS = [
@@ -70,6 +70,7 @@ $('re').oninput = load;
 $('eps').onclick = () => { const f = $('re'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; load(); };
 $('re').value = PRESETS[0][1];
 load();
+if (fromHash()) load();
 </script>
 </body>
 </html>

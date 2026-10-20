@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mid Exam Compilation Technique · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../_shared/style.css?v=7370d90c">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=07d09f84">
+  <script src="../../_shared/theme.js?v=8e552fea"></script>
+  <script src="../../_shared/notes.js?v=168acdb8" defer></script>
+  <style>
+    main { counter-reset: langkah -1; } /* section 0 = strategi, section 1–6 = kisi 1–6 */
+  </style>
+</head>
+<body class="catatan">
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+
+<header>
+  <h1>Mid Exam compilation technique</h1>
+  <p class="tujuan">Halaman ini tidak mengulang teori. Isinya resep mengerjakan setiap tipe soal di kisi-kisi Mid Exam, contoh jawaban lengkap, cara mengecek jawabanmu sendiri, dan satu simulasi ujian. Target: kamu bisa mengerjakan keenam tipe soal dalam 100 menit.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Teori setiap tipe soal ada di materi 02–11 (link di setiap section) · Setiap latihan punya link <b>Cek di viz</b> yang membuka visualisasi dengan soal itu sudah terisi</p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
+  </ul>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol start="0">
+      <li><a href="#langkah-0">Strategi: bobot dan waktu</a></li>
+      <li><a href="#langkah-1">Kisi 1 · Thompson ε-NFA (10%)</a></li>
+      <li><a href="#langkah-2">Kisi 2 · RE → DFA dengan followpos (25%)</a></li>
+      <li><a href="#langkah-3">Kisi 3 · Minimisasi DFA (15%)</a></li>
+      <li><a href="#langkah-4">Kisi 4 · RE → CFG (10%)</a></li>
+      <li><a href="#langkah-5">Kisi 5 · Left factoring dan left recursion (10%)</a></li>
+      <li><a href="#langkah-6">Kisi 6 · Top-down parsing (30%)</a></li>
+      <li><a href="#langkah-7">Simulasi Mid Exam</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main>
+
+<section class="langkah" id="langkah-0">
+<details>
+  <summary><h2>Bagi 100 menit sesuai bobot, dan sisakan 10 menit untuk mengecek</h2></summary>
+  <p class="rantai">
+    <span class="dari">kisi-kisi Mid Exam</span>
+    <span class="ke">kisi 1–6 (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-6">6️⃣</a>), simulasi (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mengisi bensin sesuai jarak: rute terjauh mendapat bensin paling banyak.</p>
+    <p class="batas">jarak rute tidak berubah, tapi kecepatanmu di setiap tipe soal bisa beda. Kalau satu tipe sudah lancar, sisa waktunya pindahkan ke tipe yang masih lambat.</p>
+  </aside>
+
+  <p>Jatah waktu = bobot × 0,9 menit. Sisa 10 menit dipakai untuk mengecek dengan cek cepat di setiap section.</p>
+  <table>
+    <tr><th>Kisi</th><th>Tipe soal</th><th>Bobot</th><th>Jatah waktu</th><th>Section</th></tr>
+    <tr><td>6</td><td>Top-down parsing</td><td>30%</td><td>27 menit</td><td><a href="#langkah-6">6️⃣</a></td></tr>
+    <tr><td>2</td><td>RE → DFA (followpos)</td><td>25%</td><td>22 menit</td><td><a href="#langkah-2">2️⃣</a></td></tr>
+    <tr><td>3</td><td>Minimisasi DFA</td><td>15%</td><td>14 menit</td><td><a href="#langkah-3">3️⃣</a></td></tr>
+    <tr><td>1</td><td>Thompson ε-NFA</td><td>10%</td><td>9 menit</td><td><a href="#langkah-1">1️⃣</a></td></tr>
+    <tr><td>4</td><td>RE → CFG</td><td>10%</td><td>9 menit</td><td><a href="#langkah-4">4️⃣</a></td></tr>
+    <tr><td>5</td><td>Left factoring dan left recursion</td><td>10%</td><td>9 menit</td><td><a href="#langkah-5">5️⃣</a></td></tr>
+    <tr><td></td><td>Cek ulang</td><td></td><td>10 menit</td><td></td></tr>
+  </table>
+  <ul>
+    <li><strong>Urutan:</strong> kerjakan soal 30% dan 25% saat masih segar. Soal 10% pendek, jadi masih bisa dikejar di akhir.</li>
+    <li><strong>Lewat jatah:</strong> tulis langkah yang sudah ada, pindah soal, lalu kembali kalau ada sisa waktu.</li>
+    <li><strong>Nilai parsial:</strong> tulis tabel dan langkah antara, bukan hanya jawaban akhir. Langkah yang benar tetap bernilai walaupun hasil akhirnya salah.</li>
+  </ul>
+
+  <p class="intinya">Bobot × 0,9 = menit. Soal besar dulu, tulis semua langkah.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Sudah 22 menit di soal RE → DFA, dan DFA-mu baru dua state. Apa yang kamu lakukan?</summary>
+    <p>Tulis tabel followpos dan baris DFA yang sudah jadi, lalu pindah ke soal berikutnya. Followpos yang benar sudah bernilai. Kalau di akhir masih ada waktu, lanjutkan baris DFA-nya.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Kisi 1 · Thompson: pecah RE sesuai prioritas, rakit dari dalam, lalu cek jumlah state</h2></summary>
+  <p class="rantai">
+    <span class="dari">pola Thompson (<a href="../02-re-ke-nfa-thompson/notes.html">materi 02</a>)</span>
+    <span class="ke">simulasi soal 1 (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Merakit LEGO dari buku petunjuk: bagian kecil dirakit dulu, lalu digabung menjadi bagian besar.</p>
+    <p class="batas">LEGO boleh dirakit dari bagian mana saja. Thompson harus dari bagian terdalam, mengikuti prioritas operator.</p>
+  </aside>
+
+  <p><strong>Bentuk soal:</strong> "Construct an ε-NFA for the regular expression … using Thompson's construction."</p>
+  <ol>
+    <li><strong>Pecah RE</strong> sesuai prioritas: star, lalu concatenation, lalu union. Contoh: <code>(a|b)*abb</code> = <code>(a|b)*</code> · <code>a</code> · <code>b</code> · <code>b</code>.</li>
+    <li><strong>Buat fragment simbol</strong>: dua state dan satu transisi untuk setiap kemunculan simbol.</li>
+    <li><strong>Rakit dari dalam ke luar</strong> dengan pola union, concatenation (ε), dan star (empat ε).</li>
+    <li><strong>Beri nomor</strong> dari kiri ke kanan, cabang atas dulu. Tandai satu start dan satu final.</li>
+    <li><strong>Cek jumlah state</strong> dengan rumus di bawah.</li>
+  </ol>
+  <p class="rumus">jumlah state = 2 × (simbol + union + star)</p>
+  <p>Contoh: <code>(a|b)*abb</code> punya 5 simbol, 1 union, dan 1 star, jadi 2 × 7 = <b>14 state</b>. Kalau gambarmu punya jumlah lain, ada pola yang salah.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan: <code>(a|b)*abb</code></summary>
+      <p><strong>Urutan rakit:</strong> fragment <code>a</code> dan <code>b</code>, lalu union <code>a|b</code>, lalu star <code>(a|b)*</code>, lalu fragment <code>a</code>, <code>b</code>, <code>b</code>, terakhir concatenation dari kiri ke kanan.</p>
+      <div class="au-fig" data-thompson="(a|b)*abb"></div>
+      <p><strong>Cek:</strong> 14 state, satu start, satu final. Telusuri string terpendek <code>abb</code>: dari start lewat ε "lewati" star, lalu <code>a</code>, <code>b</code>, <code>b</code> sampai final.</p>
+      <p><a href="../02-re-ke-nfa-thompson/viz/thompson.html#re=%28a%7Cb%29%2Aabb">Cek di viz</a> (soal ini sudah terisi).</p>
+    </details>
+  </aside>
+
+  <aside class="jebakan">
+    <p>Star selalu punya <mark class="jebakan">empat ε</mark>: masuk, keluar, ulangi, dan lewati. Yang paling sering lupa adalah ε "lewati", padahal tanpa ε itu R* tidak menerima string kosong. Daftar lengkap: <a href="../02-re-ke-nfa-thompson/notes.html#langkah-8">materi 02 8️⃣</a>.</p>
+  </aside>
+
+  <p class="intinya">Pecah, buat fragment simbol, rakit dari dalam, beri nomor, cek 2 × (simbol + union + star).</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (sesi RE to DFA):</strong> Gambar ε-NFA untuk <code>(a|b)*(ab|bb)a*</code>. Berapa state-nya?</summary>
+    <p>7 simbol (a, b, a, b, b, b, a), 2 union (<code>a|b</code> dan <code>ab|bb</code>), 2 star. Jadi 2 × 11 = <b>22 state</b>. Gambar lengkapnya: <a href="../02-re-ke-nfa-thompson/viz/thompson.html#re=%28a%7Cb%29%2A%28ab%7Cbb%29a%2A">Cek di viz</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Kisi 2 · RE → DFA: tambah #, beri nomor posisi, hitung followpos, lalu bangun DFA</h2></summary>
+  <p class="rantai">
+    <span class="dari">RE → DFA langsung (<a href="../04-re-ke-dfa-langsung/notes.html">materi 04</a>)</span>
+    <span class="ke">kisi 3 (DFA-nya bisa diminta diminimisasi), simulasi soal 2 (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Peta jalur angkot: untuk setiap halte, tulis halte mana saja yang bisa didatangi berikutnya. Setelah itu, rute apa pun bisa dibaca dari peta.</p>
+    <p class="batas">angkot boleh berhenti di mana saja. Di DFA, string hanya boleh berhenti di state yang memuat posisi #.</p>
+  </aside>
+
+  <p><strong>Bentuk soal:</strong> "Convert the regular expression … to a DFA directly (syntax tree, nullable, firstpos, lastpos, followpos)." Subset construction tidak diajarkan di kelas, jadi untuk RE → DFA pakai metode ini.</p>
+  <ol>
+    <li><strong>Tambah #</strong> di akhir: <code>(r)#</code>. Beri nomor posisi 1, 2, 3, … untuk setiap simbol dan #, dari kiri. ε tidak diberi nomor.</li>
+    <li><strong>Gambar syntax tree:</strong> leaf = posisi, node dalam = · | *, root = · dengan #.</li>
+    <li><strong>Hitung dari bawah ke atas</strong> untuk setiap node: nullable, firstpos, lastpos.</li>
+    <li><strong>Hitung followpos</strong> hanya dari node · (lastpos kiri mendapat firstpos kanan) dan node * (lastpos-nya mendapat firstpos-nya sendiri).</li>
+    <li><strong>Bangun DFA:</strong> start = firstpos(root). Untuk setiap state S dan simbol a, gabungkan followpos dari posisi bersimbol a di S. Final = state yang memuat posisi #.</li>
+  </ol>
+  <ul>
+    <li><strong>Cek cepat 1:</strong> followpos(#) selalu ∅.</li>
+    <li><strong>Cek cepat 2:</strong> start harus memuat semua posisi yang bisa menjadi huruf pertama string.</li>
+    <li><strong>Template kesimpulan:</strong> "DFA punya n state, start A = firstpos(root), dan final = state yang memuat posisi #."</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan (slide dosen): <code>(a|b)*abb</code></summary>
+      <p><strong>Posisi:</strong> a = 1, b = 2 (di dalam star), a = 3, b = 4, b = 5, # = 6. Di syntax tree, kiri node = firstpos, kanan = lastpos, atas = nullable (T/F).</p>
+      <div class="au-fig" data-tree="(a|b)*abb"></div>
+      <table class="t">
+        <tr><th>Posisi</th><th>Simbol</th><th>followpos</th><th>Asal</th></tr>
+        <tr><td>1</td><td>a</td><td>{1,2,3}</td><td>star: {1,2}; · dengan a: {3}</td></tr>
+        <tr><td>2</td><td>b</td><td>{1,2,3}</td><td>sama dengan posisi 1</td></tr>
+        <tr><td>3</td><td>a</td><td>{4}</td><td>· dengan b</td></tr>
+        <tr><td>4</td><td>b</td><td>{5}</td><td>· dengan b</td></tr>
+        <tr><td>5</td><td>b</td><td>{6}</td><td>· dengan #</td></tr>
+        <tr><td>6</td><td>#</td><td>∅</td><td></td></tr>
+      </table>
+      <table class="t">
+        <tr><th>DFA</th><th>Posisi</th><th>a</th><th>b</th></tr>
+        <tr><td>→A</td><td>{1,2,3}</td><td>fp(1) ∪ fp(3) = {1,2,3,4} = B</td><td>fp(2) = {1,2,3} = A</td></tr>
+        <tr><td>B</td><td>{1,2,3,4}</td><td>B</td><td>fp(2) ∪ fp(4) = {1,2,3,5} = C</td></tr>
+        <tr><td>C</td><td>{1,2,3,5}</td><td>B</td><td>fp(2) ∪ fp(5) = {1,2,3,6} = D</td></tr>
+        <tr><td>*D</td><td>{1,2,3,6}</td><td>B</td><td>A</td></tr>
+      </table>
+      <p><strong>Kesimpulan:</strong> DFA punya 4 state, start A = {1,2,3}, final D (memuat posisi 6 = #). <a href="../04-re-ke-dfa-langsung/viz/followpos.html#re=%28a%7Cb%29%2Aabb">Cek di viz</a>.</p>
+    </details>
+  </aside>
+
+  <aside class="jebakan">
+    <p>Di node · , <mark class="jebakan">cek nullable anak kiri dulu</mark>. Kalau anak kiri nullable, firstpos-nya ikut firstpos anak kanan. Contoh: firstpos(<code>(a|b)*·a</code>) = {1,2,3}, bukan {1,2}. Daftar lengkap: <a href="../04-re-ke-dfa-langsung/notes.html#langkah-8">materi 04 8️⃣</a>.</p>
+  </aside>
+
+  <p class="intinya"># di akhir, followpos dari · dan *, start = firstpos(root), final = memuat #.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Buat DFA untuk <code>(a|b)*(ab|bb)a*</code>.</summary>
+    <p>Posisi: a1 b2 a3 b4 b5 b6 a7 #8. followpos: 1, 2 = {1,2,3,5}; 3 = {4}; 4 = {7,8}; 5 = {6}; 6 = {7,8}; 7 = {7,8}; 8 = ∅.</p>
+    <table class="t">
+      <tr><th>DFA</th><th>Posisi</th><th>a</th><th>b</th></tr>
+      <tr><td>→A</td><td>{1,2,3,5}</td><td>B</td><td>C</td></tr>
+      <tr><td>B</td><td>{1,2,3,4,5}</td><td>B</td><td>D</td></tr>
+      <tr><td>C</td><td>{1,2,3,5,6}</td><td>B</td><td>D</td></tr>
+      <tr><td>*D</td><td>{1,2,3,5,6,7,8}</td><td>E</td><td>D</td></tr>
+      <tr><td>*E</td><td>{1,2,3,4,5,7,8}</td><td>E</td><td>D</td></tr>
+    </table>
+    <p>Langkah lengkapnya ada di <a href="../04-re-ke-dfa-langsung/notes.html#langkah-6">materi 04 6️⃣</a>. <a href="../04-re-ke-dfa-langsung/viz/followpos.html#re=%28a%7Cb%29%2A%28ab%7Cbb%29a%2A">Cek di viz</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Kisi 3 · Minimisasi DFA: pisahkan final dan bukan final, lalu pecah atau tandai sampai stabil</h2></summary>
+  <p class="rantai">
+    <span class="dari">table-filling dan partition (<a href="../05-minimisasi-dfa/notes.html">materi 05</a>)</span>
+    <span class="ke">simulasi soal 3 (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menggabung kontak HP yang ganda: dua kontak digabung kalau semua isinya menunjuk ke orang yang sama.</p>
+    <p class="batas">kontak ganda biasanya terlihat dari nama. Dua state bisa ekuivalen walaupun barisnya berbeda, jadi tetap harus dibuktikan dengan langkah di bawah.</p>
+  </aside>
+
+  <p><strong>Bentuk soal:</strong> "Minimize the following DFA" (kadang disebut metodenya: table-filling atau partition). Kalau tidak disebut, pilih salah satu. Partition biasanya lebih cepat di kertas.</p>
+  <table>
+    <tr><th>Langkah</th><th>Partition</th><th>Table-filling</th></tr>
+    <tr><td>0. Siapkan</td><td colspan="2">Buang state yang tidak tercapai dari start. Kalau ada sel kosong, tambahkan dead state.</td></tr>
+    <tr><td>1. Basis</td><td>G1 = final, G2 = bukan final</td><td>X untuk setiap pasangan (final, bukan final)</td></tr>
+    <tr><td>2. Ulangi</td><td>Tulis <b>grup tujuan</b> setiap state. Dalam satu grup, baris berbeda dipisah.</td><td>Pasangan (p, q) diberi X kalau ada simbol yang membawanya ke pasangan ber-X.</td></tr>
+    <tr><td>3. Berhenti</td><td>Tidak ada grup yang pecah</td><td>Satu putaran penuh tanpa X baru</td></tr>
+    <tr><td>4. Hasil</td><td>Satu grup = satu state</td><td>Pasangan tanpa X digabung</td></tr>
+  </table>
+  <ul>
+    <li><strong>Cek cepat:</strong> tidak ada grup yang berisi final dan bukan final sekaligus. Start baru = grup yang memuat start lama.</li>
+    <li><strong>Template kesimpulan:</strong> "DFA minimum punya n state: {…}, {…}. Start = grup yang memuat start lama, final = grup yang memuat state final."</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan (slide dosen): DFA 4 state, dengan kedua metode</summary>
+      <table class="t">
+        <tr><th></th><th>a</th><th>b</th></tr>
+        <tr><td>→1</td><td>2</td><td>3</td></tr>
+        <tr><td>2</td><td>2</td><td>3</td></tr>
+        <tr><td>3</td><td>4</td><td>3</td></tr>
+        <tr><td>*4</td><td>2</td><td>3</td></tr>
+      </table>
+      <p><strong>Partition.</strong> Round 0: G1 = {4}, G2 = {1,2,3}. Round 1: grup tujuan 1 = (G2, G2), 2 = (G2, G2), 3 = (G1, G2), jadi 3 dipisah: {4}, {1,2}, {3}. Round 2: 1 dan 2 sama-sama ke ({1,2}, {3}), jadi stabil.</p>
+      <p><strong>Table-filling.</strong> Basis: X untuk (1,4), (2,4), (3,4). Putaran 1: (1,3) dengan a ke (2,4), yang sudah X, jadi X. (2,3) juga X karena alasan yang sama. (1,2) dengan a ke (2,2) dan dengan b ke (3,3), jadi tetap kosong. Putaran 2: tidak ada X baru.</p>
+      <p><strong>Kesimpulan:</strong> DFA minimum punya 3 state: {1,2}, {3}, {4}. Start {1,2}, final {4}. <a href="../05-minimisasi-dfa/viz/minimisasi.html#src=a%20b%0A%E2%86%921%202%203%0A2%202%203%0A3%204%203%0A%2A4%202%203&amp;method=part">Cek di viz</a>.</p>
+    </details>
+  </aside>
+
+  <aside class="jebakan">
+    <p>Di partition, yang dibandingkan adalah <mark class="jebakan">grup tujuan, bukan state tujuan</mark>. Di table-filling, jangan berhenti setelah satu putaran: X baru bisa memicu X lain. Daftar lengkap: <a href="../05-minimisasi-dfa/notes.html#langkah-8">materi 05 8️⃣</a>.</p>
+  </aside>
+
+  <p class="intinya">Final dan bukan final dipisah dulu. Ulangi sampai stabil. Bandingkan grup, bukan state.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Minimisasi DFA A–H: A (0: B, 1: F), B (G, C), *C (A, C), D (C, G), E (H, F), F (C, G), G (G, E), H (G, C).</summary>
+    <p>Hasil: {A,E}, {B,H}, {C}, {D,F}, {G}. Pasangan (A,G) baru diberi X di putaran 2, jadi berhenti setelah putaran 1 membuat jawaban salah. D tidak tercapai dari A. Slide tetap mengikutkannya, tapi DFA yang benar-benar minimum membuang D dulu. Langkah lengkapnya ada di <a href="../05-minimisasi-dfa/notes.html#langkah-4">materi 05 4️⃣</a>. <a href="../05-minimisasi-dfa/viz/minimisasi.html#src=0%201%0A%E2%86%92A%20B%20F%0AB%20G%20C%0A%2AC%20A%20C%0AD%20C%20G%0AE%20H%20F%0AF%20C%20G%0AG%20G%20E%0AH%20G%20C&amp;method=table">Cek di viz</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Kisi 4 · RE → CFG: S untuk seluruh RE, dan satu variabel baru untuk setiap union atau star</h2></summary>
+  <p class="rantai">
+    <span class="dari">aturan RE → CFG (<a href="../06-re-ke-cfg/notes.html">materi 06</a>)</span>
+    <span class="ke">simulasi soal 4 (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Menerjemahkan kalimat memakai kamus: setiap kata punya padanan tetap.</p>
+    <p class="batas">satu kata di kamus bisa punya beberapa padanan. Di sini setiap operator RE punya satu pola produksi yang tetap.</p>
+  </aside>
+
+  <p><strong>Bentuk soal:</strong> "Construct a CFG for the regular expression …", kadang diminta lengkap dengan G = (V, T, P, S).</p>
+  <table>
+    <tr><th>Bagian RE</th><th>Produksi</th></tr>
+    <tr><td>concatenation <code>r₁r₂</code></td><td>tulis berdampingan</td></tr>
+    <tr><td>union <code>r₁ | r₂</code></td><td>alternatif <code>X → r₁ | r₂</code></td></tr>
+    <tr><td>star <code>(r)*</code></td><td><code>X → rX | ε</code>; kalau r = r₁|r₂, tulis <code>X → r₁X | r₂X | ε</code></td></tr>
+  </table>
+  <ol>
+    <li><strong>S = seluruh RE.</strong> Pecah dari luar ke dalam.</li>
+    <li><strong>String terminal</strong> ditulis langsung. Bagian yang berupa union atau star diganti variabel baru (A, B, …).</li>
+    <li><strong>Ulangi</strong> untuk setiap variabel baru, lalu tulis V, T, P, S.</li>
+    <li><strong>Cek:</strong> turunkan string terpendek RE dan satu string panjang. Satu star = satu variabel, supaya urutan bagian RE tidak tercampur.</li>
+  </ol>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan (slide dosen): <code>((00 + 01)* 01) + (101 (0 + 10)*)</code></summary>
+<pre class="kode"><code>S → A01 | 101B         bagian terluar union: kiri A lalu 01, kanan 101 lalu B
+A → 00A | 01A | ε      A = (00 + 01)*
+B → 0B | 10B | ε       B = (0 + 10)*</code></pre>
+      <p>G = ({S, A, B}, {0, 1}, P, S). <strong>Cek:</strong> string terpendek kiri 01 (S ⇒ A01 ⇒ 01) dan kanan 101 (S ⇒ 101B ⇒ 101). <a href="../06-re-ke-cfg/viz/re-ke-cfg.html#re=%28%2800%2B01%29%2A01%29%2B%28101%280%2B10%29%2A%29">Cek di viz</a>.</p>
+    </details>
+  </aside>
+
+  <aside class="jebakan">
+    <p><mark class="jebakan">Jangan menggabung beberapa star menjadi satu variabel.</mark> <code>S → aS | bS | ε</code> untuk <code>a*b*</code> salah, karena menerima <code>ba</code>. Daftar lengkap: <a href="../06-re-ke-cfg/notes.html#langkah-8">materi 06 8️⃣</a>.</p>
+  </aside>
+
+  <p class="intinya">S = seluruh RE. Union = |, star = rekursi + ε, satu star satu variabel.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Construct a CFG for <code>a* b* (a|c)*</code>, lengkap dengan G.</summary>
+<pre class="kode"><code>S → ABC
+A → aA | ε
+B → bB | ε
+C → aC | cC | ε</code></pre>
+    <p>G = ({S, A, B, C}, {a, b, c}, P, S). <a href="../06-re-ke-cfg/viz/re-ke-cfg.html#re=a%2Ab%2A%28a%7Cc%29%2A">Cek di viz</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Kisi 5 · Left factoring mengeluarkan awalan bersama, eliminasi left recursion memindahkan rekursi ke kanan</h2></summary>
+  <p class="rantai">
+    <span class="dari">left factoring (<a href="../08-left-factoring/notes.html">materi 08</a>), left recursion (<a href="../09-left-recursion/notes.html">materi 09</a>)</span>
+    <span class="ke">kisi 6 (grammar harus bersih dulu sebelum tabel LL(1)), simulasi soal 5 (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Merapikan rute sebelum berangkat: gabungkan dua jalan yang awalnya sama, dan hapus putaran yang tidak pernah maju.</p>
+    <p class="batas">rute yang dirapikan bisa berubah tujuan kalau salah. Grammar hasilnya harus tetap menghasilkan language yang sama, jadi selalu cek dengan string pendek.</p>
+  </aside>
+
+  <p><strong>Bentuk soal:</strong> "Perform left factoring on …" dan "Eliminate left recursion from … (with the order S, A)".</p>
+  <table>
+    <tr><th></th><th>Left factoring</th><th>Eliminasi left recursion</th></tr>
+    <tr><td>Cari</td><td>alternatif dengan awalan sama: <code>A → αβ₁ | αβ₂</code></td><td>alternatif yang diawali variabel itu sendiri: <code>A → Aα | β</code></td></tr>
+    <tr><td>Rumus</td><td><code>A → αA'</code>, <code>A' → β₁ | β₂</code> (sisa kosong = ε)</td><td><code>A → βA'</code>, <code>A' → αA' | ε</code></td></tr>
+    <tr><td>Ulangi</td><td>sampai tidak ada awalan sama, termasuk di A'</td><td>proses variabel sesuai urutan: substitusi yang lebih awal dulu, baru hapus immediate</td></tr>
+  </table>
+  <ul>
+    <li><strong>Left factoring:</strong> ambil awalan bersama yang <b>terpanjang</b>.</li>
+    <li><strong>Left recursion:</strong> A' selalu punya ε, dan β (alternatif yang tidak diawali A) selalu ada di depan.</li>
+    <li><strong>Cek:</strong> string terpendek grammar lama masih bisa diturunkan dari grammar baru.</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan (slide dosen): left factoring <code>A → abB | aB | cdg | cdeB | cdfB | h</code></summary>
+<pre class="kode"><code>A   → aA' | cdA'' | h       awalan a: abB, aB;  awalan cd: cdg, cdeB, cdfB
+A'  → bB | B
+A'' → g | eB | fB</code></pre>
+      <p><a href="../08-left-factoring/viz/left-factoring.html#src=A%20%E2%86%92%20abB%20%7C%20aB%20%7C%20cdg%20%7C%20cdeB%20%7C%20cdfB%20%7C%20h">Cek di viz</a>.</p>
+    </details>
+  </aside>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan (slide dosen): left recursion <code>S → Aa | b</code>, <code>A → Ac | Sd | f</code>, urutan S, A</summary>
+<pre class="kode"><code>S (pertama): tidak ada substitusi, tidak ada immediate. S → Aa | b tetap.
+A: A → Sd diawali S (lebih awal), substitusi S:
+   A → Ac | Aad | bd | f
+   immediate: α = c, ad    β = bd, f
+   A  → bdA' | fA'
+   A' → cA' | adA' | ε</code></pre>
+      <p><a href="../09-left-recursion/viz/left-recursion.html#src=S%20%E2%86%92%20Aa%20%7C%20b%0AA%20%E2%86%92%20Ac%20%7C%20Sd%20%7C%20f&amp;ord=S%2C%20A">Cek di viz</a>.</p>
+    </details>
+  </aside>
+
+  <aside class="jebakan">
+    <p><mark class="jebakan">Ikuti urutan variabel yang diminta soal</mark>, karena urutan lain memberi jawaban tertulis yang berbeda. Daftar lengkap: <a href="../08-left-factoring/notes.html">materi 08</a> dan <a href="../09-left-recursion/notes.html#langkah-7">materi 09 7️⃣</a>.</p>
+  </aside>
+
+  <p class="intinya">Left factoring: awalan terpanjang keluar, sisanya ke A'. Left recursion: β di depan, A' → αA' | ε.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> (a) Left factoring <code>A → ad | a | ab | abc | b</code>. (b) Eliminasi left recursion <code>S → AA | 0</code>, <code>A → SS | 1</code>, urutan S, A.</summary>
+<pre class="kode"><code>(a) A   → aA' | b          (b) S  → AA | 0
+    A'  → d | ε | bA''         A  → 0SA' | 1A'
+    A'' → ε | c                A' → ASA' | ε</code></pre>
+    <p>(a): setelah <code>a</code> dikeluarkan, sisa <code>b</code> dan <code>bc</code> masih punya awalan sama, jadi difaktorkan lagi. <a href="../08-left-factoring/viz/left-factoring.html#src=A%20%E2%86%92%20ad%20%7C%20a%20%7C%20ab%20%7C%20abc%20%7C%20b">Cek (a) di viz</a> · <a href="../09-left-recursion/viz/left-recursion.html#src=S%20%E2%86%92%20AA%20%7C%200%0AA%20%E2%86%92%20SS%20%7C%201&amp;ord=S%2C%20A">Cek (b) di viz</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Kisi 6 · Top-down parsing: bersihkan grammar, FIRST, FOLLOW, tabel, lalu trace</h2></summary>
+  <p class="rantai">
+    <span class="dari">FIRST dan FOLLOW (<a href="../10-first-dan-follow/notes.html">materi 10</a>), tabel LL(1) dan trace (<a href="../11-tabel-ll1/notes.html">materi 11</a>)</span>
+    <span class="ke">simulasi soal 6 (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mengisi formulir berlapis: setiap bagian memakai hasil bagian sebelumnya.</p>
+    <p class="batas">di formulir, satu kolom salah biasanya tidak merusak kolom lain. Di sini satu FIRST yang salah merambat ke tabel dan trace, jadi cek setiap bagian sebelum lanjut.</p>
+  </aside>
+
+  <p><strong>Bentuk soal:</strong> "Given the grammar …, (a) compute FIRST and FOLLOW, (b) construct the LL(1) parsing table, (c) is it LL(1)?, (d) trace the input …". Kerjakan berurutan:</p>
+  <ol>
+    <li><strong>Bersihkan grammar:</strong> kalau left recursive atau ada awalan sama, kerjakan kisi 5 dulu (<a href="#langkah-5">5️⃣</a>).</li>
+    <li><strong>FIRST:</strong> simbol paling depan setiap produksi. Variabel di depan? Pakai FIRST-nya, dan lanjut ke simbol berikutnya selama nullable.</li>
+    <li><strong>FOLLOW:</strong> <code>$</code> untuk start symbol. Cari B di ruas kanan: FIRST sisa di kanan B tanpa ε, dan FOLLOW(kiri) kalau B paling kanan atau sisanya nullable. Ulangi sampai tidak berubah.</li>
+    <li><strong>Tabel:</strong> <code>A → α</code> ke kolom FIRST(α). Kalau α nullable, juga ke kolom FOLLOW(A).</li>
+    <li><strong>LL(1)?</strong> Ya kalau setiap sel berisi paling banyak satu produksi.</li>
+    <li><strong>Trace:</strong> stack awal <code>S $</code>. Terminal di top dicocokkan (POP), variabel diganti isi M[X, a] dengan push dibalik. Accepted kalau stack dan input sama-sama <code>$</code>.</li>
+  </ol>
+  <ul>
+    <li><strong>Cek cepat:</strong> FOLLOW tidak pernah memuat ε. FOLLOW(start) memuat <code>$</code>. Tabel tidak punya kolom ε.</li>
+    <li><strong>Template kesimpulan:</strong> "Grammar ini LL(1), karena setiap sel berisi paling banyak satu produksi." "String w accepted, karena stack dan input sama-sama tinggal $" atau "rejected, karena M[X, a] kosong."</li>
+  </ul>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan (a, b): grammar ekspresi slide, dari left recursion sampai FIRST dan FOLLOW</summary>
+      <p>Grammar soal: <code>E → E+T | T</code>, <code>T → T*F | F</code>, <code>F → (E) | id</code>. E dan T left recursive, jadi hapus dulu (<a href="../09-left-recursion/viz/left-recursion.html#src=E%20%E2%86%92%20E%2BT%20%7C%20T%0AT%20%E2%86%92%20T%2AF%20%7C%20F%0AF%20%E2%86%92%20%28E%29%20%7C%20id&amp;ord=">cek di viz</a>):</p>
+<pre class="kode"><code>E  → TE'
+E' → +TE' | ε
+T  → FT'
+T' → *FT' | ε
+F  → (E) | id</code></pre>
+      <table class="t">
+        <tr><th></th><th>FIRST</th><th>FOLLOW</th><th>Alasan FOLLOW</th></tr>
+        <tr><td>E</td><td>{(, id}</td><td>{), $}</td><td>start symbol; <code>)</code> dari <code>F → (E)</code></td></tr>
+        <tr><td>E'</td><td>{+, ε}</td><td>{), $}</td><td>paling kanan di <code>E → TE'</code></td></tr>
+        <tr><td>T</td><td>{(, id}</td><td>{+, ), $}</td><td>FIRST(E') tanpa ε, dan E' nullable</td></tr>
+        <tr><td>T'</td><td>{*, ε}</td><td>{+, ), $}</td><td>paling kanan di <code>T → FT'</code></td></tr>
+        <tr><td>F</td><td>{(, id}</td><td>{+, *, ), $}</td><td>FIRST(T') tanpa ε, dan T' nullable</td></tr>
+      </table>
+      <p><a href="../10-first-dan-follow/viz/first-follow.html#src=E%20%E2%86%92%20TE%27%0AE%27%20%E2%86%92%20%2BTE%27%20%7C%20%CE%B5%0AT%20%E2%86%92%20FT%27%0AT%27%20%E2%86%92%20%2AFT%27%20%7C%20%CE%B5%0AF%20%E2%86%92%20%28E%29%20%7C%20id">Cek di viz</a>.</p>
+    </details>
+  </aside>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dikerjakan (c, d): tabel LL(1) dan trace <code>id*id</code></summary>
+      <table class="t">
+        <tr><th>M</th><th>id</th><th>+</th><th>*</th><th>(</th><th>)</th><th>$</th></tr>
+        <tr><td>E</td><td>E → TE'</td><td></td><td></td><td>E → TE'</td><td></td><td></td></tr>
+        <tr><td>E'</td><td></td><td>E' → +TE'</td><td></td><td></td><td>E' → ε</td><td>E' → ε</td></tr>
+        <tr><td>T</td><td>T → FT'</td><td></td><td></td><td>T → FT'</td><td></td><td></td></tr>
+        <tr><td>T'</td><td></td><td>T' → ε</td><td>T' → *FT'</td><td></td><td>T' → ε</td><td>T' → ε</td></tr>
+        <tr><td>F</td><td>F → id</td><td></td><td></td><td>F → (E)</td><td></td><td></td></tr>
+      </table>
+      <p>Setiap sel berisi paling banyak satu produksi, jadi <b>grammar ini LL(1)</b>.</p>
+      <table class="t">
+        <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+        <tr><td>E $</td><td>id*id$</td><td>E → TE'</td></tr>
+        <tr><td>T E' $</td><td>id*id$</td><td>T → FT'</td></tr>
+        <tr><td>F T' E' $</td><td>id*id$</td><td>F → id</td></tr>
+        <tr><td>id T' E' $</td><td>id*id$</td><td>POP</td></tr>
+        <tr><td>T' E' $</td><td>*id$</td><td>T' → *FT'</td></tr>
+        <tr><td>* F T' E' $</td><td>*id$</td><td>POP</td></tr>
+        <tr><td>F T' E' $</td><td>id$</td><td>F → id</td></tr>
+        <tr><td>id T' E' $</td><td>id$</td><td>POP</td></tr>
+        <tr><td>T' E' $</td><td>$</td><td>T' → ε</td></tr>
+        <tr><td>E' $</td><td>$</td><td>E' → ε</td></tr>
+        <tr><td>$</td><td>$</td><td>accepted</td></tr>
+      </table>
+      <p><strong>Kesimpulan:</strong> <code>id*id</code> accepted, karena stack dan input sama-sama tinggal $. <a href="../11-tabel-ll1/viz/tabel-ll1.html#src=E%20%E2%86%92%20TE%27%0AE%27%20%E2%86%92%20%2BTE%27%20%7C%20%CE%B5%0AT%20%E2%86%92%20FT%27%0AT%27%20%E2%86%92%20%2AFT%27%20%7C%20%CE%B5%0AF%20%E2%86%92%20%28E%29%20%7C%20id">Cek tabel di viz</a> · <a href="../11-tabel-ll1/viz/trace-ll1.html#src=E%20%E2%86%92%20TE%27%0AE%27%20%E2%86%92%20%2BTE%27%20%7C%20%CE%B5%0AT%20%E2%86%92%20FT%27%0AT%27%20%E2%86%92%20%2AFT%27%20%7C%20%CE%B5%0AF%20%E2%86%92%20%28E%29%20%7C%20id&amp;str=id%2Aid">Cek trace di viz</a>.</p>
+    </details>
+  </aside>
+
+  <aside class="catatan">
+    <p><strong>Variasi soal lain di kisi ini:</strong> menulis procedure recursive predictive parsing (<a href="../10-first-dan-follow/notes.html#langkah-4">materi 10 4️⃣</a>), membuktikan grammar bukan LL(1) (<a href="../11-tabel-ll1/notes.html#langkah-7">materi 11 7️⃣</a>), dan trace dengan panic mode (<a href="../11-tabel-ll1/notes.html#langkah-8">materi 11 8️⃣</a>).</p>
+  </aside>
+
+  <p class="intinya">Grammar bersih, FIRST, FOLLOW, tabel, cek sel ganda, lalu trace sampai <code>$</code> bertemu <code>$</code>.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> <code>S → ABC</code>, <code>A → aA | C</code>, <code>B → b</code>, <code>C → c</code>. FIRST, FOLLOW, tabel, lalu trace <code>aabc</code>.</summary>
+    <p>FIRST: S {a, c}, A {a, c}, B {b}, C {c}. FOLLOW: S {$}, A {b}, B {c}, C {b, $}. Tabel: M[S, a] = M[S, c] = <code>S → ABC</code>, M[A, a] = <code>A → aA</code>, M[A, c] = <code>A → C</code>, M[B, b] = <code>B → b</code>, M[C, c] = <code>C → c</code>.</p>
+    <p>Trace: setelah dua <code>a</code> di-POP, top stack A dengan input <code>b</code>, dan M[A, b] kosong. Jadi <code>aabc</code> <b>rejected</b>. Langkah lengkapnya ada di <a href="../11-tabel-ll1/notes.html#langkah-4">materi 11 4️⃣</a>. <a href="../10-first-dan-follow/viz/first-follow.html#src=S%20%E2%86%92%20ABC%0AA%20%E2%86%92%20aA%20%7C%20C%0AB%20%E2%86%92%20b%0AC%20%E2%86%92%20c">Cek FIRST/FOLLOW di viz</a> · <a href="../11-tabel-ll1/viz/trace-ll1.html#src=S%20%E2%86%92%20ABC%0AA%20%E2%86%92%20aA%20%7C%20C%0AB%20%E2%86%92%20b%0AC%20%E2%86%92%20c&amp;str=aabc">Cek trace di viz</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>Simulasi Mid Exam: enam soal dengan bobot kisi-kisi, kerjakan dalam 100 menit</h2></summary>
+  <p class="rantai">
+    <span class="dari">resep kisi 1–6 (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-6">6️⃣</a>)</span>
+    <span class="ke">Mid Exam yang sebenarnya</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Gladi bersih sebelum pentas.</p>
+    <p class="batas">gladi bersih boleh diulang dan dihentikan. Kerjakan simulasi ini sekali jalan dengan timer 100 menit, baru buka jawabannya.</p>
+  </aside>
+
+  <p>Semua soal baru, belum pernah dibahas di materi lain. Jawaban ada di toggle setiap soal, dan semuanya sudah dicek dengan mesin visualisasi.</p>
+  <ol>
+    <li><strong>(10%)</strong> Construct an ε-NFA for <code>(ab|b)*a</code> using Thompson's construction.</li>
+    <li><strong>(25%)</strong> Convert <code>(a|bb)*ab</code> to a DFA directly: syntax tree, nullable, firstpos, lastpos, followpos, DFA.</li>
+    <li><strong>(15%)</strong> Minimize the DFA: →A (0: C, 1: B), B (D, B), C (D, B), D (E, F), E (C, C), *F (E, E).</li>
+    <li><strong>(10%)</strong> Construct a CFG for <code>(ab|c)*b(a|b)*</code>, complete with G = (V, T, P, S).</li>
+    <li><strong>(10%)</strong> (a) Left factor <code>S → abS | abA | aB | c</code>, <code>A → d</code>, <code>B → e</code>. (b) Eliminate left recursion from <code>S → Ab | c</code>, <code>A → Ad | Sa | e</code> with the order S, A.</li>
+    <li><strong>(30%)</strong> Given <code>S → aBDh</code>, <code>B → cC</code>, <code>C → bC | ε</code>, <code>D → EF</code>, <code>E → g | ε</code>, <code>F → f | ε</code>: (a) FIRST and FOLLOW, (b) LL(1) parsing table, (c) is it LL(1)?, (d) trace <code>acbgh</code>.</li>
+  </ol>
+
+  <details class="soal">
+    <summary><strong>Jawaban soal 1:</strong> ε-NFA untuk <code>(ab|b)*a</code></summary>
+    <p>4 simbol (a, b, b, a), 1 union, 1 star, jadi 2 × 6 = <b>12 state</b>. Urutan rakit: <code>a</code>, <code>b</code>, concatenation <code>ab</code>, <code>b</code>, union <code>ab|b</code>, star, lalu concatenation dengan <code>a</code>.</p>
+    <div class="au-fig" data-thompson="(ab|b)*a"></div>
+    <p><a href="../02-re-ke-nfa-thompson/viz/thompson.html#re=%28ab%7Cb%29%2Aa">Cek di viz</a>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Jawaban soal 2:</strong> DFA untuk <code>(a|bb)*ab</code></summary>
+    <p>Posisi: a = 1, b = 2, b = 3 (<code>bb</code> di dalam star), a = 4, b = 5, # = 6. <code>(a|bb)*</code> nullable, jadi firstpos(root) = {1,2,4}.</p>
+    <div class="au-fig" data-tree="(a|bb)*ab"></div>
+    <table class="t">
+      <tr><th>Posisi</th><th>Simbol</th><th>followpos</th><th>Asal</th></tr>
+      <tr><td>1</td><td>a</td><td>{1,2,4}</td><td>star: {1,2}; · dengan a: {4}</td></tr>
+      <tr><td>2</td><td>b</td><td>{3}</td><td>· di dalam <code>bb</code></td></tr>
+      <tr><td>3</td><td>b</td><td>{1,2,4}</td><td>star: {1,2}; · dengan a: {4}</td></tr>
+      <tr><td>4</td><td>a</td><td>{5}</td><td>· dengan b</td></tr>
+      <tr><td>5</td><td>b</td><td>{6}</td><td>· dengan #</td></tr>
+      <tr><td>6</td><td>#</td><td>∅</td><td></td></tr>
+    </table>
+    <table class="t">
+      <tr><th>DFA</th><th>Posisi</th><th>a</th><th>b</th></tr>
+      <tr><td>→A</td><td>{1,2,4}</td><td>fp(1) ∪ fp(4) = {1,2,4,5} = B</td><td>fp(2) = {3} = C</td></tr>
+      <tr><td>B</td><td>{1,2,4,5}</td><td>B</td><td>fp(2) ∪ fp(5) = {3,6} = D</td></tr>
+      <tr><td>C</td><td>{3}</td><td>∅</td><td>fp(3) = {1,2,4} = A</td></tr>
+      <tr><td>*D</td><td>{3,6}</td><td>∅</td><td>fp(3) = A</td></tr>
+    </table>
+    <p><strong>Kesimpulan:</strong> 4 state, start A, final D. ∅ berarti tidak ada transisi (dead state). <a href="../04-re-ke-dfa-langsung/viz/followpos.html#re=%28a%7Cbb%29%2Aab">Cek di viz</a>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Jawaban soal 3:</strong> minimisasi DFA A–F</summary>
+    <p><strong>Partition.</strong> Round 0: G1 = {F}, G2 = {A,B,C,D,E}. Round 1: D dengan 1 ke F (G1), yang lain tetap di G2, jadi D dipisah: {F}, {A,B,C,E}, {D}. Round 2: B dan C dengan 0 ke D, A dan E dengan 0 ke grup {A,B,C,E}, jadi pecah menjadi {A,E} dan {B,C}. Round 3: tidak ada yang pecah.</p>
+    <table class="t">
+      <tr><th></th><th>0</th><th>1</th></tr>
+      <tr><td>→{A,E}</td><td>{B,C}</td><td>{B,C}</td></tr>
+      <tr><td>{B,C}</td><td>D</td><td>{B,C}</td></tr>
+      <tr><td>D</td><td>{A,E}</td><td>F</td></tr>
+      <tr><td>*F</td><td>{A,E}</td><td>{A,E}</td></tr>
+    </table>
+    <p><strong>Table-filling</strong> memberi hasil yang sama. Basis: X untuk semua pasangan dengan F. Putaran 1: (A,D), (B,D), (C,D) dengan 1 ke pasangan ber-X dengan F; lalu (C,E) dan (D,E) dengan 0 ke (C,D) atau (C,E) yang baru ber-X. Putaran 2: (A,B), (A,C), (B,E) dengan 0 ke (C,D). Putaran 3: tidak ada X baru, jadi yang kosong (A,E) dan (B,C).</p>
+    <p><strong>Kesimpulan:</strong> DFA minimum punya 4 state: {A,E}, {B,C}, {D}, {F}. A dan E barisnya berbeda (A ke C dan B, E ke C dan C), tapi tetap ekuivalen karena B dan C ekuivalen. <a href="../05-minimisasi-dfa/viz/minimisasi.html#src=0%201%0A%E2%86%92A%20C%20B%0AB%20D%20B%0AC%20D%20B%0AD%20E%20F%0AE%20C%20C%0A%2AF%20E%20E&amp;method=part">Cek partition di viz</a> · <a href="../05-minimisasi-dfa/viz/minimisasi.html#src=0%201%0A%E2%86%92A%20C%20B%0AB%20D%20B%0AC%20D%20B%0AD%20E%20F%0AE%20C%20C%0A%2AF%20E%20E&amp;method=table">Cek table-filling di viz</a>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Jawaban soal 4:</strong> CFG untuk <code>(ab|c)*b(a|b)*</code></summary>
+<pre class="kode"><code>S → AbB              star, lalu b, lalu star
+A → abA | cA | ε     A = (ab|c)*
+B → aB | bB | ε      B = (a|b)*</code></pre>
+    <p>G = ({S, A, B}, {a, b, c}, P, S). <strong>Cek:</strong> string terpendek <code>b</code> (S ⇒ AbB ⇒ bB ⇒ b). <a href="../06-re-ke-cfg/viz/re-ke-cfg.html#re=%28ab%7Cc%29%2Ab%28a%7Cb%29%2A">Cek di viz</a>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Jawaban soal 5:</strong> left factoring dan left recursion</summary>
+<pre class="kode"><code>(a) S   → aS' | c          awalan a: abS, abA, aB
+    S'  → bS'' | B         sisa bS, bA masih berawalan b
+    S'' → S | A
+    A   → d
+    B   → e
+
+(b) S (pertama): tidak ada substitusi dan immediate. S → Ab | c tetap.
+    A: A → Sa diawali S, substitusi: A → Ad | Aba | ca | e
+       immediate: α = d, ba    β = ca, e
+       A  → caA' | eA'
+       A' → dA' | baA' | ε</code></pre>
+    <p><a href="../08-left-factoring/viz/left-factoring.html#src=S%20%E2%86%92%20abS%20%7C%20abA%20%7C%20aB%20%7C%20c%0AA%20%E2%86%92%20d%0AB%20%E2%86%92%20e">Cek (a) di viz</a> · <a href="../09-left-recursion/viz/left-recursion.html#src=S%20%E2%86%92%20Ab%20%7C%20c%0AA%20%E2%86%92%20Ad%20%7C%20Sa%20%7C%20e&amp;ord=S%2C%20A">Cek (b) di viz</a>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Jawaban soal 6:</strong> FIRST, FOLLOW, tabel, dan trace <code>acbgh</code></summary>
+    <table class="t">
+      <tr><th></th><th>FIRST</th><th>FOLLOW</th><th>Alasan FOLLOW</th></tr>
+      <tr><td>S</td><td>{a}</td><td>{$}</td><td>start symbol</td></tr>
+      <tr><td>B</td><td>{c}</td><td>{f, g, h}</td><td>di <code>S → aBDh</code>: FIRST(Dh) = {f, g, h}, karena D nullable</td></tr>
+      <tr><td>C</td><td>{b, ε}</td><td>{f, g, h}</td><td>paling kanan di <code>B → cC</code>, jadi FOLLOW(B)</td></tr>
+      <tr><td>D</td><td>{f, g, ε}</td><td>{h}</td><td>tepat setelah D ada <code>h</code></td></tr>
+      <tr><td>E</td><td>{g, ε}</td><td>{f, h}</td><td>FIRST(F) tanpa ε = {f}, dan F nullable, jadi FOLLOW(D)</td></tr>
+      <tr><td>F</td><td>{f, ε}</td><td>{h}</td><td>paling kanan di <code>D → EF</code>, jadi FOLLOW(D)</td></tr>
+    </table>
+    <table class="t">
+      <tr><th>M</th><th>a</th><th>b</th><th>c</th><th>f</th><th>g</th><th>h</th><th>$</th></tr>
+      <tr><td>S</td><td>S → aBDh</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>B</td><td></td><td></td><td>B → cC</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>C</td><td></td><td>C → bC</td><td></td><td>C → ε</td><td>C → ε</td><td>C → ε</td><td></td></tr>
+      <tr><td>D</td><td></td><td></td><td></td><td>D → EF</td><td>D → EF</td><td>D → EF</td><td></td></tr>
+      <tr><td>E</td><td></td><td></td><td></td><td>E → ε</td><td>E → g</td><td>E → ε</td><td></td></tr>
+      <tr><td>F</td><td></td><td></td><td></td><td>F → f</td><td></td><td>F → ε</td><td></td></tr>
+    </table>
+    <p><strong>LL(1)?</strong> Ya, setiap sel berisi paling banyak satu produksi. <code>D → EF</code> ada di kolom h karena FIRST(EF) memuat ε, dan FOLLOW(D) = {h}.</p>
+    <table class="t">
+      <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+      <tr><td>S $</td><td>acbgh$</td><td>S → aBDh</td></tr>
+      <tr><td>a B D h $</td><td>acbgh$</td><td>POP</td></tr>
+      <tr><td>B D h $</td><td>cbgh$</td><td>B → cC</td></tr>
+      <tr><td>c C D h $</td><td>cbgh$</td><td>POP</td></tr>
+      <tr><td>C D h $</td><td>bgh$</td><td>C → bC</td></tr>
+      <tr><td>b C D h $</td><td>bgh$</td><td>POP</td></tr>
+      <tr><td>C D h $</td><td>gh$</td><td>C → ε</td></tr>
+      <tr><td>D h $</td><td>gh$</td><td>D → EF</td></tr>
+      <tr><td>E F h $</td><td>gh$</td><td>E → g</td></tr>
+      <tr><td>g F h $</td><td>gh$</td><td>POP</td></tr>
+      <tr><td>F h $</td><td>h$</td><td>F → ε</td></tr>
+      <tr><td>h $</td><td>h$</td><td>POP</td></tr>
+      <tr><td>$</td><td>$</td><td>accepted</td></tr>
+    </table>
+    <p><strong>Kesimpulan:</strong> <code>acbgh</code> accepted. <a href="../10-first-dan-follow/viz/first-follow.html#src=S%20%E2%86%92%20aBDh%0AB%20%E2%86%92%20cC%0AC%20%E2%86%92%20bC%20%7C%20%CE%B5%0AD%20%E2%86%92%20EF%0AE%20%E2%86%92%20g%20%7C%20%CE%B5%0AF%20%E2%86%92%20f%20%7C%20%CE%B5">Cek FIRST/FOLLOW di viz</a> · <a href="../11-tabel-ll1/viz/tabel-ll1.html#src=S%20%E2%86%92%20aBDh%0AB%20%E2%86%92%20cC%0AC%20%E2%86%92%20bC%20%7C%20%CE%B5%0AD%20%E2%86%92%20EF%0AE%20%E2%86%92%20g%20%7C%20%CE%B5%0AF%20%E2%86%92%20f%20%7C%20%CE%B5">Cek tabel di viz</a> · <a href="../11-tabel-ll1/viz/trace-ll1.html#src=S%20%E2%86%92%20aBDh%0AB%20%E2%86%92%20cC%0AC%20%E2%86%92%20bC%20%7C%20%CE%B5%0AD%20%E2%86%92%20EF%0AE%20%E2%86%92%20g%20%7C%20%CE%B5%0AF%20%E2%86%92%20f%20%7C%20%CE%B5&amp;str=acbgh">Cek trace di viz</a>.</p>
+  </details>
+
+  <p class="intinya">Kerjakan dulu tanpa membuka jawaban. Nilai dirimu dengan bobot kisi, lalu ulangi section yang nilainya paling rendah.</p>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
+<ol class="refs">
+  <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 3.7, 3.9, 4.3, 4.4.</li>
+  <li>Hopcroft, J. E., Motwani, R., &amp; Ullman, J. D. (2007). <i>Introduction to automata theory, languages, and computation</i> (3rd ed.). Pearson. Bab 3.2, 4.4.</li>
+  <li>Slide kuliah COMP6062 Compilation Techniques (sesi RE, NFA, RE to DFA, DFA minimization, CFG, parsing fundamentals, top down parsing).</li>
+</ol>
+
+</main>
+<script src="../../_shared/automata.js?v=92a9c3c6"></script>
+<script src="../../_shared/grammar.js?v=7b39c7be"></script>
+<script>renderFigures();</script>
+</body>
+</html>

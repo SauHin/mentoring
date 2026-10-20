@@ -327,6 +327,10 @@ a.no:hover { color: #fff; background: rgb(30 95 145); }
 .list h2 { font-size: 1.2rem; margin: 0.5rem 0 0.25rem; }
 .list p { margin: 0 0 1rem; color: var(--ink-2); }
 .list .links { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Kartu persiapan ujian di atas daftar materi: latar biru muda (sama dengan callout 🔑) supaya menonjol. */
+.list > li.card.ujian { background: var(--intinya-bg); }
+.list .ujian .chip { background: var(--surface); color: var(--ink); font-weight: 600; }
+.list .ujian p { color: var(--ink); }
 .list-link { display: block; color: inherit; text-decoration: none; transition: background 120ms ease-out; }
 .list-link:hover { background: var(--card-hover); }
 .list-link { position: relative; padding-right: 56px; }

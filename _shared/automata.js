@@ -9,6 +9,7 @@
 //   minimizeSteps                    minimisasi DFA (table-filling atau partition)
 //   layoutAuto, drawAuto, drawTree   gambar SVG (warna ikut tema lewat automata.css)
 //   stepper                          kartu langkah: Kembali / Langkah berikutnya / mode tebak
+//   fromHash                         viz dibuka dengan soal dari link (#re=..., #src=...)
 
 const escHTML = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const EPS = 'ε';
@@ -703,6 +704,25 @@ function stepper(box, onShow, guessBox) {
     load(s, at = 0) { steps = s; i = Math.min(at, s.length - 1); asking = false; render(); },
     get index() { return i; },
   };
+}
+
+/* ---------- Soal dari link ---------- */
+// Viz bisa dibuka dengan soal tertentu: viz.html#re=...&src=... (nama = id kolom input, nilai di-encode dengan
+// encodeURIComponent, karena + di hash dibaca sebagai spasi). Mengisi kolomnya, membuka "Ubah …", dan menandai
+// dropdown contoh. Return parameter hash (untuk pilihan lain, misalnya method), atau null kalau tidak ada.
+function fromHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  let any = false;
+  p.forEach((v, k) => {
+    const el = document.getElementById(k);
+    if (el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type === 'text'))) { el.value = v; any = true; }
+  });
+  if (!any) return null;
+  const box = document.querySelector('details.au-input');
+  if (box) box.open = true;
+  const pre = document.getElementById('pre');
+  if (pre) { pre.insertAdjacentHTML('afterbegin', '<option disabled>Soal dari link</option>'); pre.selectedIndex = 0; }
+  return p;
 }
 
 /* ---------- Gambar di slide dan notes ---------- */

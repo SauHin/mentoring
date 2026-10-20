@@ -106,3 +106,34 @@ assert.deepEqual(run(pm, 'ceadb', true).rows.find((r) => r.skip).skip, ['e', 'a'
 const lat = ll('S → ABC\nA → aA | C\nB → b\nC → c');
 assert.deepEqual(sets(lat, 'follow'), ['S={$}', 'A={b}', 'B={c}', 'C={b, $}']);
 assert.equal(run(lat, 'aabc').accepted, false);
+
+// Simulasi Mid Exam (00-mid-exam): jawaban soal 1–6.
+assert.equal(au.thompson(au.parseRE('(ab|b)*a')).A.states.length, 12);
+const fpS = au.followposSteps(au.parseRE('(a|bb)*ab'));
+assert.deepEqual(fpS.follow, [[1, 2, 4], [3], [1, 2, 4], [5], [6], []]);
+assert.deepEqual(fpS.steps.at(-1).rows.map(row), ['A={1,2,4}:B,C', 'B={1,2,4,5}:B,D', 'C={3}:∅,A', 'D={3,6}:∅,A']);
+const mx = au.parseTable(`0 1
+→A C B
+B D B
+C D B
+D E F
+E C C
+*F E E`);
+for (const m of ['table', 'part']) assert.deepEqual(au.minimizeSteps(mx, m).groups.map((g) => g.join('')).sort(), ['AE', 'BC', 'D', 'F']);
+assert.deepEqual(au.minimizeSteps(au.parseTable(`a b
+→1 2 3
+2 2 3
+3 4 3
+*4 2 3`), 'table').groups.map((g) => g.join('')).sort(), ['12', '3', '4']);
+assert.deepEqual(cfg('(ab|c)*b(a|b)*'), ['S → AbB', 'A → abA | cA | ε', 'B → aB | bB | ε']);
+assert.deepEqual(lf('S → abS | abA | aB | c\nA → d\nB → e'), ["S → aS' | c", "S' → bS'' | B", "S'' → S | A", 'A → d', 'B → e']);
+assert.deepEqual(lr('S → Ab | c\nA → Ad | Sa | e', ['S', 'A']), ['S → Ab | c', "A → caA' | eA'", "A' → dA' | baA' | ε"]);
+assert.deepEqual(lr('S → AA | 0\nA → SS | 1', ['S', 'A']), ['S → AA | 0', "A → 0SA' | 1A'", "A' → ASA' | ε"]);
+const sim = ll('S → aBDh\nB → cC\nC → bC | ε\nD → EF\nE → g | ε\nF → f | ε');
+assert.deepEqual(sets(sim, 'first'), ['S={a}', 'B={c}', 'C={b, ε}', 'D={f, g, ε}', 'E={g, ε}', 'F={f, ε}']);
+assert.deepEqual(sets(sim, 'follow'), ['S={$}', 'B={f, g, h}', 'C={f, g, h}', 'D={h}', 'E={f, h}', 'F={h}']);
+assert.deepEqual(cells(sim), ['aBDh . . . . . .', '. . cC . . . .', '. bC . ε ε ε .', '. . . EF EF EF .', '. . . ε g ε .', '. . . f . ε .']);
+assert.equal(sim.tb.conflicts.length, 0);
+assert.equal(run(sim, 'acbgh').rows.length, 13);
+assert.ok(run(sim, 'acbgh').accepted);
+assert.ok(run(ex, 'id*id').accepted);
