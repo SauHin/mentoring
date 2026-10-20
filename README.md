@@ -49,7 +49,7 @@ Notasi mengikuti Epp: negasi `~`, nilai T/F, dan 1/0 untuk circuit. Visualisasi 
 
 ### Compilation technique
 
-Satu materi untuk setiap tipe soal ujian, bukan mengikuti urutan sesi dosen. Visualisasi memakai mesin bersama `_shared/automata.js` (RE, Thompson, subset construction, followpos, minimisasi, gambar diagram) dan `_shared/grammar.js` (RE → CFG, derivation, left factoring, left recursion), dengan gaya `automata.css`. Setiap viz menerima soal buatan sendiri (menu "Ubah …") dan punya mode tebak. Slide dan notes menggambar diagram dengan mesin yang sama (`renderFigures`, `renderParseTrees`).
+Satu materi untuk setiap tipe soal ujian, bukan mengikuti urutan sesi dosen. Visualisasi memakai mesin bersama `_shared/automata.js` (RE, Thompson, subset construction, followpos, minimisasi, gambar diagram) dan `_shared/grammar.js` (RE → CFG, derivation, left factoring, left recursion, FIRST/FOLLOW, tabel dan trace LL(1)), dengan gaya `automata.css`. Setiap viz menerima soal buatan sendiri (menu "Ubah …") dan punya mode tebak. Slide dan notes menggambar diagram dengan mesin yang sama (`renderFigures`, `renderParseTrees`).
 
 Jawaban di mesin dicek terhadap contoh dan latihan di slide dosen: `node tools/check-engines.js` (tidak ada output = benar).
 
@@ -64,6 +64,8 @@ Jawaban di mesin dicek terhadap contoh dan latihan di slide dosen: `node tools/c
 | 07 | Derivation, parse tree, dan ambiguity | [notes](compilation-technique/07-derivation-dan-ambiguity/notes.html) | [slides](compilation-technique/07-derivation-dan-ambiguity/slides.html) |
 | 08 | Left factoring | [notes](compilation-technique/08-left-factoring/notes.html) | [slides](compilation-technique/08-left-factoring/slides.html) |
 | 09 | Eliminasi left recursion | [notes](compilation-technique/09-left-recursion/notes.html) | [slides](compilation-technique/09-left-recursion/slides.html) |
+| 10 | Predictive parsing, FIRST, dan FOLLOW | [notes](compilation-technique/10-first-dan-follow/notes.html) | [slides](compilation-technique/10-first-dan-follow/slides.html) |
+| 11 | Tabel LL(1) dan trace parser | [notes](compilation-technique/11-tabel-ll1/notes.html) | [slides](compilation-technique/11-tabel-ll1/slides.html) |
 
 ## Struktur
 
@@ -84,7 +86,7 @@ mentoring/
 │   └── 01-… sampai 05-…
 ├── compilation-technique/
 │   ├── index.html
-│   └── 01-… sampai 09-…        satu materi per tipe soal
+│   └── 01-… sampai 11-…        satu materi per tipe soal
 └── tools/                      cachebust.py, check-engines.js
 ```
 

@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabel LL(1) dan Trace Parser</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../_shared/style.css?v=8a32c630">
+  <link rel="stylesheet" href="../../_shared/automata.css?v=07d09f84">
+  <script src="../../_shared/theme.js?v=8e552fea"></script>
+  <style>
+    .tight td, .tight th { padding: 0.3em 0.7em; }
+    .small { font-size: 0.8em; }
+    .xs { font-size: 0.68em; line-height: 1.3; }
+    .xs td, .xs th { padding: 0.18em 0.6em; }
+    .pair { display: flex; flex-wrap: wrap; gap: 1em 2.5em; align-items: flex-start; }
+    .pair > div > p { margin: 0 0 0.2em; font-size: 0.8em; font-weight: 600; color: var(--pudar); }
+    .hl td { background: color-mix(in srgb, var(--stop) 14%, transparent); }
+    td.x { color: var(--x-ink); background: color-mix(in srgb, var(--stop) 14%, transparent); }
+    .ll1-diag { width: 100%; max-width: 30em; height: auto; font-family: var(--mono); }
+    .ll1-diag rect { fill: var(--card-2); stroke: var(--ink-3); stroke-width: 1.5; }
+    .ll1-diag rect.go { fill: color-mix(in srgb, var(--hot) 25%, var(--surface)); stroke: var(--hot); }
+    .ll1-diag text { fill: var(--ink); font-size: 15px; text-anchor: middle; dominant-baseline: central; }
+    .ll1-diag text.lab { fill: var(--ink-2); font-size: 13px; font-family: var(--font, sans-serif); }
+    .ll1-diag path { fill: none; stroke: var(--ink-3); stroke-width: 1.6; marker-end: url(#tip); }
+    .ll1-diag marker path { fill: var(--ink-3); stroke: none; }
+  </style>
+</head>
+<body class="deck">
+
+<section class="slide">
+  <img class="logo" src="../../_shared/logo.svg" alt="">
+  <h1>Tabel LL(1) dan trace parser</h1>
+  <p class="sub">Compilation technique · materi 11 · prasyarat: FIRST dan FOLLOW (materi 10)</p>
+  <p>Target: kamu bisa mengisi parsing table, menjalankan trace stack, menentukan apakah grammar LL(1), dan menjalankan panic-mode error recovery.</p>
+  <p class="coba-link">Label di atas setiap judul (misalnya "Notes 3️⃣") menunjuk section notes yang membahas hal yang sama secara lengkap.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 1️⃣ · Parser LL(1)</p>
+  <h2>Parser LL(1) hanya butuh input, stack, dan parsing table</h2>
+  <p class="sub"><mark>LL(1) parser</mark>: predictive parser tanpa rekursi. Input dibaca dari <b>L</b>eft, menghasilkan <b>L</b>eftmost derivation, dengan <b>1</b> token lookahead.</p>
+  <div class="cols">
+    <figure>
+      <svg class="ll1-diag" viewBox="0 0 520 250" role="img" aria-label="Parser LL(1) membaca input dan top stack, melihat parsing table, lalu menulis output">
+        <defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>
+        <rect x="160" y="8" width="200" height="42" rx="8"/><text x="260" y="29">id + id $</text>
+        <text class="lab" x="420" y="29">input</text>
+        <rect class="go" x="170" y="100" width="180" height="46" rx="8"/><text x="260" y="123">parser LL(1)</text>
+        <rect x="20" y="78" width="90" height="34" rx="6"/><text x="65" y="95">E</text>
+        <rect x="20" y="112" width="90" height="34" rx="6"/><text x="65" y="129">$</text>
+        <text class="lab" x="65" y="166">stack (E = top)</text>
+        <rect x="170" y="194" width="180" height="42" rx="8"/><text x="260" y="215">M[A, a]</text>
+        <text class="lab" x="420" y="215">parsing table</text>
+        <rect x="400" y="100" width="110" height="46" rx="8"/><text x="455" y="123">E → TE'</text>
+        <text class="lab" x="455" y="166">output</text>
+        <path d="M260 50 V96"/><path d="M114 112 H166"/><path d="M260 192 V150"/><path d="M350 123 H396"/>
+      </svg>
+      <figcaption>Parser membaca token sekarang dan top stack, melihat satu sel tabel, lalu menulis produksinya ke output.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Input</strong> diakhiri <code>$</code>.</li>
+      <li><strong>Stack</strong> awalnya <code>$</code> di dasar dan start symbol di atasnya. Stack menggantikan rekursi.</li>
+      <li><strong>Sel kosong</strong> di tabel berarti error.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 2️⃣ · Mengisi tabel</p>
+  <h2><code>A → α</code> ditulis di kolom FIRST(α), dan kalau α bisa ε, di kolom FOLLOW(A)</h2>
+  <p class="sub">Proses produksi satu per satu. Contoh slide: <code>S → aBa</code>, <code>B → bB | ε</code>, dengan FOLLOW(B) = {a}.</p>
+  <div class="cols">
+    <ol>
+      <li><strong>Untuk setiap a di FIRST(α):</strong> tulis di M[A, a].</li>
+      <li><strong>Kalau ε di FIRST(α):</strong> tulis di M[A, b] untuk setiap b di FOLLOW(A), termasuk <code>$</code>.</li>
+      <li><strong>Sel kosong</strong> = error.</li>
+    </ol>
+    <div>
+      <table class="tight t">
+        <tr><th>M</th><th>a</th><th>b</th><th>$</th></tr>
+        <tr><td>S</td><td>S → aBa</td><td></td><td></td></tr>
+        <tr><td>B</td><td>B → ε</td><td>B → bB</td><td></td></tr>
+      </table>
+      <p class="small"><code>B → ε</code> masuk kolom <code>a</code> karena FOLLOW(B) = {a}. <mark class="jebakan">Tidak ada kolom ε.</mark></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 2️⃣ · Mengisi tabel</p>
+  <h2>Grammar ekspresi: produksi ε pergi ke kolom FOLLOW, sisanya ke kolom FIRST</h2>
+  <p class="sub">Contoh slide. FIRST dan FOLLOW dari materi 10 ada di tabel kiri.</p>
+  <div class="pair">
+    <table class="tight t small">
+      <tr><th></th><th>FIRST</th><th>FOLLOW</th></tr>
+      <tr><td>E</td><td>{(, id}</td><td>{), $}</td></tr>
+      <tr><td>E'</td><td>{+, ε}</td><td>{), $}</td></tr>
+      <tr><td>T</td><td>{(, id}</td><td>{+, ), $}</td></tr>
+      <tr><td>T'</td><td>{*, ε}</td><td>{+, ), $}</td></tr>
+      <tr><td>F</td><td>{(, id}</td><td>{+, *, ), $}</td></tr>
+    </table>
+    <table class="tight t small">
+      <tr><th>M</th><th>id</th><th>+</th><th>*</th><th>(</th><th>)</th><th>$</th></tr>
+      <tr><td>E</td><td>E → TE'</td><td></td><td></td><td>E → TE'</td><td></td><td></td></tr>
+      <tr><td>E'</td><td></td><td>E' → +TE'</td><td></td><td></td><td>E' → ε</td><td>E' → ε</td></tr>
+      <tr><td>T</td><td>T → FT'</td><td></td><td></td><td>T → FT'</td><td></td><td></td></tr>
+      <tr><td>T'</td><td></td><td>T' → ε</td><td>T' → *FT'</td><td></td><td>T' → ε</td><td>T' → ε</td></tr>
+      <tr><td>F</td><td>F → id</td><td></td><td></td><td>F → (E)</td><td></td><td></td></tr>
+    </table>
+  </div>
+  <p><code>T' → ε</code> ada di tiga kolom karena FOLLOW(T') = {+, ), $}.</p>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: mengisi tabel LL(1)</h2>
+  <iframe src="viz/tabel-ll1.html" title="Visualisasi mengisi tabel LL(1)"></iframe>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 3️⃣ · Aksi parser</p>
+  <h2>Top stack X dan input a menentukan aksi: pop kalau sama, ganti X dengan M[X, a] kalau variabel</h2>
+  <p class="sub">Empat kemungkinan, dicek dari atas. Top stack ditulis di kiri, seperti trace di slide dosen.</p>
+  <table class="tight">
+    <tr><th>Keadaan</th><th>Aksi</th></tr>
+    <tr><td>X = a = <code>$</code></td><td>selesai, <b>accepted</b></td></tr>
+    <tr><td>X terminal, X = a</td><td>POP: pop X, maju satu token</td></tr>
+    <tr><td>X variabel, M[X, a] = <code>X → Y₁…Yₖ</code></td><td>pop X, push Yₖ … Y₁ (<b>Y₁ di top</b>), output produksinya</td></tr>
+    <tr><td>selain itu</td><td>error: sel kosong, atau terminal X ≠ a</td></tr>
+  </table>
+  <p>Push dibalik, karena Y₁ harus dicocokkan pertama. Produksi ε: pop X saja.</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 3️⃣ · Aksi parser</p>
+  <h2>Trace <code>abba</code>: variabel diganti isi sel, terminal di-pop kalau cocok</h2>
+  <p class="sub">Contoh slide dengan tabel <code>S → aBa</code>, <code>B → bB | ε</code>. Baca baris demi baris: stack dan input sebelum aksi.</p>
+  <div class="cols">
+    <table class="tight t small">
+      <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+      <tr><td>S $</td><td>abba$</td><td>S → aBa</td></tr>
+      <tr><td>a B a $</td><td>abba$</td><td>POP</td></tr>
+      <tr><td>B a $</td><td>bba$</td><td>B → bB</td></tr>
+      <tr><td>b B a $</td><td>bba$</td><td>POP</td></tr>
+      <tr><td>B a $</td><td>ba$</td><td>B → bB</td></tr>
+      <tr><td>b B a $</td><td>ba$</td><td>POP</td></tr>
+      <tr><td>B a $</td><td>a$</td><td>B → ε</td></tr>
+      <tr><td>a $</td><td>a$</td><td>POP</td></tr>
+      <tr><td>$</td><td>$</td><td>accepted</td></tr>
+    </table>
+    <ul>
+      <li><strong>Baris 1:</strong> M[S, a] = <code>S → aBa</code>, push dibalik, jadi <code>a</code> di top.</li>
+      <li><strong>Baris 7:</strong> M[B, a] = <code>B → ε</code>, pop B saja.</li>
+      <li><strong>Baris 9:</strong> stack dan input sama-sama <code>$</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 4️⃣ · Trace</p>
+  <h2>Trace <code>id+id</code> berakhir dengan stack dan input sama-sama $, jadi accepted</h2>
+  <p class="sub">Contoh slide, tabel grammar ekspresi. Slide dosen menulis baris kelima <code>T → ε</code>, yang benar <code>T' → ε</code>.</p>
+  <div class="cols">
+    <table class="t xs">
+      <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+      <tr><td>E $</td><td>id+id$</td><td>E → TE'</td></tr>
+      <tr><td>T E' $</td><td>id+id$</td><td>T → FT'</td></tr>
+      <tr><td>F T' E' $</td><td>id+id$</td><td>F → id</td></tr>
+      <tr><td>id T' E' $</td><td>id+id$</td><td>POP</td></tr>
+      <tr><td>T' E' $</td><td>+id$</td><td>T' → ε</td></tr>
+      <tr><td>E' $</td><td>+id$</td><td>E' → +TE'</td></tr>
+      <tr><td>+ T E' $</td><td>+id$</td><td>POP</td></tr>
+      <tr><td>T E' $</td><td>id$</td><td>T → FT'</td></tr>
+      <tr><td>F T' E' $</td><td>id$</td><td>F → id</td></tr>
+      <tr><td>id T' E' $</td><td>id$</td><td>POP</td></tr>
+      <tr><td>T' E' $</td><td>$</td><td>T' → ε</td></tr>
+      <tr><td>E' $</td><td>$</td><td>E' → ε</td></tr>
+      <tr><td>$</td><td>$</td><td>accepted</td></tr>
+    </table>
+    <ul>
+      <li><strong>T' dengan input <code>+</code>:</strong> M[T', +] = <code>T' → ε</code>, karena <code>+</code> ada di FOLLOW(T').</li>
+      <li><strong>E' dengan input <code>$</code>:</strong> M[E', $] = <code>E' → ε</code>.</li>
+      <li>Accepted hanya kalau stack <b>dan</b> input sama-sama <code>$</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 4️⃣ · Trace</p>
+  <h2>String ditolak begitu sel tabel kosong</h2>
+  <p class="sub">Dua contoh slide dengan grammar ekspresi. Baris merah adalah tempat error terjadi.</p>
+  <div class="pair">
+    <div>
+      <p>id/id+id: <code>/</code> bukan terminal, jadi tidak punya kolom</p>
+      <table class="t xs">
+        <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+        <tr><td>E $</td><td>id/id+id$</td><td>E → TE'</td></tr>
+        <tr><td>T E' $</td><td>id/id+id$</td><td>T → FT'</td></tr>
+        <tr><td>F T' E' $</td><td>id/id+id$</td><td>F → id</td></tr>
+        <tr><td>id T' E' $</td><td>id/id+id$</td><td>POP</td></tr>
+        <tr class="hl"><td>T' E' $</td><td>/id+id$</td><td>error, rejected</td></tr>
+      </table>
+    </div>
+    <div>
+      <p>id*(+id): M[E, +] kosong</p>
+      <table class="t xs">
+        <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+        <tr><td>E $</td><td>id*(+id)$</td><td>E → TE'</td></tr>
+        <tr><td>T E' $</td><td>id*(+id)$</td><td>T → FT'</td></tr>
+        <tr><td>F T' E' $</td><td>id*(+id)$</td><td>F → id</td></tr>
+        <tr><td>id T' E' $</td><td>id*(+id)$</td><td>POP</td></tr>
+        <tr><td>T' E' $</td><td>*(+id)$</td><td>T' → *FT'</td></tr>
+        <tr><td>* F T' E' $</td><td>*(+id)$</td><td>POP</td></tr>
+        <tr><td>F T' E' $</td><td>(+id)$</td><td>F → (E)</td></tr>
+        <tr><td>( E ) T' E' $</td><td>(+id)$</td><td>POP</td></tr>
+        <tr class="hl"><td>E ) T' E' $</td><td>+id)$</td><td>error, rejected</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="slide full">
+  <h2>Coba sendiri: trace parser LL(1)</h2>
+  <iframe src="viz/trace-ll1.html" title="Visualisasi trace parser LL(1)"></iframe>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 5️⃣ · Output</p>
+  <h2>Produksi di kolom aksi adalah leftmost derivation, karena variabel paling kiri selalu ada di top</h2>
+  <p class="sub">Ambil baris yang aksinya produksi (bukan POP) dari trace <code>abba</code>, lalu gambar tree-nya.</p>
+  <div class="cols">
+<pre class="kode"><code>Output: S → aBa, B → bB,
+        B → bB,  B → ε
+
+S ⇒ aBa ⇒ abBa ⇒ abbBa ⇒ abba</code></pre>
+    <figure>
+      <div class="au-fig tall" data-grammar="S → aBa;B → bB | ε" data-input="abba"></div>
+      <figcaption>Parse tree <code>abba</code>: setiap produksi output menambah anak di bawah variabelnya.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 6️⃣ · Bukan LL(1)</p>
+  <h2>M[E, e] berisi dua produksi, jadi grammar <code>S → iCtSE</code> bukan LL(1)</h2>
+  <p class="sub"><mark>LL(1) grammar</mark>: tidak ada sel berisi lebih dari satu produksi (conflict). Contoh slide: <code>S → iCtSE | a</code>, <code>E → eS | ε</code>, <code>C → b</code>.</p>
+  <table class="tight t small">
+    <tr><th>M</th><th>a</th><th>b</th><th>e</th><th>i</th><th>t</th><th>$</th></tr>
+    <tr><td>S</td><td>S → a</td><td></td><td></td><td>S → iCtSE</td><td></td><td></td></tr>
+    <tr><td>E</td><td></td><td></td><td class="x"><b>E → eS<br>E → ε</b></td><td></td><td></td><td>E → ε</td></tr>
+    <tr><td>C</td><td></td><td>C → b</td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  <ul>
+    <li><strong>Penyebab:</strong> <code>e</code> ada di FIRST(eS) dan di FOLLOW(E) = {e, $}. Dengan i = if, t = then, e = else, ini dangling else: <code>else</code> bisa milik <code>if</code> mana pun (ambiguous).</li>
+    <li><strong>Perbaikan:</strong> hapus left recursion, left factoring. Kalau masih conflict, grammar bukan LL(1).</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 7️⃣ · Syarat LL(1)</p>
+  <h2>Left recursive, belum left factoring, atau ambiguous pasti bukan LL(1)</h2>
+  <p class="sub">Syarat lengkap untuk setiap dua produksi <code>A → α | β</code>. Cukup satu yang dilanggar untuk membuat conflict.</p>
+  <div class="cols">
+    <ol>
+      <li><strong>FIRST(α) dan FIRST(β) tidak beririsan.</strong></li>
+      <li><strong>Paling banyak satu</strong> dari α dan β yang nullable.</li>
+      <li><strong>Kalau β nullable:</strong> FIRST(α) tidak beririsan dengan FOLLOW(A).</li>
+    </ol>
+    <table class="tight small">
+      <tr><th>Tanda</th><th>Syarat yang dilanggar</th></tr>
+      <tr><td><code>A → Aα | β</code></td><td>1: FIRST(β) ada di FIRST(Aα)</td></tr>
+      <tr><td><code>A → aβ₁ | aβ₂</code></td><td>1: keduanya memuat <code>a</code></td></tr>
+      <tr><td><code>E → eS | ε</code>, e di FOLLOW(E)</td><td>3: contoh dangling else</td></tr>
+    </table>
+  </div>
+  <p class="small">Template: "Grammar ini bukan LL(1), karena untuk <code>A → α | β</code>, terminal <code>a</code> ada di FIRST(α) dan di [FIRST(β) / FOLLOW(A)]."</p>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 8️⃣ · Panic mode</p>
+  <h2>Panic mode membuang input sampai ketemu simbol di FOLLOW(A), lalu pop A</h2>
+  <p class="sub"><mark>Panic mode</mark>: error recovery supaya parser bisa lanjut mencari error berikutnya. Contoh slide: <code>S → AbS | e | ε</code>, <code>A → a | cAd</code>, FOLLOW(A) = {b, d}.</p>
+  <div class="cols">
+    <table class="t xs">
+      <tr><th>Stack</th><th>Input</th><th>Aksi</th></tr>
+      <tr><td>S $</td><td>ceadb$</td><td>S → AbS</td></tr>
+      <tr><td>A b S $</td><td>ceadb$</td><td>A → cAd</td></tr>
+      <tr><td>c A d b S $</td><td>ceadb$</td><td>POP</td></tr>
+      <tr class="hl"><td>A d b S $</td><td>eadb$</td><td>error (sync): buang e a, pop A</td></tr>
+      <tr><td>d b S $</td><td>db$</td><td>POP</td></tr>
+      <tr><td>b S $</td><td>b$</td><td>POP</td></tr>
+      <tr><td>S $</td><td>$</td><td>S → ε</td></tr>
+      <tr><td>$</td><td>$</td><td>selesai, 1 error</td></tr>
+    </table>
+    <ul>
+      <li><strong>Sel kosong (sync):</strong> buang input sampai token ada di FOLLOW(A), lalu pop A.</li>
+      <li><strong>Terminal tidak cocok:</strong> pop terminal itu, laporkan "missing …, inserted".</li>
+      <li>Ada error, jadi string <b>tetap rejected</b>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Notes 9️⃣ · Kesalahan umum</p>
+  <h2>Kesalahan paling sering: kolom ε, push tidak dibalik, dan accept terlalu cepat</h2>
+  <p class="sub">Setiap baris menyebut akibatnya dan cara memperbaikinya.</p>
+  <table class="tight small">
+    <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td><code>A → ε</code> di kolom ε</td><td>produksi tidak pernah dipakai</td><td>tulis di kolom FOLLOW(A)</td></tr>
+    <tr><td>Kolom <code>$</code> kosong</td><td>string valid ditolak di akhir</td><td><code>$</code> ikut dari FOLLOW</td></tr>
+    <tr><td>Push tidak dibalik</td><td>urutan pencocokan terbalik</td><td>Y₁ terakhir di-push, jadi di top</td></tr>
+    <tr><td>Accepted padahal input sisa</td><td>kesimpulan salah</td><td>stack dan input sama-sama <code>$</code></td></tr>
+    <tr><td>Trace dengan sel conflict</td><td>hasil tergantung tebakan</td><td>perbaiki grammar dulu</td></tr>
+    <tr><td>Arah stack tertukar</td><td>salah membaca top</td><td>cek top di kiri atau di kanan</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Ringkasan</h2>
+  <p class="sub">Soal LL(1) biasanya berurutan: FIRST dan FOLLOW, tabel, lalu trace.</p>
+  <ul>
+    <li><strong>Tabel:</strong> <code>A → α</code> ke kolom FIRST(α). Kalau α nullable, juga ke kolom FOLLOW(A).</li>
+    <li><strong>Trace:</strong> terminal di top dicocokkan, variabel di top diganti isi M[X, a] dengan push dibalik.</li>
+    <li><strong>Hasil:</strong> accepted kalau stack dan input sama-sama <code>$</code>. Output = leftmost derivation.</li>
+    <li><strong>LL(1)?</strong> Tidak ada sel berisi dua produksi. Panic mode memakai FOLLOW untuk melanjutkan setelah error.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Soal</h2>
+  <p class="sub">Kerjakan, lalu cek di slide berikutnya atau di visualisasi.</p>
+  <ol class="soal-list">
+    <li>Buat parsing table untuk <code>A → aBe | cBd | C</code>, <code>B → bB | ε</code>, <code>C → f</code>.</li>
+    <li>Apakah <code>S → aS | a</code> LL(1)? Kalau tidak, perbaiki.</li>
+    <li>Latihan slide dosen: <code>S → ABC</code>, <code>A → aA | C</code>, <code>B → b</code>, <code>C → c</code>. Buat parsing table, lalu trace <code>aabc</code>.</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2>Jawaban</h2>
+  <p class="sub">Langkah lengkapnya ada di notes (nomor section di kurung).</p>
+  <ol class="soal-list">
+    <li>M[A, a] = <code>A → aBe</code>, M[A, c] = <code>A → cBd</code>, M[A, f] = <code>A → C</code>, M[B, b] = <code>B → bB</code>, M[B, d] = M[B, e] = <code>B → ε</code>, M[C, f] = <code>C → f</code> (<a href="notes.html#langkah-2">2️⃣</a>).</li>
+    <li>Bukan: M[S, a] berisi dua produksi. Left factoring: <code>S → aS'</code>, <code>S' → S | ε</code> (<a href="notes.html#langkah-6">6️⃣</a>).</li>
+    <li>M[S, a] = M[S, c] = <code>S → ABC</code>, M[A, a] = <code>A → aA</code>, M[A, c] = <code>A → C</code>, M[B, b] = <code>B → b</code>, M[C, c] = <code>C → c</code>. Trace: setelah dua <code>a</code>, M[A, b] kosong, jadi <b>rejected</b> (<a href="notes.html#langkah-4">4️⃣</a>).</li>
+  </ol>
+</section>
+
+<script src="../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../_shared/grammar.js?v=7b39c7be"></script>
+<script>renderParseTrees();</script>
+<script src="../../_shared/slides.js?v=805bba15"></script>
+</body>
+</html>

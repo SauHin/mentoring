@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabel LL(1)</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=8a32c630">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=07d09f84">
+  <script src="../../../_shared/theme.js?v=8e552fea"></script>
+</head>
+<body class="viz">
+
+<h1>Mengisi tabel LL(1)</h1>
+<p>Visualisasi ini mengisi parsing table M satu produksi demi satu produksi, memakai FIRST dan FOLLOW. Kalau satu sel berisi dua produksi, grammar-nya <b>bukan LL(1)</b>.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh, lalu klik <b>Langkah berikutnya</b>. Bandingkan grammar ekspresi dengan contoh <b>S → iCtSE</b>.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> produksi yang FIRST-nya memuat ε (misalnya <code>E' → ε</code>) ditulis di kolom FOLLOW, bukan kolom FIRST. Sel merah berisi dua produksi (conflict).</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu sel mana yang diisi"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah grammar</summary>
+  <p class="hint">Satu baris per variabel: <code>E' → +TE' | ε</code>. Variabel = huruf besar (boleh diberi '), baris pertama = start symbol. Kalau terminal lebih dari satu huruf selain <code>id</code>, pisahkan semua simbol dengan spasi.</p>
+  <textarea id="src" rows="5" spellcheck="false"></textarea>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <div class="au-two">
+      <section><div class="au-title">Grammar</div><div class="au-gram" id="gram"></div></section>
+      <section class="au-sec"><div class="au-title">FIRST dan FOLLOW</div><div class="au-scroll" id="ff"></div></section>
+    </div>
+    <section class="au-sec"><div class="au-title">Parsing table M <span class="label">baris = variabel, kolom = terminal dan $, oranye = baru diisi, merah = conflict</span></div><div class="au-scroll" id="tbl"></div></section>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/grammar.js?v=7b39c7be"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['Slide: grammar ekspresi', "E → TE'\nE' → +TE' | ε\nT → FT'\nT' → *FT' | ε\nF → (E) | id"],
+  ['Slide: S → aBa', 'S → aBa\nB → bB | ε'],
+  ['Slide: S → iCtSE (bukan LL(1))', 'S → iCtSE | a\nE → eS | ε\nC → b'],
+  ['Slide: S → AbS (panic mode)', 'S → AbS | e | ε\nA → a | cAd'],
+  ['Latihan: S → ABC', 'S → ABC\nA → aA | C\nB → b\nC → c'],
+  ['Left recursive: E → E+T | T', 'E → E+T | T\nT → id'],
+  ['Belum left factoring: S → ab | ac', 'S → ab | ac'],
+];
+let G, R;
+const st = stepper($('step'), (s) => {
+  const hotRow = s.hot && s.hot.A;
+  $('gram').innerHTML = showGrammar(G).map((r) => `<div class="${r.A === hotRow ? 'hot' : ''}"><b>${escHTML(r.A)}</b> → ${escHTML(r.alts.join(' | '))}</div>`).join('');
+  const ff = R.ff;
+  $('ff').innerHTML = `<table class="au-table"><tr><th></th><th>FIRST</th><th>FOLLOW</th></tr>${ff.vars.map((A) => `<tr><td class="st">${escHTML(A)}</td><td>${escHTML(ff.fmt(ff.first.get(A)))}</td><td>${escHTML(ff.fmt(ff.follow.get(A)))}</td></tr>`).join('')}</table>`;
+  const hot = new Set(s.hot ? s.hot.cells : []);
+  $('tbl').innerHTML = `<table class="au-table"><tr><th>M</th>${ff.cols.map((c) => `<th>${escHTML(c)}</th>`).join('')}</tr>${ff.vars.map((A) => `<tr><td class="st">${escHTML(A)}</td>${ff.cols.map((c) => {
+    const ps = s.M.get(A).get(c) || [];
+    const cls = ps.length > 1 ? 'clash' : A === hotRow && hot.has(c) ? 'hot' : '';
+    return `<td class="prods ${cls}">${ps.map((a) => `<div>${escHTML(`${A} → ${showAlt(G, a)}`)}</div>`).join('')}</td>`;
+  }).join('')}</tr>`).join('')}</table>`;
+}, $('guess'));
+
+function load() {
+  try {
+    G = parseGrammar($('src').value);
+    R = ll1TableSteps(G);
+    $('err').textContent = '';
+    st.load(R.steps);
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { $('src').value = PRESETS[e.target.value][1]; load(); };
+$('src').oninput = load;
+$('pre').onchange({ target: { value: 0 } });
+</script>
+</body>
+</html>

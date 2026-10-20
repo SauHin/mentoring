@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Compilation Technique · Mentoring</title>
   <link rel="icon" href="../_shared/favicon.svg">
-  <link rel="stylesheet" href="../_shared/gaya.css?v=5af73795">
+  <link rel="stylesheet" href="../_shared/gaya.css?v=9273b841">
   <link rel="stylesheet" href="../_shared/style.css?v=8a32c630">
   <script src="../_shared/theme.js?v=8e552fea"></script>
 </head>
@@ -14,7 +14,7 @@
 <article class="notes">
   <span class="chip">Mata kuliah</span>
   <h1>Compilation technique</h1>
-  <p class="lead">Satu materi untuk setiap <b>tipe soal</b>: RE, Thompson, subset construction, followpos, minimisasi, RE → CFG, derivation, left factoring, dan left recursion. Setiap visualisasi bisa mengerjakan soal milikmu sendiri langkah demi langkah.</p>
+  <p class="lead">Satu materi untuk setiap <b>tipe soal</b>: RE, Thompson, subset construction, followpos, minimisasi, RE → CFG, derivation, left factoring, left recursion, FIRST dan FOLLOW, serta tabel dan trace LL(1). Setiap visualisasi bisa mengerjakan soal milikmu sendiri langkah demi langkah.</p>
 
   <ol class="list">
     <li class="card">
@@ -96,6 +96,24 @@
       <div class="links">
         <a class="btn btn-go btn-sm" href="09-left-recursion/slides.html">Slide</a>
         <a class="btn btn-sm" href="09-left-recursion/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">10</span>
+      <h2>Predictive parsing, FIRST, dan FOLLOW</h2>
+      <p>Recursive descent dengan dan tanpa backtracking, lalu menghitung FIRST dan FOLLOW setiap variabel.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="10-first-dan-follow/slides.html">Slide</a>
+        <a class="btn btn-sm" href="10-first-dan-follow/notes.html">Notes</a>
+      </div>
+    </li>
+    <li class="card">
+      <span class="chip">11</span>
+      <h2>Tabel LL(1) dan trace parser</h2>
+      <p>Mengisi parsing table, trace stack sampai accepted atau rejected, cek LL(1), dan panic-mode error recovery.</p>
+      <div class="links">
+        <a class="btn btn-go btn-sm" href="11-tabel-ll1/slides.html">Slide</a>
+        <a class="btn btn-sm" href="11-tabel-ll1/notes.html">Notes</a>
       </div>
     </li>
   </ol>

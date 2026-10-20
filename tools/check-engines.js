@@ -81,3 +81,28 @@ const trees = (t, s) => { const g = gr.parseGrammar(t); return gr.findTrees(g, g
 assert.equal(trees('E → E+T | T\nT → T*F | F\nF → (E) | id', 'id+id*id'), 1);
 assert.equal(trees('E → E+E | E*E | (E) | id', 'id+id*id'), 2);
 assert.equal(trees('S → AB | C\nA → aAb | ab\nB → cBd | cd\nC → aCd | aDd\nD → bDc | bc', 'aabbccdd'), 2);
+
+// FIRST, FOLLOW, tabel LL(1), dan trace: slide Top Down Parsing (sesi 11–13).
+const ll = (t) => { const g = gr.parseGrammar(t), tb = gr.ll1TableSteps(g); return { g, tb, ff: tb.ff }; };
+const sets = ({ ff }, k) => ff.vars.map((A) => `${A}=${ff.fmt(ff[k].get(A))}`);
+const cells = ({ g, tb, ff }) => ff.vars.map((A) => ff.cols.map((c) => (tb.M.get(A).get(c) || []).map((a) => gr.showAlt(g, a)).join('/') || '.').join(' '));
+const run = (G, s, panic) => gr.ll1Parse(G.g, G.tb, gr.tokenize(G.g, s), panic);
+const ex = ll("E → TE'\nE' → +TE' | ε\nT → FT'\nT' → *FT' | ε\nF → (E) | id");
+assert.deepEqual(sets(ex, 'first'), ['E={(, id}', "E'={+, ε}", 'T={(, id}', "T'={*, ε}", 'F={(, id}']);
+assert.deepEqual(sets(ex, 'follow'), ['E={), $}', "E'={), $}", 'T={+, ), $}', "T'={+, ), $}", 'F={+, *, ), $}']);
+assert.deepEqual(cells(ex), ["TE' . . TE' . .", ". +TE' . . ε ε", "FT' . . FT' . .", ". ε *FT' . ε ε", 'id . . (E) . .']);
+const okRun = run(ex, 'id+id');
+assert.equal(okRun.rows.length, 13);
+assert.ok(okRun.accepted);
+assert.equal(run(ex, 'id/id+id').rows.at(-1).X, "T'");
+assert.equal(run(ex, 'id*(+id)').rows.at(-1).X, 'E');
+const aba = ll('S → aBa\nB → bB | ε');
+assert.deepEqual(run(aba, 'abba').rows.filter((r) => r.alt).map((r) => gr.showAlt(aba.g, r.alt)), ['aBa', 'bB', 'bB', 'ε']);
+assert.deepEqual(ll('S → iCtSE | a\nE → eS | ε\nC → b').tb.conflicts, [['E', 'e']]);
+const pm = ll('S → AbS | e | ε\nA → a | cAd');
+assert.deepEqual(sets(pm, 'follow'), ['S={$}', 'A={b, d}']);
+assert.deepEqual(run(pm, 'aab', true).rows.map((r) => r.kind), ['expand', 'expand', 'match', 'mismatch', 'expand', 'expand', 'match', 'match', 'expand', 'accept']);
+assert.deepEqual(run(pm, 'ceadb', true).rows.find((r) => r.skip).skip, ['e', 'a']);
+const lat = ll('S → ABC\nA → aA | C\nB → b\nC → c');
+assert.deepEqual(sets(lat, 'follow'), ['S={$}', 'A={b}', 'B={c}', 'C={b, $}']);
+assert.equal(run(lat, 'aabc').accepted, false);
