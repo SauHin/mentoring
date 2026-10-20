@@ -19,20 +19,20 @@
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
 
 <header>
-  <h1>Mid Exam compilation technique</h1>
-  <p class="tujuan">Halaman ini tidak mengulang teori. Isinya resep mengerjakan setiap tipe soal di kisi-kisi Mid Exam, contoh jawaban lengkap, cara mengecek jawabanmu sendiri, dan satu simulasi ujian. Target: kamu bisa mengerjakan keenam tipe soal dalam 100 menit.</p>
+  <h1>Mid Exam Compilation Technique</h1>
+  <p class="tujuan"></p>
   <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Teori setiap tipe soal ada di materi 02–11 (link di setiap section) · Setiap latihan punya link <b>Cek di viz</b> yang membuka visualisasi dengan soal itu sudah terisi</p>
   <ul class="legenda">
-    <li><mark>istilah baru</mark></li>
-    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
-    <li><mark class="jebakan">jebakan</mark></li>
-    <li><mark class="kunci">wajib diingat</mark></li>
-    <li><b>frasa kunci</b></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
   </ul>
   <nav class="peta">
-    <h2>Peta jalur</h2>
+    <h2>Daftar Isi</h2>
     <ol start="0">
-      <li><a href="#langkah-0">Strategi: bobot dan waktu</a></li>
+      <li>Strategi</li>
       <li><a href="#langkah-1">Kisi 1 · Thompson ε-NFA (10%)</a></li>
       <li><a href="#langkah-2">Kisi 2 · RE → DFA dengan followpos (25%)</a></li>
       <li><a href="#langkah-3">Kisi 3 · Minimisasi DFA (15%)</a></li>
@@ -48,7 +48,7 @@
 
 <section class="langkah" id="langkah-0">
 <details>
-  <summary><h2>Bagi 100 menit sesuai bobot, dan sisakan 10 menit untuk mengecek</h2></summary>
+  <summary><h2>Strategi</h2></summary>
   <p class="rantai">
     <span class="dari">kisi-kisi Mid Exam</span>
     <span class="ke">kisi 1–6 (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-6">6️⃣</a>), simulasi (<a href="#langkah-7">7️⃣</a>)</span>
@@ -87,7 +87,7 @@
 
 <section class="langkah" id="langkah-1">
 <details>
-  <summary><h2>Kisi 1 · Thompson: pecah RE sesuai prioritas, rakit dari dalam, lalu cek jumlah state</h2></summary>
+  <summary><h2>Thompson ε-NFA (10%)</h2></summary>
   <p class="rantai">
     <span class="dari">pola Thompson (<a href="../02-re-ke-nfa-thompson/notes.html">materi 02</a>)</span>
     <span class="ke">simulasi soal 1 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -100,11 +100,11 @@
 
   <p><strong>Bentuk soal:</strong> "Construct an ε-NFA for the regular expression … using Thompson's construction."</p>
   <ol>
-    <li><strong>Pecah RE</strong> sesuai prioritas: star, lalu concatenation, lalu union. Contoh: <code>(a|b)*abb</code> = <code>(a|b)*</code> · <code>a</code> · <code>b</code> · <code>b</code>.</li>
-    <li><strong>Buat fragment simbol</strong>: dua state dan satu transisi untuk setiap kemunculan simbol.</li>
-    <li><strong>Rakit dari dalam ke luar</strong> dengan pola union, concatenation (ε), dan star (empat ε).</li>
-    <li><strong>Beri nomor</strong> dari kiri ke kanan, cabang atas dulu. Tandai satu start dan satu final.</li>
-    <li><strong>Cek jumlah state</strong> dengan rumus di bawah.</li>
+    <li><strong><b>Pecah RE</b></strong> sesuai prioritas: star, lalu concatenation, lalu union. Contoh: <code>(a|b)*abb</code> = <code>(a|b)*</code> · <code>a</code> · <code>b</code> · <code>b</code>.</li>
+    <li><strong><b>Buat fragment simbol</b></strong>: dua state dan satu transisi untuk setiap kemunculan simbol.</li>
+    <li><strong><b>Rakit dari dalam ke luar</b></strong> dengan pola union, concatenation (ε), dan star (empat ε).</li>
+    <li><strong><b>Beri nomor</b></strong> dari kiri ke kanan, cabang atas dulu. Tandai satu start dan satu final.</li>
+    <li><b>Cek jumlah state</b> dengan rumus di bawah.</li>
   </ol>
   <p class="rumus">jumlah state = 2 × (simbol + union + star)</p>
   <p>Contoh: <code>(a|b)*abb</code> punya 5 simbol, 1 union, dan 1 star, jadi 2 × 7 = <b>14 state</b>. Kalau gambarmu punya jumlah lain, ada pola yang salah.</p>
@@ -134,7 +134,7 @@
 
 <section class="langkah" id="langkah-2">
 <details>
-  <summary><h2>Kisi 2 · RE → DFA: tambah #, beri nomor posisi, hitung followpos, lalu bangun DFA</h2></summary>
+  <summary><h2>RE → DFA dengan followpos (25%)</h2></summary>
   <p class="rantai">
     <span class="dari">RE → DFA langsung (<a href="../04-re-ke-dfa-langsung/notes.html">materi 04</a>)</span>
     <span class="ke">kisi 3 (DFA-nya bisa diminta diminimisasi), simulasi soal 2 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -208,7 +208,7 @@
 
 <section class="langkah" id="langkah-3">
 <details>
-  <summary><h2>Kisi 3 · Minimisasi DFA: pisahkan final dan bukan final, lalu pecah atau tandai sampai stabil</h2></summary>
+  <summary><h2>Minimisasi DFA (15%)</h2></summary>
   <p class="rantai">
     <span class="dari">table-filling dan partition (<a href="../05-minimisasi-dfa/notes.html">materi 05</a>)</span>
     <span class="ke">simulasi soal 3 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -264,7 +264,7 @@
 
 <section class="langkah" id="langkah-4">
 <details>
-  <summary><h2>Kisi 4 · RE → CFG: S untuk seluruh RE, dan satu variabel baru untuk setiap union atau star</h2></summary>
+  <summary><h2>RE → CFG (10%)</h2></summary>
   <p class="rantai">
     <span class="dari">aturan RE → CFG (<a href="../06-re-ke-cfg/notes.html">materi 06</a>)</span>
     <span class="ke">simulasi soal 4 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -318,7 +318,7 @@ C → aC | cC | ε</code></pre>
 
 <section class="langkah" id="langkah-5">
 <details>
-  <summary><h2>Kisi 5 · Left factoring mengeluarkan awalan bersama, eliminasi left recursion memindahkan rekursi ke kanan</h2></summary>
+  <summary><h2>Left factoring dan left recursion (10%)</h2></summary>
   <p class="rantai">
     <span class="dari">left factoring (<a href="../08-left-factoring/notes.html">materi 08</a>), left recursion (<a href="../09-left-recursion/notes.html">materi 09</a>)</span>
     <span class="ke">kisi 6 (grammar harus bersih dulu sebelum tabel LL(1)), simulasi soal 5 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -382,7 +382,7 @@ A: A → Sd diawali S (lebih awal), substitusi S:
 
 <section class="langkah" id="langkah-6">
 <details>
-  <summary><h2>Kisi 6 · Top-down parsing: bersihkan grammar, FIRST, FOLLOW, tabel, lalu trace</h2></summary>
+  <summary><h2>Top-down parsing (30%)</h2></summary>
   <p class="rantai">
     <span class="dari">FIRST dan FOLLOW (<a href="../10-first-dan-follow/notes.html">materi 10</a>), tabel LL(1) dan trace (<a href="../11-tabel-ll1/notes.html">materi 11</a>)</span>
     <span class="ke">simulasi soal 6 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -473,7 +473,7 @@ F  → (E) | id</code></pre>
 
 <section class="langkah" id="langkah-7">
 <details>
-  <summary><h2>Simulasi Mid Exam: enam soal dengan bobot kisi-kisi, kerjakan dalam 100 menit</h2></summary>
+  <summary><h2>Latihan So</h2></summary>
   <p class="rantai">
     <span class="dari">resep kisi 1–6 (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-6">6️⃣</a>)</span>
     <span class="ke">Mid Exam yang sebenarnya</span>
