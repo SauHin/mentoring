@@ -2,17 +2,18 @@
    Ubah di sini, semua catatan ikut berubah. */
 
 /* Token warna diambil dari design system Notion (variabel --c-* di halaman notion.site, 2026).
-   Nama Notion di komentar: tex = teks, bac = latar, bor = garis, Pri/Sec/Ter = tingkat. */
+   Nama Notion di komentar: tex = teks, bac = latar, bor = garis, Pri/Sec/Ter = tingkat.
+   --pudar dan --frasa digelapkan dari nilai Notion supaya kontras teks >= 4.5:1 (WCAG AA), juga di atas callout. */
 :root {
   --kertas: #fff;                     /* bacPri */
   --tinta: #2c2c2b;                   /* texPri */
-  --pudar: #7d7a75;                   /* texSec */
+  --pudar: #6f6c67;                   /* texSec, digelapkan (Notion: #7d7a75) */
   --garis: #e6e5e3;                   /* borPri */
   --callout: #f0efed;                 /* graBacSec: callout abu */
   --kode: rgb(66 35 3 / .03);         /* graBacPriTra: code block */
   --kode-bg: rgb(33 27 23 / .05);     /* bacIntTra: inline code */
   --kepala-tabel: #f7f6f3;            /* header row dan header column tabel */
-  --frasa: #cb9434;                   /* yelTexSec: <b> frasa kunci, teks kuning Notion */
+  --frasa: #8f6200;                   /* yelTexSec: <b> frasa kunci, digelapkan (Notion: #cb9434) */
   --kode-teks: #cf5148;               /* redTexSec */
   --jebakan-bg: #fce9e7;              /* redBacSec */
   --intinya-bg: #e5f2fc;              /* bluBacSec */
@@ -44,7 +45,7 @@
   --kode: rgb(252 252 252 / .03);
   --kode-bg: rgb(255 255 255 / .055);
   --kepala-tabel: rgb(255 255 255 / .03);
-  --frasa: #cb9434;
+  --frasa: #d6a03f;                   /* diterangkan (Notion: #cb9434) supaya terbaca di atas callout gelap */
   --kode-teks: #cf5148;
   --jebakan-bg: #502c29;
   --intinya-bg: #233850;

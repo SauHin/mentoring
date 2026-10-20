@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FIRST dan FOLLOW</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=8a32c630">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=07d09f84">
+  <script src="../../../_shared/theme.js?v=8e552fea"></script>
+</head>
+<body class="viz">
+
+<h1>FIRST dan FOLLOW</h1>
+<p>Visualisasi ini menghitung FIRST lalu FOLLOW untuk setiap variabel. <b>FIRST(A)</b> = terminal yang bisa muncul paling depan di string dari A. <b>FOLLOW(A)</b> = terminal yang bisa muncul tepat setelah A.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh, lalu klik <b>Langkah berikutnya</b>. Ketik grammar sendiri di <b>Ubah grammar</b>.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> sel oranye adalah set yang baru dihitung, dan baris grammar yang disorot adalah produksi yang dipakai. ε hanya bisa muncul di FIRST, tidak pernah di FOLLOW.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu isi set-nya"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah grammar</summary>
+  <p class="hint">Satu baris per variabel: <code>E' → +TE' | ε</code>. Variabel = huruf besar (boleh diberi '), baris pertama = start symbol. Kalau terminal lebih dari satu huruf selain <code>id</code>, pisahkan semua simbol dengan spasi.</p>
+  <textarea id="src" rows="5" spellcheck="false"></textarea>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <div class="au-two">
+      <section><div class="au-title">Grammar <span class="label">sorot = produksi yang dipakai</span></div><div class="au-gram" id="gram"></div></section>
+      <section class="au-sec"><div class="au-title">FIRST dan FOLLOW <span class="label">oranye = baru dihitung</span></div><div class="au-scroll" id="tbl"></div></section>
+    </div>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/grammar.js?v=7b39c7be"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const PRESETS = [
+  ['Slide: grammar ekspresi', "E → TE'\nE' → +TE' | ε\nT → FT'\nT' → *FT' | ε\nF → (E) | id"],
+  ['Rantai ε: S → ABc', 'S → ABc\nA → a | ε\nB → b | ε'],
+  ['Slide: A → aBe | cBd | C', 'A → aBe | cBd | C\nB → bB | ε\nC → f'],
+  ['Slide: S → aBa', 'S → aBa\nB → bB | ε'],
+  ['Slide: S → iCtSE (cek ulang)', 'S → iCtSE | a\nE → eS | ε\nC → b'],
+  ['Slide: S → AbS (panic mode)', 'S → AbS | e | ε\nA → a | cAd'],
+  ['Latihan: S → ABC', 'S → ABC\nA → aA | C\nB → b\nC → c'],
+];
+let G, ff;
+const st = stepper($('step'), (s) => {
+  const rows = new Set(s.rows || []);
+  $('gram').innerHTML = showGrammar(G).map((r) => `<div class="${rows.has(r.A) ? 'hot' : ''}"><b>${escHTML(r.A)}</b> → ${escHTML(r.alts.join(' | '))}</div>`).join('');
+  const cell = (A, col) => {
+    const set = s[col].get(A), hot = s.hot && s.hot.A === A && s.hot.col === col;
+    return `<td class="${hot ? 'hot' : ''}">${set ? escHTML(ff.fmt(set)) : ''}</td>`;
+  };
+  $('tbl').innerHTML = `<table class="au-table"><tr><th>Variabel</th><th>FIRST</th><th>FOLLOW</th></tr>${ff.vars.map((A) => `<tr><td class="st">${escHTML(A)}</td>${cell(A, 'first')}${cell(A, 'follow')}</tr>`).join('')}</table>`;
+}, $('guess'));
+
+function load() {
+  try {
+    G = parseGrammar($('src').value);
+    const r = firstFollowSteps(G);
+    ff = r.ff;
+    $('err').textContent = '';
+    st.load(r.steps);
+  } catch (e) { $('err').textContent = e.message; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { $('src').value = PRESETS[e.target.value][1]; load(); };
+$('src').oninput = load;
+$('pre').onchange({ target: { value: 0 } });
+</script>
+</body>
+</html>

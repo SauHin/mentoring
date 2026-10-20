@@ -89,6 +89,10 @@
 .au-table tr.cur td.hot { background: color-mix(in srgb, var(--hot) 30%, transparent); }
 .au-table td.new { color: var(--hot); font-weight: 700; }
 .au-table td.mut { color: var(--ink-3); }
+/* Tabel LL(1): sel berisi dua produksi (conflict), dan produksi di dalam sel ditumpuk. */
+.au-table td.clash { background: color-mix(in srgb, var(--stop) 18%, transparent); color: var(--x-ink); font-weight: 700; }
+.au-table td.prods div + div { border-top: 1px dashed var(--line); }
+.au-table tr.err td { color: var(--x-ink); }
 
 /* Tabel segitiga (table-filling) */
 .au-tri { border-collapse: separate; border-spacing: 3px; width: auto; font-family: var(--mono); }

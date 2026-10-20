@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trace Parser LL(1)</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=8a32c630">
+  <link rel="stylesheet" href="../../../_shared/automata.css?v=07d09f84">
+  <script src="../../../_shared/theme.js?v=8e552fea"></script>
+</head>
+<body class="viz">
+
+<h1>Trace parser LL(1)</h1>
+<p>Visualisasi ini menjalankan parser LL(1) pada sebuah string: setiap baris melihat <b>top stack</b> dan <b>input sekarang</b>, lalu memilih satu aksi. Parse tree tumbuh setiap kali sebuah variabel diganti.</p>
+<p class="coba"><strong>Coba:</strong> pilih contoh atau ketik string di kolom <b>String</b>, lalu klik <b>Langkah berikutnya</b>. Untuk string yang salah, pilih <b>Panic mode</b> supaya parser tidak langsung berhenti.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> stack ditulis dengan top di kiri. Variabel di top diganti isi sel M[top, input] yang oranye, terminal di top harus sama dengan input. String accepted hanya kalau stack dan input sama-sama tinggal $.</p>
+
+<div class="controls">
+  <label class="pick">Contoh <select class="field" id="pre"></select></label>
+  <label class="pick">String <input class="field" id="str" size="10" spellcheck="false" autocomplete="off"></label>
+  <div class="seg" id="mode" role="group" aria-label="Saat error"></div>
+  <label class="check push" title="Sebelum hasil tampil, tebak dulu produksi yang dipakai"><input type="checkbox" id="guess"> Mode tebak</label>
+</div>
+<details class="au-input">
+  <summary>Ubah grammar</summary>
+  <p class="hint">Satu baris per variabel: <code>E' → +TE' | ε</code>. Baris pertama = start symbol. Grammar harus LL(1) (tidak ada conflict). Kalau terminal lebih dari satu huruf selain <code>id</code>, pisahkan semua simbol dengan spasi, termasuk di string.</p>
+  <textarea id="src" rows="5" spellcheck="false"></textarea>
+</details>
+<div class="au-err" id="err"></div>
+
+<div class="au-main">
+  <div class="card au-step" id="step"></div>
+  <div class="panel au-panel">
+    <section><div class="au-title">Trace <span class="label">baris yang disorot = langkah sekarang</span></div><div class="au-scroll" id="trace"></div></section>
+    <section class="au-sec"><div class="au-title">Parsing table M <span class="label">oranye = sel yang dibaca</span></div><div class="au-scroll" id="tbl"></div></section>
+    <section class="au-sec"><div class="au-title">Parse tree <span class="label">oranye = simbol di top stack</span></div><div class="au-scroll" id="tree"></div></section>
+  </div>
+</div>
+
+<script src="../../../_shared/automata.js?v=9b7b4edb"></script>
+<script src="../../../_shared/grammar.js?v=7b39c7be"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const EXPR = "E → TE'\nE' → +TE' | ε\nT → FT'\nT' → *FT' | ε\nF → (E) | id";
+const PANIC = 'S → AbS | e | ε\nA → a | cAd';
+// [nama, grammar, string, panic]
+const PRESETS = [
+  ['Slide: id+id (accepted)', EXPR, 'id+id', false],
+  ['Slide: id/id+id (rejected)', EXPR, 'id/id+id', false],
+  ['Slide: id*(+id) (rejected)', EXPR, 'id*(+id)', false],
+  ['Slide: S → aBa, abba', 'S → aBa\nB → bB | ε', 'abba', false],
+  ['Slide panic mode: aab', PANIC, 'aab', true],
+  ['Slide panic mode: ceadb', PANIC, 'ceadb', true],
+  ['Latihan: S → ABC, aabc', 'S → ABC\nA → aA | C\nB → b\nC → c', 'aabc', false],
+];
+let G, T, P, panic = false;
+const sp = () => (G.spaced ? ' ' : '');
+const c = (s) => `<code>${escHTML(s)}</code>`;
+const prodTxt = (A, a) => `${A} → ${showAlt(G, a)}`;
+const inCols = (a) => T.ff.cols.includes(a);
+
+function action(r) {
+  if (r.kind === 'expand') return prodTxt(r.X, r.alt);
+  if (r.kind === 'match') return 'POP';
+  if (r.kind === 'accept') return P.errors ? `selesai, ${P.errors} error` : 'accepted';
+  if (r.kind === 'empty' && panic) return r.skip.length ? `error (sync): buang ${r.skip.join(' ')}, pop ${r.X}` : `error (sync): pop ${r.X}`;
+  if (r.kind === 'mismatch' && panic) return `error: missing ${r.X}, inserted`;
+  return 'error, rejected';
+}
+function explain(r, i) {
+  const pre = i === 0 ? `Awal: stack berisi $ dan start symbol ${c(r.X)} di atasnya, input diakhiri $. ` : '';
+  const fol = () => escHTML(T.ff.fmt(T.ff.follow.get(r.X)));
+  switch (r.kind) {
+    case 'expand': return `${pre}Top stack ${c(r.X)} adalah variabel dan input ${c(r.a)}, jadi lihat M[${escHTML(r.X)}, ${escHTML(r.a)}] = ${c(prodTxt(r.X, r.alt))}. ${r.alt.length > 1 ? `Pop ${escHTML(r.X)}, lalu push ${c(showAlt(G, r.alt))} dari belakang, supaya ${c(r.alt[0])} ada di top.` : r.alt.length ? `Pop ${escHTML(r.X)}, lalu push ${c(r.alt[0])}.` : `Pop ${escHTML(r.X)} dan tidak push apa-apa, karena ruas kanannya ε.`} Output: ${c(prodTxt(r.X, r.alt))}.`;
+    case 'match': return `${pre}Top stack terminal ${c(r.X)} sama dengan input ${c(r.a)}: pop, lalu maju ke input berikutnya.`;
+    case 'accept': return P.errors ? `Stack dan input sama-sama tinggal $. Parsing selesai, tapi tadi ada <b>${P.errors} error</b>, jadi string tetap <b>rejected</b>. Panic mode hanya membuat parser bisa lanjut dan menemukan error berikutnya.` : 'Stack dan input sama-sama tinggal $: parsing selesai, string <b>accepted</b>. Output (kolom aksi tanpa POP) adalah leftmost derivation-nya.';
+    case 'extra': return `Stack sudah habis (tinggal $), tapi input masih ${c(r.a)}: error, string <b>rejected</b>.`;
+    case 'mismatch': return panic
+      ? `Top stack terminal ${c(r.X)}, tapi input ${c(r.a)}: tidak cocok. Panic mode: pop ${c(r.X)} dan laporkan "missing ${escHTML(r.X)}, inserted" (anggap ${escHTML(r.X)} disisipkan), lalu lanjut.`
+      : `Top stack terminal ${c(r.X)}, tapi input ${c(r.a)}: tidak cocok, jadi error dan string <b>rejected</b>.`;
+    case 'empty': {
+      const why = inCols(r.a) ? `M[${escHTML(r.X)}, ${escHTML(r.a)}] kosong` : `${c(r.a)} bukan terminal grammar ini, jadi tidak ada kolomnya`;
+      return panic
+        ? `${pre}${why}: error. Panic mode: buang input sampai ketemu simbol di FOLLOW(${escHTML(r.X)}) = ${fol()}${r.skip.length ? `, jadi ${c(r.skip.join(sp()))} dibuang` : ', dan input sekarang sudah ada di sana, jadi tidak ada yang dibuang'}. Lalu pop ${escHTML(r.X)} dan lanjut.`
+        : `${pre}${why}: error, string <b>rejected</b>.`;
+    }
+  }
+}
+
+const st = stepper($('step'), (s, i) => {
+  $('trace').innerHTML = `<table class="au-table"><tr><th>Stack (top di kiri)</th><th>Input</th><th>Aksi</th></tr>${P.rows.slice(0, i + 1).map((r, k) => `<tr class="${k === i ? 'cur' : ''}${['empty', 'mismatch', 'extra'].includes(r.kind) ? ' err' : ''}"><td style="text-align:left">${escHTML(r.stack.join(' '))}</td><td style="text-align:right">${escHTML(P.input.slice(r.pos).join(sp()))}</td><td style="text-align:left">${escHTML(action(r))}</td></tr>`).join('')}</table>`;
+  const r = P.rows[i], hot = r.kind === 'expand' || r.kind === 'empty' ? [r.X, r.a] : null;
+  const ff = T.ff;
+  $('tbl').innerHTML = `<table class="au-table"><tr><th>M</th>${ff.cols.map((x) => `<th>${escHTML(x)}</th>`).join('')}</tr>${ff.vars.map((A) => `<tr><td class="st">${escHTML(A)}</td>${ff.cols.map((x) => {
+    const ps = T.M.get(A).get(x) || [];
+    return `<td class="${hot && hot[0] === A && hot[1] === x ? 'hot' : ''}">${ps.map((a) => escHTML(prodTxt(A, a))).join('')}</td>`;
+  }).join('')}</tr>`).join('')}</table>`;
+  $('tree').innerHTML = drawTree(P.root, {
+    kids: (n) => n.kids, dx: 50, side: 20,
+    label: (n) => n.sym,
+    show: (n) => n.t <= i,
+    cls: (n) => (G.P.has(n.sym) ? '' : 'term'),
+    hot: (n) => n === r.node && r.kind !== 'accept',
+    aria: 'Parse tree',
+  });
+}, $('guess'));
+
+function seg() {
+  $('mode').innerHTML = [[false, 'Saat error: berhenti'], [true, 'Panic mode']].map(([v, n]) => `<button class="btn btn-sm${v === panic ? ' sel' : ''}" data-v="${v}">${n}</button>`).join('');
+  $('mode').querySelectorAll('button').forEach((b) => (b.onclick = () => { panic = b.dataset.v === 'true'; seg(); load(); }));
+}
+function load() {
+  try {
+    G = parseGrammar($('src').value);
+    T = ll1TableSteps(G);
+    P = ll1Parse(G, T, tokenize(G, $('str').value), panic);
+    $('err').textContent = '';
+    st.load(P.rows.map((r, i) => ({ text: explain(r, i), ask: r.kind === 'expand' ? `Top stack ${c(r.X)}, input ${c(r.a)}. Produksi apa yang dipakai? Lihat M[${escHTML(r.X)}, ${escHTML(r.a)}].` : null })));
+  } catch (e) { $('err').textContent = e.message; $('trace').innerHTML = $('tbl').innerHTML = $('tree').innerHTML = ''; $('step').querySelector('.au-cap').textContent = ''; }
+}
+$('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
+$('pre').onchange = (e) => { const [, g, s, p] = PRESETS[e.target.value]; $('src').value = g; $('str').value = s; panic = p; seg(); load(); };
+$('src').oninput = $('str').oninput = load;
+$('pre').onchange({ target: { value: 0 } });
+</script>
+</body>
+</html>

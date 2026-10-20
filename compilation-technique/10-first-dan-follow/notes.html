@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Predictive Parsing, FIRST, dan FOLLOW · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../_shared/style.css?v=8a32c630">
+  <script src="../../_shared/theme.js?v=8e552fea"></script>
+  <script src="../../_shared/notes.js?v=168acdb8" defer></script>
+</head>
+<body class="catatan">
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+
+<header>
+  <h1>Predictive parsing, FIRST, dan FOLLOW</h1>
+  <p class="tujuan">Parser top-down yang efisien memilih produksi hanya dengan melihat satu token, tanpa mencoba-coba. Untuk tahu token mana cocok dengan produksi mana, kita butuh dua set: FIRST dan FOLLOW. Target: kamu bisa menghitung FIRST dan FOLLOW setiap variabel tanpa melompati aturan, termasuk saat ada ε.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/first-follow.html">FIRST dan FOLLOW langkah demi langkah</a> · Prasyarat: <a href="../08-left-factoring/notes.html">left factoring (materi 08)</a>, <a href="../09-left-recursion/notes.html">left recursion (materi 09)</a> · Lanjut: <a href="../11-tabel-ll1/notes.html">tabel LL(1) dan trace (materi 11)</a></p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
+  </ul>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol>
+      <li><a href="#langkah-1">Recursive descent dengan backtracking</a></li>
+      <li><a href="#langkah-2">Predictive parser</a></li>
+      <li><a href="#langkah-3">Satu procedure per variabel</a></li>
+      <li><a href="#langkah-4">Kapan memakai ε-production</a></li>
+      <li><a href="#langkah-5">FIRST: simbol paling depan</a></li>
+      <li><a href="#langkah-6">FIRST saat ada variabel yang bisa ε</a></li>
+      <li><a href="#langkah-7">FOLLOW: aturan 1 dan 2</a></li>
+      <li><a href="#langkah-8">FOLLOW: aturan 3</a></li>
+      <li><a href="#langkah-9">Kesalahan yang sering muncul</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Recursive descent mencoba produksi satu per satu dan mundur (backtracking) kalau gagal</h2></summary>
+  <p class="rantai">
+    <span class="dari">top-down parsing dan leftmost derivation (materi 07)</span>
+    <span class="ke">predictive parser tanpa backtracking (<a href="#langkah-2">2️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mencari jalan di labirin: coba belok kiri, kalau buntu kembali ke persimpangan, lalu coba belok kanan.</p>
+    <p class="batas">di labirin kamu bisa menandai jalan yang sudah dicoba. Parser dengan backtracking bisa mengulang pekerjaan yang sama berkali-kali, jadi lambat.</p>
+  </aside>
+
+  <p><mark>Backtracking</mark> adalah kembali ke pilihan produksi terakhir dan mencoba alternatif lain, karena pilihan sebelumnya gagal. <mark class="kaitan">Recursive descent</mark> (parser top-down dengan satu fungsi rekursif per variabel, materi 07 dan 09) memakai cara ini sambil membangun parse tree dari atas dengan leftmost derivation.</p>
+  <p>Contoh slide: <code>S → aBc</code>, <code>B → bc | b</code>, input <code>abc</code>.</p>
+  <table>
+    <tr><th>Langkah</th><th>Yang dicoba</th><th>Hasil</th></tr>
+    <tr><td>1</td><td><code>S → aBc</code>, cocokkan <code>a</code></td><td>cocok</td></tr>
+    <tr><td>2</td><td><code>B → bc</code> (alternatif pertama), cocokkan <code>b</code>, <code>c</code></td><td>cocok, input habis</td></tr>
+    <tr><td>3</td><td>kembali ke S, cocokkan <code>c</code> terakhir</td><td>input sudah habis, <b>gagal</b>. Backtrack ke B.</td></tr>
+    <tr><td>4</td><td><code>B → b</code> (alternatif kedua), cocokkan <code>b</code></td><td>cocok</td></tr>
+    <tr><td>5</td><td>kembali ke S, cocokkan <code>c</code></td><td>cocok, input habis. <b>Berhasil.</b></td></tr>
+  </table>
+  <p>Cara ini umum dan bisa dipakai untuk banyak grammar, tapi tidak efisien, jadi jarang dipakai.</p>
+
+  <p class="intinya">Backtracking = coba, gagal, mundur, coba alternatif lain. Benar, tapi lambat.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Grammar yang sama, input <code>ab</code>. Apa yang terjadi?</summary>
+    <p><code>S → aBc</code>: <code>a</code> cocok. <code>B → bc</code>: <code>b</code> cocok, tapi <code>c</code> tidak ada, gagal. Backtrack, <code>B → b</code>: <code>b</code> cocok. S butuh <code>c</code>, input habis, gagal. B tidak punya alternatif lagi, jadi <code>ab</code> <b>ditolak</b>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Predictive parser memilih produksi hanya dengan melihat token sekarang, jadi tidak perlu backtracking</h2></summary>
+  <p class="rantai">
+    <span class="dari">backtracking (<a href="#langkah-1">1️⃣</a>), lookahead (materi 08)</span>
+    <span class="ke">procedure per variabel (<a href="#langkah-3">3️⃣</a>), parser LL(1) (materi 11)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Petugas loket melihat jenis tiket di tanganmu dan langsung menunjuk antrean yang benar.</p>
+    <p class="batas">petugas bisa bertanya kalau ragu. Predictive parser tidak bisa: kalau dua produksi cocok dengan token yang sama, grammar itu tidak bisa dipakai.</p>
+  </aside>
+
+  <p><mark>Predictive parser</mark> adalah parser top-down yang memilih alternatif dari <code>A → α₁ | … | αₙ</code> hanya dengan melihat token input sekarang (<mark class="kaitan">lookahead</mark>, materi 08). Contoh slide:</p>
+<pre class="kode"><code>stmt → if …  |  while …  |  begin …  |  for …</code></pre>
+  <p>Kalau token sekarang <code>if</code>, pasti alternatif pertama. Tidak ada tebakan, jadi tidak ada backtracking. Supaya ini bisa, grammar biasanya disiapkan dulu:</p>
+  <ul>
+    <li><strong>Eliminasi left recursion (materi 09):</strong> kalau tidak, parser memanggil dirinya terus.</li>
+    <li><strong>Left factoring (materi 08):</strong> kalau dua alternatif punya awalan sama, satu token tidak cukup.</li>
+    <li><strong>Belum ada jaminan 100%:</strong> grammar yang benar-benar bisa disebut LL(1) grammar, dan cara mengeceknya ada di materi 11.</li>
+  </ul>
+  <table>
+    <tr><th></th><th>Recursive predictive parsing</th><th>Non-recursive (LL(1) parser)</th></tr>
+    <tr><td>Cara kerja</td><td>satu procedure per variabel</td><td>stack dan parsing table</td></tr>
+    <tr><td>Dibahas di</td><td><a href="#langkah-3">3️⃣</a> dan <a href="#langkah-4">4️⃣</a></td><td>materi 11</td></tr>
+  </table>
+
+  <p class="intinya">Predictive = satu token cukup untuk memilih produksi. Keduanya butuh FIRST dan FOLLOW.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Bisakah predictive parser memakai <code>S → ab | ac</code>?</summary>
+    <p><b>Tidak.</b> Kedua alternatif diawali <code>a</code>, jadi token <code>a</code> tidak cukup untuk memilih. Left factoring dulu: <code>S → aS'</code>, <code>S' → b | c</code>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Recursive predictive parsing: satu procedure untuk setiap variabel, dan kasusnya dipilih dari token sekarang</h2></summary>
+  <p class="rantai">
+    <span class="dari">predictive parser (<a href="#langkah-2">2️⃣</a>), fungsi dan <code>switch</code> di C</span>
+    <span class="ke">ε-production (<a href="#langkah-4">4️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Resep yang memanggil resep lain: "buat sausnya (lihat halaman 12)".</p>
+    <p class="batas">resep tidak perlu memilih. Procedure harus memilih kasus berdasarkan token sekarang.</p>
+  </aside>
+
+  <p><mark>Recursive predictive parsing</mark> adalah recursive descent tanpa backtracking: setiap variabel menjadi satu procedure, dan procedure itu memilih alternatif dari token sekarang. Contoh slide, <code>A → aBb | bAB</code>, ditulis dengan pseudo-code mirip C:</p>
+<pre class="kode"><code>void A() {
+    switch (token) {
+        case 'a': match('a'); B(); match('b'); break;   // A → aBb
+        case 'b': match('b'); A(); B(); break;          // A → bAB
+        default:  error();
+    }
+}</code></pre>
+  <ul>
+    <li><strong>Isi tiap case:</strong> ruas kanan produksi dibaca dari kiri ke kanan. Terminal menjadi <code>match</code>, variabel menjadi panggilan procedure-nya.</li>
+    <li><strong><code>match(t)</code>:</strong> cek bahwa token sekarang sama dengan <code>t</code>, lalu maju ke token berikutnya. Kalau beda, error.</li>
+    <li><strong>Label case:</strong> token yang mengawali alternatif itu.</li>
+  </ul>
+
+  <p class="intinya">Terminal = <code>match</code>, variabel = panggil procedure-nya, label case = token awal alternatif.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Tulis procedure untuk <code>A → aBb</code> (satu-satunya produksi A).</summary>
+<pre class="kode"><code>void A() {
+    match('a');
+    B();
+    match('b');
+}</code></pre>
+    <p>Hanya ada satu alternatif, jadi tidak perlu <code>switch</code>. Kalau token pertama bukan <code>a</code>, <code>match</code> sendiri yang memberi error.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>ε-production dipilih kalau token sekarang bisa muncul tepat setelah variabel itu</h2></summary>
+  <p class="rantai">
+    <span class="dari">procedure per variabel (<a href="#langkah-3">3️⃣</a>)</span>
+    <span class="ke">FIRST (<a href="#langkah-5">5️⃣</a>) dan FOLLOW (<a href="#langkah-7">7️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Ruang tunggu yang boleh dilewati: kalau namamu tidak dipanggil di sini, kamu langsung lanjut ke ruangan berikutnya.</p>
+    <p class="batas">di dunia nyata siapa pun boleh lewat. Di parser, hanya token yang memang bisa datang berikutnya yang boleh lewat. Token lain berarti error.</p>
+  </aside>
+
+  <p>Contoh slide: <code>A → aBe | cBd | C</code>, <code>B → bB | ε</code>, <code>C → f</code>.</p>
+<pre class="kode"><code>void A() {
+    switch (token) {
+        case 'a': match('a'); B(); match('e'); break;
+        case 'c': match('c'); B(); match('d'); break;
+        case 'f': C(); break;              // f = terminal pertama dari C
+        default:  error();
+    }
+}
+void B() {
+    switch (token) {
+        case 'b': match('b'); B(); break;
+        case 'e': case 'd': break;         // B → ε: e dan d bisa muncul setelah B
+        default:  error();
+    }
+}
+void C() { match('f'); }</code></pre>
+  <ul>
+    <li><strong>Case <code>f</code> di A:</strong> alternatif <code>C</code> diawali variabel, jadi labelnya adalah terminal pertama yang bisa dihasilkan C. Set ini disebut <b>FIRST</b> (<a href="#langkah-5">5️⃣</a>).</li>
+    <li><strong>Case <code>e</code>, <code>d</code> di B:</strong> <code>B → ε</code> tidak membaca apa pun, jadi labelnya adalah token yang bisa muncul tepat setelah B. Di <code>A → aBe</code> dan <code>A → cBd</code>, setelah B selalu ada <code>e</code> atau <code>d</code>. Set ini disebut <b>FOLLOW</b> (<a href="#langkah-7">7️⃣</a>).</li>
+  </ul>
+
+  <aside class="jebakan">
+    <p>Slide juga menyebut cara lain: pakai ε kalau semua alternatif lain gagal. Cara itu jalan, tapi error baru ketahuan belakangan. Cara yang benar menurut slide: pakai ε hanya kalau token ada di <mark class="jebakan">FOLLOW, bukan sembarang token</mark>.</p>
+  </aside>
+
+  <p class="intinya">Label case untuk <code>A → α</code> = FIRST(α). Label case untuk <code>A → ε</code> = FOLLOW(A).</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Di procedure <code>B()</code> di atas, apa yang terjadi kalau token sekarang <code>d</code>? Kalau <code>f</code>?</summary>
+    <p><code>d</code>: masuk case <code>e</code>, <code>d</code>, jadi B tidak melakukan apa-apa (<code>B → ε</code>) dan kembali ke A, yang lalu menjalankan <code>match('d')</code>. <code>f</code>: masuk <code>default</code>, error, karena <code>f</code> tidak pernah muncul tepat setelah B.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>FIRST(α) berisi terminal yang bisa muncul paling depan di string hasil α</h2></summary>
+  <p class="rantai">
+    <span class="dari">label case (<a href="#langkah-4">4️⃣</a>)</span>
+    <span class="ke">FIRST dengan ε (<a href="#langkah-6">6️⃣</a>), tabel LL(1) (materi 11)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Huruf depan semua nama di satu kelas: cukup lihat daftar absen, tidak perlu kenal orangnya.</p>
+    <p class="batas">nama di absen sudah jadi. Variabel harus diturunkan dulu, dan kadang hasilnya kosong (ε). Hasil kosong itu dicatat juga.</p>
+  </aside>
+
+  <p><mark>FIRST(α)</mark> adalah set terminal yang bisa muncul sebagai simbol pertama dari string yang diturunkan dari α. Kalau α bisa menjadi ε, maka ε juga masuk FIRST(α).</p>
+  <table>
+    <tr><th>Kasus</th><th>Yang masuk FIRST</th><th>Contoh</th></tr>
+    <tr><td>X terminal</td><td>X sendiri</td><td>FIRST(<code>id</code>) = {id}</td></tr>
+    <tr><td><code>X → ε</code></td><td>ε</td><td><code>E' → ε</code>, jadi ε masuk FIRST(E')</td></tr>
+    <tr><td><code>X → aβ</code>, diawali terminal</td><td>terminal <code>a</code></td><td><code>E' → +TE'</code>, jadi <code>+</code> masuk</td></tr>
+    <tr><td><code>X → Yβ</code>, diawali variabel</td><td>FIRST(Y), tanpa ε</td><td><code>T → FT'</code>, jadi FIRST(F) masuk</td></tr>
+  </table>
+  <p>Untuk satu variabel, lihat <b>semua</b> produksinya dan gabungkan hasilnya. Kalau sebuah produksi diawali variabel lain, hitung FIRST variabel itu dulu.</p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide: FIRST grammar ekspresi</summary>
+<pre class="kode"><code>E  → TE'
+E' → +TE' | ε
+T  → FT'
+T' → *FT' | ε
+F  → (E) | id</code></pre>
+      <p>E butuh FIRST(T), dan T butuh FIRST(F). Jadi urutan menghitungnya F, T, E, lalu E' dan T'.</p>
+      <table class="t">
+        <tr><th>Produksi</th><th>FIRST ruas kanan</th><th>Alasan</th></tr>
+        <tr><td>F → (E)</td><td>{(}</td><td>diawali terminal <code>(</code></td></tr>
+        <tr><td>F → id</td><td>{id}</td><td>diawali terminal <code>id</code></td></tr>
+        <tr><td>T → FT'</td><td>{(, id}</td><td>FIRST(F), F tidak bisa ε</td></tr>
+        <tr><td>E → TE'</td><td>{(, id}</td><td>FIRST(T), T tidak bisa ε</td></tr>
+        <tr><td>E' → +TE'</td><td>{+}</td><td>diawali terminal <code>+</code></td></tr>
+        <tr><td>E' → ε</td><td>{ε}</td><td>ruas kanan ε</td></tr>
+        <tr><td>T' → *FT'</td><td>{*}</td><td>diawali terminal <code>*</code></td></tr>
+        <tr><td>T' → ε</td><td>{ε}</td><td>ruas kanan ε</td></tr>
+      </table>
+      <p><b>Hasil:</b> FIRST(F) = FIRST(T) = FIRST(E) = {(, id}, FIRST(E') = {+, ε}, FIRST(T') = {*, ε}.</p>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Di <a href="viz/first-follow.html">visualisasi</a>, pilih "Slide: grammar ekspresi" dan lihat urutan F, T, E.</p>
+  </aside>
+
+  <p class="intinya">FIRST = lihat simbol paling depan. Kalau variabel, pakai FIRST variabel itu.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Hitung FIRST untuk <code>A → aBe | cBd | C</code>, <code>B → bB | ε</code>, <code>C → f</code>.</summary>
+    <p>FIRST(C) = {f}. FIRST(B) = {b, ε}. FIRST(A) = {a, c, f}: <code>a</code> dan <code>c</code> dari terminal di depan, <code>f</code> dari FIRST(C). Bandingkan dengan label case di <a href="#langkah-4">4️⃣</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-6">
+<details>
+  <summary><h2>Kalau simbol paling depan bisa menjadi ε, FIRST lanjut ke simbol berikutnya</h2></summary>
+  <p class="rantai">
+    <span class="dari">FIRST dasar (<a href="#langkah-5">5️⃣</a>), nullable di syntax tree RE (materi 04)</span>
+    <span class="ke">FOLLOW aturan 2 (<a href="#langkah-7">7️⃣</a>), yang memakai FIRST dari deretan simbol</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Foto barisan: kalau orang paling depan jongkok sampai tidak terlihat, yang terlihat paling depan adalah orang kedua.</p>
+    <p class="batas">orang yang jongkok tetap ada di foto. Variabel yang menjadi ε benar-benar hilang dari string.</p>
+  </aside>
+
+  <p>Variabel yang bisa menurunkan ε disebut <mark class="kaitan">nullable</mark>, sama seperti nullable di materi 04. Untuk <code>X → Y₁Y₂…Yₙ</code> (aturan 2 di slide):</p>
+  <ol>
+    <li><strong>Mulai dari Y₁:</strong> FIRST(Y₁) tanpa ε masuk FIRST(X).</li>
+    <li><strong>Kalau Y₁ nullable:</strong> lanjut, FIRST(Y₂) tanpa ε juga masuk. Begitu seterusnya, dan berhenti di simbol pertama yang tidak nullable.</li>
+    <li><strong>Kalau semua Yᵢ nullable:</strong> ε masuk FIRST(X).</li>
+  </ol>
+<pre class="kode"><code>S → ABc      A → a | ε      B → b | ε
+
+FIRST(S): FIRST(A) tanpa ε = {a}    A nullable, lanjut ke B
+          FIRST(B) tanpa ε = {b}    B nullable, lanjut ke c
+          c terminal       = {c}    berhenti
+FIRST(S) = {a, b, c}</code></pre>
+  <p>Cara yang sama dipakai untuk FIRST dari deretan simbol, misalnya FIRST(<code>Bc</code>) = {b, c}. Deretan ini nanti dipakai di FOLLOW.</p>
+
+  <aside class="jebakan">
+    <p><mark class="jebakan">ε di FIRST(A) tidak otomatis masuk FIRST(S).</mark> Di contoh atas, FIRST(S) tidak memuat ε, karena <code>c</code> tidak bisa hilang.</p>
+  </aside>
+
+  <p class="intinya">Lanjut ke simbol berikutnya selama simbol sekarang nullable. ε masuk hanya kalau semuanya nullable.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>S → AB</code>, <code>A → a | ε</code>, <code>B → b | ε</code>. Berapa FIRST(S)?</summary>
+    <p>FIRST(A) tanpa ε = {a}. A nullable, jadi lanjut: FIRST(B) tanpa ε = {b}. B juga nullable, dan tidak ada simbol lagi, jadi ε masuk. <b>FIRST(S) = {a, b, ε}.</b></p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-7">
+<details>
+  <summary><h2>FOLLOW(A) berisi terminal yang bisa muncul tepat setelah A: mulai dari $ dan simbol di sebelah kanan A</h2></summary>
+  <p class="rantai">
+    <span class="dari">label case untuk ε (<a href="#langkah-4">4️⃣</a>), FIRST deretan simbol (<a href="#langkah-6">6️⃣</a>)</span>
+    <span class="ke">aturan 3 (<a href="#langkah-8">8️⃣</a>), tabel LL(1) (materi 11)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Siapa saja yang pernah duduk tepat di sebelah kananmu, di semua kelas yang kamu ikuti.</p>
+    <p class="batas">di kelas, kalau kamu duduk di ujung, kursi sebelahmu kosong. Di FOLLOW, kalau A ada di paling akhir, yang "duduk" setelahnya diambil dari variabel induknya (<a href="#langkah-8">8️⃣</a>).</p>
+  </aside>
+
+  <p><mark>FOLLOW(A)</mark> adalah set terminal yang bisa muncul tepat setelah variabel A, di string mana pun yang diturunkan dari start symbol. Tanda akhir input <code>$</code> masuk FOLLOW(A) kalau A bisa berada di paling akhir.</p>
+  <table>
+    <tr><th>Aturan</th><th>Isi</th></tr>
+    <tr><td>1</td><td><code>$</code> masuk FOLLOW(S), dengan S = start symbol</td></tr>
+    <tr><td>2</td><td>Untuk produksi <code>A → αBβ</code>: FIRST(β) tanpa ε masuk FOLLOW(B)</td></tr>
+  </table>
+  <ul>
+    <li><strong>Cari B di ruas kanan</strong> semua produksi, bukan di ruas kiri. Setiap kemunculan B diperiksa.</li>
+    <li><strong>Cara cepat (slide):</strong> kalau tepat setelah B ada terminal, terminal itu langsung masuk FOLLOW(B).</li>
+  </ul>
+  <p>Contoh grammar ekspresi: E start symbol, jadi <code>$</code> masuk. Di <code>F → (E)</code>, tepat setelah E ada <code>)</code>. Jadi <b>FOLLOW(E) = {), $}</b>.</p>
+
+  <aside class="jebakan">
+    <p><mark class="jebakan">FOLLOW tidak pernah memuat ε.</mark> Saat memakai FIRST(β), buang ε-nya.</p>
+  </aside>
+
+  <p class="intinya">FOLLOW(B) = lihat apa yang ada di kanan B. Start symbol selalu mendapat $.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>S → ABc</code>, <code>A → a | ε</code>, <code>B → b | ε</code>. Hitung FOLLOW(S), FOLLOW(A), FOLLOW(B).</summary>
+    <p>FOLLOW(S) = {$} (aturan 1, S tidak muncul di ruas kanan). FOLLOW(A): setelah A ada <code>Bc</code>, dan FIRST(<code>Bc</code>) = {b, c}, jadi <b>{b, c}</b>. FOLLOW(B): tepat setelah B ada <code>c</code>, jadi <b>{c}</b>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-8">
+<details>
+  <summary><h2>Kalau B ada di paling kanan, atau sisanya bisa ε, FOLLOW variabel kiri ikut masuk ke FOLLOW(B)</h2></summary>
+  <p class="rantai">
+    <span class="dari">aturan 1 dan 2 (<a href="#langkah-7">7️⃣</a>)</span>
+    <span class="ke">tabel LL(1) (materi 11)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Kamu duduk paling kanan di barisan kelompokmu. Orang yang duduk setelahmu adalah siapa pun yang duduk setelah kelompokmu.</p>
+    <p class="batas">batas kelompok di kelas terlihat jelas. Di grammar, "kelompok" adalah variabel kiri A, dan yang duduk setelahnya adalah FOLLOW(A).</p>
+  </aside>
+
+  <table>
+    <tr><th>Aturan</th><th>Bentuk produksi</th><th>Isi</th></tr>
+    <tr><td>3a</td><td><code>A → αB</code> (B paling kanan)</td><td>semua FOLLOW(A) masuk FOLLOW(B)</td></tr>
+    <tr><td>3b</td><td><code>A → αBβ</code>, dan β nullable</td><td>semua FOLLOW(A) masuk FOLLOW(B)</td></tr>
+  </table>
+  <p>Alasannya: B adalah bagian paling akhir dari A, jadi token apa pun yang mengikuti A juga mengikuti B. Arahnya <b>dari A ke B</b>: FOLLOW(A) masuk FOLLOW(B), bukan sebaliknya.</p>
+  <p>Kalau FOLLOW(A) belum selesai dihitung, pakai isinya sekarang dan cek lagi nanti. <b>Ulangi semua aturan sampai tidak ada set yang bertambah.</b></p>
+
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide: FOLLOW grammar ekspresi</summary>
+      <table class="t">
+        <tr><th>Variabel</th><th>Dari produksi</th><th>Aturan</th><th>FOLLOW</th></tr>
+        <tr><td>E</td><td>start symbol; <code>F → (E)</code></td><td>1, 2</td><td>{), $}</td></tr>
+        <tr><td>E'</td><td><code>E → TE'</code>: E' paling kanan</td><td>3a</td><td>{), $}</td></tr>
+        <tr><td>T</td><td><code>E → TE'</code>, <code>E' → +TE'</code>: FIRST(E') tanpa ε = {+}; E' nullable, jadi FOLLOW(E) dan FOLLOW(E')</td><td>2, 3b</td><td>{+, ), $}</td></tr>
+        <tr><td>T'</td><td><code>T → FT'</code>: T' paling kanan</td><td>3a</td><td>{+, ), $}</td></tr>
+        <tr><td>F</td><td><code>T → FT'</code>, <code>T' → *FT'</code>: FIRST(T') tanpa ε = {*}; T' nullable, jadi FOLLOW(T) dan FOLLOW(T')</td><td>2, 3b</td><td>{+, *, ), $}</td></tr>
+      </table>
+      <p><code>E' → +TE'</code> juga membuat E' paling kanan di produksinya sendiri. Itu memasukkan FOLLOW(E') ke dirinya sendiri, jadi tidak menambah apa-apa. Hal yang sama untuk T'.</p>
+    </details>
+  </aside>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh slide: <code>S → iCtSE | a</code>, <code>E → eS | ε</code>, <code>C → b</code> (perlu dicek ulang)</summary>
+      <ol>
+        <li><strong>FOLLOW(S):</strong> $ (aturan 1). Di <code>S → iCtSE</code>, setelah S ada E: FIRST(E) tanpa ε = {e}. Di <code>E → eS</code>, S paling kanan, jadi FOLLOW(E) masuk, tapi FOLLOW(E) belum dihitung. Sementara: {e, $}.</li>
+        <li><strong>FOLLOW(E):</strong> di <code>S → iCtSE</code>, E paling kanan, jadi FOLLOW(S) = {e, $} masuk. Hasil: {e, $}.</li>
+        <li><strong>FOLLOW(C):</strong> tepat setelah C ada <code>t</code>. Hasil: {t}.</li>
+        <li><strong>Cek ulang FOLLOW(S):</strong> FOLLOW(E) sekarang {e, $}, dan isinya sudah ada di FOLLOW(S). Tidak ada yang bertambah, jadi selesai.</li>
+      </ol>
+    </details>
+  </aside>
+
+  <aside class="coba">
+    <p>Di <a href="viz/first-follow.html">visualisasi</a>, baris grammar yang disorot adalah produksi tempat variabel itu muncul di ruas kanan.</p>
+  </aside>
+
+  <p class="intinya">B paling kanan, atau sisanya nullable: FOLLOW(kiri) masuk FOLLOW(B). Ulangi sampai tidak berubah.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan (slide dosen):</strong> Hitung FIRST dan FOLLOW untuk <code>S → ABC</code>, <code>A → aA | C</code>, <code>B → b</code>, <code>C → c</code>.</summary>
+    <table class="t">
+      <tr><th></th><th>FIRST</th><th>FOLLOW</th></tr>
+      <tr><td>S</td><td>{a, c}</td><td>{$}</td></tr>
+      <tr><td>A</td><td>{a, c}</td><td>{b}</td></tr>
+      <tr><td>B</td><td>{b}</td><td>{c}</td></tr>
+      <tr><td>C</td><td>{c}</td><td>{b, $}</td></tr>
+    </table>
+    <ul>
+      <li><strong>FIRST(A):</strong> <code>a</code> dari <code>A → aA</code>, dan FIRST(C) = {c} dari <code>A → C</code>.</li>
+      <li><strong>FOLLOW(A):</strong> di <code>S → ABC</code>, setelah A ada B, jadi FIRST(B) = {b}. Di <code>A → aA</code>, A paling kanan di produksinya sendiri, jadi tidak menambah.</li>
+      <li><strong>FOLLOW(C):</strong> di <code>S → ABC</code>, C paling kanan, jadi FOLLOW(S) = {$}. Di <code>A → C</code>, C paling kanan, jadi FOLLOW(A) = {b}.</li>
+    </ul>
+    <p>Tabel LL(1) dan trace untuk soal ini ada di <a href="../11-tabel-ll1/notes.html#langkah-4">materi 11</a>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-9">
+<details>
+  <summary><h2>Kesalahan yang sering muncul: ε di FOLLOW, lupa $, dan aturan 3 yang terbalik</h2></summary>
+  <p class="rantai">
+    <span class="dari">semua section sebelumnya</span>
+    <span class="ke">tabel LL(1) yang benar (materi 11)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Salah menyalin satu angka di rumus Excel: semua sel yang memakainya ikut salah.</p>
+    <p class="batas">di Excel salahnya bisa dilacak dengan klik sel. Di ujian, satu set FIRST atau FOLLOW yang salah membuat tabel LL(1) dan trace ikut salah tanpa tanda.</p>
+  </aside>
+
+  <p>Setelah selesai, cek dua hal: FOLLOW start symbol memuat <code>$</code>, dan tidak ada ε di FOLLOW mana pun.</p>
+  <table>
+    <tr><th>Kesalahan</th><th>Akibat</th><th>Perbaikan</th></tr>
+    <tr><td>ε ditulis di FOLLOW</td><td>tabel LL(1) mendapat kolom yang tidak ada</td><td>FOLLOW hanya berisi terminal dan <code>$</code></td></tr>
+    <tr><td>Lupa <code>$</code> di FOLLOW(start)</td><td>kolom <code>$</code> kosong, string yang valid ditolak di akhir</td><td>aturan 1 selalu dulu</td></tr>
+    <tr><td>FIRST(<code>Y₁Y₂</code>) hanya melihat Y₁, padahal Y₁ nullable</td><td>terminal dari Y₂ hilang</td><td>lanjut ke Y₂ selama nullable (<a href="#langkah-6">6️⃣</a>)</td></tr>
+    <tr><td>ε dari FIRST(Y₁) langsung dimasukkan ke FIRST(X)</td><td>ε palsu di FIRST(X)</td><td>ε masuk hanya kalau semua simbol nullable</td></tr>
+    <tr><td>Aturan 3 terbalik: FOLLOW(B) dimasukkan ke FOLLOW(A)</td><td>set salah</td><td>FOLLOW(kiri) masuk FOLLOW(B)</td></tr>
+    <tr><td>Lupa aturan 3b (sisa setelah B nullable)</td><td>terminal hilang, misalnya <code>)</code> dan <code>$</code> di FOLLOW(T)</td><td>cek apakah sisa setelah B bisa ε</td></tr>
+    <tr><td>Mencari B di ruas kiri</td><td>FOLLOW diambil dari produksi yang salah</td><td>cari B di ruas kanan</td></tr>
+    <tr><td>Berhenti setelah satu putaran</td><td>set belum lengkap kalau ada FOLLOW yang saling bergantung</td><td>ulangi sampai tidak ada yang bertambah</td></tr>
+  </table>
+
+  <p class="intinya">FIRST: lihat ke depan. FOLLOW: lihat ke kanan B, lalu ke variabel induknya.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Temanmu menulis FOLLOW(E') = {), $, ε}. Apa yang salah?</summary>
+    <p>ε tidak pernah masuk FOLLOW. FOLLOW berisi token yang bisa muncul setelah E', dan ε bukan token. Yang benar: FOLLOW(E') = {), $}.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
+<ol class="refs">
+  <li>Aho, A. V., Lam, M. S., Sethi, R., &amp; Ullman, J. D. (2007). <i>Compilers: Principles, techniques, and tools</i> (2nd ed.). Addison-Wesley. Bab 4.4.1–4.4.2.</li>
+  <li><i>Top down parsing</i> (revisi 2026). Slide kuliah COMP6062 Compilation Techniques, sesi 11–13.</li>
+</ol>
+
+</main>
+</body>
+</html>

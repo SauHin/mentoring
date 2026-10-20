@@ -19,7 +19,7 @@
           "_shared/style.css"
         ],
         "createdAt": "2026-10-05T07:41:19.347Z",
-        "reason": "Laser pointer dot in slides (.laser-dot) imitates real laser light; glow is the literal effect the user asked for"
+        "reason": "Claude: the red glow is the slide laser-pointer dot (.laser-dot); a glowing laser is the intended literal look"
       },
       {
         "rule": "dark-glow",

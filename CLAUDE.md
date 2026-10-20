@@ -11,7 +11,7 @@ Situs statis (GitHub Pages, branch master) berisi notes, slide, dan visualisasi 
 
 Pembaca: menti dari berbagai semester, ada yang semester 5 dan ada yang mengulang matkul. Anggap mereka malas memperhatikan di kelas, jadi notes dan slides ini harus bisa menjadi sumber utama mereka.
 
-Acuan tampilan: `_shared/gaya.css` (salinan `C:\Users\jonat\Music\belajar\catatan\gaya.css`, warna Notion terang/gelap). Satu perubahan: mode gelap memakai `[data-theme='dark']` dari `theme.js`, supaya tombol tema tetap jalan. Contoh komponen notes: `C:\Users\jonat\Music\belajar\catatan\_contoh.html`.
+Acuan tampilan: `_shared/gaya.css` (salinan `C:\Users\jonat\Music\belajar\catatan\gaya.css`, warna Notion terang/gelap). Dua perubahan: mode gelap memakai `[data-theme='dark']` dari `theme.js`, supaya tombol tema tetap jalan, dan `--pudar`/`--frasa` diubah supaya kontras teks minimal 4.5:1. Jangan kembalikan ke nilai Notion saat menyalin ulang. Contoh komponen notes: `C:\Users\jonat\Music\belajar\catatan\_contoh.html`.
 
 **Topik acuan gaya catatan** (disetujui 2026-10-08): `algorithm-and-programming/03-repetition/`. Pakai `notes.html` untuk notes, `slides.html` untuk slide, `viz/loop.html` untuk viz. Template kosongnya ada di `_template/NN-nama-materi/`.
 
