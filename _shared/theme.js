@@ -69,7 +69,7 @@
     }
     // Scratch pad (coret-coret) hanya untuk slide dan notes materi, bukan halaman daftar matkul.
     if (document.querySelector('body.deck, script[src*="notes.js"]'))
-      document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js?v=d4d95638', root).href;
+      document.head.appendChild(document.createElement('script')).src = new URL('_shared/scratch.js?v=c0643b57', root).href;
   });
 
   // Syntax highlighting C untuk code block. hlC dipakai juga oleh notes.js (full code) dan cviz.js (panel kode).

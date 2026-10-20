@@ -83,3 +83,5 @@ Acuan tampilan: `_shared/gaya.css` (salinan `C:\Users\jonat\Music\belajar\catata
 Baca ulang slides saja, lalu notes saja, sebagai menti yang belajar sendiri tanpa mentor. Cari istilah yang belum dijelaskan, langkah yang dilompati, visualisasi tanpa petunjuk, dan bagian yang hanya bisa dipahami kalau dijelaskan lisan. Perbaiki semuanya sebelum lanjut ke topik berikutnya. Buka hasilnya di browser dan cek semua visualisasi interaktif masih berfungsi.
 
 Langkah teknis untuk materi baru ada di README, bagian "Membuat Materi Baru". Matkul baru juga butuh kartu di home (`index.html`).
+
+**Editor web admin** (`_shared/editor.js`, README bagian "Mengedit Lewat Web"): admin bisa mengedit isi halaman langsung di situs, dan setiap simpan menjadi commit di `master`. Jadi `git pull` dulu sebelum mengubah file. Halaman baru (selain viz) harus memuat `editor.js` setelah `theme.js`, seperti di `_template/`. Tulis blok teks yang bisa diedit sebagai elemen paling dalam (`p`, `li`, `td`, judul), jangan teks lepas di samping elemen blok lain.

@@ -89,7 +89,7 @@ function openPicker() {
 
 /* ---------- Keyboard ---------- */
 document.addEventListener('keydown', (e) => {
-  if (picker.open || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (picker.open || e.ctrlKey || e.metaKey || e.altKey || e.target.isContentEditable) return; // mengetik di mode edit (editor.js)
   const k = e.key.toLowerCase();
   if (['arrowright', 'arrowdown', 'pagedown', ' '].includes(k)) show(current + 1);
   else if (['arrowleft', 'arrowup', 'pageup'].includes(k)) show(current - 1);

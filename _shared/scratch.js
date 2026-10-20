@@ -247,7 +247,7 @@
 
   /* ---------- Keyboard ---------- */
   addEventListener('keydown', (e) => {
-    if (e.target.closest && e.target.closest('input, textarea, select, dialog')) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, dialog, [contenteditable="true"]')) return;
     const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
     if (k === 'd' && !mod && !e.altKey) setActive(!active);
     else if (!active) return;

@@ -6,9 +6,10 @@
   <title>Mid Exam Compilation Technique · Notes</title>
   <link rel="icon" href="../../_shared/favicon.svg">
   <link rel="stylesheet" href="../../_shared/gaya.css?v=9273b841">
-  <link rel="stylesheet" href="../../_shared/style.css?v=61a3ae4d">
+  <link rel="stylesheet" href="../../_shared/style.css?v=cec1c6a4">
   <link rel="stylesheet" href="../../_shared/automata.css?v=07d09f84">
-  <script src="../../_shared/theme.js?v=8e552fea"></script>
+  <script src="../../_shared/theme.js?v=8240686c"></script>
+  <script src="../../_shared/editor.js?v=8f506eef" defer></script>
   <script src="../../_shared/notes.js?v=168acdb8" defer></script>
   <style>
     main { counter-reset: langkah -1; } /* section 0 = strategi, section 1–6 = kisi 1–6 */
@@ -19,21 +20,21 @@
 <button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
 
 <header>
-  <h1>Mid Exam compilation technique</h1>
-  <p class="tujuan">Catatan ini untuk latihan mengerjakan soal, bukan untuk mengulang teori. Setiap kisi berisi jenis-jenis soalnya, cheat sheet aturan, dan contoh soal untuk setiap jenis. Setiap contoh dikerjakan langkah demi langkah: apa yang dilakukan di langkah itu, lalu hasilnya. Target: kamu bisa mengerjakan semua jenis soal di keenam kisi dalam 100 menit.</p>
+  <h1>Mid Exam Compilation Technique</h1>
+  <p class="tujuan"></p>
   <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Teori lengkap setiap kisi ada di materi 02–11 (link di setiap section) · <b>Cek di viz</b> membuka visualisasi dengan soal yang sama sudah terisi</p>
   <ul class="legenda">
-    <li><mark>istilah baru</mark></li>
-    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
-    <li><mark class="jebakan">jebakan</mark></li>
-    <li><mark class="kunci">wajib diingat</mark></li>
-    <li><b>kata kunci langkah</b></li>
-    <li><span class="hasil-legenda">hasil satu langkah</span></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
   </ul>
   <nav class="peta">
-    <h2>Peta jalur</h2>
+    <h2>Daftar Isi</h2>
     <ol start="0">
-      <li><a href="#langkah-0">Strategi: bobot dan waktu</a></li>
+      <li><a href="#langkah-0">Strategi</a></li>
       <li><a href="#langkah-1">Kisi 1 · Thompson ε-NFA (10%)</a></li>
       <li><a href="#langkah-2">Kisi 2 · RE → DFA dengan followpos (25%)</a></li>
       <li><a href="#langkah-3">Kisi 3 · Minimisasi DFA (15%)</a></li>
@@ -49,7 +50,7 @@
 
 <section class="langkah" id="langkah-0">
 <details>
-  <summary><h2>Bagi 100 menit sesuai bobot, dan sisakan 10 menit untuk mengecek</h2></summary>
+  <summary><h2>Strategi</h2></summary>
   <p class="rantai">
     <span class="dari">kisi-kisi Mid Exam</span>
     <span class="ke">kisi 1–6 (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-6">6️⃣</a>), simulasi (<a href="#langkah-7">7️⃣</a>)</span>
@@ -88,7 +89,7 @@
 
 <section class="langkah" id="langkah-1">
 <details>
-  <summary><h2>Kisi 1 · Thompson (10%): pecah RE, rakit dari bagian terdalam, lalu cek jumlah state</h2></summary>
+  <summary><h2>Thompson ε-NFA (10%)</h2></summary>
   <p class="rantai">
     <span class="dari">pola Thompson (<a href="../02-re-ke-nfa-thompson/notes.html">materi 02</a>)</span>
     <span class="ke">simulasi soal 1 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -225,7 +226,7 @@
 
 <section class="langkah" id="langkah-2">
 <details>
-  <summary><h2>Kisi 2 · RE → DFA (25%): tambah #, hitung firstpos dan followpos, lalu bangun DFA</h2></summary>
+  <summary><h2>RE → DFA dengan followpos (25%)</h2></summary>
   <p class="rantai">
     <span class="dari">RE → DFA langsung (<a href="../04-re-ke-dfa-langsung/notes.html">materi 04</a>)</span>
     <span class="ke">kisi 3 (DFA-nya sering diminta diminimisasi), simulasi soal 2 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -460,7 +461,7 @@ B - C -
 
 <section class="langkah" id="langkah-3">
 <details>
-  <summary><h2>Kisi 3 · Minimisasi DFA (15%): pisahkan final dan bukan final, lalu pecah atau tandai sampai stabil</h2></summary>
+  <summary><h2>Minimisasi DFA (15%)</h2></summary>
   <p class="rantai">
     <span class="dari">table-filling dan partition (<a href="../05-minimisasi-dfa/notes.html">materi 05</a>)</span>
     <span class="ke">simulasi soal 3 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -663,7 +664,7 @@ B - C -
 
 <section class="langkah" id="langkah-4">
 <details>
-  <summary><h2>Kisi 4 · RE → CFG (10%): S untuk seluruh RE, dan satu variabel baru untuk setiap union atau star</h2></summary>
+  <summary><h2>RE → CFG (10%)</h2></summary>
   <p class="rantai">
     <span class="dari">aturan RE → CFG (<a href="../06-re-ke-cfg/notes.html">materi 06</a>)</span>
     <span class="ke">simulasi soal 4 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -812,7 +813,7 @@ C → aC | cC | ε</code></pre></div>
 
 <section class="langkah" id="langkah-5">
 <details>
-  <summary><h2>Kisi 5 · Left factoring dan left recursion (10%): keluarkan awalan bersama, pindahkan rekursi ke kanan</h2></summary>
+  <summary><h2>Left factoring dan left recursion (10%)</h2></summary>
   <p class="rantai">
     <span class="dari">left factoring (<a href="../08-left-factoring/notes.html">materi 08</a>), left recursion (<a href="../09-left-recursion/notes.html">materi 09</a>)</span>
     <span class="ke">kisi 6 (grammar harus bersih dulu sebelum tabel LL(1)), simulasi soal 5 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -972,7 +973,7 @@ A' → cA' | adA' | ε</code></pre></div>
 
 <section class="langkah" id="langkah-6">
 <details>
-  <summary><h2>Kisi 6 · Top-down parsing (30%): bersihkan grammar, FIRST, FOLLOW, tabel, lalu trace</h2></summary>
+  <summary><h2>Top-down parsing (30%)</h2></summary>
   <p class="rantai">
     <span class="dari">FIRST dan FOLLOW (<a href="../10-first-dan-follow/notes.html">materi 10</a>), tabel LL(1) dan trace (<a href="../11-tabel-ll1/notes.html">materi 11</a>)</span>
     <span class="ke">simulasi soal 6 (<a href="#langkah-7">7️⃣</a>)</span>
@@ -1352,7 +1353,7 @@ void C() { match('f'); }</code></pre></div>
 
 <section class="langkah" id="langkah-7">
 <details>
-  <summary><h2>Simulasi Mid Exam: enam soal dengan bobot kisi-kisi, kerjakan dalam 100 menit</h2></summary>
+  <summary><h2>Latihan Soal</h2></summary>
   <p class="rantai">
     <span class="dari">contoh soal kisi 1–6 (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-6">6️⃣</a>)</span>
     <span class="ke">Mid Exam yang sebenarnya</span>
