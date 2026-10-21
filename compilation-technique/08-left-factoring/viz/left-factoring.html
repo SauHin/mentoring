@@ -25,6 +25,7 @@
   <summary>Ubah grammar</summary>
   <p class="hint">Satu baris per variabel: <code>A → abB | aB | h</code>. Variabel = huruf besar, ε untuk string kosong. Kalau terminal lebih dari satu huruf, pisahkan semua simbol dengan spasi.</p>
   <textarea id="src" rows="4" spellcheck="false"></textarea>
+  <div class="au-keys"><button class="btn btn-sm" id="eps" title="Sisipkan ε (string kosong) di posisi kursor">ε</button></div>
 </details>
 <div class="au-err" id="err"></div>
 
@@ -61,6 +62,7 @@ function load() {
 $('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
 $('pre').onchange = (e) => { $('src').value = PRESETS[e.target.value][1]; load(); };
 $('src').oninput = load;
+$('eps').onclick = () => { const f = $('src'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; load(); };
 $('src').value = PRESETS[0][1];
 load();
 if (fromHash()) load();

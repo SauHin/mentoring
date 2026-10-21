@@ -27,6 +27,7 @@
   <summary>Ubah grammar</summary>
   <p class="hint">Satu baris per variabel: <code>E' → +TE' | ε</code>. Baris pertama = start symbol. Grammar harus LL(1) (tidak ada conflict). Kalau terminal lebih dari satu huruf selain <code>id</code>, pisahkan semua simbol dengan spasi, termasuk di string.</p>
   <textarea id="src" rows="5" spellcheck="false"></textarea>
+  <div class="au-keys"><button class="btn btn-sm" id="eps" title="Sisipkan ε (string kosong) di posisi kursor">ε</button></div>
 </details>
 <div class="au-err" id="err"></div>
 
@@ -123,6 +124,7 @@ function load() {
 $('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
 $('pre').onchange = (e) => { const [, g, s, p] = PRESETS[e.target.value]; $('src').value = g; $('str').value = s; panic = p; seg(); load(); };
 $('src').oninput = $('str').oninput = load;
+$('eps').onclick = () => { const f = $('src'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; load(); };
 $('pre').onchange({ target: { value: 0 } });
 const fromLink = fromHash();
 if (fromLink) { panic = fromLink.get('panic') === '1'; seg(); load(); }

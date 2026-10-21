@@ -28,6 +28,7 @@
     <label class="au-field">Grammar<textarea id="src" rows="5" spellcheck="false"></textarea></label>
     <label class="au-field">Urutan variabel (pisahkan koma)<input class="field" id="ord" spellcheck="false" autocomplete="off"></label>
   </div>
+  <div class="au-keys"><button class="btn btn-sm" id="eps" title="Sisipkan ε (string kosong) di posisi kursor">ε</button></div>
 </details>
 <div class="au-err" id="err"></div>
 
@@ -69,6 +70,7 @@ function load() {
 $('pre').innerHTML = PRESETS.map(([n], i) => `<option value="${i}">${n}</option>`).join('');
 $('pre').onchange = (e) => { const [, g, o] = PRESETS[e.target.value]; $('src').value = g; $('ord').value = o; load(); };
 $('src').oninput = $('ord').oninput = load;
+$('eps').onclick = () => { const f = $('src'), at = f.selectionStart ?? f.value.length; f.value = f.value.slice(0, at) + 'ε' + f.value.slice(f.selectionEnd ?? at); f.focus(); f.selectionStart = f.selectionEnd = at + 1; load(); };
 $('pre').onchange({ target: { value: 0 } });
 if (fromHash()) load();
 </script>
