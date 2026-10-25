@@ -70,6 +70,14 @@ Viz bisa dibuka dengan soal tertentu lewat hash, misalnya `viz/followpos.html#re
 | 10 | Predictive parsing, FIRST, dan FOLLOW | [notes](compilation-technique/10-first-dan-follow/notes.html) | [slides](compilation-technique/10-first-dan-follow/slides.html) |
 | 11 | Tabel LL(1) dan trace parser | [notes](compilation-technique/11-tabel-ll1/notes.html) | [slides](compilation-technique/11-tabel-ll1/slides.html) |
 
+### Speech recognition
+
+Hanya notes UTS, disusun per soal kisi-kisi (3 esai, 2 studi kasus). Sumbernya 6 PPT dosen COMP6822001 (Session 1 sampai 6). Session 6 (Dialog System) tidak ada di kisi-kisi.
+
+| No | Materi | Notes | Slide |
+|----|--------|-------|-------|
+| 00 | Persiapan Mid Exam: pipeline, phonetics, eksperimen ASR dan wav2vec, HMM, WER | [notes](speech-recognition/00-mid-exam/notes.html) | |
+
 ## Struktur
 
 ```
@@ -90,6 +98,9 @@ mentoring/
 ├── compilation-technique/
 │   ├── index.html
 │   └── 00-mid-exam, 01-… sampai 11-…   persiapan ujian, lalu satu materi per tipe soal
+├── speech-recognition/
+│   ├── index.html
+│   └── 00-mid-exam                     notes UTS saja, satu section per soal kisi-kisi
 └── tools/                      cachebust.py, check-engines.js
 ```
 

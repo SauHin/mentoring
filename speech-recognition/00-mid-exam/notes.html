@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mid Exam Speech Recognition · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../_shared/style.css?v=cec1c6a4">
+  <script src="../../_shared/theme.js?v=8240686c"></script>
+  <script src="../../_shared/editor.js?v=8f506eef" defer></script>
+  <script src="../../_shared/notes.js?v=168acdb8" defer></script>
+  <style>
+    main { counter-reset: langkah -1; } /* section 0 = strategi, section 1 sampai 5 = soal 1 sampai 5 */
+    .langkah h3 { margin: 1.6rem 0 .4rem; font-size: 1.05rem; }
+    .diagram { color: var(--tinta); }
+    .diagram text { fill: currentColor; font: 13px var(--huruf); }
+    .diagram .kecil { font-size: 12.5px; fill: var(--pudar); }
+    .diagram .kotak { fill: var(--callout); stroke: var(--garis); }
+    .diagram .garis { fill: none; stroke: currentColor; stroke-width: 1.4; }
+    .diagram .pita { fill: currentColor; opacity: .75; }
+    .diagram .tipis { stroke: currentColor; stroke-width: 1; opacity: .22; }
+    .jawaban-esai p { margin: .7em 0; }
+  </style>
+</head>
+<body class="catatan">
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+
+<header>
+  <h1>Mid Exam Speech Recognition</h1>
+  <p class="tujuan">Persiapan UTS 100 menit: 3 soal esai dan 2 studi kasus. Satu section untuk setiap soal di kisi-kisi, berisi materi yang dibutuhkan, kerangka jawaban, contoh jawaban, dan soal latihan.</p>
+  <p class="tautan">Sumber: 6 PPT dosen (COMP6822001, Session 1 sampai 6). Mulai dari <a href="#langkah-0">0️⃣</a> untuk peta kisi-kisi dan gaya jawaban yang diminta dosen.</p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
+  </ul>
+  <nav class="peta">
+    <h2>Daftar Isi</h2>
+    <ol start="0">
+      <li><a href="#langkah-0">Strategi 100 menit dan gaya jawaban</a></li>
+      <li><a href="#langkah-1">Soal 1 · Speech recognition pipeline (esai)</a></li>
+      <li><a href="#langkah-2">Soal 2 · Phonetics dan speech recognition (esai)</a></li>
+      <li><a href="#langkah-3">Soal 3 · Merancang eksperimen ASR (esai)</a></li>
+      <li><a href="#langkah-4">Soal 4 · HMM dan path probability (studi kasus)</a></li>
+      <li><a href="#langkah-5">Soal 5 · Word error rate (studi kasus)</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main>
+
+<section class="langkah" id="langkah-0">
+<details>
+  <summary><h2>Strategi 100 menit dan gaya jawaban</h2></summary>
+  <p class="rantai">
+    <span class="dari">dua versi kisi-kisi dan kuis lisan dengan dosen</span>
+    <span class="ke">semua soal (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <h3>Peta kisi-kisi</h3>
+  <p>Ada dua versi kisi-kisi, dan isinya sama. Versi 2 hanya memecah topik lebih rinci, jadi ketujuh topiknya masuk ke 5 soal versi 1.</p>
+  <table>
+    <tr><th>Soal (versi 1)</th><th>Format</th><th>Topik di versi 2</th></tr>
+    <tr><td><a href="#langkah-1">1️⃣</a> Speech recognition pipeline</td><td>Esai</td><td>Speech recognition pipeline</td></tr>
+    <tr><td><a href="#langkah-2">2️⃣</a> Phonetics dan speech recognition</td><td>Esai</td><td>Phonetics and recognition, speech signal spectrogram</td></tr>
+    <tr><td><a href="#langkah-3">3️⃣</a> Merancang eksperimen ASR</td><td>Esai</td><td>wav2vec</td></tr>
+    <tr><td><a href="#langkah-4">4️⃣</a> HMM dan path probability</td><td>Studi kasus</td><td>Speech path probability, speech transition and observation</td></tr>
+    <tr><td><a href="#langkah-5">5️⃣</a> Word error rate</td><td>Studi kasus</td><td>Speech/word error rate</td></tr>
+  </table>
+  <p>Session 6 (Dialog System) <b>tidak ada di kisi-kisi</b>, jadi tidak dibahas di sini.</p>
+
+  <h3>Jatah waktu</h3>
+  <p>Bobot pasti belum diumumkan, tapi studi kasus lebih berat. Karena itu studi kasus mendapat waktu lebih banyak dan dikerjakan duluan, selagi kepala masih segar.</p>
+  <table>
+    <tr><th>Urutan</th><th>Soal</th><th>Jatah</th></tr>
+    <tr><td>1</td><td><a href="#langkah-4">4️⃣</a> HMM dan path probability</td><td>25 menit</td></tr>
+    <tr><td>2</td><td><a href="#langkah-5">5️⃣</a> Word error rate</td><td>20 menit</td></tr>
+    <tr><td>3</td><td><a href="#langkah-1">1️⃣</a> Pipeline</td><td>15 menit</td></tr>
+    <tr><td>4</td><td><a href="#langkah-2">2️⃣</a> Phonetics</td><td>15 menit</td></tr>
+    <tr><td>5</td><td><a href="#langkah-3">3️⃣</a> Eksperimen ASR</td><td>15 menit</td></tr>
+    <tr><td>6</td><td>Cek ulang hitungan soal 4 dan 5</td><td>10 menit</td></tr>
+  </table>
+  <ul>
+    <li><strong>Lewat jatah:</strong> tulis yang sudah ada, pindah soal, lalu kembali kalau masih ada waktu.</li>
+    <li><strong>Nilai parsial:</strong> di studi kasus, tulis tabel dan nilai antara. Angka akhir yang salah tetap dapat nilai kalau langkahnya benar.</li>
+  </ul>
+
+  <h3>Gaya jawaban yang diminta dosen</h3>
+  <aside class="analogi">
+    <p>Menjawab esai itu seperti menjelaskan materi ke teman yang tidak masuk kelas. Kamu tidak bisa cuma bilang "pakai MFCC", karena temanmu belum tahu MFCC itu apa.</p>
+    <p class="batas">teman bisa bertanya balik kalau bingung, dosen tidak. Semua penjelasan harus sudah tertulis di kertas.</p>
+  </aside>
+  <p>Dari kuis lisan, dosen meminta tiga hal:</p>
+  <ul>
+    <li><strong>Nama panjang dulu:</strong> setiap singkatan ditulis lengkap saat pertama muncul, misalnya HMM (Hidden Markov Model), bukan HMM saja.</li>
+    <li><strong>Istilah teknis dijelaskan:</strong> setiap istilah teknis langsung diberi arti singkat, misalnya "emission probability, yaitu peluang sebuah state menghasilkan observasi tertentu".</li>
+    <li><strong>Mengalir, tidak kaku:</strong> kalimat disambung dengan "karena", "setelah itu", "hasilnya", dan "jadi", seperti sedang bercerita. Daftar poin tanpa penjelasan terasa kaku.</li>
+  </ul>
+  <table>
+    <tr><th>Gaya</th><th>Contoh</th></tr>
+    <tr><td>Kaku</td><td>Pipeline ASR: feature extraction, acoustic model, lexicon, LM, decoder.</td></tr>
+    <tr><td>Mengalir</td><td>ASR (Automatic Speech Recognition) mengubah suara menjadi teks lewat lima tahap. Pertama, suara diubah menjadi MFCC (Mel-Frequency Cepstral Coefficients), yaitu deretan angka yang meringkas bentuk spektrum suara. Setelah itu, acoustic model menghitung seberapa cocok angka-angka itu dengan setiap bunyi, …</td></tr>
+  </table>
+
+  <h3>Kerangka jawaban</h3>
+  <div class="cheat">
+    <section class="c-mint"><h4>Esai (soal 1, 2, 3)</h4>
+      <ol>
+        <li><strong>Definisi:</strong> istilah utama dengan nama panjang, dalam satu kalimat "X adalah …".</li>
+        <li><strong>Cara kerja:</strong> tahap demi tahap, dengan alasan kenapa tahap itu ada.</li>
+        <li><strong>Contoh:</strong> satu contoh konkret, misalnya sebuah kata atau kalimat.</li>
+        <li><strong>Penutup:</strong> kelebihan, keterbatasan, atau kaitan ke bagian lain ASR.</li>
+      </ol>
+    </section>
+    <section class="c-lilac"><h4>Studi kasus (soal 4, 5)</h4>
+      <ol>
+        <li><strong>Pembuka:</strong> dua atau tiga kalimat yang menjelaskan istilah di soal, misalnya HMM, transition probability, atau WER.</li>
+        <li><strong>Diketahui:</strong> salin data soal ke tabel.</li>
+        <li><strong>Langkah:</strong> setiap langkah diberi label, nilai antara ditaruh di tabel.</li>
+        <li><strong>Kesimpulan:</strong> satu kalimat yang menjawab pertanyaan dengan angka dan artinya.</li>
+      </ol>
+    </section>
+  </div>
+
+  <aside class="jebakan">
+    <p><mark class="jebakan">Singkatan tanpa nama panjang</mark> dan <mark class="jebakan">rumus tanpa arti simbol</mark> membuat jawaban terlihat seperti hafalan. Perbaikannya: setiap kali menulis singkatan atau simbol, tambahkan "yaitu …" di belakangnya.</p>
+  </aside>
+
+  <p class="intinya">Studi kasus dulu (45 menit), esai kemudian (45 menit), cek ulang 10 menit. Setiap istilah: nama panjang, lalu artinya, dalam kalimat yang mengalir.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Ubah jawaban kaku ini menjadi jawaban yang mengalir: "WER = (S + D + I) / N."</summary>
+    <p>WER (Word Error Rate) adalah persentase kata yang salah dikenali oleh sistem ASR (Automatic Speech Recognition). Nilainya dihitung dengan menjumlahkan tiga jenis kesalahan, yaitu substitution (S, kata diganti kata lain), deletion (D, kata yang hilang), dan insertion (I, kata tambahan), lalu membaginya dengan N, yaitu jumlah kata di transkrip yang benar. Jadi kalau WER 10%, sekitar 10 dari setiap 100 kata salah dikenali.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>Soal 1 · Speech recognition pipeline (esai)</h2></summary>
+  <p class="rantai">
+    <span class="dari">PPT Session 3 (Acoustic Modeling) dan Session 4 (Automatic Speech Recognition)</span>
+    <span class="ke">soal 3 (eksperimen memakai pipeline ini) dan soal 4 (HMM ada di dalam lexicon dan decoder)</span>
+  </p>
+
+  <h3>Bentuk soal</h3>
+  <ul>
+    <li>Jelaskan pipeline speech recognition, dari sinyal suara sampai menjadi teks.</li>
+    <li>Jelaskan peran setiap komponen ASR dan hubungannya dengan noisy channel model.</li>
+    <li>Jelaskan langkah ekstraksi fitur MFCC.</li>
+  </ul>
+
+  <h3>Ide dasar: noisy channel model</h3>
+  <aside class="analogi">
+    <p>Mendengar teman bicara di tempat ramai. Suaranya samar, tapi kamu menebak kalimat yang paling masuk akal dari bunyi yang terdengar dan dari kebiasaan orang bicara.</p>
+    <p class="batas">kamu juga memakai konteks obrolan dan raut wajah teman. ASR klasik hanya memakai dua angka: kecocokan bunyi dan kewajaran kalimat.</p>
+  </aside>
+  <p>ASR (Automatic Speech Recognition) adalah sistem yang mengubah sinyal suara menjadi teks. Cara pandangnya disebut <mark>noisy channel model</mark>: suara dianggap sebagai kalimat asli yang "dikotori" saat lewat saluran, dan tugas ASR adalah menebak kalimat asli yang paling mungkin.</p>
+  <p class="rumus">Ŵ = argmax<sub>W ∈ L</sub> P(O | W) · P(W)</p>
+  <details class="keterangan">
+    <summary>Arti simbol</summary>
+    <dl>
+      <dt>O</dt><dd>observation: deretan fitur suara o<sub>1</sub>, o<sub>2</sub>, …, o<sub>t</sub>, satu vektor setiap 10 ms</dd>
+      <dt>W</dt><dd>kandidat kalimat w<sub>1</sub>, w<sub>2</sub>, …, w<sub>n</sub></dd>
+      <dt>L</dt><dd>semua kalimat yang mungkin dalam bahasa itu</dd>
+      <dt>P(O | W)</dt><dd><b>likelihood</b>: seberapa cocok suara O kalau kalimatnya W. Dihitung acoustic model bersama lexicon</dd>
+      <dt>P(W)</dt><dd><b>prior</b>: seberapa wajar kalimat W muncul dalam bahasa. Dihitung language model</dd>
+      <dt>argmax</dt><dd>ambil W yang membuat hasil kalinya paling besar</dd>
+    </dl>
+  </details>
+  <p><strong>Cara membaca:</strong> kalimat pemenang harus <b>cocok dengan bunyinya</b> dan <b>wajar sebagai kalimat</b>. Contoh: "saya pergi ke bank" dan "saya pergi ke bang" terdengar hampir sama, jadi P(O | W) keduanya mirip, tapi P(W) kalimat pertama jauh lebih besar.</p>
+  <aside class="hitung">
+    <details>
+      <summary>Dari mana rumusnya: Bayes rule</summary>
+      <p><strong>Langkah 1.</strong> Yang dicari sebenarnya kalimat dengan P(W | O) terbesar, yaitu peluang kalimatnya W kalau suaranya O.</p>
+      <p><strong>Langkah 2.</strong> Bayes rule mengubahnya menjadi P(W | O) = P(O | W) · P(W) / P(O).</p>
+      <p><strong>Langkah 3.</strong> P(O) sama untuk semua kandidat W, karena suaranya sama. Jadi P(O) tidak mengubah siapa pemenangnya dan boleh dibuang.</p>
+    </details>
+  </aside>
+
+  <h3>Lima komponen pipeline</h3>
+  <p>Sistem klasik HMM-GMM memecah rumus di atas menjadi lima komponen yang bekerja berurutan.</p>
+  <figure>
+    <svg class="diagram" viewBox="0 0 420 330" role="img" aria-label="Pipeline ASR: sinyal suara masuk feature extraction. Fitur MFCC masuk acoustic model. Acoustic model dan lexicon memberi P(O|W), language model memberi P(W), dan keduanya masuk decoder Viterbi yang menghasilkan teks.">
+      <defs><marker id="panah-pipeline" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <text x="210" y="16" text-anchor="middle">Sinyal suara (waveform)</text>
+      <line class="garis" x1="210" y1="22" x2="210" y2="44" marker-end="url(#panah-pipeline)"/>
+      <rect class="kotak" x="110" y="46" width="200" height="34" rx="8"/>
+      <text x="210" y="68" text-anchor="middle">1. Feature extraction</text>
+      <polyline class="garis" points="210,80 210,96 72,96 72,116" marker-end="url(#panah-pipeline)"/>
+      <text x="218" y="100" class="kecil">O = deretan MFCC</text>
+      <rect class="kotak" x="6" y="118" width="132" height="48" rx="8"/>
+      <text x="72" y="138" text-anchor="middle">2. Acoustic model</text>
+      <text x="72" y="156" text-anchor="middle" class="kecil">GMM: p(o | q)</text>
+      <rect class="kotak" x="144" y="118" width="132" height="48" rx="8"/>
+      <text x="210" y="138" text-anchor="middle">3. Lexicon</text>
+      <text x="210" y="156" text-anchor="middle" class="kecil">kata ke phone (HMM)</text>
+      <rect class="kotak" x="282" y="118" width="132" height="48" rx="8"/>
+      <text x="348" y="138" text-anchor="middle">4. Language model</text>
+      <text x="348" y="156" text-anchor="middle" class="kecil">N-gram</text>
+      <path class="garis" d="M8 174v6h266v-6"/>
+      <text x="141" y="198" text-anchor="middle">P(O | W)</text>
+      <text x="348" y="198" text-anchor="middle">P(W)</text>
+      <line class="garis" x1="141" y1="206" x2="178" y2="240" marker-end="url(#panah-pipeline)"/>
+      <line class="garis" x1="348" y1="206" x2="262" y2="240" marker-end="url(#panah-pipeline)"/>
+      <rect class="kotak" x="110" y="242" width="200" height="34" rx="8"/>
+      <text x="210" y="264" text-anchor="middle">5. Decoder (Viterbi)</text>
+      <line class="garis" x1="210" y1="276" x2="210" y2="298" marker-end="url(#panah-pipeline)"/>
+      <text x="210" y="318" text-anchor="middle">Teks W: "if music be the food of love …"</text>
+    </svg>
+    <figcaption>Arsitektur HMM-GMM dari slide Session 4. Acoustic model dan lexicon memberi P(O | W), language model memberi P(W), lalu decoder memilih W dengan hasil kali terbesar.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Komponen</th><th>Tugas</th><th>Kenapa di posisi ini</th></tr>
+    <tr><td>1. Feature extraction</td><td>Mengubah waveform menjadi 39 angka MFCC setiap 10 ms</td><td>Model tidak bisa langsung membaca gelombang mentah, jadi suara diringkas dulu</td></tr>
+    <tr><td>2. Acoustic model</td><td>GMM (Gaussian Mixture Model) menghitung p(o | q), yaitu peluang frame o dihasilkan state q (sebuah subphone)</td><td>Butuh fitur dari komponen 1</td></tr>
+    <tr><td>3. Lexicon</td><td>Kamus pengucapan: setiap kata ditulis sebagai deretan phone, misalnya dari CMU dictionary (127 ribu kata), lalu disusun sebagai HMM</td><td>Menghubungkan bunyi dari komponen 2 ke kata</td></tr>
+    <tr><td>4. Language model</td><td>N-gram menghitung p(w<sub>i</sub> | w<sub>i−1</sub>), yaitu peluang sebuah kata berdasarkan kata sebelumnya</td><td>Memilih di antara kata yang bunyinya mirip</td></tr>
+    <tr><td>5. Decoder</td><td>Algoritma Viterbi (dynamic programming) menggabungkan semua skor dan memilih kalimat terbaik</td><td>Harus terakhir, karena butuh skor dari komponen 2, 3, dan 4</td></tr>
+  </table>
+  <p><strong>Kalau urutannya rusak:</strong> decoder yang jalan tanpa language model memilih kalimat yang bunyinya paling cocok walaupun tidak masuk akal, misalnya "saya pergi ke bang".</p>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh dari slide: kata "Samson" lewat pipeline</summary>
+      <table>
+        <tr><td>Transcription</td><td>Samson</td></tr>
+        <tr><td>Pronunciation (dari lexicon)</td><td><code>S AE M S AH N</code></td></tr>
+        <tr><td>Subphone (state HMM)</td><td>942, 942, 6, 37, 8006, 4422, … (nomor state hasil state tying)</td></tr>
+        <tr><td>Acoustic model</td><td>Setiap state punya GMM yang memberi skor untuk fitur setiap frame</td></tr>
+        <tr><td>Audio input</td><td>Spectrogram dipotong per frame, setiap frame menjadi satu vektor fitur</td></tr>
+      </table>
+      <p>State 942 muncul dua kali berturut-turut, karena satu subphone bisa bertahan beberapa frame. Di HMM, ini dimodelkan oleh self-loop (lihat <a href="#langkah-4">4️⃣</a>).</p>
+    </details>
+  </aside>
+
+  <h3>Feature extraction: MFCC</h3>
+  <p><mark>MFCC (Mel-Frequency Cepstral Coefficients)</mark> adalah 39 angka per frame yang meringkas bentuk spektrum suara, dengan skala frekuensi yang meniru telinga manusia. Menurut slide, MFCC adalah representasi spektrum yang paling banyak dipakai di ASR.</p>
+  <ol>
+    <li><strong>Pre-emphasis (koefisien 0,97):</strong> menguatkan frekuensi tinggi, karena energi bunyi di frekuensi tinggi biasanya lemah. Slide hanya menyebut koefisiennya, alasannya dari buku Jurafsky.</li>
+    <li><strong>Windowing:</strong> sinyal dipotong menjadi frame 25 ms yang bergeser setiap 10 ms. Ucapan terus berubah, tapi dalam 25 ms bentuknya hampir tetap, jadi bisa dianalisis per potongan.</li>
+    <li><strong>DFT (Discrete Fourier Transform):</strong> setiap frame diubah menjadi spectrum, yaitu besar energi di setiap frekuensi.</li>
+    <li><strong>Mel filter bank:</strong> spectrum dikelompokkan dengan filter segitiga yang rapat di bawah 1000 Hz dan makin renggang di atasnya, karena telinga kurang peka membedakan frekuensi tinggi.</li>
+    <li><strong>Log:</strong> ambil log dari kuadrat output filter bank. Log mengubah perkalian source × filter menjadi penjumlahan, sehingga keduanya bisa dipisah di tahap berikutnya.</li>
+    <li><strong>IDFT (Inverse DFT, di slide juga disebut DCT, Discrete Cosine Transform):</strong> menghasilkan cepstrum, yang memisahkan source (getaran pita suara) dari filter (bentuk mulut). Yang diambil hanya 12 koefisien pertama, yaitu bagian filter.</li>
+    <li><strong>Energy dan derivatives:</strong> tambah 1 energy, lalu delta (perubahan antar frame) dan double delta (perubahan dari delta).</li>
+  </ol>
+  <table>
+    <tr><th>Bagian fitur</th><th>Jumlah</th></tr>
+    <tr><td>MFCC (cepstral coefficient)</td><td>12</td></tr>
+    <tr><td>Energy</td><td>1</td></tr>
+    <tr><td>Delta MFCC dan delta energy</td><td>12 + 1</td></tr>
+    <tr><td>Double delta MFCC dan double delta energy</td><td>12 + 1</td></tr>
+    <tr><td>Total</td><td><b>39</b></td></tr>
+  </table>
+  <p class="rumus">d(t) = ( c(t + 1) − c(t − 1) ) / 2</p>
+  <p><strong>Cara membaca:</strong> delta adalah selisih koefisien frame sesudah dan frame sebelum, dibagi 2. Contoh: c(t − 1) = 4 dan c(t + 1) = 10, jadi d(t) = (10 − 4) / 2 = 3, artinya koefisien itu sedang naik.</p>
+  <ul>
+    <li><strong>Windowing sebelum DFT:</strong> DFT butuh potongan sinyal yang bentuknya stabil. DFT pada satu kalimat utuh mencampur semua bunyi menjadi satu spectrum.</li>
+    <li><strong>Log sebelum IDFT:</strong> source dan filter baru bisa dipisah setelah log. Tanpa log, cepstrum tidak memisahkan apa pun.</li>
+    <li><strong>Delta paling akhir:</strong> delta butuh MFCC dari frame tetangga, jadi semua frame harus selesai dulu.</li>
+  </ul>
+  <p><strong>Kenapa MFCC populer (slide):</strong> cepat dihitung, memakai skala mel yang sesuai persepsi, memisahkan source dan filter, dan fiturnya tidak saling berkorelasi, yang dibutuhkan GMM dengan diagonal covariance (GMM yang menganggap setiap angka fitur tidak saling berhubungan). Alternatifnya PLP (Perceptual Linear Prediction), dan untuk acoustic model neural, pilihan fitur tidak terlalu berpengaruh.</p>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh hitungan: berapa frame dari 1 detik suara?</summary>
+      <p><strong>Langkah 1.</strong> Frame mulai di 0, 10, 20, … ms. Frame terakhir harus selesai paling lambat di 1000 ms, jadi mulainya paling lambat 1000 − 25 = 975 ms, dibulatkan ke bawah menjadi 970 ms.</p>
+      <p><strong>Langkah 2.</strong> Jumlah frame = 970 / 10 + 1 = 98 frame.</p>
+      <p><strong>Langkah 3.</strong> Setiap frame 39 angka, jadi 1 detik suara menjadi 98 × 39 = 3.822 angka.</p>
+    </details>
+  </aside>
+
+  <h3>Perkembangan acoustic model</h3>
+  <table>
+    <tr><th>Generasi</th><th>Cara kerja</th></tr>
+    <tr><td>HMM-GMM</td><td>Setiap state HMM punya GMM, yaitu gabungan beberapa kurva Gaussian (distribusi normal), untuk menghitung p(o | q). State-nya berkembang dari phone, ke subphone (3 per phone), ke triphone, lalu state tying (lihat <a href="#langkah-2">2️⃣</a>).</td></tr>
+    <tr><td>HMM-DNN (hybrid)</td><td>DNN (Deep Neural Network) menggantikan GMM. DNN memberi P(s | x), lalu Bayes rule mengubahnya menjadi P(x | s) yang sebanding dengan P(s | x) / P(s), yaitu output DNN dibagi state prior (seberapa sering state itu muncul di data latih). DNN dilatih per frame dengan cross entropy, yaitu loss yang makin besar kalau peluang untuk state yang benar makin kecil, dengan label dari forced alignment (pasangan frame dan state yang dicari dari transkrip yang sudah diketahui). Sejak Hinton dkk. (2012), sistem hybrid mendominasi ASR.</td></tr>
+    <tr><td>RNN hybrid</td><td>RNN (Recurrent Neural Network) membawa informasi dari frame sebelumnya ke frame berikutnya.</td></tr>
+    <tr><td>End-to-end (HMM-free)</td><td>Satu jaringan langsung memetakan suara ke teks tanpa HMM.</td></tr>
+    <tr><td>Foundation model</td><td>Model besar seperti wav2vec 2.0 dilatih dulu tanpa label, lalu di-fine-tune dengan sedikit data berlabel (lihat <a href="#langkah-3">3️⃣</a>).</td></tr>
+  </table>
+
+  <h3>Kerangka jawaban</h3>
+  <ol>
+    <li><strong>Definisi:</strong> ASR dan noisy channel model, beserta rumus dan arti P(O | W) dan P(W).</li>
+    <li><strong>Feature extraction:</strong> frame 25 ms setiap 10 ms, diubah menjadi 39 MFCC.</li>
+    <li><strong>Acoustic model:</strong> GMM atau DNN menghitung p(o | q) untuk setiap subphone.</li>
+    <li><strong>Lexicon dan language model:</strong> kamus pengucapan dan N-gram.</li>
+    <li><strong>Decoder:</strong> Viterbi menggabungkan semuanya, dengan contoh "bank" dan "bang".</li>
+    <li><strong>Penutup:</strong> perkembangan ke HMM-DNN, end-to-end, dan foundation model, lalu evaluasi dengan WER.</li>
+  </ol>
+  <table>
+    <tr><th>Istilah wajib</th><th>Nama panjang</th><th>Arti singkat</th></tr>
+    <tr><td>ASR</td><td>Automatic Speech Recognition</td><td>sistem yang mengubah suara menjadi teks</td></tr>
+    <tr><td>LVCSR</td><td>Large Vocabulary Continuous Speech Recognition</td><td>ASR dengan kosakata besar (sekitar 64.000 kata), ucapan sambung, untuk pembicara mana saja</td></tr>
+    <tr><td>MFCC</td><td>Mel-Frequency Cepstral Coefficients</td><td>39 angka fitur per frame</td></tr>
+    <tr><td>DFT</td><td>Discrete Fourier Transform</td><td>pengubah potongan sinyal menjadi spectrum</td></tr>
+    <tr><td>GMM</td><td>Gaussian Mixture Model</td><td>gabungan kurva Gaussian untuk menghitung p(o | q)</td></tr>
+    <tr><td>HMM</td><td>Hidden Markov Model</td><td>model state tersembunyi dengan peluang transisi dan emisi</td></tr>
+    <tr><td>DNN</td><td>Deep Neural Network</td><td>jaringan saraf dengan banyak lapisan</td></tr>
+    <tr><td>N-gram</td><td>language model N kata</td><td>peluang kata berdasarkan N − 1 kata sebelumnya</td></tr>
+    <tr><td>WER</td><td>Word Error Rate</td><td>persentase kata yang salah dikenali</td></tr>
+  </table>
+
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh jawaban</span> Pipeline speech recognition</summary>
+    <aside class="soal-ujian"><p>Jelaskan pipeline sistem speech recognition, mulai dari sinyal suara sampai menjadi teks!</p></aside>
+    <div class="jawaban-esai">
+      <p>ASR (Automatic Speech Recognition) adalah sistem yang mengubah sinyal suara menjadi teks. Cara kerjanya memakai noisy channel model, yaitu cara pandang bahwa suara yang diterima adalah kalimat asli yang sudah "dikotori" saat diucapkan, sehingga tugas ASR adalah menebak kalimat asli yang paling mungkin. Secara matematis, ASR mencari kalimat Ŵ = argmax P(O | W) · P(W), dengan O (observation) adalah deretan fitur suara dan W adalah kandidat kalimat.</p>
+      <p>Dalam rumus itu, P(O | W) disebut likelihood, yaitu seberapa cocok suara O dengan kalimat W, dan nilainya dihitung oleh acoustic model bersama lexicon. P(W) disebut prior, yaitu seberapa wajar kalimat W dalam bahasa, dan nilainya dihitung oleh language model. Untuk menghitung keduanya, sistem klasik HMM-GMM memakai lima komponen yang bekerja berurutan.</p>
+      <p>Komponen pertama adalah feature extraction. Sinyal suara dipotong menjadi frame 25 ms yang bergeser setiap 10 ms, lalu setiap frame diubah menjadi 39 angka MFCC (Mel-Frequency Cepstral Coefficients), yaitu ringkasan spektrum suara yang memakai skala mel, skala frekuensi yang meniru pendengaran manusia. Deretan vektor MFCC inilah yang menjadi O.</p>
+      <p>Komponen kedua adalah acoustic model. Pada sistem HMM-GMM, GMM (Gaussian Mixture Model), yaitu gabungan beberapa kurva distribusi normal, menghitung p(o | q), peluang sebuah frame o dihasilkan oleh state q. State di sini adalah subphone, potongan bunyi yang lebih kecil dari phone, karena setiap phone dibagi menjadi bagian awal, tengah, dan akhir.</p>
+      <p>Komponen ketiga adalah lexicon atau pronunciation model, yaitu kamus yang menyimpan cara pengucapan setiap kata sebagai deretan phone, misalnya CMU Pronouncing Dictionary yang berisi sekitar 127 ribu kata. Lexicon disusun sebagai HMM (Hidden Markov Model), sehingga terlihat phone mana yang boleh mengikuti phone lain. Komponen keempat adalah language model berbentuk N-gram, yang menghitung peluang sebuah kata berdasarkan kata sebelumnya.</p>
+      <p>Komponen terakhir adalah decoder. Decoder memakai algoritma Viterbi, yaitu algoritma dynamic programming yang hanya menyimpan jalur terbaik di setiap langkah, untuk menggabungkan skor acoustic model, lexicon, dan language model sampai ditemukan kalimat dengan P(O | W) · P(W) terbesar. Misalnya, "saya pergi ke bank" dan "saya pergi ke bang" terdengar hampir sama, tetapi language model membuat kalimat pertama menang karena lebih wajar.</p>
+      <p>Pipeline ini terus berkembang. GMM kemudian diganti DNN (Deep Neural Network) sehingga muncul sistem hybrid HMM-DNN, lalu muncul model end-to-end yang tidak lagi memakai HMM, dan sekarang ada foundation model seperti wav2vec 2.0. Apa pun modelnya, hasil akhirnya dievaluasi dengan WER (Word Error Rate), yaitu persentase kata yang salah dikenali.</p>
+    </div>
+  </details>
+
+  <aside class="jebakan">
+    <ul>
+      <li><mark class="jebakan">Menukar likelihood dan prior.</mark> P(O | W) dari acoustic model, P(W) dari language model.</li>
+      <li><strong>Lupa alasan P(O) dibuang:</strong> P(O) sama untuk semua kandidat kalimat, jadi tidak mengubah hasil argmax.</li>
+      <li><strong>Menyebut 39 MFCC semuanya koefisien cepstral:</strong> yang cepstral hanya 12. Sisanya energy, delta, dan double delta.</li>
+    </ul>
+  </aside>
+
+  <p class="intinya">ASR memilih kalimat W dengan P(O | W) · P(W) terbesar. Komponennya berurutan: feature extraction (MFCC), acoustic model, lexicon, language model, lalu decoder Viterbi.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa P(O) boleh dibuang saat mencari Ŵ?</summary>
+    <p>Karena P(O) adalah peluang suara itu sendiri, nilainya sama untuk semua kandidat kalimat W. Membagi semua kandidat dengan angka yang sama tidak mengubah siapa yang paling besar, jadi hasil argmax tetap sama.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Audio 2 detik diproses dengan window 25 ms dan shift 10 ms. Berapa frame dan berapa angka fitur MFCC yang dihasilkan?</summary>
+    <p>Frame terakhir mulai paling lambat di 2000 − 25 = 1975 ms, dibulatkan ke bawah menjadi 1970 ms. Jumlah frame = 1970 / 10 + 1 = <b>198 frame</b>, dan jumlah angka = 198 × 39 = <b>7.722 angka</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Sebutkan isi 39 fitur MFCC.</summary>
+    <p>12 MFCC + 1 energy, 12 delta MFCC + 1 delta energy, dan 12 double delta MFCC + 1 double delta energy. Totalnya 13 × 3 = 39.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Soal 2 · Phonetics dan speech recognition (esai)</h2></summary>
+  <p class="rantai">
+    <span class="dari">PPT Session 2 (Phonetics) dan Session 3 (triphone, state tying)</span>
+    <span class="ke">soal 1 (lexicon dan MFCC memakai konsep fonetik) dan soal 4 (state HMM adalah subphone)</span>
+  </p>
+
+  <h3>Bentuk soal</h3>
+  <ul>
+    <li>Jelaskan hubungan phonetics dengan speech recognition.</li>
+    <li>Jelaskan articulatory phonetics (voicing, place, dan manner of articulation) beserta contoh.</li>
+    <li>Jelaskan apa itu spectrogram dan bagaimana membacanya.</li>
+  </ul>
+
+  <h3>Phone dan cara menuliskannya</h3>
+  <p><mark>Phonetics</mark> adalah ilmu tentang bunyi ucapan manusia. Satuan dasarnya adalah <b>phone</b>, yaitu bunyi terkecil dalam ucapan, misalnya bunyi [s] di awal kata "saya".</p>
+  <ul>
+    <li><strong>Articulatory phonetics:</strong> bagaimana bunyi dibuat oleh articulator, yaitu bagian mulut yang bergerak (bibir, lidah, gigi, langit-langit).</li>
+    <li><strong>Acoustic phonetics:</strong> sifat gelombang bunyi, misalnya frekuensi dan energinya.</li>
+    <li><strong>Transkripsi:</strong> menulis bunyi dengan simbol, memakai IPA atau ARPAbet.</li>
+  </ul>
+  <p><b>IPA (International Phonetic Alphabet)</b> adalah simbol bunyi standar internasional, misalnya ʃ dan θ. <b>ARPAbet</b> adalah simbol bunyi bahasa Inggris Amerika yang hanya memakai huruf biasa (ASCII), sehingga mudah diproses komputer. Namanya dari ARPA (Advanced Research Projects Agency), lembaga riset Amerika yang membuatnya (di luar slide).</p>
+  <table>
+    <tr><th>IPA</th><th>ARPAbet</th><th>Contoh kata</th></tr>
+    <tr><td>i</td><td><code>IY</code></td><td>beat</td></tr>
+    <tr><td>ɪ</td><td><code>IH</code></td><td>bit</td></tr>
+    <tr><td>æ</td><td><code>AE</code></td><td>bat</td></tr>
+    <tr><td>ʃ</td><td><code>SH</code></td><td>shy</td></tr>
+    <tr><td>θ</td><td><code>TH</code></td><td>thigh</td></tr>
+    <tr><td>ð</td><td><code>DH</code></td><td>there</td></tr>
+    <tr><td>ŋ</td><td><code>NG</code></td><td>sing</td></tr>
+    <tr><td>tʃ</td><td><code>CH</code></td><td>china</td></tr>
+    <tr><td>ɾ</td><td><code>DX</code></td><td>butter</td></tr>
+  </table>
+  <p>Kamus pengucapan seperti CMU (Carnegie Mellon University) Pronouncing Dictionary memakai ARPAbet, misalnya "six" = <code>S IH K S</code>. Untuk bahasa Indonesia, slide memakai tabel phone dari Lestari dkk. (2006): "saya" = /s a y a/ dan "kamu" = /k a m u/.</p>
+  <aside class="jebakan">
+    <p>Tabel IPA-ARPAbet di slide memberi label ʃ (<code>SH</code>) "Stop, Unvoiced". Yang benar: ʃ adalah <mark class="jebakan">fricative unvoiced</mark>, satu kelompok dengan f, θ, dan s di atasnya.</p>
+  </aside>
+
+  <h3>Articulatory phonetics: voicing, place, manner</h3>
+  <p>Bunyi dibuat dari udara paru-paru yang keluar lewat pita suara, lalu dibentuk oleh mulut dan hidung. Satu konsonan dijelaskan dengan tiga ciri:</p>
+  <ul>
+    <li><strong>Voicing:</strong> pita suara (vocal folds) bergetar atau tidak. Kalau bergetar, bunyinya <b>voiced</b> (b, d, g, z, m, dan semua vowel). Kalau terbuka, bunyinya <b>voiceless</b> (p, t, k, s, f, sh, th, ch).</li>
+    <li><strong>Place of articulation:</strong> tempat aliran udara paling dihambat, misalnya kedua bibir (bilabial), gusi di belakang gigi atas (alveolar), atau langit-langit belakang (velar).</li>
+    <li><strong>Manner of articulation:</strong> cara udara dihambat, misalnya ditutup total lalu dilepas (stop) atau dipersempit sampai berdesis (fricative).</li>
+  </ul>
+  <p>Coba tempelkan jari di leher sambil mengucapkan "zzz", lalu "sss". Getarannya hanya terasa di "zzz", karena [z] voiced dan [s] voiceless.</p>
+  <table>
+    <tr><th>Manner</th><th>Bilabial</th><th>Labiodental</th><th>Interdental</th><th>Alveolar</th><th>Palatal</th><th>Velar</th><th>Glottal</th></tr>
+    <tr><td>Stop</td><td>p b</td><td></td><td></td><td>t d</td><td></td><td>k g</td><td>q</td></tr>
+    <tr><td>Fricative</td><td></td><td>f v</td><td>th dh</td><td>s z</td><td>sh zh</td><td></td><td>h</td></tr>
+    <tr><td>Affricate</td><td></td><td></td><td></td><td></td><td>ch jh</td><td></td><td></td></tr>
+    <tr><td>Nasal</td><td>m</td><td></td><td></td><td>n</td><td></td><td>ng</td><td></td></tr>
+    <tr><td>Approximant</td><td>w</td><td></td><td></td><td>l r</td><td>y</td><td></td><td></td></tr>
+    <tr><td>Flap</td><td></td><td></td><td></td><td>dx</td><td></td><td></td><td></td></tr>
+  </table>
+  <p><strong>Cara membaca:</strong> kalau satu sel berisi dua bunyi, yang kiri voiceless dan yang kanan voiced. Contoh: [b] = voiced bilabial stop, [s] = voiceless alveolar fricative, [m] = voiced bilabial nasal.</p>
+  <details class="keterangan">
+    <summary>Arti setiap manner</summary>
+    <dl>
+      <dt>Stop</dt><dd>saluran ditutup total, tekanan naik, lalu dilepas seperti meledak: p, t, k, b, d, g</dd>
+      <dt>Nasal</dt><dd>mulut tertutup, tapi langit-langit lunak turun sehingga udara keluar lewat hidung: m, n, ng</dd>
+      <dt>Fricative</dt><dd>dua articulator sangat dekat, udara berdesis lewat celah sempit: f, v, s, z, th, dh</dd>
+      <dt>Affricate</dt><dd>stop yang langsung diikuti fricative: ch, jh</dd>
+      <dt>Approximant</dt><dd>celah agak lebar sehingga tidak berdesis: y, r, w. Untuk l, udara lewat samping lidah (lateral approximant)</dd>
+      <dt>Flap</dt><dd>lidah mengetuk gusi sekali, seperti dx di "butter" versi Amerika</dd>
+    </dl>
+  </details>
+  <p>Vowel dibedakan dari <b>posisi lidah</b>: depan atau belakang, tinggi atau rendah. Contoh: [iy] di "bead" (depan, tinggi), [uw] di "booed" (belakang, tinggi), dan [aa] di "father" (belakang, rendah).</p>
+
+  <h3>Prosody</h3>
+  <p><mark>Prosody</mark> adalah ciri ucapan di atas tingkat phone yang membawa makna kalimat, diukur dari F0 (nada), intensity (keras-lemah), dan duration (panjang bunyi). Tiga aspeknya: prominence (kata yang ditekan), structure atau boundaries (pengelompokan kata), dan tune (melodi intonasi).</p>
+  <p>Contoh boundaries dari slide: "I met Mary and [Elena's mother]" berarti dua orang, sedangkan "I met [Mary and Elena's] mother" berarti satu orang, yaitu ibu Mary dan Elena. Kata-katanya sama persis, yang membedakan hanya jeda saat diucapkan.</p>
+
+  <h3>Sinyal suara: F0, source-filter, formant</h3>
+  <p>Bunyi adalah gelombang tekanan udara, dan grafik tekanan terhadap waktu disebut <b>waveform</b>. Dari waveform kita bisa menghitung F0 (fundamental frequency), yaitu berapa kali pita suara membuka dalam satu detik.</p>
+  <p class="rumus">F0 = jumlah siklus / durasi</p>
+  <p><strong>Cara membaca:</strong> di slide, vowel [iy] punya 10 puncak dalam 0,03875 detik, jadi F0 = 10 / 0,03875 ≈ 258 Hz. Setiap puncak adalah satu kali pita suara membuka.</p>
+  <p><b>Pitch</b> adalah F0 seperti yang dirasakan telinga, dan hubungannya tidak linear: hampir linear di 100 sampai 1000 Hz, logaritmik di atas 1000 Hz. Skala mel memodelkan hubungan ini:</p>
+  <p class="rumus">mel = 1127 ln(1 + f / 700)</p>
+  <p><strong>Cara membaca:</strong> skala mel memampatkan frekuensi tinggi. Naik dari 1000 ke 2000 Hz menambah 521 mel, tapi naik dari 2000 ke 4000 Hz hanya menambah 625 mel, padahal selisih Hz-nya dua kali lipat.</p>
+  <aside class="hitung">
+    <details>
+      <summary>Contoh hitungan: 1000 Hz dan 4000 Hz dalam mel</summary>
+      <table>
+        <tr><th>Langkah</th><th>f = 1000 Hz</th><th>f = 4000 Hz</th></tr>
+        <tr><td>f / 700</td><td>1,4286</td><td>5,7143</td></tr>
+        <tr><td>1 + f / 700</td><td>2,4286</td><td>6,7143</td></tr>
+        <tr><td>ln(…)</td><td>0,8873</td><td>1,9042</td></tr>
+        <tr><td>× 1127</td><td><b>1000 mel</b></td><td><b>2146 mel</b></td></tr>
+      </table>
+      <p>Frekuensinya naik 4 kali lipat, tapi mel-nya hanya naik sekitar 2,1 kali lipat.</p>
+    </details>
+  </aside>
+  <p><mark>Source-filter model</mark> adalah model yang memandang suara sebagai sumber getaran (source) yang disaring oleh bentuk rongga mulut (filter).</p>
+  <table>
+    <tr><th>Bagian</th><th>Asalnya</th><th>Menentukan</th></tr>
+    <tr><td>Source</td><td>Getaran pita suara: F0 dan harmonics (kelipatan F0)</td><td>Pitch</td></tr>
+    <tr><td>Filter</td><td>Bentuk vocal tract (lidah, bibir, rongga mulut) yang memperkuat harmonics tertentu</td><td>Formant, jadi juga menentukan phone</td></tr>
+  </table>
+  <p><b>Formant</b> adalah frekuensi yang diperkuat oleh rongga mulut, diberi nama F1, F2, F3 dari yang terendah. Source dan filter independen: vowel berbeda bisa punya pitch sama, dan vowel yang sama bisa diucapkan dengan pitch berbeda. Karena phone ditentukan oleh filter, MFCC memakai cepstrum untuk membuang source (lihat <a href="#langkah-1">1️⃣</a>).</p>
+
+  <h3>Spectrogram dan cara membacanya</h3>
+  <p><mark>Spectrogram</mark> adalah gambar energi setiap frekuensi sepanjang waktu: sumbu x waktu, sumbu y frekuensi (Hz), dan makin gelap berarti makin besar energinya. Spectrum hanya memotret satu saat, sedangkan spectrogram adalah spectrum yang disusun sepanjang waktu.</p>
+  <figure>
+    <svg class="diagram" viewBox="0 0 420 210" role="img" aria-label="Skema spectrogram: noise di frekuensi tinggi untuk fricative sh, pita formant mendatar untuk vowel iy, bagian kosong lalu garis tegak untuk stop b, lalu pita formant untuk vowel ey.">
+      <defs>
+        <pattern id="noise-sh" width="9" height="7" patternUnits="userSpaceOnUse">
+          <rect x="1" y="1" width="2" height="1.6" fill="currentColor" opacity=".7"/>
+          <rect x="5" y="4" width="2" height="1.6" fill="currentColor" opacity=".5"/>
+          <rect x="7" y="0.5" width="1.4" height="1.4" fill="currentColor" opacity=".4"/>
+        </pattern>
+        <marker id="panah-spek" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+      </defs>
+      <line class="garis" x1="40" y1="160" x2="40" y2="14" marker-end="url(#panah-spek)"/>
+      <line class="garis" x1="40" y1="160" x2="412" y2="160" marker-end="url(#panah-spek)"/>
+      <text x="14" y="90" class="kecil" transform="rotate(-90 14 90)" text-anchor="middle">frekuensi (Hz)</text>
+      <text x="404" y="178" class="kecil" text-anchor="end">waktu</text>
+      <rect x="46" y="22" width="70" height="70" fill="url(#noise-sh)"/>
+      <rect x="46" y="92" width="70" height="40" fill="url(#noise-sh)" opacity=".35"/>
+      <g class="tipis">
+        <line x1="124" y1="26" x2="124" y2="156"/><line x1="129" y1="26" x2="129" y2="156"/><line x1="134" y1="26" x2="134" y2="156"/><line x1="139" y1="26" x2="139" y2="156"/><line x1="144" y1="26" x2="144" y2="156"/><line x1="149" y1="26" x2="149" y2="156"/><line x1="154" y1="26" x2="154" y2="156"/><line x1="159" y1="26" x2="159" y2="156"/><line x1="164" y1="26" x2="164" y2="156"/><line x1="169" y1="26" x2="169" y2="156"/><line x1="174" y1="26" x2="174" y2="156"/><line x1="179" y1="26" x2="179" y2="156"/><line x1="184" y1="26" x2="184" y2="156"/><line x1="189" y1="26" x2="189" y2="156"/><line x1="194" y1="26" x2="194" y2="156"/>
+        <line x1="270" y1="26" x2="270" y2="156"/><line x1="275" y1="26" x2="275" y2="156"/><line x1="280" y1="26" x2="280" y2="156"/><line x1="285" y1="26" x2="285" y2="156"/><line x1="290" y1="26" x2="290" y2="156"/><line x1="295" y1="26" x2="295" y2="156"/><line x1="300" y1="26" x2="300" y2="156"/><line x1="305" y1="26" x2="305" y2="156"/><line x1="310" y1="26" x2="310" y2="156"/><line x1="315" y1="26" x2="315" y2="156"/><line x1="320" y1="26" x2="320" y2="156"/><line x1="325" y1="26" x2="325" y2="156"/><line x1="330" y1="26" x2="330" y2="156"/><line x1="335" y1="26" x2="335" y2="156"/><line x1="340" y1="26" x2="340" y2="156"/>
+      </g>
+      <rect class="pita" x="122" y="140" width="76" height="9" rx="3"/>
+      <rect class="pita" x="122" y="52" width="76" height="8" rx="3"/>
+      <rect class="pita" x="122" y="36" width="76" height="7" rx="3"/>
+      <line class="garis" x1="252" y1="30" x2="252" y2="156" stroke-dasharray="2 2"/>
+      <rect class="pita" x="268" y="122" width="76" height="9" rx="3"/>
+      <rect class="pita" x="268" y="76" width="76" height="8" rx="3"/>
+      <rect class="pita" x="268" y="50" width="76" height="7" rx="3"/>
+      <text x="81" y="176" class="kecil" text-anchor="middle">[sh]</text>
+      <text x="160" y="176" class="kecil" text-anchor="middle">[iy]</text>
+      <text x="226" y="176" class="kecil" text-anchor="middle">[b] closure</text>
+      <text x="252" y="196" class="kecil" text-anchor="middle">burst</text>
+      <text x="306" y="176" class="kecil" text-anchor="middle">[ey]</text>
+      <text x="204" y="143" class="kecil">F1</text>
+      <text x="204" y="58" class="kecil">F2</text>
+      <text x="204" y="40" class="kecil">F3</text>
+    </svg>
+    <figcaption>Skema, bukan spectrogram asli: fricative [sh] berupa noise di frekuensi tinggi, vowel berupa pita formant mendatar dengan garis tegak rapat, dan stop [b] berupa bagian kosong lalu burst.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Bunyi</th><th>Pola di spectrogram</th><th>Contoh di slide</th></tr>
+    <tr><td>Vowel</td><td>Pita gelap mendatar (formant) dan garis tegak rapat dari getaran pita suara</td><td>[iy] di "she"</td></tr>
+    <tr><td>Stop</td><td>Bagian kosong saat saluran tertutup (closure), lalu semburan tipis tegak saat dilepas (burst)</td><td>[b] di "baby", [k] di "came"</td></tr>
+    <tr><td>Fricative</td><td>Noise acak, paling gelap di frekuensi tinggi, tanpa formant yang jelas</td><td>[sh] di "she"</td></tr>
+    <tr><td>Nasal</td><td>Formant samar dan energinya lebih lemah</td><td>[m] di "came"</td></tr>
+    <tr><td>Velar (k, g)</td><td>F2 dan F3 saling mendekat di dekat konsonan</td><td>"gag", "back"</td></tr>
+    <tr><td>Bilabial (b, p, m)</td><td>Semua formant naik cepat setelah bibir terbuka</td><td>"bab"</td></tr>
+  </table>
+  <p><strong>Saat soal memberi gambar spectrogram:</strong> sebutkan dulu arti sumbunya, lalu cari bagian voiced (ada garis tegak rapat) dan voiceless, lalu tandai vowel dari formant, stop dari closure dan burst, dan fricative dari noise frekuensi tinggi.</p>
+
+  <h3>Di mana phonetics dipakai dalam ASR</h3>
+  <p>Slide menyebut sistem modern makin jarang memasukkan pengetahuan fonetik secara langsung. Tetapi phonetics tetap menjadi dasar unit, fitur, dan analisis kesalahan ASR:</p>
+  <table>
+    <tr><th>Bagian ASR</th><th>Konsep fonetik</th><th>Contoh</th></tr>
+    <tr><td>Lexicon</td><td>Kata disimpan sebagai deretan phone (ARPAbet)</td><td>"six" = <code>S IH K S</code>. Kata baru cukup ditambah pengucapannya</td></tr>
+    <tr><td>Subphone</td><td>Phone tidak homogen, bunyinya berubah dari awal ke akhir</td><td>Setiap phone dibagi 3 state: beg, mid, fin. Jadi "six" = 4 phone × 3 = 12 state</td></tr>
+    <tr><td>Triphone</td><td>Bunyi sebuah phone dipengaruhi phone tetangganya</td><td>"eh" di w-eh-d, y-eh-l, dan b-eh-n berbeda. Triphone ditulis <code>a-b+c</code>: phone b, didahului a, diikuti c</td></tr>
+    <tr><td>State tying</td><td>Kelas fonetik (stop, nasal, fricative, …) menjadi pertanyaan ya/tidak di decision tree, misalnya "apakah phone kirinya nasal?"</td><td>Triphone yang konteksnya sama-sama nasal digabung dan berbagi Gaussian</td></tr>
+    <tr><td>Fitur MFCC</td><td>Persepsi pitch (mel) dan source-filter model (cepstrum)</td><td>Filter bank rapat di bawah 1 kHz, dan hanya 12 koefisien cepstrum pertama yang diambil</td></tr>
+    <tr><td>Analisis kesalahan</td><td>Aksen mengubah pengucapan</td><td>"three" diucapkan [t r iy], lalu dikenali sebagai "tree"</td></tr>
+  </table>
+  <aside class="hitung">
+    <details>
+      <summary>Kenapa butuh state tying: hitungan triphone dari slide</summary>
+      <p><strong>Langkah 1.</strong> Ada sekitar 50 phone, jadi kemungkinan triphone = 50 × 50 × 50 = 125.000.</p>
+      <p><strong>Langkah 2.</strong> Untuk tugas WSJ (Wall Street Journal) 20 ribu kata, model cross-word butuh 55.000 triphone, tapi data latih hanya memuat 18.500 (Young dkk.).</p>
+      <p><strong>Langkah 3.</strong> Lebih dari separuh triphone tidak punya data latih. Solusinya, state triphone yang mirip digabung lewat decision tree (Young, Odell, Woodland 1994), dan state yang digabung memakai Gaussian yang sama.</p>
+    </details>
+  </aside>
+  <details class="keterangan">
+    <summary>Contoh triphone: word-internal dan cross-word ("our list")</summary>
+    <dl>
+      <dt>Word-internal</dt><dd><code>SIL AA+R AA-R L+IH L-IH+S IH-S+T S-T</code>: konteks berhenti di batas kata</dd>
+      <dt>Cross-word</dt><dd><code>SIL-AA+R AA-R+L R-L+IH L-IH+S IH-S+T S-T+SIL</code>: konteks melewati batas kata, lebih akurat tapi membuat decoding lebih sulit</dd>
+    </dl>
+  </details>
+
+  <h3>Kerangka jawaban</h3>
+  <ol>
+    <li><strong>Definisi:</strong> phonetics, phone, dan tiga cabangnya (articulatory, acoustic, transkripsi IPA/ARPAbet).</li>
+    <li><strong>Lexicon:</strong> kata sebagai deretan phone, dengan contoh "six" atau "saya".</li>
+    <li><strong>Acoustic model:</strong> subphone, triphone, dan state tying yang memakai kelas fonetik.</li>
+    <li><strong>Fitur:</strong> source-filter model, formant, mel, dan cepstrum di MFCC.</li>
+    <li><strong>Penutup:</strong> phonetics membantu menganalisis kesalahan, misalnya karena aksen.</li>
+  </ol>
+  <table>
+    <tr><th>Istilah wajib</th><th>Nama panjang</th><th>Arti singkat</th></tr>
+    <tr><td>IPA</td><td>International Phonetic Alphabet</td><td>simbol bunyi standar internasional</td></tr>
+    <tr><td>ARPAbet</td><td>alfabet fonetik dari ARPA (Advanced Research Projects Agency)</td><td>simbol bunyi bahasa Inggris Amerika dengan huruf ASCII</td></tr>
+    <tr><td>CMU dict</td><td>Carnegie Mellon University Pronouncing Dictionary</td><td>kamus pengucapan sekitar 127 ribu kata</td></tr>
+    <tr><td>F0</td><td>fundamental frequency</td><td>jumlah getaran pita suara per detik</td></tr>
+    <tr><td>CI dan CD phone</td><td>Context-Independent dan Context-Dependent phone</td><td>phone tanpa dan dengan memperhitungkan tetangganya (CD phone = triphone)</td></tr>
+    <tr><td>WSJ</td><td>Wall Street Journal</td><td>korpus bacaan berita untuk menguji ASR</td></tr>
+  </table>
+
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh jawaban</span> Hubungan phonetics dan speech recognition</summary>
+    <aside class="soal-ujian"><p>Jelaskan hubungan phonetics dengan speech recognition!</p></aside>
+    <div class="jawaban-esai">
+      <p>Phonetics adalah ilmu yang mempelajari bunyi ucapan manusia: bagaimana bunyi dibuat (articulatory phonetics), bagaimana sifat gelombangnya (acoustic phonetics), dan bagaimana menuliskannya dengan simbol seperti IPA (International Phonetic Alphabet) atau ARPAbet, yaitu versi simbol bunyi yang hanya memakai huruf biasa. Satuan dasarnya adalah phone, yaitu bunyi terkecil dalam ucapan, seperti bunyi [s] di awal kata "saya". Speech recognition membutuhkan phonetics karena sistem ASR (Automatic Speech Recognition) tidak langsung mengenali kata, tetapi mengenali deretan bunyi lalu menyusunnya menjadi kata.</p>
+      <p>Hubungan pertama terlihat di lexicon, yaitu kamus pengucapan yang menyimpan setiap kata sebagai deretan phone. Misalnya kata "six" ditulis S IH K S dalam ARPAbet, dan kata "saya" ditulis /s a y a/. Karena unitnya phone, kata baru cukup ditambahkan pengucapannya ke lexicon tanpa harus merekam kata itu dari awal.</p>
+      <p>Hubungan kedua ada di acoustic model. Satu phone tidak berbunyi sama dari awal sampai akhir, jadi setiap phone dibagi menjadi tiga subphone (awal, tengah, akhir) yang menjadi state di HMM (Hidden Markov Model). Selain itu, bunyi sebuah phone dipengaruhi phone di sebelahnya, sehingga ASR memakai triphone, yaitu model phone yang memperhitungkan phone sebelum dan sesudahnya, misalnya iy-p+aa.</p>
+      <p>Masalahnya, jumlah triphone sangat banyak: dengan sekitar 50 phone ada 125.000 kemungkinan, sedangkan data latih hanya memuat sebagian kecil. Di sinilah articulatory phonetics dipakai, karena triphone yang konteksnya mirip, misalnya sama-sama diawali bunyi nasal atau stop, digabung lewat decision tree dalam proses state tying sehingga berbagi model Gaussian yang sama. Kategori stop, nasal, dan fricative itu sendiri berasal dari manner of articulation, yaitu cara udara dihambat saat bunyi dibuat.</p>
+      <p>Hubungan ketiga ada di fitur suara. Menurut source-filter model, suara terbentuk dari getaran pita suara (source) yang disaring oleh bentuk mulut dan lidah (filter), dan filter inilah yang menentukan phone karena menghasilkan formant, yaitu frekuensi yang diperkuat rongga mulut. Karena itu MFCC (Mel-Frequency Cepstral Coefficients) memakai cepstrum untuk memisahkan filter dari source, dan memakai skala mel yang meniru cara telinga manusia mendengar frekuensi.</p>
+      <p>Terakhir, phonetics membantu menganalisis kesalahan ASR. Sistem modern memang makin jarang memasukkan aturan fonetik secara manual, tetapi pemahaman fonetik menjelaskan kenapa sistem salah, misalnya penutur yang mengucapkan "three" sebagai [t r iy] sehingga dikenali sebagai "tree". Jadi phonetics menjadi dasar unit, fitur, dan analisis kesalahan dalam speech recognition.</p>
+    </div>
+  </details>
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh jawaban</span> Spectrogram</summary>
+    <aside class="soal-ujian"><p>Jelaskan apa itu spectrogram dan bagaimana cara membacanya!</p></aside>
+    <div class="jawaban-esai">
+      <p>Spectrogram adalah gambar yang menunjukkan energi setiap frekuensi sepanjang waktu, dengan sumbu horizontal sebagai waktu, sumbu vertikal sebagai frekuensi dalam Hz (hertz), dan warna yang makin gelap menandakan energi yang makin besar. Gambar ini dibuat dengan memotong sinyal suara menjadi frame pendek, menghitung spectrum setiap frame dengan DFT (Discrete Fourier Transform), lalu menyusun spectrum itu berdampingan.</p>
+      <p>Dari spectrogram, jenis bunyi bisa dikenali. Vowel terlihat sebagai pita gelap mendatar yang disebut formant, yaitu frekuensi yang diperkuat bentuk rongga mulut, disertai garis tegak rapat dari getaran pita suara. Stop seperti [b] terlihat sebagai bagian kosong saat bibir tertutup (closure) lalu semburan tipis saat dilepas (burst), sedangkan fricative seperti [sh] terlihat sebagai noise acak di frekuensi tinggi.</p>
+      <p>Dalam speech recognition, spectrogram menjadi dasar feature extraction. Spectrum per frame diolah lebih lanjut menjadi MFCC (Mel-Frequency Cepstral Coefficients), dan bentuk log mel spectrogram juga dipakai langsung sebagai input model neural, misalnya saat diberi augmentasi SpecAugment.</p>
+    </div>
+  </details>
+
+  <aside class="jebakan">
+    <ul>
+      <li><mark class="jebakan">Menganggap F0 menentukan phone.</mark> F0 berasal dari source dan menentukan pitch. Phone ditentukan formant, yang berasal dari filter.</li>
+      <li><strong>Menukar place dan manner:</strong> place = di mana udara dihambat (bilabial, velar), manner = bagaimana dihambat (stop, fricative).</li>
+      <li><strong>Menghitung state kata:</strong> jumlah state = jumlah phone × 3, bukan jumlah huruf × 3. "six" punya 4 phone, walaupun hurufnya 3.</li>
+    </ul>
+  </aside>
+
+  <p class="intinya">Phonetics dipakai ASR di tiga tempat: unit (phone, subphone, triphone di lexicon dan acoustic model), fitur (mel dan cepstrum di MFCC), dan analisis kesalahan (aksen).</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tentukan voicing, place, dan manner untuk [k], [z], [n], dan [f].</summary>
+    <p>[k] = voiceless velar stop. [z] = voiced alveolar fricative. [n] = voiced alveolar nasal. [f] = voiceless labiodental fricative.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Sebuah waveform vowel punya 8 siklus dalam 0,04 detik. Berapa F0-nya?</summary>
+    <p>F0 = 8 / 0,04 = <b>200 Hz</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Berapa nilai 700 Hz dalam mel?</summary>
+    <p>mel = 1127 ln(1 + 700 / 700) = 1127 ln 2 = 1127 × 0,6931 ≈ <b>781 mel</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis triphone word-internal untuk kata "cat" (<code>K AE T</code>).</summary>
+    <p><code>K+AE</code>, <code>K-AE+T</code>, <code>AE-T</code>. Phone pertama tidak punya tetangga kiri dan phone terakhir tidak punya tetangga kanan, karena konteksnya berhenti di batas kata.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Soal 3 · Merancang eksperimen ASR (esai)</h2></summary>
+  <p class="rantai">
+    <span class="dari">PPT Session 3 (augmentasi, adaptasi), Session 4 (evaluasi), dan Session 5 (foundation model)</span>
+    <span class="ke">soal 5 (WER adalah ukuran keberhasilan eksperimen)</span>
+  </p>
+
+  <aside class="catatan">
+    <p>Tidak ada slide khusus tentang desain eksperimen. Learning outcome "LO 2: Explain proper speech recognition experiments workflow" hanya disebut di Session 4 dan 5, jadi alur di bawah dirangkai dari slide Session 1, 3, 4, dan 5. Bagian yang berasal dari luar slide ditandai.</p>
+  </aside>
+
+  <h3>Bentuk soal</h3>
+  <ul>
+    <li>Rancang eksperimen untuk membangun ASR bahasa atau domain tertentu yang datanya terbatas.</li>
+    <li>Jelaskan langkah-langkah eksperimen speech recognition yang benar.</li>
+    <li>Jelaskan cara kerja wav2vec 2.0 dan kenapa cocok untuk data sedikit.</li>
+  </ul>
+
+  <h3>Foundation model: belajar dari audio tanpa label</h3>
+  <aside class="analogi">
+    <p>Anak kecil mendengar orang dewasa bicara bertahun-tahun tanpa diajari apa pun. Saat mulai belajar menulis kata, ia cukup diberi sedikit contoh, karena pola bunyinya sudah akrab.</p>
+    <p class="batas">anak juga belajar arti kata dari konteks. Foundation model suara hanya belajar pola bunyi, belum arti kata.</p>
+  </aside>
+  <p><mark>Foundation model</mark> adalah model neural besar yang dilatih dengan data sangat banyak memakai self-supervision, yaitu label yang dibuat otomatis dari data itu sendiri, lalu dipakai ulang untuk banyak tugas. Idenya sama dengan BERT (Bidirectional Encoder Representations from Transformers) di NLP (Natural Language Processing): tutup sebagian input, lalu suruh model menebaknya.</p>
+  <table>
+    <tr><th>Tahap</th><th>Data</th><th>Hasil</th></tr>
+    <tr><td>Pre-training</td><td>Audio tanpa transkrip, sangat banyak (ribuan jam)</td><td>Encoder yang paham pola bunyi</td></tr>
+    <tr><td>Fine-tuning</td><td>Audio bertranskrip, sedikit (10 menit sampai beberapa jam)</td><td>Model untuk tugas tertentu, misalnya ASR atau pengenalan emosi</td></tr>
+  </table>
+  <p>Embedding, yaitu vektor angka hasil encoder pre-trained, juga bisa dipakai langsung sebagai fitur pengganti MFCC, dan bisa meringkas audio yang panjangnya berbeda-beda menjadi satu vektor. Contoh dari slide: fitur HuBERT untuk pengenalan emosi jauh lebih baik daripada filterbank biasa (Morais dkk., 2022).</p>
+
+  <h3>wav2vec 2.0</h3>
+  <p><mark>wav2vec 2.0</mark> adalah foundation model suara yang belajar langsung dari waveform mentah dengan cara menebak bagian audio yang ditutup (Baevski dkk., 2020). Slide memakainya sebagai contoh "standar" foundation model.</p>
+  <ol>
+    <li><strong>CNN feature encoder:</strong> CNN (Convolutional Neural Network) mengubah waveform X menjadi deretan latent speech representation Z, satu vektor untuk setiap potongan pendek audio. Lapisan konvolusi ini sekaligus mengurangi jumlah input.</li>
+    <li><strong>Quantization:</strong> setiap z diubah menjadi vektor diskret q dari sebuah codebook, semacam kamus bunyi. Slide menyamakannya dengan triphone clustering di HMM atau BPE (Byte Pair Encoding) di NLP.</li>
+    <li><strong>Masking:</strong> pilih posisi acak, lalu tutup M langkah setelahnya.</li>
+    <li><strong>Transformer:</strong> membaca Z yang sebagian tertutup dan menghasilkan context representation C. Untuk posisi yang tertutup, c<sub>t</sub> harus ditebak dari konteks kiri dan kanan.</li>
+    <li><strong>Loss:</strong> contrastive loss membuat c<sub>t</sub> memilih q<sub>t</sub> yang benar di antara K distractor, yaitu q palsu dari posisi tertutup lain di ucapan yang sama. Ditambah diversity loss supaya semua isi codebook terpakai.</li>
+  </ol>
+  <p><strong>Kenapa urutannya begitu:</strong> quantization memakai Z sebelum ditutup, karena q<sub>t</sub> adalah kunci jawaban. Kalau Z ditutup dulu, kunci jawabannya ikut hilang.</p>
+  <details class="keterangan">
+    <summary>Rumus contrastive loss (dari paper, ditampilkan di slide)</summary>
+    <p class="rumus">L<sub>m</sub> = −log [ exp(sim(c<sub>t</sub>, q<sub>t</sub>) / κ) / Σ<sub>q̃ ∈ Q<sub>t</sub></sub> exp(sim(c<sub>t</sub>, q̃) / κ) ]</p>
+    <dl>
+      <dt>c<sub>t</sub></dt><dd>output Transformer di posisi tertutup t</dd>
+      <dt>q<sub>t</sub></dt><dd>quantized vector yang benar untuk posisi t</dd>
+      <dt>Q<sub>t</sub></dt><dd>semua kandidat: q<sub>t</sub> ditambah K distractor</dd>
+      <dt>sim</dt><dd>cosine similarity, ukuran kemiripan arah dua vektor</dd>
+      <dt>κ</dt><dd>temperature, pengatur seberapa tajam pilihan model</dd>
+    </dl>
+    <p><strong>Cara membaca:</strong> pecahan di dalam log adalah peluang model memilih q<sub>t</sub> yang benar. Makin mirip c<sub>t</sub> dengan q<sub>t</sub> dibanding dengan distractor, makin dekat peluangnya ke 1 dan makin kecil loss-nya.</p>
+  </details>
+  <p>Hasilnya, ASR sudah layak walaupun data berlabelnya sangat sedikit. Tabel dari slide (model LARGE, pre-training 60 ribu jam audiobook LibriVox, decoding dengan Transformer language model), diuji di LibriSpeech: test-clean berisi rekaman jernih, test-other rekaman yang lebih sulit.</p>
+  <table>
+    <tr><th>Data berlabel untuk fine-tuning</th><th>WER test-clean</th><th>WER test-other</th></tr>
+    <tr><td>10 menit</td><td>4,8%</td><td>8,2%</td></tr>
+    <tr><td>1 jam</td><td>2,9%</td><td>5,8%</td></tr>
+    <tr><td>10 jam</td><td>2,6%</td><td>4,9%</td></tr>
+  </table>
+
+  <h3>HuBERT dan XLS-R</h3>
+  <table>
+    <tr><th>Aspek</th><th>wav2vec 2.0</th><th>HuBERT</th><th>XLS-R</th></tr>
+    <tr><td>Nama panjang</td><td>wav2vec versi 2.0</td><td>Hidden-Unit BERT</td><td>Cross-lingual speech representations</td></tr>
+    <tr><td>Yang ditebak</td><td>q<sub>t</sub> yang benar di antara distractor (contrastive)</td><td>label cluster (hidden unit) dari k-means, yaitu algoritma yang mengelompokkan vektor yang mirip ke k kelompok, terutama untuk frame yang ditutup</td><td>sama dengan wav2vec 2.0</td></tr>
+    <tr><td>Asal target</td><td>quantization yang dipelajari bersama model</td><td>clustering terpisah: mula-mula k-means pada MFCC, lalu diperbarui berulang memakai fitur model</td><td>quantization yang tidak terikat bahasa</td></tr>
+    <tr><td>Data pre-training</td><td>LibriSpeech atau LibriVox (bahasa Inggris)</td><td>bahasa Inggris</td><td>436 ribu jam, 128 bahasa</td></tr>
+    <tr><td>Kelebihan</td><td>WER layak dengan 10 menit data berlabel</td><td>lebih langsung mengoptimalkan prediksi label yang ditutup, sedikit lebih baik di low resource (data berlabel sedikit)</td><td>cocok untuk bahasa selain Inggris yang datanya sedikit, misalnya bahasa Indonesia</td></tr>
+  </table>
+
+  <h3>Alur eksperimen ASR</h3>
+  <p>Urutannya: tentukan tugas, siapkan data, pilih fitur dan model, latih, ukur, lalu perbaiki. Setiap langkah butuh hasil langkah sebelumnya.</p>
+  <ol class="cara">
+    <li><span class="judul">Tentukan tugas</span>
+      <p>Tetapkan bahasa, domain (call center, rapat, perintah suara), dan jenisnya: LVCSR atau isolated word, speaker independent (untuk pembicara mana saja) atau speaker dependent. Tetapkan juga ukuran keberhasilannya, biasanya WER.</p>
+      <p><strong>Kenapa pertama:</strong> data dan model bergantung pada tugas. ASR perintah suara 20 kata butuh data dan model yang jauh berbeda dari ASR rapat.</p>
+    </li>
+    <li><span class="judul">Siapkan data</span>
+      <p>Kumpulkan rekaman dan transkripsikan semua katanya (slide Session 1: "collect lots and lots of speech and transcribe all the words"), rapikan formatnya (misalnya WAV, dikonversi dengan SoX, Sound eXchange), lalu siapkan lexicon. Kalau datanya kurang, gabungkan korpus, seperti Switchboard (300 jam) dan Fisher (2.000 jam) di slide.</p>
+      <p><strong>Bagi data (di luar slide, praktik umum machine learning):</strong> train untuk melatih, dev untuk memilih pengaturan, dan test untuk penilaian akhir, dengan pembicara yang tidak tumpang tindih. Kalau data test ikut dipakai melatih, WER terlihat bagus padahal model hanya menghafal.</p>
+    </li>
+    <li><span class="judul">Pilih fitur</span>
+      <p>MFCC 39 dimensi (frame 25 ms, shift 10 ms), log mel filterbank, atau fitur dari foundation model (wav2vec 2.0, HuBERT, XLS-R). Untuk model neural, pilihan fitur klasik tidak terlalu berpengaruh.</p>
+    </li>
+    <li><span class="judul">Augmentasi data latih</span>
+      <p>SpecAugment menambah variasi tanpa merekam ulang: time warping (meregangkan waktu), frequency masking (menutup pita frekuensi), dan time masking (menutup potongan waktu) pada log mel spectrogram.</p>
+    </li>
+    <li><span class="judul">Latih model, mulai dari baseline</span>
+      <p>Baseline (sistem pembanding) misalnya HMM-GMM di toolkit Kaldi, lalu model yang lebih kuat: HMM-DNN, end-to-end, atau fine-tuning foundation model di SpeechBrain (toolkit ASR berbasis PyTorch) atau HuggingFace transformers (library berisi model pre-trained). Menurut slide, menambah data atau parameter hampir selalu memperbaiki hasil (Ellis dan Morgan, 1999).</p>
+      <p><strong>Adaptasi (opsional, untuk HMM-GMM):</strong> MLLR (Maximum Likelihood Linear Regression) menggeser mean Gaussian dengan satu transformasi linear, cukup dari beberapa kalimat (slide: 3 kalimat, 11 detik). MAP (Maximum A Posteriori) lebih cocok kalau data adaptasinya banyak.</p>
+    </li>
+    <li><span class="judul">Decoding dan evaluasi</span>
+      <p>Gabungkan dengan language model saat decoding, lalu hitung WER di data test dengan sclite, alat dari NIST (National Institute of Standards and Technology). Bandingkan dengan baseline atau API (Application Programming Interface) yang sudah ada, sesuai pertanyaan di slide Session 1: "How much would building our own improve on an API?"</p>
+    </li>
+    <li><span class="judul">Analisis kesalahan dan ulangi</span>
+      <p>Confusion pairs dari sclite menunjukkan kata yang paling sering tertukar, misalnya "four" menjadi "for". Hasilnya menentukan perbaikan berikutnya: tambah data, perbaiki lexicon, atau perkuat language model.</p>
+    </li>
+  </ol>
+  <p><strong>Kalau urutannya ditukar:</strong> memilih model sebelum tahu jumlah data bisa berujung pada model besar yang dilatih dengan data sedikit. Mengevaluasi tanpa baseline membuat angka WER tidak punya pembanding.</p>
+
+  <h3>Memilih pendekatan sesuai kondisi data</h3>
+  <table>
+    <tr><th>Kondisi</th><th>Pilihan</th><th>Alasan</th></tr>
+    <tr><td>Data berlabel banyak (ratusan jam), satu bahasa</td><td>HMM-DNN hybrid atau end-to-end</td><td>Data cukup untuk melatih model dari awal</td></tr>
+    <tr><td>Data berlabel sedikit (10 menit sampai 10 jam)</td><td>Fine-tuning wav2vec 2.0 atau HuBERT</td><td>Pola bunyi sudah dipelajari saat pre-training</td></tr>
+    <tr><td>Bahasa selain Inggris, data sedikit</td><td>Fine-tuning XLS-R</td><td>Pre-training mencakup 128 bahasa</td></tr>
+    <tr><td>Pembicara baru, hanya beberapa detik suara</td><td>Adaptasi MLLR (sistem HMM-GMM)</td><td>Cukup belajar satu transformasi linear, bukan seluruh model</td></tr>
+    <tr><td>Variasi rekaman kurang</td><td>SpecAugment, gabung korpus</td><td>Menambah variasi tanpa merekam ulang</td></tr>
+  </table>
+
+  <h3>Kerangka jawaban</h3>
+  <ol>
+    <li><strong>Pembuka:</strong> definisi eksperimen ASR dan ringkasan kasusnya.</li>
+    <li><strong>Tugas dan ukuran keberhasilan:</strong> LVCSR atau bukan, speaker independent atau bukan, dan WER sebagai metrik.</li>
+    <li><strong>Data:</strong> rekaman dan transkrip, lexicon, pembagian train, dev, test, lalu augmentasi.</li>
+    <li><strong>Fitur dan model:</strong> baseline, lalu model utama beserta alasannya, misalnya data sedikit sehingga memakai foundation model.</li>
+    <li><strong>Evaluasi:</strong> WER di data test dengan sclite, dibandingkan dengan baseline.</li>
+    <li><strong>Analisis kesalahan:</strong> confusion pairs dan rencana perbaikan.</li>
+  </ol>
+  <table>
+    <tr><th>Istilah wajib</th><th>Nama panjang</th><th>Arti singkat</th></tr>
+    <tr><td>SpecAugment</td><td>spectrogram augmentation</td><td>menutup atau meregangkan bagian spectrogram untuk menambah variasi data latih</td></tr>
+    <tr><td>CNN</td><td>Convolutional Neural Network</td><td>jaringan yang memproses potongan input berdekatan, di wav2vec 2.0 dipakai sebagai encoder waveform</td></tr>
+    <tr><td>BERT</td><td>Bidirectional Encoder Representations from Transformers</td><td>model NLP yang belajar dengan menebak kata yang ditutup</td></tr>
+    <tr><td>HuBERT</td><td>Hidden-Unit BERT</td><td>foundation model suara yang menebak label cluster bunyi</td></tr>
+    <tr><td>XLS-R</td><td>Cross-lingual speech representations</td><td>wav2vec 2.0 yang dilatih dengan 128 bahasa</td></tr>
+    <tr><td>MLLR</td><td>Maximum Likelihood Linear Regression</td><td>adaptasi pembicara dengan satu transformasi linear pada mean Gaussian</td></tr>
+    <tr><td>MAP</td><td>Maximum A Posteriori</td><td>adaptasi yang cocok untuk data adaptasi banyak</td></tr>
+    <tr><td>NIST</td><td>National Institute of Standards and Technology</td><td>lembaga pembuat sclite, alat penghitung WER</td></tr>
+  </table>
+
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh jawaban</span> ASR call center bahasa Indonesia dengan data 10 jam</summary>
+    <aside class="soal-ujian"><p>Sebuah perusahaan ingin membangun sistem speech recognition bahasa Indonesia untuk call center, tetapi hanya memiliki 10 jam rekaman yang sudah ditranskripsi. Rancang eksperimen yang tepat!</p></aside>
+    <div class="jawaban-esai">
+      <p>Eksperimen ASR (Automatic Speech Recognition) adalah rangkaian langkah untuk membangun sistem pengenal suara dan mengukur kualitasnya secara jujur. Untuk call center berbahasa Indonesia dengan 10 jam data bertranskripsi, eksperimen saya terdiri dari enam langkah: menentukan tugas, menyiapkan data, memilih fitur dan model, melatih, mengevaluasi, dan menganalisis kesalahan.</p>
+      <p>Langkah pertama adalah menentukan tugas. Sistem ini termasuk LVCSR (Large Vocabulary Continuous Speech Recognition), yaitu pengenalan ucapan sambung dengan kosakata besar, dan harus speaker independent, artinya bisa mengenali suara pelanggan yang belum pernah didengar sebelumnya. Keberhasilannya diukur dengan WER (Word Error Rate), yaitu persentase kata yang salah dikenali.</p>
+      <p>Langkah kedua adalah menyiapkan data. Rekaman 10 jam dirapikan dalam format WAV, transkripsinya diperiksa ulang, lalu dibagi menjadi data train untuk melatih, dev untuk memilih pengaturan, dan test untuk penilaian akhir, dengan pembicara yang berbeda supaya model dinilai pada suara yang benar-benar baru. Karena datanya sedikit, data train diperbanyak dengan SpecAugment, yaitu teknik augmentasi yang menutup sebagian frekuensi dan waktu pada spectrogram, sehingga model terbiasa dengan suara yang tidak sempurna.</p>
+      <p>Langkah ketiga adalah memilih fitur dan model. Sebagai baseline atau sistem pembanding, saya melatih HMM-GMM (Hidden Markov Model dengan Gaussian Mixture Model) memakai fitur MFCC (Mel-Frequency Cepstral Coefficients) 39 dimensi dan lexicon bahasa Indonesia. Model utamanya adalah XLS-R, yaitu versi wav2vec 2.0 yang sudah dilatih secara self-supervised pada 436 ribu jam audio dari 128 bahasa, sehingga cukup di-fine-tune dengan 10 jam data kita.</p>
+      <p>Langkah keempat adalah decoding dan evaluasi. Output model digabung dengan language model N-gram yang dilatih dari transkrip call center agar kalimatnya lebih wajar, lalu WER dihitung pada data test dengan sclite, alat dari NIST (National Institute of Standards and Technology) yang menyejajarkan transkrip asli (reference) dengan hasil ASR (hypothesis) dan menghitung substitution, deletion, serta insertion. Model XLS-R dianggap berhasil kalau WER-nya lebih rendah daripada baseline.</p>
+      <p>Langkah terakhir adalah analisis kesalahan. Daftar confusion pairs dari sclite menunjukkan kata yang paling sering tertukar, misalnya nama produk atau angka, sehingga perbaikan bisa diarahkan ke lexicon, language model, atau penambahan data. Setelah perbaikan, eksperimen diulang dan WER-nya dibandingkan lagi.</p>
+    </div>
+  </details>
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh jawaban</span> wav2vec 2.0</summary>
+    <aside class="soal-ujian"><p>Jelaskan cara kerja wav2vec 2.0 dan mengapa model ini cocok untuk data berlabel yang sedikit!</p></aside>
+    <div class="jawaban-esai">
+      <p>wav2vec 2.0 adalah foundation model untuk suara, yaitu model besar yang dilatih dengan banyak audio tanpa label secara self-supervised, artinya labelnya dibuat otomatis dari audio itu sendiri, lalu dipakai ulang untuk tugas lain seperti speech recognition. Model ini belajar langsung dari waveform, yaitu gelombang suara mentah, tanpa perlu fitur buatan tangan seperti MFCC.</p>
+      <p>Cara kerjanya dimulai dari CNN (Convolutional Neural Network) yang mengubah waveform menjadi deretan latent representation Z, satu vektor untuk setiap potongan pendek audio. Sebagian vektor Z kemudian ditutup (masking), lalu Transformer, yaitu jaringan yang melihat konteks seluruh ucapan, menghasilkan context representation C. Di saat yang sama, quantization module mengubah Z yang belum ditutup menjadi vektor diskret q dari sebuah codebook, semacam kamus bunyi.</p>
+      <p>Model dilatih dengan contrastive loss: untuk setiap posisi yang ditutup, C harus memilih q yang benar di antara beberapa distractor, yaitu q palsu dari bagian lain ucapan yang sama. Ditambah diversity loss supaya semua isi codebook terpakai, model jadi belajar mengenali pola bunyi tanpa satu pun transkrip.</p>
+      <p>Karena pola bunyi sudah dipelajari saat pre-training, model cukup di-fine-tune dengan sedikit data berlabel. Pada eksperimen Baevski dkk. (2020), 10 menit data berlabel sudah menghasilkan WER (Word Error Rate) 4,8% pada LibriSpeech test-clean. Karena itu wav2vec 2.0, dan versi multilingualnya XLS-R, cocok untuk bahasa atau domain yang data bertranskripsinya sedikit.</p>
+    </div>
+  </details>
+
+  <aside class="jebakan">
+    <ul>
+      <li><mark class="jebakan">Mengukur WER di data latih.</mark> Hasilnya terlalu bagus karena model sudah melihat datanya. Ukur di data test yang tidak pernah dipakai melatih.</li>
+      <li><strong>Lupa baseline:</strong> WER 15% tidak berarti apa-apa tanpa pembanding. Tulis sistem pembandingnya.</li>
+      <li><strong>Mengira wav2vec 2.0 tidak butuh data berlabel sama sekali:</strong> pre-training memang tanpa label, tapi fine-tuning untuk ASR tetap butuh transkrip, walaupun sedikit.</li>
+      <li><strong>Memakai MLLR untuk model end-to-end:</strong> MLLR menggeser mean Gaussian, jadi hanya untuk sistem HMM-GMM.</li>
+    </ul>
+  </aside>
+
+  <p class="intinya">Eksperimen ASR: tugas, data (train, dev, test), fitur, augmentasi, baseline lalu model utama, evaluasi WER, dan analisis kesalahan. Kalau data berlabel sedikit, fine-tune foundation model seperti wav2vec 2.0 atau XLS-R.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kenapa data test tidak boleh dipakai untuk memilih pengaturan model?</summary>
+    <p>Karena pengaturan yang dipilih jadi menyesuaikan diri dengan data test, sehingga WER di test terlihat lebih bagus daripada kenyataannya. Pengaturan dipilih dengan data dev, dan data test hanya dipakai sekali untuk penilaian akhir. Ini praktik umum machine learning, bukan dari slide.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Apa beda yang ditebak wav2vec 2.0 dan HuBERT?</summary>
+    <p>wav2vec 2.0 memilih quantized vector yang benar di antara distractor (contrastive loss). HuBERT menebak label cluster dari k-means, dan clustering-nya diperbarui berulang kali.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Sebutkan tiga jenis augmentasi di SpecAugment.</summary>
+    <p>Time warping (meregangkan waktu), frequency masking (menutup pita frekuensi), dan time masking (menutup potongan waktu).</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Kapan memakai MLLR dan kapan MAP?</summary>
+    <p>MLLR untuk data adaptasi yang sedikit, bahkan beberapa kalimat, karena yang dipelajari hanya satu transformasi linear. MAP untuk data adaptasi yang banyak.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Soal 4 · HMM dan path probability (studi kasus)</h2></summary>
+  <p class="rantai">
+    <span class="dari">PPT Session 4 (Automatic Speech Recognition), termasuk slide tersembunyi di appendix</span>
+    <span class="ke">soal 1 (decoder Viterbi) dan soal 2 (state HMM untuk speech adalah subphone)</span>
+  </p>
+
+  <h3>Jenis soal</h3>
+  <table>
+    <tr><th>Jenis</th><th>Yang diminta</th><th>Contoh</th></tr>
+    <tr><td><span class="tag c-mint">A</span></td><td>Peluang deretan state di Markov chain (semua state terlihat)</td><td><a href="#k4-a">Contoh A</a>: 4 hari WARM</td></tr>
+    <tr><td><span class="tag c-lilac">B</span></td><td>Peluang satu path tertentu di HMM, yaitu P(O, Q)</td><td><a href="#k4-b">Contoh B</a>: P(3 1 3, HOT HOT COLD)</td></tr>
+    <tr><td><span class="tag c-jingga">C</span></td><td>Path terbaik dengan Viterbi, beserta peluangnya</td><td><a href="#k4-c">Contoh C</a>: Viterbi untuk 3 1 3</td></tr>
+    <tr><td><span class="tag c-pink">D</span></td><td>Peluang semua path, P(O), dengan forward algorithm</td><td><a href="#k4-d">Contoh D</a>: forward untuk 3 1 3</td></tr>
+  </table>
+  <p>Soal juga bisa meminta penjelasan transition dan observation probability, terutama di speech. Jawabannya ada di tabel perbandingan di bawah.</p>
+
+  <h3>Markov chain: semua state terlihat</h3>
+  <aside class="analogi">
+    <p>Menebak cuaca besok hanya dari cuaca hari ini. Kalau hari ini panas, besok kemungkinan besar panas lagi.</p>
+    <p class="batas">cuaca asli dipengaruhi banyak hal, seperti musim dan angin. Markov chain sengaja hanya melihat satu langkah ke belakang.</p>
+  </aside>
+  <p><mark>Markov chain</mark> adalah model deretan state yang peluang state berikutnya hanya bergantung pada state sekarang. Aturan "hanya bergantung pada state sekarang" ini disebut Markov assumption.</p>
+  <ul>
+    <li><strong>State Q:</strong> q<sub>1</sub>, …, q<sub>N</sub>, misalnya HOT, COLD, WARM.</li>
+    <li><strong>Transition probability A:</strong> a<sub>ij</sub> = P(q<sub>t</sub> = j | q<sub>t−1</sub> = i), yaitu peluang pindah dari state i ke state j. Setiap <b>baris</b> A berjumlah 1.</li>
+    <li><strong>Initial probability π:</strong> π<sub>i</sub> = P(q<sub>1</sub> = i), yaitu peluang mulai di state i. Totalnya juga 1.</li>
+  </ul>
+  <p class="rumus">P(q<sub>1</sub>, q<sub>2</sub>, …, q<sub>T</sub>) = π<sub>q1</sub> × a<sub>q1q2</sub> × a<sub>q2q3</sub> × … × a<sub>q(T−1)qT</sub></p>
+  <p><strong>Cara membaca:</strong> peluang mulai di state pertama, dikali peluang setiap perpindahan. Markov chain cuaca dari slide (baris = asal, kolom = tujuan):</p>
+  <table>
+    <tr><th>Dari \ ke</th><th>HOT (1)</th><th>COLD (2)</th><th>WARM (3)</th><th>π</th></tr>
+    <tr><td>HOT (1)</td><td>0,5</td><td>0,2</td><td>0,3</td><td>0,5</td></tr>
+    <tr><td>COLD (2)</td><td>0,2</td><td>0,5</td><td>0,3</td><td>0,3</td></tr>
+    <tr><td>WARM (3)</td><td>0,3</td><td>0,1</td><td>0,6</td><td>0,2</td></tr>
+  </table>
+  <details class="contoh" id="k4-a">
+    <summary><span class="tag c-mint">Contoh A</span> Peluang 4 hari berturut-turut WARM</summary>
+    <aside class="soal-ujian"><p>Dengan Markov chain cuaca di atas, berapa peluang cuaca WARM, WARM, WARM, WARM?</p></aside>
+    <ol class="cara">
+      <li><span class="judul">Tulis deretan state</span>
+        <p>WARM adalah state 3, jadi deretannya 3, 3, 3, 3: satu state awal dan tiga perpindahan.</p></li>
+      <li><span class="judul">Kalikan π dan semua transisinya</span>
+        <div class="hasil"><p>P(3, 3, 3, 3) = π<sub>3</sub> × a<sub>33</sub> × a<sub>33</sub> × a<sub>33</sub> = 0,2 × 0,6 × 0,6 × 0,6 = <b>0,0432</b></p></div></li>
+    </ol>
+    <p class="jawab">Peluang 4 hari berturut-turut WARM adalah 0,0432, atau sekitar 4%.</p>
+  </details>
+
+  <h3>HMM: state tersembunyi, transition, dan observation</h3>
+  <p><mark>HMM (Hidden Markov Model)</mark> adalah Markov chain yang state-nya tidak terlihat. Yang terlihat hanya observation, yaitu output yang dihasilkan setiap state.</p>
+  <p>Contoh dari slide: tahun 2799, seorang climatologist tidak menemukan catatan cuaca Baltimore musim panas 2008. Ia hanya menemukan buku harian Jason Eisner yang mencatat berapa es krim yang dimakan setiap hari (1, 2, atau 3). Cuaca (HOT atau COLD) adalah state tersembunyi, dan jumlah es krim adalah observation.</p>
+  <figure>
+    <svg class="diagram" viewBox="0 0 420 220" role="img" aria-label="HMM es krim: start ke HOT 0,8 dan ke COLD 0,2. HOT ke HOT 0,7, HOT ke COLD 0,3, COLD ke HOT 0,4, COLD ke COLD 0,6.">
+      <defs><marker id="panah-hmm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <circle class="kotak" cx="50" cy="40" r="26"/>
+      <text x="50" y="45" text-anchor="middle">start</text>
+      <circle class="kotak" cx="130" cy="150" r="32"/>
+      <text x="130" y="155" text-anchor="middle">HOT</text>
+      <circle class="kotak" cx="320" cy="150" r="32"/>
+      <text x="320" y="155" text-anchor="middle">COLD</text>
+      <line class="garis" x1="64" y1="62" x2="110" y2="125" marker-end="url(#panah-hmm)"/>
+      <text x="70" y="104">0,8</text>
+      <path class="garis" d="M76 34Q230 4 318 116" marker-end="url(#panah-hmm)"/>
+      <text x="214" y="22">0,2</text>
+      <path class="garis" d="M100 140C58 118 58 182 100 160" marker-end="url(#panah-hmm)"/>
+      <text x="50" y="155" text-anchor="end">0,7</text>
+      <path class="garis" d="M350 140C392 118 392 182 350 160" marker-end="url(#panah-hmm)"/>
+      <text x="396" y="155">0,6</text>
+      <line class="garis" x1="161" y1="140" x2="287" y2="140" marker-end="url(#panah-hmm)"/>
+      <text x="224" y="132" text-anchor="middle">0,3</text>
+      <line class="garis" x1="290" y1="162" x2="162" y2="162" marker-end="url(#panah-hmm)"/>
+      <text x="224" y="180" text-anchor="middle">0,4</text>
+      <text x="130" y="208" text-anchor="middle" class="kecil">B = 0,2 · 0,4 · 0,4</text>
+      <text x="320" y="208" text-anchor="middle" class="kecil">B = 0,5 · 0,4 · 0,1</text>
+    </svg>
+    <figcaption>HMM es krim dari slide. Panah = transition probability (A). Angka B di bawah state = observation likelihood untuk 1, 2, dan 3 es krim.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Dari \ ke</th><th>HOT</th><th>COLD</th></tr>
+    <tr><td>start (π)</td><td>0,8</td><td>0,2</td></tr>
+    <tr><td>HOT</td><td>0,7</td><td>0,3</td></tr>
+    <tr><td>COLD</td><td>0,4</td><td>0,6</td></tr>
+  </table>
+  <table>
+    <tr><th>State</th><th>P(1 | state)</th><th>P(2 | state)</th><th>P(3 | state)</th></tr>
+    <tr><td>HOT</td><td>0,2</td><td>0,4</td><td>0,4</td></tr>
+    <tr><td>COLD</td><td>0,5</td><td>0,4</td><td>0,1</td></tr>
+  </table>
+  <table>
+    <tr><th>Aspek</th><th>Transition probability (A)</th><th>Observation likelihood (B)</th></tr>
+    <tr><td>Arti</td><td>Peluang pindah dari state i ke state j</td><td>Peluang state j menghasilkan observation o. Disebut juga emission probability</td></tr>
+    <tr><td>Notasi</td><td>a<sub>ij</sub> = P(q<sub>t</sub> = j | q<sub>t−1</sub> = i)</td><td>b<sub>j</sub>(o<sub>t</sub>) = P(o<sub>t</sub> | q<sub>t</sub> = j)</td></tr>
+    <tr><td>Contoh es krim</td><td>P(COLD | HOT) = 0,3</td><td>P(3 | HOT) = 0,4</td></tr>
+    <tr><td>Di speech recognition</td><td>Pindah antar subphone. Self-loop a<sub>ii</sub> mengatur berapa lama satu bunyi bertahan</td><td>Peluang satu frame MFCC dihasilkan sebuah subphone, dihitung GMM atau DNN</td></tr>
+    <tr><td>Berjumlah 1 per</td><td>Baris: semua tujuan dari satu state asal</td><td>State: semua observation dari satu state</td></tr>
+  </table>
+  <ul>
+    <li><strong>Markov assumption:</strong> P(q<sub>i</sub> | q<sub>1</sub>, …, q<sub>i−1</sub>) = P(q<sub>i</sub> | q<sub>i−1</sub>). State sekarang hanya bergantung pada state sebelumnya.</li>
+    <li><strong>Output independence:</strong> P(o<sub>t</sub> | o<sub>1</sub>, …, o<sub>t−1</sub>, q<sub>1</sub>, …, q<sub>t</sub>) = P(o<sub>t</sub> | q<sub>t</sub>). Observation hanya bergantung pada state saat itu.</li>
+  </ul>
+  <table>
+    <tr><th>Problem (slide)</th><th>Pertanyaan</th><th>Algoritma</th></tr>
+    <tr><td>1. Evaluation</td><td>Seberapa mungkin O dihasilkan model λ = (A, B), yaitu P(O | λ)?</td><td>Forward</td></tr>
+    <tr><td>2. Decoding</td><td>Deretan state Q mana yang paling menjelaskan O?</td><td>Viterbi</td></tr>
+    <tr><td>3. Learning</td><td>Bagaimana mengatur A dan B supaya P(O | λ) maksimal?</td><td>Baum-Welch (forward-backward)</td></tr>
+  </table>
+
+  <h3>Peluang satu path: P(O, Q)</h3>
+  <p>Kalau path, yaitu deretan state Q, sudah ditentukan, peluangnya bersama observation O adalah perkalian semua transisi dan semua emisi di sepanjang path.</p>
+  <p class="rumus">P(O, Q) = P(O | Q) × P(Q) = ∏ P(o<sub>i</sub> | q<sub>i</sub>) × ∏ P(q<sub>i</sub> | q<sub>i−1</sub>)</p>
+  <p><strong>Cara membaca:</strong> setiap langkah waktu menyumbang dua faktor, yaitu transisi <b>masuk</b> ke state itu dan emisi <b>dari</b> state itu. Jadi tulis per langkah: transisi × emisi.</p>
+  <details class="contoh" id="k4-b">
+    <summary><span class="tag c-lilac">Contoh B</span> P(3 1 3, HOT HOT COLD)</summary>
+    <aside class="soal-ujian"><p>Dengan HMM es krim di atas, hitung peluang Jason makan 3, 1, 3 es krim dengan cuaca HOT, HOT, COLD.</p></aside>
+    <ol class="cara">
+      <li><span class="judul">Pasangkan observation dengan state, lalu tulis faktor per langkah</span>
+        <div class="hasil"><table>
+          <tr><th>t</th><th>o<sub>t</sub></th><th>State</th><th>Transisi masuk</th><th>Emisi</th><th>Faktor</th></tr>
+          <tr><td>1</td><td>3</td><td>HOT</td><td>P(HOT | start) = 0,8</td><td>P(3 | HOT) = 0,4</td><td>0,32</td></tr>
+          <tr><td>2</td><td>1</td><td>HOT</td><td>P(HOT | HOT) = 0,7</td><td>P(1 | HOT) = 0,2</td><td>0,14</td></tr>
+          <tr><td>3</td><td>3</td><td>COLD</td><td>P(COLD | HOT) = 0,3</td><td>P(3 | COLD) = 0,1</td><td>0,03</td></tr>
+        </table></div></li>
+      <li><span class="judul">Kalikan semua faktor</span>
+        <div class="hasil"><p>0,32 × 0,14 × 0,03 = <b>0,001344</b></p></div></li>
+    </ol>
+    <p class="jawab">P(3 1 3, HOT HOT COLD) = 0,001344.</p>
+  </details>
+  <aside class="hitung">
+    <details>
+      <summary>Semua 8 path untuk 3 1 3, dan kenapa butuh Viterbi</summary>
+      <p>Dengan N = 2 state dan T = 3 observation, ada N<sup>T</sup> = 2<sup>3</sup> = 8 path (slide appendix). Peluang masing-masing:</p>
+      <table>
+        <tr><th>Path</th><th>Faktor per langkah</th><th>P(O, Q)</th></tr>
+        <tr><td>H H H</td><td>0,32 × 0,14 × 0,28</td><td><b>0,012544</b> (terbesar)</td></tr>
+        <tr><td>H H C</td><td>0,32 × 0,14 × 0,03</td><td>0,001344</td></tr>
+        <tr><td>H C H</td><td>0,32 × 0,15 × 0,16</td><td>0,00768</td></tr>
+        <tr><td>H C C</td><td>0,32 × 0,15 × 0,06</td><td>0,00288</td></tr>
+        <tr><td>C H H</td><td>0,02 × 0,08 × 0,28</td><td>0,000448</td></tr>
+        <tr><td>C H C</td><td>0,02 × 0,08 × 0,03</td><td>0,000048</td></tr>
+        <tr><td>C C H</td><td>0,02 × 0,30 × 0,16</td><td>0,00096</td></tr>
+        <tr><td>C C C</td><td>0,02 × 0,30 × 0,06</td><td>0,00036</td></tr>
+        <tr><td>Jumlah</td><td></td><td>0,026264 = P(O)</td></tr>
+      </table>
+      <p>Untuk speech, N bisa ribuan state dan T ratusan frame, jadi N<sup>T</sup> path mustahil dicoba satu per satu. Viterbi mencari path terbesar dan forward menghitung jumlahnya tanpa mencoba semua path.</p>
+    </details>
+  </aside>
+
+  <h3>Viterbi: path terbaik tanpa mencoba semua path</h3>
+  <p><mark>Viterbi algorithm</mark> adalah algoritma dynamic programming yang mencari deretan state paling mungkin dengan menyimpan, di setiap sel trellis, hanya peluang path terbaik yang sampai ke sel itu. <b>Trellis</b> adalah tabel dengan baris = state dan kolom = waktu.</p>
+  <p class="rumus">v<sub>t</sub>(j) = max<sub>i</sub> v<sub>t−1</sub>(i) × a<sub>ij</sub> × b<sub>j</sub>(o<sub>t</sub>)</p>
+  <details class="keterangan">
+    <summary>Arti simbol dan tiga tahapnya</summary>
+    <dl>
+      <dt>v<sub>t−1</sub>(i)</dt><dd>Viterbi path probability di langkah sebelumnya: peluang path terbaik yang berakhir di state i</dd>
+      <dt>a<sub>ij</sub></dt><dd>transition probability dari state i ke state j</dd>
+      <dt>b<sub>j</sub>(o<sub>t</sub>)</dt><dd>state observation likelihood: peluang state j menghasilkan o<sub>t</sub></dd>
+      <dt>Inisialisasi</dt><dd>v<sub>1</sub>(j) = a<sub>0j</sub> × b<sub>j</sub>(o<sub>1</sub>), dengan a<sub>0j</sub> = peluang dari start (sama dengan π<sub>j</sub>)</dd>
+      <dt>Backpointer</dt><dd>bt<sub>t</sub>(j) = state i yang memberi nilai max, supaya path bisa ditelusuri balik</dd>
+      <dt>Terminasi</dt><dd>P* = max<sub>i</sub> v<sub>T</sub>(i) × a<sub>iF</sub>. Kalau soal tidak memberi peluang ke end state, ambil nilai terbesar di kolom terakhir</dd>
+    </dl>
+  </details>
+  <details class="contoh" id="k4-c">
+    <summary><span class="tag c-jingga">Contoh C</span> Viterbi untuk observation 3 1 3</summary>
+    <aside class="soal-ujian"><p>Dengan HMM es krim di atas, tentukan deretan cuaca yang paling mungkin jika Jason makan 3, 1, 3 es krim, beserta peluangnya.</p></aside>
+    <ol class="cara">
+      <li><span class="judul">Kolom t = 1 (o = 3): inisialisasi</span>
+        <div class="hasil"><p>v<sub>1</sub>(H) = 0,8 × 0,4 = 0,32. v<sub>1</sub>(C) = 0,2 × 0,1 = 0,02.</p></div></li>
+      <li><span class="judul">Kolom t = 2 (o = 1): bandingkan dua jalan masuk ke setiap state</span>
+        <div class="hasil"><table>
+          <tr><th>Ke</th><th>Dari H</th><th>Dari C</th><th>Max</th></tr>
+          <tr><td>H</td><td>0,32 × 0,7 × 0,2 = 0,0448</td><td>0,02 × 0,4 × 0,2 = 0,0016</td><td>0,0448 (dari H)</td></tr>
+          <tr><td>C</td><td>0,32 × 0,3 × 0,5 = 0,048</td><td>0,02 × 0,6 × 0,5 = 0,006</td><td>0,048 (dari H)</td></tr>
+        </table></div></li>
+      <li><span class="judul">Kolom t = 3 (o = 3)</span>
+        <div class="hasil"><table>
+          <tr><th>Ke</th><th>Dari H</th><th>Dari C</th><th>Max</th></tr>
+          <tr><td>H</td><td>0,0448 × 0,7 × 0,4 = 0,012544</td><td>0,048 × 0,4 × 0,4 = 0,00768</td><td>0,012544 (dari H)</td></tr>
+          <tr><td>C</td><td>0,0448 × 0,3 × 0,1 = 0,001344</td><td>0,048 × 0,6 × 0,1 = 0,00288</td><td>0,00288 (dari C)</td></tr>
+        </table></div></li>
+      <li><span class="judul">Terminasi: nilai terbesar di kolom terakhir</span>
+        <div class="hasil"><p>max(0,012544; 0,00288) = <b>0,012544</b>, di state H.</p></div></li>
+      <li><span class="judul">Backtrace: ikuti backpointer dari belakang</span>
+        <div class="hasil"><p>t = 3: H, datang dari H. t = 2: H, datang dari H. t = 1: H. Jadi path-nya <b>H, H, H</b>.</p></div></li>
+    </ol>
+    <table>
+      <tr><th>State</th><th>t = 1 (o = 3)</th><th>t = 2 (o = 1)</th><th>t = 3 (o = 3)</th></tr>
+      <tr><td>H</td><td>0,32</td><td>0,0448 ← H</td><td><b>0,012544 ← H</b></td></tr>
+      <tr><td>C</td><td>0,02</td><td>0,048 ← H</td><td>0,00288 ← C</td></tr>
+    </table>
+    <p class="jawab">Cuaca yang paling mungkin adalah HOT, HOT, HOT dengan peluang 0,012544, sama dengan path terbesar di tabel 8 path.</p>
+    <p>Slide hanya menampilkan trellis sampai t = 2. Kolom t = 3 dihitung dengan rumus yang sama.</p>
+  </details>
+  <aside class="jebakan">
+    <ul>
+      <li>Di t = 2, nilai terbesar ada di C (0,048), bukan H (0,0448). Kalau kamu <mark class="jebakan">memilih state terbesar di setiap kolom</mark>, hasilnya H, C, H dengan peluang hanya 0,00768. Path terbaik baru ketahuan di akhir, jadi <b>selalu backtrace</b> lewat backpointer.</li>
+      <li>Gambar trellis Viterbi di slide menulis "v<sub>2</sub>(2) = max(.32*.014, .02*.08)". Angka <code>.014</code> adalah typo, seharusnya <code>.14</code> (= 0,7 × 0,2). Hasilnya, .0448, sudah benar, dan gambar trellis forward di slide sudah membetulkan typo ini.</li>
+    </ul>
+  </aside>
+
+  <h3>Forward: peluang semua path</h3>
+  <p>Forward algorithm menjawab problem 1: P(O), yaitu peluang observation O dihasilkan model, dengan menjumlahkan semua path. Rumusnya sama dengan Viterbi, hanya <b>max diganti jumlah (Σ)</b>. Bagian ini ada di slide tersembunyi (appendix) Session 4.</p>
+  <p class="rumus">α<sub>t</sub>(j) = Σ<sub>i</sub> α<sub>t−1</sub>(i) × a<sub>ij</sub> × b<sub>j</sub>(o<sub>t</sub>)</p>
+  <details class="contoh" id="k4-d">
+    <summary><span class="tag c-pink">Contoh D</span> Forward untuk observation 3 1 3</summary>
+    <aside class="soal-ujian"><p>Dengan HMM es krim di atas, hitung P(3 1 3) memakai forward algorithm.</p></aside>
+    <table>
+      <tr><th>State</th><th>t = 1 (o = 3)</th><th>t = 2 (o = 1)</th><th>t = 3 (o = 3)</th></tr>
+      <tr><td>H</td><td>0,8 × 0,4 = 0,32</td><td>(0,32 × 0,7 + 0,02 × 0,4) × 0,2 = 0,0464</td><td>(0,0464 × 0,7 + 0,054 × 0,4) × 0,4 = 0,021632</td></tr>
+      <tr><td>C</td><td>0,2 × 0,1 = 0,02</td><td>(0,32 × 0,3 + 0,02 × 0,6) × 0,5 = 0,054</td><td>(0,0464 × 0,3 + 0,054 × 0,6) × 0,1 = 0,004632</td></tr>
+    </table>
+    <p class="jawab">P(3 1 3) = 0,021632 + 0,004632 = 0,026264, sama dengan jumlah 8 path.</p>
+  </details>
+
+  <h3>HMM untuk speech</h3>
+  <table>
+    <tr><th>Bagian HMM</th><th>Es krim</th><th>Speech recognition</th></tr>
+    <tr><td>State (tersembunyi)</td><td>HOT, COLD</td><td>Subphone, misalnya bagian awal, tengah, dan akhir bunyi [s]</td></tr>
+    <tr><td>Observation</td><td>Jumlah es krim: 1, 2, 3</td><td>Vektor MFCC setiap 10 ms</td></tr>
+    <tr><td>B (observation likelihood)</td><td>Tabel angka</td><td>Dihitung GMM atau DNN</td></tr>
+    <tr><td>Struktur</td><td>Ergodic: semua state saling terhubung</td><td>Bakis (left-to-right): hanya tetap di state yang sama (self-loop) atau maju</td></tr>
+  </table>
+  <p>Kata "six" (<code>S IH K S</code>) menjadi 4 phone × 3 subphone = 12 state berderet dari start ke end. Self-loop membuat satu kata bisa diucapkan cepat atau lambat: "five" bisa berupa <code>f ay ay ay ay v v v v</code> atau <code>f f ay ay ay ay v v v</code>, dan keduanya path yang valid untuk kata yang sama.</p>
+
+  <h3>Kerangka jawaban studi kasus</h3>
+  <ol>
+    <li><strong>Pembuka:</strong> "HMM (Hidden Markov Model) adalah …", lalu jelaskan state tersembunyi, transition probability, dan observation likelihood dengan konteks soal.</li>
+    <li><strong>Diketahui:</strong> salin π, A, B, dan deretan observation ke tabel.</li>
+    <li><strong>Hitung:</strong> tabel per langkah waktu (Contoh B) atau trellis dengan backpointer (Contoh C).</li>
+    <li><strong>Kesimpulan:</strong> path dan peluangnya dalam satu kalimat.</li>
+  </ol>
+  <p><strong>Template kesimpulan:</strong> "Deretan state yang paling mungkin untuk observation [O] adalah [Q] dengan peluang [nilai]." Nilainya selalu antara 0 dan 1, dan makin panjang deretan observation, makin kecil angkanya, karena setiap langkah menambah faktor perkalian yang kurang dari 1.</p>
+  <table>
+    <tr><th>Istilah wajib</th><th>Notasi</th><th>Arti singkat</th></tr>
+    <tr><td>HMM (Hidden Markov Model)</td><td>λ = (A, B)</td><td>model peluang dengan state tersembunyi dan observation yang terlihat</td></tr>
+    <tr><td>Transition probability</td><td>a<sub>ij</sub></td><td>peluang pindah dari state i ke state j</td></tr>
+    <tr><td>Observation likelihood (emission probability)</td><td>b<sub>j</sub>(o<sub>t</sub>)</td><td>peluang state j menghasilkan observation o<sub>t</sub></td></tr>
+    <tr><td>Initial probability</td><td>π<sub>i</sub> atau a<sub>0i</sub></td><td>peluang state pertama adalah i</td></tr>
+    <tr><td>Trellis</td><td>v<sub>t</sub>(j)</td><td>tabel state × waktu untuk Viterbi atau forward</td></tr>
+    <tr><td>Backpointer</td><td>bt<sub>t</sub>(j)</td><td>catatan state asal yang memberi nilai max</td></tr>
+  </table>
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh pembuka</span> Paragraf pembuka untuk soal HMM es krim</summary>
+    <div class="jawaban-esai">
+      <p>HMM (Hidden Markov Model) adalah model peluang untuk deretan state yang tidak terlihat langsung, karena yang bisa diamati hanya observation yang dihasilkan setiap state. Pada soal ini, state tersembunyinya adalah cuaca (HOT atau COLD) dan observation-nya adalah jumlah es krim yang dimakan Jason.</p>
+      <p>Transition probability a<sub>ij</sub> adalah peluang cuaca berpindah dari state i ke state j, misalnya P(COLD | HOT) = 0,3. Observation likelihood b<sub>j</sub>(o) adalah peluang Jason makan o es krim saat cuacanya j, misalnya P(3 | HOT) = 0,4. Path terbaik dicari dengan algoritma Viterbi, yaitu dynamic programming yang menyimpan peluang path terbaik di setiap langkah.</p>
+    </div>
+  </details>
+
+  <aside class="jebakan">
+    <ul>
+      <li><strong>Lupa faktor awal:</strong> langkah pertama selalu memakai π (atau a<sub>0j</sub>), bukan a<sub>ij</sub>.</li>
+      <li><mark class="jebakan">Salah arah a<sub>ij</sub>.</mark> Baris = asal, kolom = tujuan. P(COLD | HOT) = 0,3, bukan 0,4.</li>
+      <li><strong>Emisi dari state yang salah:</strong> emisi selalu diambil dari state tujuan di langkah itu.</li>
+      <li><strong>Menjumlah padahal diminta path terbaik:</strong> path terbaik = max (Viterbi). Peluang observation = jumlah (forward).</li>
+      <li><strong>Membulatkan terlalu cepat:</strong> angkanya kecil sekali, jadi simpan semua digit sampai jawaban akhir.</li>
+    </ul>
+  </aside>
+
+  <p class="intinya">Peluang satu path = perkalian (transisi × emisi) di setiap langkah. Viterbi = ambil max dan simpan backpointer, lalu backtrace. Forward = sama, tapi dijumlah.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan Markov chain cuaca, hitung P(COLD, COLD, WARM, HOT).</summary>
+    <p>π<sub>2</sub> × a<sub>22</sub> × a<sub>23</sub> × a<sub>31</sub> = 0,3 × 0,5 × 0,3 × 0,3 = <b>0,0135</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan HMM es krim, hitung P(1 2 3, COLD COLD HOT).</summary>
+    <p>(0,2 × 0,5) × (0,6 × 0,4) × (0,4 × 0,4) = 0,1 × 0,24 × 0,16 = <b>0,00384</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Dengan HMM es krim, cari path terbaik untuk observation 3, 3, 1.</summary>
+    <table>
+      <tr><th>State</th><th>t = 1 (o = 3)</th><th>t = 2 (o = 3)</th><th>t = 3 (o = 1)</th></tr>
+      <tr><td>H</td><td>0,32</td><td>max(0,32 × 0,7 × 0,4; 0,02 × 0,4 × 0,4) = 0,0896 ← H</td><td>max(0,0896 × 0,7 × 0,2; 0,0096 × 0,4 × 0,2) = 0,012544 ← H</td></tr>
+      <tr><td>C</td><td>0,02</td><td>max(0,32 × 0,3 × 0,1; 0,02 × 0,6 × 0,1) = 0,0096 ← H</td><td>max(0,0896 × 0,3 × 0,5; 0,0096 × 0,6 × 0,5) = <b>0,01344 ← H</b></td></tr>
+    </table>
+    <p>Nilai terbesar di kolom terakhir adalah 0,01344 di C. Backtrace: C datang dari H, H datang dari H. Path terbaik <b>H, H, C</b> dengan peluang 0,01344. Masuk akal: hari ketiga Jason hanya makan 1 es krim, jadi cuacanya kemungkinan dingin.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan (buatan, gaya speech):</strong> HMM left-to-right kata "is" punya state IH lalu Z. Transisi: start ke IH = 1, IH ke IH = 0,6, IH ke Z = 0,4, Z ke Z = 0,7, Z ke end = 0,3. Observation disederhanakan menjadi simbol x dan y: b<sub>IH</sub>(x) = 0,7, b<sub>IH</sub>(y) = 0,3, b<sub>Z</sub>(x) = 0,2, b<sub>Z</sub>(y) = 0,8. Untuk observation x, x, y, mana yang lebih mungkin: path IH IH Z atau IH Z Z?</summary>
+    <p><strong>IH IH Z:</strong> (1 × 0,7) × (0,6 × 0,7) × (0,4 × 0,8) × 0,3 = 0,7 × 0,42 × 0,32 × 0,3 = <b>0,028224</b>.</p>
+    <p><strong>IH Z Z:</strong> (1 × 0,7) × (0,4 × 0,2) × (0,7 × 0,8) × 0,3 = 0,7 × 0,08 × 0,56 × 0,3 = 0,009408.</p>
+    <p>Path IH IH Z lebih mungkin, karena dua frame x lebih cocok dengan IH dan frame y lebih cocok dengan Z. Faktor 0,3 di akhir adalah transisi ke end state. Ini latihan buatan, bukan dari slide: di ASR asli, observation-nya vektor MFCC dan b dihitung GMM.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> HMM punya 3 state dan observation-nya 5 simbol. Berapa path yang harus dicek kalau dihitung satu per satu?</summary>
+    <p>N<sup>T</sup> = 3<sup>5</sup> = <b>243 path</b>. Dengan Viterbi, cukup mengisi 3 × 5 = 15 sel trellis.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Soal 5 · Word error rate (studi kasus)</h2></summary>
+  <p class="rantai">
+    <span class="dari">PPT Session 4 (Evaluation: word error rate dan sclite)</span>
+    <span class="ke">soal 3 (WER adalah ukuran keberhasilan eksperimen)</span>
+  </p>
+
+  <h3>Jenis soal</h3>
+  <table>
+    <tr><th>Jenis</th><th>Yang diberikan</th><th>Contoh</th></tr>
+    <tr><td><span class="tag c-mint">A</span></td><td>REF dan HYP yang kesejajarannya mudah dilihat</td><td><a href="#k5-a1">Contoh A1</a>, <a href="#k5-a2">Contoh A2</a></td></tr>
+    <tr><td><span class="tag c-lilac">B</span></td><td>Output sclite: alignment atau jumlah #C #S #D #I</td><td><a href="#k5-b">Contoh B</a></td></tr>
+    <tr><td><span class="tag c-jingga">C</span></td><td>Banyak insertion, sehingga WER bisa lebih dari 100%</td><td><a href="#k5-c">Contoh C</a></td></tr>
+    <tr><td><span class="tag c-pink">D</span></td><td>Kesejajaran tidak jelas, perlu tabel edit distance</td><td><a href="#k5-d">Contoh D</a></td></tr>
+  </table>
+
+  <h3>Definisi dan rumus</h3>
+  <aside class="analogi">
+    <p>Guru mengoreksi dikte dengan membandingkan tulisan murid dan teks asli kata per kata. Ada kata yang salah tulis, ada yang terlewat, dan ada yang ditambah sendiri.</p>
+    <p class="batas">guru bisa memberi setengah nilai untuk kata yang hampir benar. WER menganggap kata yang beda satu huruf pun salah penuh.</p>
+  </aside>
+  <p><mark>WER (Word Error Rate)</mark> adalah persentase kesalahan kata pada hasil ASR dibandingkan transkrip yang benar, dihitung dari jumlah edit paling sedikit yang mengubah transkrip benar menjadi hasil ASR.</p>
+  <p class="rumus">WER = 100 × (S + D + I) / N</p>
+  <details class="keterangan">
+    <summary>Arti simbol</summary>
+    <dl>
+      <dt>REF</dt><dd>reference: transkrip yang benar, ditulis manusia</dd>
+      <dt>HYP</dt><dd>hypothesis: hasil ASR</dd>
+      <dt>S</dt><dd>substitution: kata di REF diganti kata lain di HYP</dd>
+      <dt>D</dt><dd>deletion: kata di REF hilang di HYP</dd>
+      <dt>I</dt><dd>insertion: kata tambahan di HYP yang tidak ada di REF</dd>
+      <dt>N</dt><dd>jumlah kata di REF = C + S + D, dengan C (correct) = kata yang benar</dd>
+    </dl>
+  </details>
+  <p><strong>Cara membaca:</strong> 0% berarti sempurna, dan makin kecil makin baik. WER bisa lebih dari 100%, karena jumlah insertion tidak dibatasi panjang REF.</p>
+
+  <h3>Resep alignment</h3>
+  <ol>
+    <li><strong>Tulis sejajar:</strong> REF di atas, HYP di bawah, lalu cari kata yang sama sebagai jangkar.</li>
+    <li><strong>Pasangkan kata di antara jangkar:</strong> pasangan yang berbeda = S. Kata REF tanpa pasangan = D (tulis <code>***</code> di HYP). Kata HYP tanpa pasangan = I (tulis <code>***</code> di REF).</li>
+    <li><strong>Pilih alignment dengan kesalahan paling sedikit:</strong> satu kata yang salah dihitung S (1 kesalahan), bukan D + I (2 kesalahan).</li>
+    <li><strong>Hitung N dari REF saja:</strong> tanda <code>***</code> bukan kata.</li>
+    <li><strong>Masukkan ke rumus,</strong> lalu tulis kalimat kesimpulan.</li>
+  </ol>
+
+  <details class="contoh" id="k5-a1">
+    <summary><span class="tag c-mint">Contoh A1</span> Contoh dari slide: WER 50%</summary>
+    <aside class="soal-ujian"><p>REF: portable phone upstairs last night so<br>HYP: portable form of stores last night so<br>Hitung WER-nya.</p></aside>
+    <ol class="cara">
+      <li><span class="judul">Sejajarkan</span>
+        <div class="hasil"><table>
+          <tr><td>REF</td><td>portable</td><td><code>***</code></td><td>PHONE</td><td>UPSTAIRS</td><td>last</td><td>night</td><td>so</td></tr>
+          <tr><td>HYP</td><td>portable</td><td>FORM</td><td>OF</td><td>STORES</td><td>last</td><td>night</td><td>so</td></tr>
+          <tr><td>Eval</td><td></td><td>I</td><td>S</td><td>S</td><td></td><td></td><td></td></tr>
+        </table></div></li>
+      <li><span class="judul">Hitung</span>
+        <div class="hasil"><p>S = 2, D = 0, I = 1. N = 6 (portable, phone, upstairs, last, night, so). WER = 100 × (2 + 0 + 1) / 6 = <b>50%</b>.</p></div></li>
+    </ol>
+    <p class="jawab">WER = 50%: kesalahannya setara setengah dari jumlah kata di REF.</p>
+    <p>Alignment lain dengan jumlah kesalahan yang sama juga benar, misalnya PHONE jadi FORM (S), UPSTAIRS jadi OF (S), dan STORES sebagai insertion. WER-nya tetap 50%.</p>
+  </details>
+
+  <details class="contoh" id="k5-a2">
+    <summary><span class="tag c-mint">Contoh A2</span> Kalimat bahasa Indonesia dengan S, D, dan I</summary>
+    <aside class="soal-ujian"><p>REF: saya ingin memesan tiket kereta ke bandung<br>HYP: saya ingin pesan tiket kereta bandung besok<br>Hitung WER-nya.</p></aside>
+    <ol class="cara">
+      <li><span class="judul">Sejajarkan dengan jangkar saya, ingin, tiket, kereta, bandung</span>
+        <div class="hasil"><table>
+          <tr><td>REF</td><td>saya</td><td>ingin</td><td>MEMESAN</td><td>tiket</td><td>kereta</td><td>KE</td><td>bandung</td><td><code>***</code></td></tr>
+          <tr><td>HYP</td><td>saya</td><td>ingin</td><td>PESAN</td><td>tiket</td><td>kereta</td><td><code>***</code></td><td>bandung</td><td>BESOK</td></tr>
+          <tr><td>Eval</td><td></td><td></td><td>S</td><td></td><td></td><td>D</td><td></td><td>I</td></tr>
+        </table></div></li>
+      <li><span class="judul">Hitung</span>
+        <div class="hasil"><p>S = 1, D = 1, I = 1, N = 7. WER = 100 × 3 / 7 = <b>42,86%</b>.</p></div></li>
+    </ol>
+    <p class="jawab">WER = 42,86%: dari 7 kata di REF terjadi 3 kesalahan, masing-masing satu substitution, deletion, dan insertion.</p>
+  </details>
+
+  <details class="contoh" id="k5-b">
+    <summary><span class="tag c-lilac">Contoh B</span> Output sclite dari slide</summary>
+    <aside class="soal-ujian"><p>sclite memberi Scores (#C #S #D #I) = 9 3 1 2 untuk alignment berikut. Hitung WER-nya.</p></aside>
+    <div class="hasil"><table>
+      <tr><td>REF</td><td>was an engineer</td><td>SO</td><td>I</td><td>i was always with</td><td><code>****</code></td><td><code>****</code></td><td>MEN</td><td>UM</td><td>and they</td></tr>
+      <tr><td>HYP</td><td>was an engineer</td><td><code>**</code></td><td>AND</td><td>i was always with</td><td>THEM</td><td>THEY</td><td>ALL</td><td>THAT</td><td>and they</td></tr>
+      <tr><td>Eval</td><td></td><td>D</td><td>S</td><td></td><td>I</td><td>I</td><td>S</td><td>S</td><td></td></tr>
+    </table></div>
+    <ol class="cara">
+      <li><span class="judul">Cari N dari #C, #S, #D</span>
+        <div class="hasil"><p>N = C + S + D = 9 + 3 + 1 = 13. #I tidak ikut, karena insertion bukan kata REF.</p></div></li>
+      <li><span class="judul">Hitung WER</span>
+        <div class="hasil"><p>WER = 100 × (3 + 1 + 2) / 13 = 600 / 13 = <b>46,15%</b>.</p></div></li>
+    </ol>
+    <p class="jawab">WER = 46,15%. Slide tidak menulis angka WER untuk contoh ini, jadi soal seperti ini cocok sebagai latihan.</p>
+  </details>
+
+  <details class="contoh" id="k5-c">
+    <summary><span class="tag c-jingga">Contoh C</span> WER lebih dari 100%</summary>
+    <aside class="soal-ujian"><p>REF: terima kasih<br>HYP: terima kasih banyak ya semua<br>Hitung WER-nya.</p></aside>
+    <div class="hasil"><p>Kedua kata REF benar, lalu ada 3 insertion (banyak, ya, semua). S = 0, D = 0, I = 3, N = 2. WER = 100 × 3 / 2 = <b>150%</b>.</p></div>
+    <p class="jawab">WER = 150%, walaupun semua kata di REF dikenali dengan benar.</p>
+  </details>
+
+  <details class="contoh" id="k5-d">
+    <summary><span class="tag c-pink">Contoh D</span> Tabel minimum edit distance</summary>
+    <p>Kalau kalimatnya panjang dan banyak yang berubah, jangkar sulit dicari. Cara yang pasti adalah tabel minimum edit distance, dengan baris = kata REF dan kolom = kata HYP. Cara ini dari buku Jurafsky dan Martin, karena slide hanya menyebut namanya di appendix.</p>
+    <aside class="soal-ujian"><p>REF: kamu sudah makan<br>HYP: kamu udah makan nasi<br>Hitung WER-nya dengan tabel edit distance.</p></aside>
+    <p class="rumus">D[i][j] = min( D[i−1][j] + 1, D[i][j−1] + 1, D[i−1][j−1] + (0 kalau kata sama, 1 kalau beda) )</p>
+    <details class="keterangan">
+      <summary>Arti tiga pilihan</summary>
+      <dl>
+        <dt>D[i−1][j] + 1</dt><dd>dari atas: deletion, kata REF ke-i dibuang</dd>
+        <dt>D[i][j−1] + 1</dt><dd>dari kiri: insertion, kata HYP ke-j ditambahkan</dd>
+        <dt>D[i−1][j−1] + 0 atau 1</dt><dd>dari diagonal: kata sama (0) atau substitution (1)</dd>
+        <dt>ε</dt><dd>belum ada kata sama sekali. Baris dan kolom ε berisi 0, 1, 2, …</dd>
+      </dl>
+    </details>
+    <ol class="cara">
+      <li><span class="judul">Isi tabel dari kiri atas ke kanan bawah</span>
+        <div class="hasil"><table>
+          <tr><th>REF \ HYP</th><th>ε</th><th>kamu</th><th>udah</th><th>makan</th><th>nasi</th></tr>
+          <tr><td>ε</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+          <tr><td>kamu</td><td>1</td><td><b>0</b></td><td>1</td><td>2</td><td>3</td></tr>
+          <tr><td>sudah</td><td>2</td><td>1</td><td><b>1</b></td><td>2</td><td>3</td></tr>
+          <tr><td>makan</td><td>3</td><td>2</td><td>2</td><td><b>1</b></td><td><b>2</b></td></tr>
+        </table></div></li>
+      <li><span class="judul">Backtrace dari kanan bawah</span>
+        <p>Angka tebal adalah jalur balik: 2 datang dari kiri (insertion "nasi"), 1 datang dari diagonal tanpa tambah (makan = makan), 1 datang dari diagonal dengan tambah 1 (sudah jadi udah, substitution), dan 0 adalah kamu = kamu.</p>
+        <div class="hasil"><p>S = 1, D = 0, I = 1, N = 3. WER = 100 × 2 / 3 = <b>66,67%</b>.</p></div></li>
+    </ol>
+    <p class="jawab">WER = 66,67%. Angka di pojok kanan bawah (2) selalu sama dengan S + D + I.</p>
+  </details>
+
+  <h3>Membaca sclite dan keterbatasan WER</h3>
+  <p><b>sclite</b> adalah alat dari NIST (National Institute of Standards and Technology) yang menyejajarkan HYP dengan REF, lalu menghitung #C, #S, #D, dan #I. Di outputnya, kata yang salah ditulis kapital dan bintang menandai kata yang hilang atau ditambahkan.</p>
+  <ul>
+    <li><strong>Confusion pairs:</strong> daftar pasangan kata yang paling sering tertukar, misalnya "four" jadi "for" atau "a" jadi "the". Daftar ini bahan error analysis.</li>
+    <li><strong>Keterbatasan:</strong> kalau WER sudah di bawah sekitar 10%, sisa kesalahannya sering di function word (and, of, uh-huh) yang tidak mengubah makna. WER juga memberi bobot yang sama untuk semua kesalahan.</li>
+    <li><strong>Alternatif di slide:</strong> semantic error rate mengukur kesalahan makna. Idenya bagus tapi sulit disepakati, dan sudah dipakai di dialog system yang output tugasnya jelas.</li>
+    <li><strong>Sentence error rate (di luar slide):</strong> persentase kalimat yang punya minimal satu kesalahan. Kisi-kisi versi 2 menulis "speech/word error rate", jadi kalau yang ditanya ukuran per kalimat, pakai ini.</li>
+  </ul>
+
+  <h3>Kerangka jawaban studi kasus</h3>
+  <ol>
+    <li><strong>Pembuka:</strong> "WER (Word Error Rate) adalah …", lalu arti REF, HYP, substitution, deletion, dan insertion.</li>
+    <li><strong>Alignment:</strong> tabel REF, HYP, dan Eval.</li>
+    <li><strong>Hitung:</strong> S, D, I, dan N dari REF.</li>
+    <li><strong>Rumus:</strong> WER = 100 × (S + D + I) / N.</li>
+    <li><strong>Kesimpulan:</strong> angka WER beserta artinya.</li>
+  </ol>
+  <p><strong>Template kesimpulan:</strong> "WER sistem adalah X%, artinya dari setiap 100 kata di transkrip asli terjadi sekitar X kesalahan, dan yang paling banyak adalah [substitution/deletion/insertion]." Rentangnya: 0% berarti sempurna, makin kecil makin baik, dan bisa lebih dari 100% kalau banyak insertion. Untuk membandingkan dua sistem: "Sistem A lebih baik karena WER-nya lebih kecil."</p>
+  <table>
+    <tr><th>Istilah wajib</th><th>Nama panjang</th><th>Arti singkat</th></tr>
+    <tr><td>WER</td><td>Word Error Rate</td><td>persentase kesalahan kata</td></tr>
+    <tr><td>REF dan HYP</td><td>reference dan hypothesis</td><td>transkrip benar dan hasil ASR</td></tr>
+    <tr><td>S, D, I</td><td>substitution, deletion, insertion</td><td>kata diganti, hilang, ditambah</td></tr>
+    <tr><td>sclite</td><td>alat scoring dari NIST (National Institute of Standards and Technology)</td><td>menyejajarkan HYP dengan REF dan menghitung WER</td></tr>
+  </table>
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh pembuka</span> Paragraf pembuka untuk soal WER</summary>
+    <div class="jawaban-esai">
+      <p>WER (Word Error Rate) adalah ukuran kualitas sistem ASR (Automatic Speech Recognition) yang menghitung persentase kata yang salah dikenali. Kesalahan dihitung dengan menyejajarkan transkrip yang benar (reference) dengan hasil ASR (hypothesis), lalu menghitung tiga jenis kesalahan: substitution (kata diganti kata lain), deletion (kata hilang), dan insertion (kata tambahan).</p>
+      <p>Jumlah ketiga kesalahan itu dibagi N, yaitu jumlah kata di reference, lalu dikali 100%. Alignment dipilih yang jumlah kesalahannya paling sedikit, sesuai prinsip minimum edit distance.</p>
+    </div>
+  </details>
+
+  <aside class="jebakan">
+    <ul>
+      <li><mark class="jebakan">Membagi dengan jumlah kata HYP.</mark> N selalu jumlah kata REF.</li>
+      <li><strong>Satu kata salah dihitung D + I:</strong> itu 2 kesalahan, padahal cukup 1 substitution.</li>
+      <li><strong>Mengira WER maksimal 100%:</strong> insertion bisa membuat WER lebih dari 100%.</li>
+      <li><strong>Menghitung tanda bintang sebagai kata:</strong> bintang hanya penanda posisi kosong.</li>
+    </ul>
+  </aside>
+
+  <p class="intinya">WER = 100 × (S + D + I) / N, dengan N = jumlah kata REF. Sejajarkan dulu dengan kesalahan paling sedikit, baru hitung.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> REF: the cat sat on the mat. HYP: the cat sat on mat. Berapa WER-nya?</summary>
+    <p>Satu deletion ("the" kedua), N = 6. WER = 100 × 1 / 6 = <b>16,67%</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> REF: saya suka makan bakso. HYP: saya suka makan bak so. Berapa WER-nya?</summary>
+    <p>"bakso" jadi "bak" (S) dan "so" tambahan (I), N = 4. WER = 100 × 2 / 4 = <b>50%</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> REF: dia pergi ke pasar. HYP: dia pergi pasar pagi. Berapa WER-nya, dan apakah alignment-nya hanya satu?</summary>
+    <p>Alignment 1: "ke" hilang (D) dan "pagi" tambahan (I). Alignment 2: "ke" jadi "pasar" (S) dan "pasar" jadi "pagi" (S). Keduanya 2 kesalahan, jadi WER = 100 × 2 / 4 = <b>50%</b>. Alignment bisa lebih dari satu, tapi jumlah kesalahan minimumnya selalu sama.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> sclite memberi #C = 45, #S = 3, #D = 2, #I = 1. Berapa WER-nya?</summary>
+    <p>N = 45 + 3 + 2 = 50. WER = 100 × (3 + 2 + 1) / 50 = <b>12%</b>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> REF punya 40 kata. Sistem A: S = 4, D = 0, I = 0. Sistem B: S = 0, D = 2, I = 2. Mana yang lebih baik?</summary>
+    <p>Keduanya WER = 100 × 4 / 40 = <b>10%</b>, jadi menurut WER sama baiknya. Bedanya ada di jenis kesalahan: A salah mengenali kata, B menghilangkan dan menambah kata. Untuk memilih, lihat kata mana yang salah dan apakah maknanya berubah, karena WER memberi bobot yang sama untuk semua kesalahan.</p>
+  </details>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
+<ol class="refs">
+  <li>Jurafsky, D., &amp; Martin, J. H. (2000). <i>Speech and language processing: An introduction to natural language processing, computational linguistics, and speech recognition</i>. Prentice Hall. Rujukan utama semua PPT dosen.</li>
+  <li>Bina Nusantara University. (2022). <i>COMP6822001 Speech Recognition</i>, PPT Session 1 sampai 6 (Introduction, Phonetics, Acoustic Modeling, Automatic Speech Recognition, Foundation Models and SpeechBrain Training, Dialog Systems Overview).</li>
+  <li>Lestari, D. P., Iwano, K., &amp; Furui, S. (2006). <i>A large vocabulary continuous speech recognition system for Indonesian language</i>. Tabel phone bahasa Indonesia di PPT Phonetics.</li>
+  <li>Young, S. J., Odell, J. J., &amp; Woodland, P. C. (1994). Tree-based state tying for high accuracy acoustic modelling. <i>Proceedings of the ARPA Human Language Technology Workshop</i>.</li>
+  <li>Jurafsky, D., &amp; Martin, J. H. <i>Speech and language processing</i> (edisi ke-3, draf). Appendix A (Hidden Markov Models) dan Bab 2 (minimum edit distance). <a href="https://web.stanford.edu/~jurafsky/slp3/">https://web.stanford.edu/~jurafsky/slp3/</a></li>
+  <li>Leggetter, C. J., &amp; Woodland, P. C. (1995). Maximum likelihood linear regression for speaker adaptation of continuous density hidden Markov models. <i>Computer Speech and Language, 9</i>(2), 171–185.</li>
+  <li>Ellis, D., &amp; Morgan, N. (1999). Size matters: An empirical study of neural network training for large vocabulary continuous speech recognition. <i>ICASSP 1999</i>.</li>
+  <li>Hinton, G., dkk. (2012). Deep neural networks for acoustic modeling in speech recognition. <i>IEEE Signal Processing Magazine, 29</i>(6), 82–97.</li>
+  <li>Baevski, A., Zhou, H., Mohamed, A., &amp; Auli, M. (2020). wav2vec 2.0: A framework for self-supervised learning of speech representations. <i>Advances in Neural Information Processing Systems 33</i>.</li>
+  <li>Hsu, W.-N., Bolte, B., Tsai, Y.-H. H., Lakhotia, K., Salakhutdinov, R., &amp; Mohamed, A. (2021). HuBERT: Self-supervised speech representation learning by masked prediction of hidden units. <i>IEEE/ACM Transactions on Audio, Speech, and Language Processing, 29</i>.</li>
+  <li>Babu, A., dkk. (2021). XLS-R: Self-supervised cross-lingual speech representation learning at scale. <i>arXiv:2111.09296</i>.</li>
+  <li>Park, D. S., dkk. (2020). SpecAugment on large scale datasets. <i>ICASSP 2020</i>.</li>
+  <li>Morais, E., dkk. (2022). Speech emotion recognition using self-supervised features. <i>ICASSP 2022</i>.</li>
+</ol>
+
+</main>
+</body>
+</html>

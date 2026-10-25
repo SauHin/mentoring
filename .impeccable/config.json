@@ -452,6 +452,15 @@
         ],
         "createdAt": "2026-10-07T02:40:29.065Z",
         "reason": "Claude: only match is the shared slides laser dot (#f04438) in _shared/style.css, already accepted for _shared/style.css and every other lesson page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "speech-recognition/00-mid-exam/notes.html"
+        ],
+        "createdAt": "2026-10-25T03:06:49.651Z",
+        "reason": "Claude: the only glow is the red pen swatch (#f04438) of the shared scratch pad in _shared/scratch.js:37, loaded on every notes page; nothing in this file draws a shadow"
       }
     ]
   }
