@@ -461,6 +461,15 @@
         ],
         "createdAt": "2026-10-25T03:06:49.651Z",
         "reason": "Claude: the only glow is the red pen swatch (#f04438) of the shared scratch pad in _shared/scratch.js:37, loaded on every notes page; nothing in this file draws a shadow"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "deep-learning/00-mid-exam/notes.html"
+        ],
+        "createdAt": "2026-10-26T15:56:13.530Z",
+        "reason": "Claude: the only glow is the slide laser-pointer dot in shared _shared/style.css:252, an intentional laser effect; this notes page defines no shadows"
       }
     ]
   }

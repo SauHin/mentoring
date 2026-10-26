@@ -78,6 +78,14 @@ Hanya notes UTS, disusun per soal kisi-kisi (3 esai, 2 studi kasus). Sumbernya 6
 |----|--------|-------|-------|
 | 00 | Persiapan Mid Exam: pipeline, phonetics, eksperimen ASR dan wav2vec, HMM, WER | [notes](speech-recognition/00-mid-exam/notes.html) | |
 
+### Deep learning
+
+Hanya notes UTS, disusun per soal kisi-kisi (4 esai, 2 studi kasus). Sumbernya 7 PPT dosen (Session 1 sampai 7). S5 (transfer learning) dan diffusion tidak ada di kisi-kisi, jadi hanya dibahas singkat.
+
+| No | Materi | Notes | Slide |
+|----|--------|-------|-------|
+| 00 | Persiapan Mid Exam: linear model, training dan evaluasi, arsitektur CNN, GAN, MLP, autoencoder | [notes](deep-learning/00-mid-exam/notes.html) | |
+
 ## Struktur
 
 ```
@@ -99,6 +107,9 @@ mentoring/
 │   ├── index.html
 │   └── 00-mid-exam, 01-… sampai 11-…   persiapan ujian, lalu satu materi per tipe soal
 ├── speech-recognition/
+│   ├── index.html
+│   └── 00-mid-exam                     notes UTS saja, satu section per soal kisi-kisi
+├── deep-learning/
 │   ├── index.html
 │   └── 00-mid-exam                     notes UTS saja, satu section per soal kisi-kisi
 └── tools/                      cachebust.py, check-engines.js
