@@ -626,12 +626,45 @@
     <tr><td>Tabel phone bahasa Indonesia (Lestari dkk., 2006)</td><td>Daftar bunyi bahasa Indonesia untuk ASR bahasa Indonesia</td><td>"saya" = /s a y a/, "lambang" = /l a m b a ng/</td></tr>
   </table>
 
-  <p><strong>Kenapa penting untuk speech recognition:</strong> ASR mengubah suara menjadi teks, padahal yang diucapkan adalah bunyi, sedangkan yang ditulis adalah huruf. Phonetics menjembatani keduanya dengan empat cara.</p>
+  <p><strong>Kenapa phonetics penting untuk speech recognition</strong></p>
+  <p>ASR menerima suara dan harus menghasilkan tulisan, padahal komputer tidak mendengar huruf, hanya gelombang suara. Supaya bisa sampai ke tulisan, ASR perlu tahu bunyi apa saja yang ada dalam sebuah bahasa, apa yang membedakan satu bunyi dari bunyi lain, dan bunyi apa saja yang menyusun setiap kata. Pengetahuan inilah yang dipelajari phonetics, dan ASR memakainya untuk empat hal berikut.</p>
   <ol>
-    <li><strong>Memberi unit bunyi:</strong> ASR memakai phone sebagai unit. Lexicon menyimpan setiap kata sebagai urutan phone, misalnya "saya" = s a y a, dan acoustic model mengenali phone di setiap potongan suara. Dengan unit phone, kata baru cukup ditambahkan pengucapannya ke lexicon tanpa harus merekam kata itu.</li>
-    <li><strong>Menjelaskan bunyi mana yang mirip:</strong> articulatory phonetics mengelompokkan bunyi berdasarkan cara membuatnya, misalnya kelompok bunyi nasal (m, n, ng). ASR memakai kelompok ini untuk menggabungkan bunyi yang mirip, sehingga bunyi yang jarang muncul di data latih tetap bisa dikenali.</li>
-    <li><strong>Menunjukkan bagian suara yang penting:</strong> acoustic phonetics menjelaskan bahwa bunyi ditentukan oleh bentuk mulut, bukan oleh tinggi-rendah nada. Karena itu fitur MFCC dirancang untuk mengambil informasi bentuk mulut dan membuang informasi nada.</li>
-    <li><strong>Membantu menjelaskan kesalahan:</strong> slide menyebut sistem modern makin jarang memasukkan pengetahuan fonetik secara langsung, tetapi pemahaman dasarnya membantu menjelaskan dan memperbaiki kesalahan sistem. Contoh: penutur yang mengucapkan "three" sebagai [t r iy] membuat ASR menulis "tree", karena bunyi [θ] di awal kata diganti [t].</li>
+    <li>
+      <p><strong>ASR cukup belajar puluhan bunyi, bukan puluhan ribu kata.</strong></p>
+      <ul>
+        <li><strong>Masalahnya:</strong> kalau setiap kata dipelajari secara utuh, ASR butuh rekaman untuk setiap kata, padahal kosakata bisa puluhan ribu kata. LVCSR di slide memakai sekitar 64.000 kata.</li>
+        <li><strong>Yang diberikan phonetics:</strong> daftar bunyi sebuah bahasa. Tabel phone di slide berisi 32 bunyi bahasa Indonesia, dan setiap kata adalah susunan dari bunyi-bunyi itu.</li>
+        <li><strong>Dipakai di ASR:</strong> acoustic model cukup belajar mengenali 32 bunyi itu, dan lexicon mencatat susunan bunyi setiap kata, misalnya "saya" = s a y a.</li>
+        <li><strong>Contoh:</strong> kata "sayur" tetap bisa dikenali walaupun tidak ada di rekaman latihan, karena bunyi s, a, y, u, r sudah dipelajari dari kata lain, dan lexicon mencatat "sayur" = s a y u r.</li>
+      </ul>
+    </li>
+    <li>
+      <p><strong>Bunyi yang jarang ada di data latih bisa memakai pola dari bunyi yang mirip.</strong></p>
+      <ul>
+        <li><strong>Masalahnya:</strong> bunyi sebuah phone sedikit berubah tergantung bunyi di sebelahnya, misalnya "a" di "ma" tidak persis sama dengan "a" di "ka". Jadi ASR harus mempelajari setiap bunyi beserta tetangganya, dan banyak kombinasinya yang jarang muncul di data latih. Di slide, dari 55.000 kombinasi bunyi dan tetangganya yang dibutuhkan, data latih hanya memuat 18.500.</li>
+        <li><strong>Yang diberikan phonetics:</strong> pengelompokan bunyi berdasarkan cara membuatnya. Contohnya, m dan n sama-sama bunyi nasal karena udaranya keluar lewat hidung, sehingga pengaruhnya ke bunyi di sebelahnya mirip.</li>
+        <li><strong>Dipakai di ASR:</strong> saat acoustic model dilatih, bunyi yang tetangganya sekelompok digabung dan dipelajari bersama. Slide menyebut proses ini state tying.</li>
+        <li><strong>Contoh:</strong> kalau data latih punya banyak contoh "ma" tetapi sedikit "na", bunyi "a" di "na" bisa dikenali dengan pola "a" dari "ma".</li>
+      </ul>
+    </li>
+    <li>
+      <p><strong>ASR tahu bagian suara mana yang harus disimpan dan mana yang dibuang.</strong></p>
+      <ul>
+        <li><strong>Masalahnya:</strong> kata "saya" yang diucapkan anak kecil dengan suara tinggi dan orang dewasa dengan suara rendah menghasilkan gelombang suara yang sangat berbeda, padahal katanya sama.</li>
+        <li><strong>Yang diberikan phonetics:</strong> acoustic phonetics menjelaskan bahwa tinggi-rendah suara berasal dari getaran pita suara, sedangkan bunyi "a" atau "i" ditentukan oleh bentuk mulut. Jadi untuk mengenali bunyi, yang penting adalah bentuk mulutnya.</li>
+        <li><strong>Dipakai di ASR:</strong> feature extraction (MFCC) dirancang untuk menyimpan angka yang menggambarkan bentuk mulut dan membuang tinggi-rendah suara.</li>
+        <li><strong>Contoh:</strong> "saya" dari anak kecil dan dari orang dewasa menghasilkan angka MFCC yang mirip, sehingga acoustic model mengenalinya sebagai bunyi yang sama.</li>
+      </ul>
+    </li>
+    <li>
+      <p><strong>Kesalahan karena aksen bisa dijelaskan dan diperbaiki.</strong></p>
+      <ul>
+        <li><strong>Masalahnya:</strong> orang dari daerah yang berbeda bisa mengucapkan bunyi yang sama dengan cara berbeda, sehingga ASR salah menulis kata.</li>
+        <li><strong>Yang diberikan phonetics:</strong> penjelasan bunyi mana yang tertukar dan kenapa. Contohnya, sebagian penutur mengucapkan bunyi "f" sebagai "p", karena keduanya dibuat dengan bibir, sehingga "fakta" terdengar seperti "pakta".</li>
+        <li><strong>Dipakai di ASR:</strong> setelah penyebabnya diketahui, kesalahan bisa diperbaiki, misalnya dengan menambahkan cara ucap "p a k t a" untuk kata "fakta" di lexicon, atau menambah rekaman penutur beraksen itu ke data latih.</li>
+        <li><strong>Kata slide:</strong> sistem modern makin jarang memasukkan pengetahuan fonetik secara langsung, tetapi pemahaman fonetik membantu menjelaskan dan memperbaiki kesalahan seperti ini. Contoh "fakta" dan "pakta" bukan dari slide.</li>
+      </ul>
+    </li>
   </ol>
 
   <h3>2. Bagaimana suara manusia dihasilkan</h3>
@@ -708,7 +741,7 @@
   <ol>
     <li><strong>Apa itu phonetics:</strong> definisi, phone, dan bedanya dengan huruf.</li>
     <li><strong>Isi phonetics:</strong> articulatory, acoustic, dan simbol bunyi (IPA, ARPAbet).</li>
-    <li><strong>Kenapa penting untuk ASR:</strong> unit bunyi, kelompok bunyi yang mirip, bagian suara yang penting, dan analisis kesalahan.</li>
+    <li><strong>Kenapa penting untuk ASR:</strong> ASR cukup belajar puluhan bunyi, bunyi yang jarang memakai pola bunyi yang mirip, MFCC menyimpan bentuk mulut, dan kesalahan karena aksen bisa dijelaskan.</li>
     <li><strong>Kalau ditanya lebih jauh:</strong> ambil dari subbab 2 (cara suara dihasilkan) atau subbab 3 (spectrogram).</li>
   </ol>
 
@@ -718,24 +751,25 @@
     <div class="jawaban-esai">
       <p>Phonetics adalah ilmu yang mempelajari bunyi ucapan manusia: bagaimana bunyi dibuat oleh organ bicara, seperti apa gelombang suaranya, dan bagaimana menuliskannya. Satuan dasarnya disebut phone, yaitu bunyi terkecil dalam ucapan, seperti bunyi [s] di awal kata "saya". Phone tidak sama dengan huruf, karena satu huruf bisa punya bunyi berbeda, misalnya huruf e di "enak" dan "kemana", dan dua huruf bisa menjadi satu bunyi, misalnya "ng" di "lambang".</p>
       <p>Karena itu phonetics menulis bunyi dengan simbol khusus, misalnya IPA (International Phonetic Alphabet) yang berlaku untuk semua bahasa, atau ARPAbet yang hanya memakai huruf biasa sehingga mudah diproses komputer. Phonetics juga dibagi menjadi articulatory phonetics, yang mempelajari cara bunyi dibuat oleh organ bicara, dan acoustic phonetics, yang mempelajari sifat gelombang suara setiap bunyi.</p>
-      <p>Phonetics penting untuk speech recognition karena ASR (Automatic Speech Recognition) mengubah suara menjadi teks, padahal yang diucapkan adalah bunyi, bukan huruf. Phonetics menyediakan unit yang menjembatani keduanya, yaitu phone: lexicon menyimpan setiap kata sebagai urutan phone, misalnya "saya" sebagai s a y a, dan acoustic model mengenali phone di setiap potongan suara. Dengan unit phone, kata baru cukup ditambahkan pengucapannya ke lexicon tanpa harus merekam kata itu.</p>
-      <p>Selain itu, articulatory phonetics menjelaskan bunyi mana yang mirip karena dibuat dengan cara yang mirip, misalnya kelompok bunyi nasal, sehingga ASR bisa menggabungkan bunyi-bunyi itu ketika data latihnya sedikit. Acoustic phonetics menjelaskan bahwa bunyi ditentukan oleh bentuk mulut, bukan tinggi-rendah nada, sehingga fitur MFCC (Mel-Frequency Cepstral Coefficients) dirancang untuk mengambil informasi bentuk mulut itu.</p>
-      <p>Terakhir, walaupun sistem modern makin jarang memasukkan aturan fonetik secara langsung, pemahaman fonetik tetap membantu menjelaskan kesalahan ASR. Misalnya, penutur yang mengucapkan "three" sebagai [t r iy] membuat ASR menulis "tree", karena bunyi [θ] di awal kata diganti bunyi [t].</p>
+      <p>Phonetics penting untuk speech recognition karena ASR (Automatic Speech Recognition) menerima suara tetapi harus menghasilkan tulisan, padahal komputer tidak mendengar huruf, hanya gelombang suara. Pertama, phonetics menyusun daftar bunyi sebuah bahasa, misalnya 32 bunyi bahasa Indonesia, sehingga acoustic model cukup belajar mengenali puluhan bunyi, bukan puluhan ribu kata. Lexicon lalu mencatat susunan bunyi setiap kata, misalnya "sayur" = s a y u r, sehingga kata yang tidak ada di rekaman latihan tetap bisa dikenali dari bunyi-bunyinya.</p>
+      <p>Kedua, phonetics mengelompokkan bunyi berdasarkan cara membuatnya, misalnya m dan n yang sama-sama bunyi nasal. Kelompok ini dipakai ketika data latih kurang: bunyi "a" di "na" yang jarang muncul bisa dikenali dengan pola "a" dari "ma" yang sering muncul, karena bunyi di sebelahnya sekelompok.</p>
+      <p>Ketiga, acoustic phonetics menjelaskan bahwa bunyi seperti "a" atau "i" ditentukan oleh bentuk mulut, sedangkan tinggi-rendah suara berasal dari getaran pita suara. Karena itu fitur MFCC (Mel-Frequency Cepstral Coefficients) dirancang untuk menyimpan bentuk mulut dan membuang tinggi-rendah suara, sehingga kata "saya" dari anak kecil maupun orang dewasa menghasilkan angka yang mirip.</p>
+      <p>Terakhir, phonetics membantu menjelaskan dan memperbaiki kesalahan ASR. Misalnya, penutur yang mengucapkan "fakta" sebagai "pakta" membuat ASR menulis "pakta", karena bunyi [f] diganti [p] yang sama-sama dibuat dengan bibir. Kesalahan ini bisa diperbaiki dengan menambahkan cara ucap tersebut ke lexicon, atau dengan menambah rekaman penutur beraksen itu ke data latih.</p>
     </div>
   </details>
 
   <aside class="jebakan">
     <ul>
-      <li><mark class="jebakan">Langsung menjawab "phonetics dipakai di lexicon dan acoustic model".</mark> Jelaskan dulu apa itu phonetics dan kenapa ASR butuh unit bunyi, baru tunjukkan di mana phonetics dipakai.</li>
+      <li><mark class="jebakan">Langsung menjawab "phonetics dipakai di lexicon dan acoustic model".</mark> Jelaskan dulu apa itu phonetics dan masalah apa yang diselesaikannya untuk ASR, baru tunjukkan di mana phonetics dipakai.</li>
       <li><strong>Menyamakan phone dengan huruf:</strong> phone adalah bunyi. Satu huruf bisa punya dua bunyi, dan dua huruf bisa menjadi satu bunyi.</li>
     </ul>
   </aside>
 
-  <p class="intinya">Phonetics mempelajari bunyi ucapan, dengan satuan phone yang berbeda dari huruf. ASR butuh phonetics karena yang diucapkan adalah bunyi: phone menjadi unit di lexicon dan acoustic model, kelompok bunyi membantu mengenali bunyi yang mirip, dan acoustic phonetics menentukan informasi yang diambil MFCC.</p>
+  <p class="intinya">Phonetics mempelajari bunyi ucapan, dengan satuan phone yang berbeda dari huruf. ASR butuh phonetics karena komputer hanya menerima bunyi: ASR cukup belajar puluhan bunyi lalu menyusunnya menjadi kata, bunyi yang jarang bisa memakai pola bunyi yang mirip, MFCC tahu harus menyimpan bentuk mulut, dan kesalahan karena aksen bisa dijelaskan.</p>
 
   <details class="soal">
     <summary><strong>Soal latihan:</strong> Kenapa ASR memakai phone sebagai unit, bukan huruf?</summary>
-    <p>Karena yang diucapkan dan direkam adalah bunyi, dan tulisan tidak selalu sesuai dengan bunyinya. Huruf e di "enak" dan "kemana" bunyinya berbeda, sedangkan "ng" ditulis dua huruf tetapi satu bunyi. Dengan phone, setiap unit punya satu bunyi yang jelas, dan kata baru cukup ditambahkan pengucapannya ke lexicon.</p>
+    <p>Karena yang diucapkan dan direkam adalah bunyi, dan tulisan tidak selalu sesuai dengan bunyinya: huruf e di "enak" dan "kemana" bunyinya berbeda, sedangkan "ng" ditulis dua huruf tetapi satu bunyi. Dengan phone, acoustic model cukup belajar 32 bunyi bahasa Indonesia, dan setiap kata, termasuk kata yang tidak ada di rekaman latihan, dikenali dari susunan bunyinya di lexicon.</p>
   </details>
   <details class="soal">
     <summary><strong>Soal latihan:</strong> Di spectrogram ada bagian kosong yang diikuti semburan tipis tegak. Bunyi apa itu, dan kenapa polanya begitu?</summary>
