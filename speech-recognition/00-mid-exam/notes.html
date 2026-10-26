@@ -13,6 +13,7 @@
   <style>
     main { counter-reset: langkah -1; } /* section 0 = strategi, section 1 sampai 5 = soal 1 sampai 5 */
     .langkah h3 { margin: 1.6rem 0 .4rem; font-size: 1.05rem; }
+    .langkah.singkat { counter-increment: none; } /* versi singkat soal 2: nomornya ikut soal 2 */
     .diagram { color: var(--tinta); }
     .diagram text { fill: currentColor; font: 13px var(--huruf); }
     .diagram .kecil { font-size: 12.5px; fill: var(--pudar); }
@@ -42,7 +43,8 @@
     <ol start="0">
       <li><a href="#langkah-0">Strategi 100 menit dan gaya jawaban</a></li>
       <li><a href="#langkah-1">Soal 1 · Speech recognition pipeline (esai)</a></li>
-      <li><a href="#langkah-2">Soal 2 · Phonetics dan speech recognition (esai)</a></li>
+      <li><a href="#langkah-2">Soal 2 · Phonetics dan speech recognition (esai)</a>
+        <ul><li><a href="#langkah-2-singkat">Versi singkat: yang wajib dipelajari</a></li></ul></li>
       <li><a href="#langkah-3">Soal 3 · Merancang eksperimen ASR (esai)</a></li>
       <li><a href="#langkah-4">Soal 4 · HMM dan path probability (studi kasus)</a></li>
       <li><a href="#langkah-5">Soal 5 · Word error rate (studi kasus)</a></li>
@@ -351,6 +353,10 @@
     <span class="ke">soal 1 (lexicon dan MFCC memakai konsep fonetik) dan soal 4 (state HMM adalah subphone)</span>
   </p>
 
+  <aside class="catatan">
+    <p>Section ini lengkap supaya bisa dipakai sebagai rujukan, bukan untuk dihafal semua. Kalau waktumu sedikit, pelajari dulu <a href="#langkah-2-singkat">versi singkatnya</a> di bawah.</p>
+  </aside>
+
   <h3>Bentuk soal</h3>
   <ul>
     <li>Jelaskan hubungan phonetics dengan speech recognition.</li>
@@ -589,6 +595,134 @@
   <details class="soal">
     <summary><strong>Soal latihan:</strong> Tulis triphone word-internal untuk kata "cat" (<code>K AE T</code>).</summary>
     <p><code>K+AE</code>, <code>K-AE+T</code>, <code>AE-T</code>. Phone pertama tidak punya tetangga kiri dan phone terakhir tidak punya tetangga kanan, karena konteksnya berhenti di batas kata.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah singkat" id="langkah-2-singkat">
+<details>
+  <summary><h2>Soal 2 versi singkat: yang wajib dipelajari</h2></summary>
+  <p class="rantai">
+    <span class="dari">materi lengkap soal 2 (<a href="#langkah-2">2️⃣</a>) dan slide Phonetics nomor 20 sampai 35</span>
+    <span class="ke">jawaban esai soal 2 di ujian</span>
+  </p>
+
+  <h3>Petunjuk dari kisi-kisi</h3>
+  <p>Kedua versi kisi-kisi menulis "phonetics <b>and</b> speech recognition", jadi soalnya kemungkinan besar menanyakan <b>hubungan</b> phonetics dengan ASR. Di kelas, dosen juga membahas organ penghasil suara (slide Phonetics nomor 21), jadi bagian itu kemungkinan besar ikut keluar.</p>
+  <ol>
+    <li>Jelaskan apa itu phonetics dan hubungannya dengan speech recognition. <b>(paling mungkin)</b></li>
+    <li>Jelaskan bagaimana suara manusia dihasilkan, termasuk bunyi voiced dan voiceless.</li>
+    <li>Jelaskan place dan manner of articulation beserta contohnya.</li>
+    <li>Jelaskan apa itu spectrogram dan cara membacanya. <b>(kemungkinan kecil, hanya ada di kisi-kisi versi 2)</b></li>
+  </ol>
+
+  <h3>Phonetics dan phone</h3>
+  <p><mark>Phonetics</mark> adalah ilmu tentang bunyi ucapan manusia: bagaimana bunyi dibuat oleh organ bicara, dan bagaimana sifat gelombang suaranya. Satuan dasarnya adalah <b>phone</b>, yaitu bunyi terkecil dalam ucapan, misalnya bunyi [s] di awal kata "saya". Phone ditulis dengan simbol khusus, yaitu IPA (International Phonetic Alphabet) atau ARPAbet, versi simbol bunyi yang hanya memakai huruf biasa sehingga mudah diproses komputer.</p>
+
+  <h3>Bagaimana suara dihasilkan</h3>
+  <aside class="analogi">
+    <p>Suara manusia mirip alat musik tiup: paru-paru adalah pompa udara, pita suara adalah bagian yang bergetar, dan rongga mulut serta hidung adalah ruang yang membentuk bunyinya.</p>
+    <p class="batas">bentuk alat musik tiup tetap, sedangkan bentuk mulut terus berubah saat bicara. Perubahan bentuk itulah yang menghasilkan bunyi yang berbeda-beda.</p>
+  </aside>
+  <figure>
+    <svg class="diagram" viewBox="0 0 420 372" role="img" aria-label="Jalur udara saat bicara: dari lungs naik ke trachea, lalu larynx tempat vocal folds bergetar atau terbuka, lalu pharynx, lalu keluar lewat oral cavity atau nasal cavity.">
+      <defs><marker id="panah-suara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <rect class="kotak" x="10" y="16" width="170" height="48" rx="8"/>
+      <text x="95" y="36" text-anchor="middle">Oral cavity</text>
+      <text x="95" y="54" text-anchor="middle" class="kecil">lidah, bibir, gigi</text>
+      <rect class="kotak" x="200" y="16" width="170" height="48" rx="8"/>
+      <text x="285" y="36" text-anchor="middle">Nasal cavity</text>
+      <text x="285" y="54" text-anchor="middle" class="kecil">bunyi m, n, ng</text>
+      <line class="garis" x1="160" y1="104" x2="118" y2="68" marker-end="url(#panah-suara)"/>
+      <line class="garis" x1="220" y1="104" x2="262" y2="68" marker-end="url(#panah-suara)"/>
+      <rect class="kotak" x="100" y="104" width="180" height="40" rx="8"/>
+      <text x="190" y="129" text-anchor="middle">Pharynx</text>
+      <text x="288" y="129" class="kecil">ruang resonansi</text>
+      <line class="garis" x1="190" y1="180" x2="190" y2="148" marker-end="url(#panah-suara)"/>
+      <rect class="kotak" x="100" y="180" width="180" height="40" rx="8"/>
+      <text x="190" y="205" text-anchor="middle">Larynx (vocal folds)</text>
+      <text x="288" y="197" class="kecil">getar: voiced</text>
+      <text x="288" y="213" class="kecil">terbuka: voiceless</text>
+      <line class="garis" x1="190" y1="256" x2="190" y2="224" marker-end="url(#panah-suara)"/>
+      <rect class="kotak" x="100" y="256" width="180" height="40" rx="8"/>
+      <text x="190" y="281" text-anchor="middle">Trachea</text>
+      <text x="288" y="281" class="kecil">jalan udara</text>
+      <line class="garis" x1="190" y1="320" x2="190" y2="300" marker-end="url(#panah-suara)"/>
+      <rect class="kotak" x="100" y="320" width="180" height="40" rx="8"/>
+      <text x="190" y="345" text-anchor="middle">Lungs</text>
+      <text x="288" y="345" class="kecil">sumber udara</text>
+    </svg>
+    <figcaption>Jalur udara saat bicara, dibaca dari bawah ke atas. Bunyi nasal keluar lewat hidung, bunyi lain lewat mulut.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Organ</th><th>Perannya</th></tr>
+    <tr><td>Lungs (paru-paru)</td><td>Sumber aliran udara. Kita bicara sambil menghembuskan napas</td></tr>
+    <tr><td>Trachea (batang tenggorok)</td><td>Jalan udara dari paru-paru ke atas</td></tr>
+    <tr><td>Larynx (kotak suara) dan vocal folds (pita suara)</td><td>Vocal folds ada di dalam larynx. Kalau bergetar, bunyinya <b>voiced</b>. Kalau terbuka, udara lewat tanpa getaran dan bunyinya <b>voiceless</b></td></tr>
+    <tr><td>Pharynx (faring)</td><td>Rongga di belakang mulut. Bentuknya ikut memperkuat frekuensi tertentu (resonance)</td></tr>
+    <tr><td>Oral cavity (rongga mulut)</td><td>Lidah, bibir, gigi, dan langit-langit mengatur aliran udara sehingga terbentuk bunyi tertentu (articulation)</td></tr>
+    <tr><td>Nasal cavity (rongga hidung)</td><td>Kalau langit-langit lunak (velum) turun, udara keluar lewat hidung dan terbentuk bunyi nasal: m, n, ng</td></tr>
+  </table>
+  <p>Slide merangkum proses ini menjadi tiga tahap: <b>flow</b> (aliran udara dari paru-paru), <b>resonance</b> (bentuk rongga memperkuat frekuensi tertentu), dan <b>articulation</b> (lidah, bibir, dan langit-langit mengatur aliran udara).</p>
+
+  <h3>Tiga ciri setiap konsonan</h3>
+  <table>
+    <tr><th>Ciri</th><th>Pertanyaannya</th><th>Contoh</th></tr>
+    <tr><td>Voicing</td><td>Vocal folds bergetar atau tidak?</td><td>Voiced: b, d, g, m, z, dan semua vowel. Voiceless: p, t, k, s, f</td></tr>
+    <tr><td>Place of articulation</td><td>Di mana udara paling dihambat?</td><td>Bilabial (kedua bibir): p, b, m. Alveolar (gusi di belakang gigi atas): t, d, s, n. Velar (langit-langit belakang): k, g, ng</td></tr>
+    <tr><td>Manner of articulation</td><td>Bagaimana udara dihambat?</td><td>Stop (ditutup total lalu dilepas): p, t, k. Fricative (celah sempit sampai berdesis): s, f. Nasal (udara lewat hidung): m, n</td></tr>
+  </table>
+  <p><strong>Cara memakai:</strong> gabungkan ketiganya untuk menjelaskan satu bunyi. Contoh: [b] adalah voiced bilabial stop, dan [s] adalah voiceless alveolar fricative.</p>
+
+  <h3>Hubungannya dengan speech recognition</h3>
+  <ul>
+    <li><strong>Lexicon:</strong> setiap kata disimpan sebagai urutan phone, misalnya "saya" = s a y a. Jadi ASR mengenali kata lewat bunyinya.</li>
+    <li><strong>Acoustic model:</strong> yang diberi peluang di setiap frame adalah phone, tepatnya subphone, yaitu bagian awal, tengah, atau akhir dari satu phone.</li>
+    <li><strong>Feature extraction:</strong> MFCC memakai skala mel yang meniru cara telinga mendengar, dan mengambil informasi bentuk mulut, karena bentuk mulut itulah yang menentukan phone.</li>
+    <li><strong>Analisis kesalahan:</strong> aksen mengubah cara bunyi diucapkan, misalnya "three" diucapkan [t r iy] sehingga dikenali sebagai "tree".</li>
+  </ul>
+
+  <h3>Prioritas belajar</h3>
+  <table>
+    <tr><th>Prioritas</th><th>Topik</th></tr>
+    <tr><td>Wajib</td><td>Semua isi section ini</td></tr>
+    <tr><td>Baca sekilas</td><td>Spectrogram (pola dasar vowel, stop, dan fricative), F0, formant, dan skala mel di <a href="#langkah-2">2️⃣</a></td></tr>
+    <tr><td>Boleh dilewati</td><td>Tabel IPA dan ARPAbet lengkap, prosody, detail triphone dan state tying, rumus mel</td></tr>
+  </table>
+
+  <h3>Satu kerangka untuk semua bentuk soal</h3>
+  <ol>
+    <li><strong>Definisi:</strong> phonetics dan phone.</li>
+    <li><strong>Produksi suara:</strong> dari lungs sampai rongga mulut atau hidung.</li>
+    <li><strong>Voicing, place, manner:</strong> masing-masing dengan satu contoh.</li>
+    <li><strong>Hubungan ke ASR:</strong> phone menjadi unit di lexicon dan acoustic model.</li>
+  </ol>
+  <p>Kalau soalnya hanya menanyakan satu bagian, misalnya produksi suara saja, kembangkan bagian itu dan sebut bagian lain secukupnya.</p>
+
+  <details class="contoh">
+    <summary><span class="tag c-mint">Contoh jawaban</span> Phonetics dan speech recognition, versi singkat</summary>
+    <aside class="soal-ujian"><p>Jelaskan apa itu phonetics, bagaimana suara manusia dihasilkan, dan hubungannya dengan speech recognition!</p></aside>
+    <div class="jawaban-esai">
+      <p>Phonetics adalah ilmu yang mempelajari bunyi ucapan manusia, mulai dari cara bunyi dibuat oleh organ bicara sampai sifat gelombang suaranya. Satuan dasarnya disebut phone, yaitu bunyi terkecil dalam ucapan, seperti bunyi [s] di awal kata "saya". Phone ditulis dengan simbol khusus, misalnya IPA (International Phonetic Alphabet) atau ARPAbet, yaitu versi simbol bunyi yang hanya memakai huruf biasa sehingga mudah diproses komputer.</p>
+      <p>Suara manusia dihasilkan dari aliran udara. Saat bicara, udara dari lungs (paru-paru) naik melalui trachea (batang tenggorok) menuju larynx (kotak suara), tempat vocal folds (pita suara) berada. Kalau vocal folds bergetar, bunyinya disebut voiced, seperti [b], [z], dan semua vowel, sedangkan kalau vocal folds terbuka sehingga udara lewat tanpa getaran, bunyinya disebut voiceless, seperti [p] dan [s].</p>
+      <p>Setelah itu udara melewati pharynx (faring), lalu keluar melalui oral cavity (rongga mulut) atau nasal cavity (rongga hidung). Bentuk rongga-rongga ini memperkuat frekuensi tertentu (resonance), sedangkan lidah, bibir, gigi, dan langit-langit mengatur aliran udara (articulation). Kalau langit-langit lunak turun, udara keluar lewat hidung dan terbentuk bunyi nasal seperti [m] dan [n].</p>
+      <p>Setiap konsonan bisa dijelaskan dengan tiga ciri: voicing, place of articulation, dan manner of articulation. Place adalah tempat udara paling dihambat, misalnya kedua bibir (bilabial) untuk [p] dan [b], sedangkan manner adalah cara udara dihambat, misalnya ditutup total lalu dilepas (stop) atau dipersempit sampai berdesis (fricative). Jadi [b] adalah voiced bilabial stop, sedangkan [s] adalah voiceless alveolar fricative.</p>
+      <p>Phonetics menjadi dasar speech recognition karena ASR (Automatic Speech Recognition) mengenali kata lewat bunyinya. Lexicon menyimpan setiap kata sebagai urutan phone, misalnya "saya" sebagai s a y a, dan acoustic model memberi peluang untuk setiap phone, tepatnya subphone, di setiap potongan suara. Fitur MFCC (Mel-Frequency Cepstral Coefficients) juga dirancang mengikuti cara manusia mendengar dan mengambil informasi bentuk mulut, karena bentuk mulut itulah yang menentukan phone yang diucapkan.</p>
+    </div>
+  </details>
+
+  <aside class="jebakan">
+    <ul>
+      <li><mark class="jebakan">Menganggap semua bunyi keluar lewat hidung.</mark> Hanya bunyi nasal (m, n, ng) yang keluar lewat nasal cavity. Bunyi lain keluar lewat mulut.</li>
+      <li><strong>Menganggap voiced atau voiceless ditentukan lidah:</strong> voicing hanya ditentukan vocal folds, bergetar atau tidak.</li>
+    </ul>
+  </aside>
+
+  <p class="intinya">Kuasai empat hal: phonetics dan phone, jalur udara dari lungs sampai mulut atau hidung, voicing, place, dan manner, serta phone sebagai unit di lexicon dan acoustic model.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Jelaskan jalur udara saat kita mengucapkan bunyi [m], dan tentukan voicing, place, serta manner-nya.</summary>
+    <p>Udara dari lungs naik lewat trachea, lalu melewati vocal folds di larynx yang bergetar, jadi [m] adalah bunyi voiced. Setelah melewati pharynx, kedua bibir menutup sehingga udara tidak bisa keluar lewat mulut, dan langit-langit lunak turun sehingga udara keluar lewat nasal cavity. Jadi [m] adalah voiced bilabial nasal.</p>
   </details>
 </details>
 </section>
