@@ -33,6 +33,7 @@
     .deck .h40 svg { max-height: 40vh; }
     .deck .h58 svg { max-height: 58vh; }
     .deck .h64 svg { max-height: 64vh; }
+    .deck .h68 svg { max-height: 68vh; }
     .sym { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5em 1.5em; }
     .sym figure { margin: 0; text-align: left; }
     .sym .dg-fig { text-align: left; }
@@ -487,13 +488,13 @@ c > x : No
   <table class="tight xs">
     <tr><th>Simbol</th><th>Komponen</th><th>Contoh di sistem katering</th></tr>
     <tr><td><div class="dg-fig" data-kind="dfd">ent a 0 0 Customer</div></td><td><strong>External entity:</strong> orang, organisasi, atau sistem lain di luar sistem. Namanya kata benda.</td><td><b>Customer</b>: pelanggan yang memesan makanan. Ia mengirim pesanan dan menerima konfirmasi, tapi bukan bagian dari sistem.</td></tr>
-    <tr><td><div class="dg-fig" data-kind="dfd">dproc a 0 0 [2] Process Order</div></td><td><strong>Process:</strong> kegiatan yang mengolah data. Bernomor, namanya kata kerja + objek.</td><td><b>2 Process Order</b>: sistem memproses (kata kerja) pesanan (objek): cek menu, hitung total, minta pembayaran.</td></tr>
+    <tr><td><div class="dg-fig" data-kind="dfd">dproc a 0 0 [3] Place Order</div></td><td><strong>Process:</strong> kegiatan yang mengolah data. Bernomor, namanya kata kerja + objek.</td><td><b>3 Place Order</b>: sistem mencatat (place) pesanan (order): cek ketersediaan menu, hitung total, simpan pesanan.</td></tr>
     <tr><td><div class="dg-fig" data-kind="dfd">store a 0 0 [D3] Orders</div></td><td><strong>Data store:</strong> tempat data disimpan. ID-nya D1, D2, …</td><td><b>D3 Orders</b>: semua pesanan yang tersimpan di sistem.</td></tr>
     <tr><td><div class="dg-fig" data-kind="dfd">
 pt a 0 0
 pt b 130 0
 a > b : Order details
-    </div></td><td><strong>Data flow:</strong> data yang bergerak. Selalu diberi nama data.</td><td><b>Order details</b>: menu, jumlah, dan alamat yang dikirim Customer ke process 2.</td></tr>
+    </div></td><td><strong>Data flow:</strong> data yang bergerak. Selalu diberi nama data.</td><td><b>Order details</b>: menu, jumlah, dan alamat yang dikirim Customer ke process 3.</td></tr>
   </table>
 </section>
 
@@ -516,7 +517,7 @@ p > d : Menu record
     </div><p>Process yang menyimpan data ke data store.</p></div>
     <div class="salah"><h3><span class="x">✗</span> Tidak boleh: black hole</h3><div class="dg-fig" data-kind="dfd">
 ent m 0 0 Customer
-dproc p 250 0 [2] Process Order !
+dproc p 250 0 [3] Place Order !
 m > p : Order details
     </div><p>Process hanya menerima data, tidak ada output.</p></div>
     <div class="salah"><h3><span class="x">✗</span> Tidak boleh: miracle</h3><div class="dg-fig" data-kind="dfd">
@@ -538,7 +539,7 @@ p > l : Order report
     <tr><th>Diagram</th><th>Isi</th><th>Nomor process</th></tr>
     <tr><td>Context diagram</td><td>seluruh sistem sebagai <b>satu process</b>, semua entity, semua data flow, tanpa data store</td><td>0</td></tr>
     <tr><td>Level 0</td><td>process utama (satu per kegiatan), data store, dan semua flow dari context diagram</td><td>1, 2, 3, …</td></tr>
-    <tr><td>Level 1</td><td>satu process Level 0 dipecah menjadi subprocess</td><td>2.1, 2.2, … (untuk process 2)</td></tr>
+    <tr><td>Level 1</td><td>satu process Level 0 dipecah menjadi subprocess</td><td>3.1, 3.2, … (untuk process 3)</td></tr>
   </table>
 </section>
 
@@ -586,10 +587,12 @@ p > l : Order report
   <table class="tight xs">
     <tr><th>Process</th><th>Dari kalimat soal</th><th>Entity</th><th>Data store</th></tr>
     <tr><td>1 Manage Menu</td><td>administrators manage the menu</td><td>Administrator</td><td>D2 Menu</td></tr>
-    <tr><td>2 Process Order</td><td>checks availability, calculates the total, payment, confirmed</td><td>Customer, Payment Provider</td><td>D1 Customers, D2 Menu, D3 Orders, D4 Payments</td></tr>
-    <tr><td>3 Prepare Order</td><td>kitchen staff … update the preparation status</td><td>Kitchen Staff</td><td>D3 Orders</td></tr>
-    <tr><td>4 Deliver Order</td><td>delivery staff get the delivery information</td><td>Delivery Staff</td><td>D3 Orders, D5 Deliveries</td></tr>
-    <tr><td>5 Generate Report</td><td>produce reports on totals, payment, deliveries</td><td>Administrator</td><td>D3, D4, D5</td></tr>
+    <tr><td>2 Browse Menu</td><td>look through the menu</td><td>Customer</td><td>D2 Menu</td></tr>
+    <tr><td>3 Place Order</td><td>send an order, checks availability, calculates the total</td><td>Customer</td><td>D1 Customers, D2 Menu, D3 Orders</td></tr>
+    <tr><td>4 Process Payment</td><td>payment request, confirmed only after the payment is verified</td><td>Payment Provider, Customer</td><td>D3 Orders, D4 Payments</td></tr>
+    <tr><td>5 Prepare Order</td><td>kitchen staff … update the preparation status</td><td>Kitchen Staff</td><td>D3 Orders</td></tr>
+    <tr><td>6 Deliver Order</td><td>delivery staff get the delivery information</td><td>Delivery Staff</td><td>D1 Customers, D3 Orders, D5 Deliveries</td></tr>
+    <tr><td>7 Generate Report</td><td>produce reports on totals, payment, deliveries</td><td>Administrator</td><td>D3, D4, D5</td></tr>
   </table>
   <ul class="small">
     <li><strong>Data store:</strong> D1 Customers, D2 Menu, D3 Orders, D4 Payments, D5 Deliveries.</li>
@@ -599,13 +602,13 @@ p > l : Order report
 <section class="slide" data-soal="catering">
   <p class="kicker">Notes 4️⃣ · Level 0</p>
   <h2>Level 0: satu fragment per process</h2>
-  <p class="sub"><mark>DFD fragment</mark> adalah satu process beserta entity, data store, dan flow-nya. Ini fragment process 2.</p>
+  <p class="sub"><mark>DFD fragment</mark> adalah satu process beserta entity, data store, dan flow-nya. Ini fragment process 4 Process Payment.</p>
   <div class="cols wl">
     <div data-dg="catering.frag2" class="h58"></div>
     <ul class="small">
       <li><strong>Flow ke entity</strong> diambil dari context diagram.</li>
       <li><strong>Flow ke data store</strong> ditambah sekarang: process menyimpan atau membaca data.</li>
-      <li><strong>Buat fragment</strong> untuk process 1 sampai 5, lalu gabungkan. Entity dan store yang sama digambar sekali.</li>
+      <li><strong>Buat fragment</strong> untuk process 1 sampai 7, lalu gabungkan. Entity dan store yang sama digambar sekali.</li>
     </ul>
   </div>
 </section>
@@ -613,19 +616,19 @@ p > l : Order report
 <section class="slide full" data-soal="catering">
   <p class="kicker">Notes 4️⃣ · Level 0</p>
   <h2>Level 0 soal 3</h2>
-  <p class="sub">Gabungan lima fragment. Semua flow dari context diagram ada di sini.</p>
-  <div data-dg="catering.l0" class="h64"></div>
+  <div data-dg="catering.l0" class="h68"></div>
+  <p class="coba-link">Gabungan tujuh fragment. Semua flow dari context diagram ada di sini, dan setiap process punya tugas sendiri.</p>
 </section>
 
 <section class="slide" data-soal="catering">
   <p class="kicker">Notes 4️⃣ · Level 1</p>
-  <h2>Level 1: process 2 Process Order</h2>
-  <p class="sub">Process 2 dipecah mengikuti urutan kalimat soal: terima pesanan, hitung total, minta pembayaran, konfirmasi.</p>
+  <h2>Level 1: process 3 Place Order</h2>
+  <p class="sub">Process 3 dipecah mengikuti urutan kalimat soal: cek ketersediaan menu, hitung total, lalu simpan pesanan.</p>
   <div class="cols wl">
     <div data-dg="catering.l1" class="h64"></div>
     <ul class="small">
-      <li><strong>Nomor:</strong> 2.1, 2.2, 2.3, 2.4.</li>
-      <li><strong>Flow internal</strong> antar subprocess boleh ditambah (Order items, Order total, Pending order).</li>
+      <li><strong>Nomor:</strong> 3.1, 3.2, 3.3.</li>
+      <li><strong>Flow internal</strong> antar subprocess boleh ditambah (Available items, Order with total).</li>
       <li><strong>Berhenti memecah</strong> saat process bisa dijelaskan dalam satu kalimat. Idealnya 3 sampai 7 subprocess.</li>
     </ul>
   </div>
@@ -634,14 +637,13 @@ p > l : Order report
 <section class="slide" data-soal="catering">
   <p class="kicker">Notes 4️⃣ · Balancing</p>
   <h2>Balancing: cek Level 1 dengan Level 0</h2>
-  <p class="sub"><mark>Balancing</mark>: semua flow process 2 di Level 0 harus muncul lagi di Level 1, tidak boleh hilang atau bertambah.</p>
-  <table class="tight xs">
-    <tr><th>Flow process 2 di Level 0</th><th>Di Level 1</th><th>Flow process 2 di Level 0</th><th>Di Level 1</th></tr>
-    <tr><td>Customer → Order details</td><td>2.1 ✓</td><td>D1 → Customer details</td><td>2.1 ✓</td></tr>
-    <tr><td>Menu list → Customer</td><td>2.1 ✓</td><td>Payment request → Payment Provider</td><td>2.3 ✓</td></tr>
-    <tr><td>Order confirmation → Customer</td><td>2.4 ✓</td><td>Payment Provider → Payment verification</td><td>2.4 ✓</td></tr>
-    <tr><td>D2 → Menu details</td><td>2.1 ✓</td><td>Payment record → D4</td><td>2.4 ✓</td></tr>
-    <tr><td>Customer data → D1</td><td>2.1 ✓</td><td>Confirmed order → D3</td><td>2.4 ✓</td></tr>
+  <p class="sub"><mark>Balancing</mark>: semua flow process 3 di Level 0 harus muncul lagi di Level 1, tidak boleh hilang atau bertambah.</p>
+  <table class="tight small">
+    <tr><th>Flow process 3 di Level 0</th><th>Di Level 1</th></tr>
+    <tr><td>Customer → Order details</td><td>3.1 ✓</td></tr>
+    <tr><td>D2 → Menu availability</td><td>3.1 ✓</td></tr>
+    <tr><td>Customer data → D1</td><td>3.3 ✓</td></tr>
+    <tr><td>New order → D3</td><td>3.3 ✓</td></tr>
   </table>
   <ul class="small">
     <li><strong>Tidak boleh</strong> menambah flow baru ke entity di Level 1. Kalau perlu, tambahkan juga di Level 0 dan context diagram.</li>
@@ -686,7 +688,7 @@ p > l : Order report
   <p class="sub">Kerjakan dulu, jawabannya di slide berikutnya.</p>
   <ol class="soal-list small">
     <li><strong>Bike Rental Fee Calculator (GUI).</strong> City Bike: IDR 15,000 jam pertama, IDR 5,000 per jam tambahan. E-Bike: IDR 25,000 dan IDR 10,000. Lebih dari 5 jam: diskon 10%. Durasi harus bilangan bulat positif. Tombol Calculate Fee dan Clear. Buat IPO chart, pseudocode, dan flowchart untuk kedua tombol.</li>
-    <li><strong>Online Clinic Appointment System.</strong> Patient mengirim appointment request. Sistem mengecek jadwal dokter, meminta pembayaran ke Payment Gateway, lalu mengirim konfirmasi setelah pembayaran terverifikasi. Doctor menerima daftar janji harian dan menandai selesai. Administrator mengelola jadwal dan menerima laporan bulanan. Buat context diagram, Level 0, dan Level 1 untuk process Book Appointment.</li>
+    <li><strong>Online Clinic Appointment System.</strong> Patient mengirim appointment request. Sistem mengecek jadwal dokter, meminta pembayaran ke Payment Gateway, lalu mengirim konfirmasi setelah pembayaran terverifikasi. Doctor menerima daftar janji harian dan menandai selesai. Administrator mengelola jadwal dan menerima laporan bulanan. Buat context diagram, Level 0, dan Level 1 untuk process Process Payment.</li>
   </ol>
   <p class="coba-link">Soal lengkap berbahasa Inggris dan kanvasnya: <a href="viz/latihan.html#bike">Latihan 1</a> · <a href="viz/latihan.html#clinic">Latihan 2</a></p>
 </section>
@@ -713,7 +715,7 @@ p > l : Order report
 <section class="slide" data-soal="clinic">
   <p class="kicker">Notes 5️⃣ · Jawaban</p>
   <h2>Jawaban latihan 2</h2>
-  <p class="sub">Level 0: 1 Manage Doctor Schedules, 2 Book Appointment, 3 Manage Daily Appointments, 4 Generate Monthly Report. Level 0 dan Level 1 lengkap ada di notes 5️⃣.</p>
+  <p class="sub">Level 0: 1 Manage Doctor Schedules, 2 Book Appointment, 3 Process Payment, 4 Manage Daily Appointments, 5 Generate Monthly Report. Level 0 dan Level 1 lengkap ada di notes 5️⃣.</p>
   <div data-dg="clinic.ctx"></div>
 </section>
 

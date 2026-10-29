@@ -665,35 +665,34 @@ p > d : Book record
   <h3>Latihan 2: Online Clinic Appointment System (DFD)</h3>
   <aside class="soal-ujian">
     <div data-dg="clinic.case"></div>
-    <p>Tasks: (a) Context Diagram. (b) DFD Level 0 with the major processes, data stores, and data flows. (c) DFD Level 1 for process 2 (Book Appointment), balanced with Level 0.</p>
+    <p>Tasks: (a) Context Diagram. (b) DFD Level 0 with the major processes, data stores, and data flows. (c) DFD Level 1 for process 3 (Process Payment), balanced with Level 0.</p>
   </aside>
   <details class="contoh">
     <summary>Jawaban Latihan 2</summary>
     <ol class="cara">
       <li><span class="judul">Tandai soal</span>
-        <p>Entity: Patient, Doctor, Administrator, Payment Gateway (sistem luar). Data store: Doctor Schedules, Appointments, Payments. Kegiatan: mengelola jadwal, booking, mengelola janji harian, membuat laporan.</p>
+        <p>Entity: Patient, Doctor, Administrator, Payment Gateway (sistem luar). Data store: Doctor Schedules, Appointments, Payments. Kegiatan: mengelola jadwal, booking, memproses pembayaran, mengelola janji harian, membuat laporan.</p>
       </li>
       <li><span class="judul">Context diagram</span>
         <div class="lebar" data-dg="clinic.ctx"></div>
       </li>
-      <li><span class="judul">Level 0: empat process utama</span>
-        <p>Process 2 paling sibuk karena di sanalah pembayaran diverifikasi sebelum janji dikonfirmasi.</p>
+      <li><span class="judul">Level 0: lima process, satu tugas per process</span>
+        <p>Booking dan pembayaran dipisah, karena terjadi di waktu yang berbeda: process 2 menyimpan janji yang belum dibayar ke D2, lalu process 3 mengambilnya untuk diproses pembayarannya.</p>
         <div class="lebar" data-dg="clinic.l0"></div>
       </li>
-      <li><span class="judul">Level 1 untuk process 2</span>
-        <p>Urutan 2.1 sampai 2.4 mengikuti kalimat soal: cek jadwal, minta pembayaran, verifikasi, lalu konfirmasi.</p>
+      <li><span class="judul">Level 1 untuk process 3</span>
+        <p>Urutan 3.1 sampai 3.3 mengikuti kalimat soal: minta pembayaran, verifikasi, lalu konfirmasi janji.</p>
         <div class="lebar" data-dg="clinic.l1"></div>
       </li>
-      <li><span class="judul">Cek balancing process 2</span>
+      <li><span class="judul">Cek balancing process 3</span>
         <div class="hasil"><table>
-          <tr><th>Flow process 2 di Level 0</th><th>Di Level 1</th></tr>
-          <tr><td>Patient → Appointment request</td><td>2.1 ✓</td></tr>
-          <tr><td>D1 → Available slots</td><td>2.1 ✓</td></tr>
-          <tr><td>Payment request → Payment Gateway</td><td>2.2 ✓</td></tr>
-          <tr><td>Payment Gateway → Payment verification</td><td>2.3 ✓</td></tr>
-          <tr><td>Payment record → D3</td><td>2.3 ✓</td></tr>
-          <tr><td>New appointment → D2</td><td>2.4 ✓</td></tr>
-          <tr><td>Appointment confirmation → Patient</td><td>2.4 ✓</td></tr>
+          <tr><th>Flow process 3 di Level 0</th><th>Di Level 1</th></tr>
+          <tr><td>D2 → Pending appointment</td><td>3.1 ✓</td></tr>
+          <tr><td>Payment request → Payment Gateway</td><td>3.1 ✓</td></tr>
+          <tr><td>Payment Gateway → Payment verification</td><td>3.2 ✓</td></tr>
+          <tr><td>Payment record → D3</td><td>3.2 ✓</td></tr>
+          <tr><td>Confirmed appointment → D2</td><td>3.3 ✓</td></tr>
+          <tr><td>Appointment confirmation → Patient</td><td>3.3 ✓</td></tr>
         </table></div>
       </li>
     </ol>

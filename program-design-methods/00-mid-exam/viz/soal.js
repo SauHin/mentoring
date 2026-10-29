@@ -331,54 +331,53 @@ p > gw : Payment request
 gw > p : Payment verification` };
 
   D['clinic.l0'] = { kind: 'dfd', alt: 'DFD Level 0 Online Clinic Appointment System', spec: `
-ent adm -280 -320 =140x56 Administrator
-dproc p1 -280 -160 =170x86 [1] Manage Doctor\\nSchedules
-store d1 -280 0 =180x40 [D1] Doctor Schedules
-ent pat 0 -160 =120x56 Patient
-dproc p2 0 0 =170x86 [2] Book\\nAppointment
-ent gw 0 160 =160x56 Payment Gateway
-store d3 300 -160 =160x40 [D3] Payments
-dproc p4 300 -320 =170x86 [4] Generate\\nMonthly Report
-store d2 300 0 =180x40 [D2] Appointments
-dproc p3 300 160 =170x86 [3] Manage Daily\\nAppointments
-ent doc 300 320 =120x56 Doctor
+ent adm 0 300 =150x60 Administrator
+ent pat 990 450 =120x60 Patient
+ent gw 660 600 =160x60 Payment Gateway
+ent doc 330 150 =120x86 Doctor
+dproc p1 0 0 =170x86 [1] Manage Doctor\\nSchedules
+dproc p2 990 300 =170x86 [2] Book\\nAppointment
+dproc p3 660 450 =170x86 [3] Process\\nPayment
+dproc p4 660 150 =170x86 [4] Manage Daily\\nAppointments
+dproc p5 330 300 =170x86 [5] Generate\\nMonthly Report
+store d1 990 0 =180x40 [D1] Doctor Schedules
+store d2 660 300 =180x40 [D2] Appointments
+store d3 330 450 =160x40 [D3] Payments
 adm > p1 : Schedule data
 p1 > d1 : Schedule record
-d1 > p2 : Available slots
 pat > p2 : Appointment request
-p2 > pat : Appointment\\nconfirmation
-p2 > gw : Payment request
-gw > p2 : Payment verification
-p2 > d2 : New appointment
-p2 > d3 : Payment record
-d3 > p4 : Payment data
-d2 > p4 : Appointment data @r
-p4 > adm : Monthly report
-d2 > p3 : Today's appointments
-p3 > d2 : Completed appointment
-p3 > doc : Daily appointment list
-doc > p3 : Completion status` };
+d1 > p2 : Available slots
+p2 > d2 : Pending appointment
+d2 > p3 : Pending appointment
+p3 > gw : Payment request
+gw > p3 : Payment verification
+p3 > d3 : Payment record
+p3 > d2 : Confirmed appointment
+p3 > pat : Appointment confirmation
+d2 > p4 : Today's appointments
+p4 > doc : Daily appointment list
+doc > p4 : Completion status
+p4 > d2 : Completed appointment
+d2 > p5 : Appointment data
+d3 > p5 : Payment data
+p5 > adm : Monthly report` };
 
-  D['clinic.l1'] = { kind: 'dfd', alt: 'DFD Level 1 untuk process 2 Book Appointment', spec: `
-ent pat -20 210 =120x56 Patient
-dproc a 260 0 =180x78 [2.1] Check Available\\nSlot
-dproc b 260 140 =180x78 [2.2] Request\\nPayment
-dproc c 260 280 =180x78 [2.3] Verify\\nPayment
-dproc d 260 420 =180x78 [2.4] Confirm\\nAppointment
-store d1 560 0 =180x40 [D1] Doctor Schedules
-ent gw 560 180 =160x56 Payment Gateway
-store d3 560 300 =160x40 [D3] Payments
-store d2 560 420 =180x40 [D2] Appointments
-pat > a : Appointment\\nrequest
-d1 > a : Available slots
-a > b : Selected slot
-b > gw : Payment request
-b > c : Pending booking
-gw > c : Payment\\nverification
-c > d3 : Payment record
-c > d : Paid booking
-d > d2 : New appointment
-d > pat : Appointment\\nconfirmation` };
+  D['clinic.l1'] = { kind: 'dfd', alt: 'DFD Level 1 untuk process 3 Process Payment', spec: `
+store d2 0 150 =180x40 [D2] Appointments
+dproc a 320 0 =180x86 [3.1] Request\\nPayment
+dproc b 320 150 =180x86 [3.2] Verify\\nPayment
+dproc c 320 300 =180x86 [3.3] Confirm\\nAppointment
+ent gw 650 0 =160x60 Payment Gateway
+store d3 650 150 =160x40 [D3] Payments
+ent pat 650 300 =120x60 Patient
+d2 > a : Pending appointment
+a > gw : Payment request
+a > b : Awaiting payment
+gw > b : Payment verification
+b > d3 : Payment record
+b > c : Paid appointment
+c > d2 : Confirmed appointment
+c > pat : Appointment confirmation` };
 
   /* ---------- Soal kuis PDM before mid, ditulis ulang dengan kalimat sendiri (dipakai slides) ---------- */
   // Kelas hl + warna menandai bagian soal: IPO (c-mint input, c-jingga processing, c-pink decision, c-lilac output),
@@ -546,90 +545,79 @@ ds > p : Delivery status
 p > pp : Payment request
 pp > p : Payment verification` };
 
-  D['catering.frag2'] = { kind: 'dfd', alt: 'DFD fragment untuk process 2 Process Order', spec: `
-store d2 300 0 =150x40 [D2] Menu
-store d4 600 40 =160x40 [D4] Payments
-ent cus 0 150 =120x130 Customer
-dproc p2 300 150 =170x130 [2] Process Order
-store d3 600 150 =150x40 [D3] Orders
-ent pp 0 390 =140x60 Payment Provider
-store d1 300 300 =160x40 [D1] Customers
-d2 > p2 : Menu details
-cus > p2 : Order details
-p2 > cus : Menu list
-p2 > cus : Order confirmation
-p2 > pp : Payment request
-pp > p2 : Payment verification
-p2 > d1 : Customer data
-d1 > p2 : Customer details
-p2 > d4 : Payment record
-p2 > d3 : Confirmed order` };
+  D['catering.frag2'] = { kind: 'dfd', alt: 'DFD fragment untuk process 4 Process Payment', spec: `
+ent pp 300 0 =160x60 Payment Provider
+ent cus 0 150 =120x60 Customer
+dproc p4 300 150 =170x86 [4] Process\\nPayment
+store d4 620 150 =160x40 [D4] Payments
+store d3 300 300 =150x40 [D3] Orders
+d3 > p4 : New order
+p4 > d3 : Confirmed order
+p4 > pp : Payment request
+pp > p4 : Payment verification
+p4 > d4 : Payment record
+p4 > cus : Order confirmation` };
 
   D['catering.l0'] = { kind: 'dfd', alt: 'DFD Level 0 Online Catering Order Management System', spec: `
-ent adm 0 -60 =150x60 Administrator
-dproc p1 290 -60 =170x86 [1] Manage Menu
-store d4 560 -60 =160x40 [D4] Payments
-dproc p5 830 -60 =170x86 [5] Generate Report
-store d2 290 60 =150x40 [D2] Menu
-store d5 830 60 =160x40 [D5] Deliveries
-ent cus 0 185 =120x130 Customer
-dproc p2 290 185 =170x130 [2] Process Order
-store d3 560 185 =150x40 [D3] Orders
-dproc p4 830 185 =170x86 [4] Deliver Order
-ent pp 0 420 =140x60 Payment Provider
-store d1 330 330 =160x40 [D1] Customers
-dproc p3 560 310 =170x86 [3] Prepare Order
-ent ds 830 310 =140x60 Delivery Staff
-ent kit 560 430 =140x60 Kitchen Staff
+ent adm 260 600 =150x60 Administrator
+ent cus 520 0 =120x60 Customer
+ent pp 0 0 =160x60 Payment Provider
+ent kit 0 600 =140x60 Kitchen Staff
+ent ds 780 300 =140x60 Delivery Staff
+dproc p1 1040 600 =170x86 [1] Manage Menu
+dproc p2 1040 0 =170x86 [2] Browse Menu
+dproc p3 520 150 =170x86 [3] Place Order
+dproc p4 0 150 =170x86 [4] Process\\nPayment
+dproc p5 0 450 =170x86 [5] Prepare Order
+dproc p6 780 450 =170x86 [6] Deliver Order
+dproc p7 260 450 =170x86 [7] Generate\\nReport
+store d1 520 300 =160x40 [D1] Customers
+store d2 1040 150 =150x40 [D2] Menu
+store d3 0 300 =150x40 [D3] Orders
+store d4 260 150 =160x40 [D4] Payments
+store d5 520 450 =160x40 [D5] Deliveries
 adm > p1 : Menu data
 p1 > d2 : Menu record
-p5 > adm : Order report @u
 d2 > p2 : Menu details
-cus > p2 : Order details
 p2 > cus : Menu list
-p2 > cus : Order confirmation
-p2 > pp : Payment request
-pp > p2 : Payment verification
-p2 > d1 : Customer data
-d1 > p2 : Customer details
-p2 > d4 : Payment record
-p2 > d3 : Confirmed order
-d3 > p3 : Confirmed orders
-p3 > d3 : Preparation status
-p3 > kit : Confirmed orders
-kit > p3 : Preparation status
-d3 > p4 : Order to deliver
-p4 > ds : Delivery info
-ds > p4 : Delivery status
-p4 > d5 : Delivery record
-d3 > p5 : Order totals
-d4 > p5 : Payment status
-d5 > p5 : Delivery records` };
+cus > p3 : Order details
+d2 > p3 : Menu availability
+p3 > d1 : Customer data
+p3 > d3 : New order
+d3 > p4 : New order
+p4 > pp : Payment request
+pp > p4 : Payment verification
+p4 > d4 : Payment record
+p4 > d3 : Confirmed order
+p4 > cus : Order confirmation
+d3 > p5 : Confirmed orders
+p5 > kit : Confirmed orders
+kit > p5 : Preparation status
+p5 > d3 : Preparation status
+d3 > p6 : Order to deliver
+d1 > p6 : Customer address
+p6 > ds : Delivery info
+ds > p6 : Delivery status
+p6 > d5 : Delivery record
+d3 > p7 : Order totals
+d4 > p7 : Payment status
+d5 > p7 : Delivery records
+p7 > adm : Order report` };
 
-  D['catering.l1'] = { kind: 'dfd', alt: 'DFD Level 1 untuk process 2 Process Order', spec: `
-ent cus 0 0 =120x86 Customer
-dproc a 300 0 =180x86 [2.1] Receive Order
-dproc b 300 130 =180x78 [2.2] Calculate\\nOrder Total
-dproc c 300 260 =180x78 [2.3] Request\\nPayment
-dproc d 300 390 =180x78 [2.4] Confirm Order
-store d2 620 -40 =150x40 [D2] Menu
-store d1 640 120 =160x40 [D1] Customers
-ent pp 620 325 =150x60 Payment Provider
-store d3 20 480 =150x40 [D3] Orders
-store d4 620 460 =160x40 [D4] Payments
+  D['catering.l1'] = { kind: 'dfd', alt: 'DFD Level 1 untuk process 3 Place Order', spec: `
+ent cus 0 0 =120x60 Customer
+dproc a 320 0 =180x86 [3.1] Check Menu\\nAvailability
+dproc b 320 150 =180x86 [3.2] Calculate\\nOrder Total
+dproc c 320 300 =180x86 [3.3] Save Order
+store d2 650 0 =150x40 [D2] Menu
+store d1 0 300 =160x40 [D1] Customers
+store d3 650 300 =150x40 [D3] Orders
 cus > a : Order details
-a > cus : Menu list
-d2 > a : Menu details
-d1 > a : Customer details
-a > d1 : Customer data
-a > b : Order items
-b > c : Order total
-c > pp : Payment request
-c > d : Pending order
-pp > d : Payment verification
-d > d4 : Payment record
-d > d3 : Confirmed order
-d > cus : Order confirmation @l` };
+d2 > a : Menu availability
+a > b : Available items
+b > c : Order with total
+c > d1 : Customer data
+c > d3 : New order` };
 
   /* ---------- Daftar soal untuk kanvas latihan ---------- */
   // tab: tab kanvas yang dibuka pertama. flow/dfd: nama halaman diagram. answers: [judul, kunci DG.data].
@@ -651,8 +639,8 @@ d > cus : Order confirmation @l` };
     },
     {
       id: 'clinic', title: 'Latihan 2 · Online Clinic Appointment System (DFD)', case: 'clinic.case', tab: 'dfd',
-      tasks: ['Context Diagram: represent the entire system as a single process, with the external entities and the data flows entering and leaving the system.', 'DFD Level 0: decompose the system into its major processes, with the relevant external entities, data stores, and data flows.', 'DFD Level 1: decompose process 2 (Book Appointment). Keep its inputs and outputs balanced with Level 0.'],
-      answers: [['Context diagram', 'clinic.ctx'], ['DFD Level 0', 'clinic.l0'], ['DFD Level 1: process 2 Book Appointment', 'clinic.l1']],
+      tasks: ['Context Diagram: represent the entire system as a single process, with the external entities and the data flows entering and leaving the system.', 'DFD Level 0: decompose the system into its major processes, with the relevant external entities, data stores, and data flows.', 'DFD Level 1: decompose process 3 (Process Payment). Keep its inputs and outputs balanced with Level 0.'],
+      answers: [['Context diagram', 'clinic.ctx'], ['DFD Level 0', 'clinic.l0'], ['DFD Level 1: process 3 Process Payment', 'clinic.l1']],
     },
     { id: 'bebas', title: 'Kanvas bebas (soal sendiri)', free: true, tab: 'flow' },
   ];
