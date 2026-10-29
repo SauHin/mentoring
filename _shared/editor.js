@@ -3,7 +3,7 @@
 // localStorage perangkat ini. Buka halaman mana saja dengan ?admin untuk login. Tanpa token, halaman hanya bisa
 // dilihat: pengunjung tidak bisa menyimpan, karena GitHub menolak tulisan tanpa izin.
 // Yang bisa diedit: blok teks paling dalam (judul, paragraf, poin, sel tabel, summary, keterangan, blok kode).
-// Gambar dari mesin viz (.au-fig) dan halaman viz tidak bisa diedit.
+// Gambar dari mesin viz (.au-fig, diagram.js) dan halaman viz tidak bisa diedit.
 // Toolbar format seperti Notion: ubah jenis blok, warna teks dan latar, tebal, miring, garis bawah, coret, kode, link.
 // Simpan hanya menulis ulang blok yang berubah di file sumber. Blok dicari lewat posisinya di pohon HTML
 // (tag dan urutannya), lalu teks aslinya dicocokkan dengan versi di GitHub, supaya tidak menimpa bagian yang salah.
@@ -12,7 +12,7 @@
   const REPO = 'SauHin/mentoring', BRANCH = 'master', KEY = 'mentoring-admin-token', RECENT = 'mentoring-editor-recent';
   const API = `https://api.github.com/repos/${REPO}`;
   const BLOCKS = 'h1, h2, h3, h4, p, li, td, th, dt, dd, figcaption, summary, pre, span.judul';
-  const SKIP = '.au-fig, svg, iframe, nav.toc, .toc-pop, .topbar, .toolbar, .reveal-bar, button, dialog, .edit-ui';
+  const SKIP = '.au-fig, [data-dg], .dg-fig, svg, iframe, nav.toc, .toc-pop, .topbar, .toolbar, .reveal-bar, button, dialog, .edit-ui';
   const ROOTS = 'body > header, body > main, body > article, body > section.slide';
 
   const local = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} return null; };
@@ -27,7 +27,7 @@
   function blocks() {
     const out = [];
     document.querySelectorAll(ROOTS).forEach((root) => root.querySelectorAll(BLOCKS).forEach((el) => {
-      if (el.closest(SKIP) || el.querySelector(`${BLOCKS}, .au-fig, svg, iframe`)) return; // hanya blok paling dalam
+      if (el.closest(SKIP) || el.querySelector(`${BLOCKS}, .au-fig, [data-dg], svg, iframe`)) return; // hanya blok paling dalam
       if (el.matches('pre') && el.querySelector('.blk')) return; // full code bertahap (notes.js) sudah diubah bentuknya
       out.push(el);
     }));

@@ -86,12 +86,24 @@ Hanya notes UTS, disusun per soal kisi-kisi (4 esai, 2 studi kasus). Sumbernya 7
 |----|--------|-------|-------|
 | 00 | Persiapan Mid Exam: linear model, training dan evaluasi, arsitektur CNN, GAN, MLP, autoencoder | [notes](deep-learning/00-mid-exam/notes.html) | |
 
+### Program design methods
+
+Persiapan Mid Exam PDM dari kisi-kisi: pseudocode, flowchart, IPO chart dan hierarchy chart, DFD. Sumbernya 2 PPT dosen (Data Flow Fundamentals, Data Flow Analysis) yang hanya membahas DFD, jadi materi lain mengikuti buku acuan dosen (Gaddis, *Starting Out with Programming Logic and Design*). Soal latihan meniru bentuk kuis PDM before mid, tetapi kasusnya berbeda.
+
+Gambar memakai mesin bersama `_shared/diagram.js` dan `diagram.css`: flowchart (simbol Gaddis), hierarchy chart, dan DFD (notasi Gane & Sarson). Semua soal, contoh jawaban, dan spec gambar ada di satu file `00-mid-exam/viz/soal.js`, yang dibaca notes, slides, dan kanvas latihan (`<div data-dg="kunci">`).
+
+Kanvas latihan (`viz/latihan.html`): soal di kiri, tab IPO chart, pseudocode, flowchart, hierarchy, dan DFD di kanan. Bentuk menyesuaikan panjang teks dan bisa di-resize, garis dibuat dengan menarik titik biru, dan **Cek aturan** memeriksa aturan bentuk (Start/End, Yes/No, black hole, miracle, balancing Context dan Level 0). Jawaban tersimpan di `localStorage` browser masing-masing. `#print`, `#library`, `#bike`, `#clinic`, `#bebas` membuka soal tertentu.
+
+| No | Materi | Notes | Slide |
+|----|--------|-------|-------|
+| 00 | Persiapan Mid Exam: strategi studi kasus, IPO dan hierarchy chart, pseudocode, flowchart, DFD, dua soal bergaya kuis | [notes](program-design-methods/00-mid-exam/notes.html) | [slides](program-design-methods/00-mid-exam/slides.html) |
+
 ## Struktur
 
 ```
 mentoring/
 ├── index.html                  home: daftar mata kuliah
-├── _shared/                    gaya.css, style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, cviz.js/css, logic.js/css, automata.js/css, grammar.js, logo
+├── _shared/                    gaya.css, style.css, theme.js, slides.js, notes.js, scratch.js, listviz.js/css, cviz.js/css, logic.js/css, automata.js/css, grammar.js, diagram.js/css, logo
 ├── _template/
 │   └── NN-nama-materi/         salin folder ini untuk materi baru
 ├── algorithm-and-programming/
@@ -112,6 +124,9 @@ mentoring/
 ├── deep-learning/
 │   ├── index.html
 │   └── 00-mid-exam                     notes UTS saja, satu section per soal kisi-kisi
+├── program-design-methods/
+│   ├── index.html
+│   └── 00-mid-exam                     notes, slides, viz/latihan.html (kanvas), viz/soal.js (soal dan jawaban)
 └── tools/                      cachebust.py, check-engines.js
 ```
 

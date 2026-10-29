@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mid Exam Program Design Methods · Notes</title>
+  <link rel="icon" href="../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../_shared/style.css?v=cec1c6a4">
+  <link rel="stylesheet" href="../../_shared/diagram.css?v=2e818b40">
+  <script src="../../_shared/theme.js?v=8240686c"></script>
+  <script src="../../_shared/editor.js?v=39e9adee" defer></script>
+  <script src="../../_shared/notes.js?v=168acdb8" defer></script>
+  <script src="../../_shared/diagram.js?v=c3d0dcb3" defer></script>
+  <script src="viz/soal.js" defer></script>
+  <style>
+    main { counter-reset: langkah -1; } /* section 0 = strategi, 1–4 = kisi-kisi, 5 = latihan */
+    .langkah h3 { margin: 1.6rem 0 .4rem; font-size: 1.05rem; }
+    .simbol td:first-child { width: 9.5rem; background: none; }
+    .simbol .dg-fig svg { max-width: 9rem; }
+  </style>
+</head>
+<body class="catatan">
+<button class="tool theme-toggle" onclick="toggleTheme()" title="Tema Siang/Malam" aria-label="Tema Siang/Malam"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path class="fill" d="M12 4a8 8 0 0 1 0 16z"/></svg></button>
+
+<header>
+  <h1>Mid Exam Program Design Methods</h1>
+  <p class="tujuan">Persiapan kisi-kisi Mid Exam PDM: pseudocode, flowchart, IPO chart dan hierarchy chart, serta data flow diagram. Target: kamu bisa membaca soal studi kasus seperti kuis, lalu menggambar diagram yang diminta dengan aturan yang benar.</p>
+  <p class="tautan">Versi ringkas: <a href="slides.html">slide</a> · Coba langsung: <a href="viz/latihan.html">kanvas latihan</a> (soal di kiri, kanvas IPO, pseudocode, flowchart, hierarchy, dan DFD di kanan)</p>
+  <ul class="legenda">
+    <li><mark>istilah baru</mark></li>
+    <li><mark class="kaitan">kaitan ke yang sudah kamu tahu</mark></li>
+    <li><mark class="jebakan">jebakan</mark></li>
+    <li><mark class="kunci">wajib diingat</mark></li>
+    <li><b>frasa kunci</b></li>
+  </ul>
+  <nav class="peta">
+    <h2>Peta jalur</h2>
+    <ol start="0">
+      <li><a href="#langkah-0">Strategi: baca soal sebagai input, process, decision, dan output</a></li>
+      <li><a href="#langkah-1">IPO chart dan hierarchy chart</a></li>
+      <li><a href="#langkah-2">Pseudocode</a></li>
+      <li><a href="#langkah-3">Flowchart</a></li>
+      <li><a href="#langkah-4">Data flow diagram (DFD)</a></li>
+      <li><a href="#langkah-5">Latihan bergaya kuis, dengan jawaban</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main>
+
+<section class="langkah" id="langkah-0">
+<details>
+  <summary><h2>Strategi: baca soal sebagai input, process, decision, dan output</h2></summary>
+  <p class="rantai">
+    <span class="dari">soal kuis PDM before mid (studi kasus berbahasa Inggris)</span>
+    <span class="ke">semua section berikutnya (<a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Resep masakan berisi daftar bahan (input), cara memasak (process), dan hidangan jadi (output).</p>
+    <p class="batas">resep tidak mengecek bahan yang salah. Program harus mengecek input dulu, dan pengecekan itu menjadi decision.</p>
+  </aside>
+
+  <p>Soal PDM hampir selalu berbentuk <b>studi kasus</b>: satu cerita tentang sebuah sistem, lalu kamu diminta membuat satu atau beberapa diagram. Kelima alat di kisi-kisi menggambarkan cerita yang sama dari sudut yang berbeda.</p>
+  <table>
+    <tr><th>Alat</th><th>Pertanyaan yang dijawab</th><th>Bentuk</th></tr>
+    <tr><td>IPO chart (<a href="#langkah-1">1️⃣</a>)</td><td>Data apa yang masuk, diolah, dan keluar?</td><td>tabel 3 kolom</td></tr>
+    <tr><td>Hierarchy chart (<a href="#langkah-1">1️⃣</a>)</td><td>Program dipecah menjadi module apa saja?</td><td>kotak bertingkat</td></tr>
+    <tr><td>Pseudocode (<a href="#langkah-2">2️⃣</a>)</td><td>Langkah logikanya apa, ditulis sebagai teks?</td><td>teks berindentasi</td></tr>
+    <tr><td>Flowchart (<a href="#langkah-3">3️⃣</a>)</td><td>Langkah logikanya apa, digambar?</td><td>simbol dan panah</td></tr>
+    <tr><td>DFD (<a href="#langkah-4">4️⃣</a>)</td><td>Data bergerak dari siapa ke siapa, dan disimpan di mana?</td><td>4 simbol Gane &amp; Sarson</td></tr>
+  </table>
+
+  <h3>Tandai kata di soal</h3>
+  <p>Sebelum menggambar apa pun, tandai kata di soal. Setiap kata punya tempat yang tetap di diagram.</p>
+  <table>
+    <tr><th>Kata di soal</th><th>Artinya</th><th>Masuk ke</th></tr>
+    <tr><td>enter, select, choose</td><td>data dari pengguna</td><td>Input, simbol parallelogram</td></tr>
+    <tr><td>calculate, add, determine</td><td>pengolahan data</td><td>Processing, simbol rectangle</td></tr>
+    <tr><td>if, whether, must be, otherwise, only after</td><td>keputusan dengan dua jawaban</td><td>decision (diamond), <code>If</code></td></tr>
+    <tr><td>display, show, send, generate</td><td>hasil untuk pengguna</td><td>Output, simbol parallelogram</td></tr>
+    <tr><td>angka aturan (IDR 500 per page)</td><td>rumus atau konstanta</td><td>isi process</td></tr>
+    <tr><td>the system stores …</td><td>data yang disimpan</td><td>data store (DFD)</td></tr>
+    <tr><td>customer, staff, payment provider</td><td>pihak di luar sistem</td><td>external entity (DFD)</td></tr>
+  </table>
+
+  <details class="contoh">
+    <summary>Contoh: memecah soal Print Order Calculator</summary>
+    <div data-dg="print.case"></div>
+    <table>
+      <tr><th>Kalimat di soal</th><th>Masuk ke</th></tr>
+      <tr><td>selects the print type, enters the number of pages, chooses whether … binding</td><td><strong>Input:</strong> <code>printType</code>, <code>pages</code>, <code>binding</code></td></tr>
+      <tr><td>checks that a print type is selected and that the number of pages is greater than zero</td><td><strong>Decision 1:</strong> input valid?</td></tr>
+      <tr><td>BW IDR 500 per page, Color IDR 1,500 per page</td><td><strong>Decision 2:</strong> Color? lalu <strong>process</strong> harga per halaman</td></tr>
+      <tr><td>Binding costs an additional IDR 5,000 per order</td><td><strong>Decision 3:</strong> binding? lalu <strong>process</strong> tambah 5000</td></tr>
+      <tr><td>displays an error message / displays the order summary</td><td><strong>Output:</strong> pesan error atau ringkasan pesanan</td></tr>
+    </table>
+    <p>Daftar ini dipakai lagi di IPO chart (<a href="#langkah-1">1️⃣</a>), pseudocode (<a href="#langkah-2">2️⃣</a>), dan flowchart (<a href="#langkah-3">3️⃣</a>).</p>
+  </details>
+
+  <h3>Urutan mengerjakan</h3>
+  <ol class="cara">
+    <li><span class="judul">Tandai kata di soal</span><p>Ini bahan semua diagram. Kalau dilewati, biasanya ada input yang lupa dibaca atau output yang lupa ditampilkan.</p></li>
+    <li><span class="judul">Tulis daftar IPO, walau tidak diminta</span><p>Daftar input dan output dibutuhkan sebelum logika. Kalau logika ditulis dulu, kamu menebak variabel di tengah jalan.</p></li>
+    <li><span class="judul">Urutkan decision</span><p>Validasi selalu paling awal, karena perhitungan dengan input yang salah tidak ada artinya.</p></li>
+    <li><span class="judul">Tulis atau gambar diagram yang diminta</span><p>Ikuti aturan alatnya: section <a href="#langkah-1">1️⃣</a> sampai <a href="#langkah-4">4️⃣</a>.</p></li>
+    <li><span class="judul">Cek dengan satu contoh angka</span><p>Jalankan diagrammu dengan satu input. Kesalahan rumus dan panah yang hilang ketahuan di sini, bukan saat dinilai.</p></li>
+  </ol>
+
+  <p class="intinya">Baca soal sebagai daftar input, process, decision, dan output. Diagram apa pun yang diminta, isinya berasal dari daftar ini.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Masukkan setiap kalimat ke Input, Process, Decision, Output, atau data store: (a) "The customer enters the number of tickets." (b) "Members get a 10% discount." (c) "The system displays the total price." (d) "The system stores all bookings."</summary>
+    <p>(a) <strong>Input:</strong> jumlah tiket. (b) <strong>Decision</strong> "member?" lalu <strong>process</strong> diskon 10%. (c) <strong>Output:</strong> total harga. (d) <strong>Data store</strong> Bookings di DFD.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-1">
+<details>
+  <summary><h2>IPO chart dan hierarchy chart</h2></summary>
+  <p class="rantai">
+    <span class="dari">daftar input, process, output di <a href="#langkah-0">0️⃣</a></span>
+    <span class="ke">pseudocode (<a href="#langkah-2">2️⃣</a>): setiap kotak hierarchy menjadi <code>Module</code> atau <code>Function</code></span>
+  </p>
+
+  <aside class="analogi">
+    <p>Mesin jus: buah masuk (input), diblender (processing), jus keluar (output).</p>
+    <p class="batas">mesin jus tidak mengecek buahnya busuk atau tidak. Di program, pengecekan input juga ditulis di kolom Processing.</p>
+  </aside>
+
+  <h3>IPO chart</h3>
+  <p><mark>IPO chart</mark> adalah tabel tiga kolom yang mencatat input, processing, dan output dari satu module. Kita isi kolomnya langsung dari hasil menandai soal di <a href="#langkah-0">0️⃣</a>.</p>
+  <ul>
+    <li><strong>Input:</strong> data yang diterima dari luar, yaitu dari pengguna, dari form, atau dari parameter.</li>
+    <li><strong>Processing:</strong> langkah yang mengubah input menjadi output, termasuk validasi dan rumus.</li>
+    <li><strong>Output:</strong> hasil yang keluar, yaitu yang ditampilkan atau dikembalikan dengan <code>Return</code>.</li>
+  </ul>
+  <div data-dg="print.ipo"></div>
+  <aside class="catatan">
+    <p>Di buku acuan dosen (Gaddis), IPO chart dibuat untuk <b>setiap module</b>. Untuk soal program kecil yang hanya meminta "IPO chart", satu chart untuk seluruh program sudah cukup. Ini aturan dari buku, bukan dari slide dosen.</p>
+  </aside>
+
+  <h3>Hierarchy chart</h3>
+  <p><mark>Hierarchy chart</mark> (disebut juga structure chart) adalah diagram kotak yang menunjukkan module di program dan module mana memanggil module mana. Bentuknya mirip bagan organisasi: <code>main</code> di paling atas, module yang dipanggil di bawahnya.</p>
+  <p>Bedanya dengan bagan organisasi: hierarchy chart <b>tidak menunjukkan urutan kerja</b>, decision, atau loop. Urutan itu ada di pseudocode dan flowchart.</p>
+  <div data-dg="print.tree" data-alt="Hierarchy chart: main memanggil getOrder, isValidOrder, calculateTotal, showSummary; calculateTotal memanggil getPricePerPage"></div>
+
+  <details class="contoh">
+    <summary>Contoh: dari pseudocode <code>main</code> ke hierarchy chart dan IPO per module</summary>
+    <p>Setiap <code>Call</code> atau function yang dipanggil di <code>main</code> menjadi satu kotak di bawah <code>main</code>. <code>getOrder</code> mengisi tiga variabel milik <code>main</code> (di Gaddis memakai parameter <code>Ref</code>).</p>
+    <div data-dg="print.codeMain"></div>
+    <p><code>calculateTotal</code> memanggil <code>getPricePerPage</code>, jadi kotak <code>getPricePerPage</code> ada di bawah <code>calculateTotal</code>, bukan di bawah <code>main</code>. Setiap kotak lalu diberi IPO chart sendiri:</p>
+    <div data-dg="print.ipoMod"></div>
+  </details>
+
+  <aside class="jebakan">
+    <table>
+      <tr><th>Kesalahan</th><th>Penyebab</th><th>Perbaikan</th></tr>
+      <tr><td>"Display total" di kolom Processing</td><td>Display adalah hasil yang keluar ke pengguna</td><td>tulis "total" di kolom Output</td></tr>
+      <tr><td>total ditulis di kolom Input</td><td>total belum ada sebelum dihitung</td><td>Input hanya data yang diberikan dari luar</td></tr>
+      <tr><td>Panah atau nomor urutan di hierarchy chart</td><td>hierarchy chart bukan urutan langkah</td><td>garis polos tanpa panah</td></tr>
+      <tr><td>Module yang dipanggil digambar sejajar pemanggilnya</td><td>posisi vertikal menunjukkan siapa memanggil</td><td>taruh di bawah pemanggilnya</td></tr>
+    </table>
+  </aside>
+
+  <p class="intinya">IPO chart = data masuk, diolah, keluar untuk satu module. Hierarchy chart = siapa memanggil siapa, tanpa urutan. Satu kotak hierarchy punya satu IPO chart.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> <code>main</code> memanggil <code>getScores</code>, <code>calcAverage</code>, dan <code>showGrade</code>. Di dalamnya, <code>calcAverage</code> memanggil <code>sumScores</code>. Gambar hierarchy chart-nya.</summary>
+    <div class="dg-fig" data-kind="tree" data-alt="Hierarchy chart jawaban soal latihan">
+mod main main
+mod g getScores
+mod a calcAverage
+mod s showGrade
+mod sum sumScores
+main > g
+main > a
+main > s
+a > sum
+    </div>
+    <p><code>sumScores</code> ada di bawah <code>calcAverage</code>, karena yang memanggilnya <code>calcAverage</code>, bukan <code>main</code>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Isi IPO chart untuk <code>calcAverage</code>, yang menerima tiga nilai ujian dan mengembalikan rata-ratanya.</summary>
+    <p><strong>Input:</strong> <code>score1</code>, <code>score2</code>, <code>score3</code>. <strong>Processing:</strong> <code>total = sumScores(score1, score2, score3)</code>, lalu <code>average = total / 3</code>. <strong>Output:</strong> <code>average</code> (return value).</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-2">
+<details>
+  <summary><h2>Pseudocode</h2></summary>
+  <p class="rantai">
+    <span class="dari">kolom Processing di IPO chart (<a href="#langkah-1">1️⃣</a>)</span>
+    <span class="ke">flowchart (<a href="#langkah-3">3️⃣</a>): setiap baris pseudocode menjadi satu simbol</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Resep yang ditulis untuk orang lain: "Panaskan minyak. Kalau minyak sudah panas, masukkan telur."</p>
+    <p class="batas">resep boleh ambigu, misalnya "garam secukupnya". Pseudocode harus cukup jelas sampai bisa langsung diubah menjadi kode.</p>
+  </aside>
+
+  <p><mark>Pseudocode</mark> adalah langkah program yang ditulis dengan bahasa Inggris sederhana dan sedikit aturan, tanpa sintaks bahasa pemrograman tertentu. Kita pakai kata kunci dari buku Gaddis, buku acuan dosen.</p>
+
+  <h3>Kata kunci</h3>
+  <table>
+    <tr><th>Kata kunci</th><th>Fungsi</th><th>Contoh</th></tr>
+    <tr><td><code>Declare</code></td><td>membuat variabel dengan tipe <code>Integer</code>, <code>Real</code>, <code>String</code>, atau <code>Boolean</code></td><td><code>Declare Integer pages</code></td></tr>
+    <tr><td><code>Constant</code></td><td>nilai yang tidak berubah</td><td><code>Constant Real FEE = 5000</code></td></tr>
+    <tr><td><code>Display</code></td><td>menampilkan ke pengguna (output)</td><td><code>Display "Total: ", total</code></td></tr>
+    <tr><td><code>Input</code></td><td>membaca dari pengguna</td><td><code>Input pages</code></td></tr>
+    <tr><td><code>Set</code></td><td>mengisi variabel</td><td><code>Set total = pages * 500</code></td></tr>
+    <tr><td><code>If</code> … <code>Then</code> … <code>Else</code> … <code>End If</code></td><td>decision dengan dua jalan</td><td><code>If pages > 0 Then</code></td></tr>
+    <tr><td><code>Select</code> … <code>Case</code> … <code>End Select</code></td><td>memilih berdasarkan nilai satu variabel</td><td><code>Case "Color":</code></td></tr>
+    <tr><td><code>While</code> … <code>End While</code></td><td>loop yang mengecek kondisi di awal</td><td><code>While pages &lt;= 0</code></td></tr>
+    <tr><td><code>For</code> … <code>To</code> … <code>End For</code></td><td>loop dengan counter</td><td><code>For i = 1 To 5</code></td></tr>
+    <tr><td><code>Module</code>, <code>Call</code></td><td>membuat module dan memanggilnya</td><td><code>Call showSummary()</code></td></tr>
+    <tr><td><code>Function</code> … <code>Return</code></td><td>module yang mengembalikan nilai</td><td><code>Return total</code></td></tr>
+  </table>
+  <ul>
+    <li><strong>Operator:</strong> <code>==</code> sama dengan, <code>!=</code> tidak sama, <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code>, lalu <code>AND</code>, <code>OR</code>, <code>NOT</code>, dan <code>*</code> <code>/</code> <code>MOD</code> untuk hitungan.</li>
+    <li><strong>Indentasi:</strong> isi blok (<code>If</code>, <code>While</code>, <code>Module</code>) menjorok 3 spasi, supaya terlihat langkah mana yang ada di dalam blok.</li>
+    <li><strong>Penutup:</strong> setiap <code>If</code> ditutup <code>End If</code>, setiap <code>While</code> ditutup <code>End While</code>.</li>
+  </ul>
+
+  <details class="contoh">
+    <summary>Contoh: pseudocode Print Order Calculator, dengan trace</summary>
+    <div data-dg="print.code"></div>
+    <p>Trace dengan input <code>Color</code>, <code>10</code>, <code>Yes</code>:</p>
+    <table>
+      <tr><th>Langkah</th><th>pricePerPage</th><th>total</th><th>Alasan</th></tr>
+      <tr><td>Validasi</td><td></td><td></td><td>Color termasuk BW atau Color, dan 10 &gt; 0, jadi masuk ke cabang Then</td></tr>
+      <tr><td>If Color</td><td>1500</td><td></td><td><code>printType == "Color"</code> benar</td></tr>
+      <tr><td>Set total</td><td>1500</td><td>15000</td><td>10 × 1500</td></tr>
+      <tr><td>If binding</td><td>1500</td><td>20000</td><td>binding Yes, jadi 15000 + 5000</td></tr>
+    </table>
+    <p>Output: ringkasan pesanan dengan total IDR 20,000. Dengan <code>pages = 0</code>, cabang Else jalan dan hanya pesan error yang tampil.</p>
+  </details>
+
+  <h3>Pseudocode untuk soal ber-GUI</h3>
+  <p>Di soal yang punya desain GUI (seperti kuis Parking Fee Calculator), setiap tombol punya <mark>event handler</mark>: module yang jalan saat tombol diklik. Di Gaddis, namanya <code>namaTombol_Click</code>.</p>
+  <ul>
+    <li><strong>Input</strong> dibaca dari komponen, misalnya <code>durationTextBox.Text</code>, bukan dengan <code>Input</code>.</li>
+    <li><strong>Output</strong> ditulis ke label, misalnya <code>Set totalLabel.Text = fee</code>, bukan dengan <code>Display</code>.</li>
+    <li><strong>Tombol Clear</strong> punya handler sendiri yang mengosongkan semua komponen.</li>
+  </ul>
+  <pre class="kode"><code>Module clearButton_Click()
+   Set bikeTypeDropdown.Text = "City Bike"
+   Set durationTextBox.Text = ""
+   Set totalLabel.Text = ""
+End Module</code></pre>
+
+  <h3>Validasi input: dua pola</h3>
+  <table>
+    <tr><th>Pola</th><th>Kapan dipakai</th><th>Bentuk</th></tr>
+    <tr><td><code>If</code> … <code>Else</code></td><td>program GUI: tampilkan error, handler selesai, pengguna memperbaiki lalu klik lagi</td><td><code>If valid Then</code> hitung <code>Else</code> error <code>End If</code></td></tr>
+    <tr><td><code>While</code> (validation loop)</td><td>program console: minta input lagi sampai benar</td><td><code>Input</code>, lalu <code>While</code> salah: error dan <code>Input</code> lagi</td></tr>
+  </table>
+  <pre class="kode"><code>Input pages
+While pages &lt;= 0
+   Display "Error: pages must be greater than 0"
+   Input pages
+End While</code></pre>
+  <p>Kalimat soal "If the input is invalid, the system displays an error message. Otherwise, it calculates …" paling cocok dengan pola <code>If</code> … <code>Else</code>.</p>
+
+  <aside class="jebakan">
+    <table>
+      <tr><th>Kesalahan</th><th>Penyebab</th><th>Perbaikan</th></tr>
+      <tr><td><code>If pages = 0 Then</code></td><td><code>=</code> artinya mengisi variabel</td><td>pakai <code>==</code> untuk membandingkan: <code>If pages == 0 Then</code></td></tr>
+      <tr><td>Lupa <code>End If</code></td><td>tidak jelas di mana blok berakhir</td><td>tutup setiap <code>If</code>, ratakan <code>End If</code> dengan <code>If</code>-nya</td></tr>
+      <tr><td><code>printf</code>, <code>scanf</code>, titik koma</td><td>itu sintaks bahasa C, bukan pseudocode</td><td><code>Display</code> dan <code>Input</code>, tanpa titik koma</td></tr>
+      <tr><td>Variabel dipakai sebelum <code>Declare</code></td><td>tipe datanya tidak diketahui</td><td>deklarasikan semua variabel di awal module</td></tr>
+      <tr><td>Hitung dulu, validasi belakangan</td><td>hasil hitung dari input yang salah sudah terlanjur dipakai</td><td>validasi paling awal, hitungan di cabang valid</td></tr>
+    </table>
+  </aside>
+
+  <p class="intinya">Satu baris satu aksi: <code>Declare</code>, <code>Input</code>, <code>Set</code>, <code>Display</code>. Decision dengan <code>If</code> … <code>End If</code>, bandingkan dengan <code>==</code>, dan validasi input paling awal.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Cari tiga kesalahan: <code>Input age</code> / <code>If age = 17 Then</code> / <code>Display "Adult"</code> / <code>Else</code> / <code>Display "Child"</code>. Anggap batas dewasa 17 tahun ke atas.</summary>
+    <p>(1) <code>age</code> belum di-<code>Declare</code>: tambah <code>Declare Integer age</code>. (2) <code>=</code> harus <code>&gt;=</code>, karena 17 tahun ke atas, bukan tepat 17. (3) Tidak ada <code>End If</code> di akhir.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Tulis pseudocode: tiket Adult IDR 50,000 dan Child IDR 30,000. Pengguna memasukkan jenis tiket dan jumlah (1 sampai 10). Kalau jumlah tidak valid, tampilkan error. Kalau valid, tampilkan total.</summary>
+    <pre class="kode"><code>Declare String ticketType
+Declare Integer quantity
+Declare Real price, total
+
+Display "Ticket type (Adult or Child)?"
+Input ticketType
+Display "Quantity (1-10)?"
+Input quantity
+
+If quantity >= 1 AND quantity &lt;= 10 Then
+   If ticketType == "Adult" Then
+      Set price = 50000
+   Else
+      Set price = 30000
+   End If
+   Set total = quantity * price
+   Display "Total: IDR ", total
+Else
+   Display "Error: quantity must be 1 to 10"
+End If</code></pre>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-3">
+<details>
+  <summary><h2>Flowchart</h2></summary>
+  <p class="rantai">
+    <span class="dari">pseudocode (<a href="#langkah-2">2️⃣</a>): satu baris menjadi satu simbol</span>
+    <span class="ke">kuis studi kasus 1 dan 2, Latihan 1 (<a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Papan petunjuk arah di mal: kotak berisi tempat, panah menunjukkan jalan, dan di persimpangan kamu harus memilih.</p>
+    <p class="batas">di mal kamu boleh berhenti di mana saja. Di flowchart, setiap jalur harus sampai ke End.</p>
+  </aside>
+
+  <p><mark>Flowchart</mark> adalah gambar langkah program: setiap jenis langkah punya simbol sendiri, dan panah menunjukkan urutan jalannya. Isinya sama dengan pseudocode, jadi kalau pseudocode-mu sudah benar, flowchart tinggal digambar.</p>
+
+  <h3>Simbol</h3>
+  <table class="simbol">
+    <tr><th>Simbol</th><th>Nama dan kegunaan</th><th>Di pseudocode</th></tr>
+    <tr><td><div class="dg-fig mini" data-kind="flow">term a 0 0 Start</div></td><td><strong>Terminal:</strong> awal dan akhir. Di flowchart module atau tombol: nama module di atas, End atau Return di bawah.</td><td>awal dan akhir program</td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="flow">io a 0 0 Input pages</div></td><td><strong>Input/Output:</strong> membaca input atau menampilkan output.</td><td><code>Input</code>, <code>Display</code></td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="flow">proc a 0 0 total = pages × 500</div></td><td><strong>Process:</strong> menghitung atau mengisi variabel.</td><td><code>Set</code></td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="flow">dec a 0 0 pages > 0?</div></td><td><strong>Decision:</strong> pertanyaan dengan dua panah keluar, Yes dan No.</td><td><code>If</code>, <code>While</code></td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="flow">call a 0 0 calculateTotal</div></td><td><strong>Predefined process:</strong> memanggil module lain yang punya flowchart sendiri.</td><td><code>Call</code></td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="flow">conn a 0 0 A</div></td><td><strong>Connector:</strong> menyambung alur yang terpotong, misalnya pindah kolom. Dua connector berhuruf sama adalah titik yang sama.</td><td>tidak ada</td></tr>
+  </table>
+
+  <h3>Tiga struktur dasar</h3>
+  <div class="cheat">
+    <section><h4>Sequence: langkah berurutan</h4><div class="dg-fig" data-kind="flow" data-grid="170,72">
+io a 0 0 Input pages
+proc b 0 1 total = pages × 500
+io c 0 2 Display total
+a > b
+b > c
+    </div></section>
+    <section class="c-jingga"><h4>Decision: If-Then-Else</h4><div class="dg-fig" data-kind="flow" data-grid="170,72">
+dec c 0 0 pages > 100?
+proc y 0.75 1.05 discount = 0.1
+proc n -0.75 1.05 discount = 0
+io d 0 2.1 Display discount
+c > y : Yes
+c > n : No
+y > d @t
+n > d @t
+    </div><p>Kedua cabang bertemu lagi sebelum langkah berikutnya.</p></section>
+    <section class="c-lilac"><h4>Repetition: While loop</h4><div class="dg-fig" data-kind="flow" data-grid="170,72">
+dec c 0 0 count &lt;= 5?
+io d 0 1.15 Display count
+proc u 0 2.15 count = count + 1
+term x 1.1 3.1 End
+c > d : Yes
+d > u
+u > c @l
+c > x : No
+    </div><p>Panah kembali ke decision. Loop berhenti saat jawabannya No.</p></section>
+  </div>
+  <ul>
+    <li><strong>Satu awal, satu akhir:</strong> jalur error juga berakhir di End yang sama.</li>
+    <li><strong>Decision:</strong> tepat dua panah keluar, keduanya diberi label Yes dan No.</li>
+    <li><strong>Arah:</strong> dari atas ke bawah. Garis yang terlalu jauh disambung dengan connector.</li>
+  </ul>
+
+  <details class="contoh">
+    <summary>Contoh: flowchart Print Order Calculator, dicocokkan dengan pseudocode</summary>
+    <div data-dg="print.flow"></div>
+    <table>
+      <tr><th>Pseudocode (<a href="#langkah-2">2️⃣</a>)</th><th>Simbol</th></tr>
+      <tr><td>6 baris <code>Display</code> pertanyaan dan <code>Input</code></td><td>1 parallelogram "Input printType, pages, binding". Boleh digabung, karena isinya satu kegiatan: membaca pesanan.</td></tr>
+      <tr><td><code>If (printType == "BW" OR …) AND pages &gt; 0 Then</code></td><td>diamond "printType valid AND pages &gt; 0?"</td></tr>
+      <tr><td><code>If printType == "Color" Then</code> … <code>Else</code></td><td>diamond dengan dua process, lalu bertemu lagi</td></tr>
+      <tr><td><code>Set total = pages * pricePerPage</code></td><td>rectangle</td></tr>
+      <tr><td><code>If binding == "Yes" Then</code> tanpa <code>Else</code></td><td>diamond: Yes ke process, No langsung ke Display</td></tr>
+      <tr><td>4 baris <code>Display</code></td><td>1 parallelogram</td></tr>
+      <tr><td><code>Else</code> error</td><td>cabang No paling atas, lalu ke End</td></tr>
+    </table>
+  </details>
+
+  <h3>Flowchart untuk soal ber-GUI</h3>
+  <p>Kalau soal memberi desain GUI, buat <b>satu flowchart untuk setiap tombol</b>, sama seperti pseudocode-nya punya satu event handler per tombol. Terminal atas berisi kejadiannya, misalnya "Calculate Fee clicked".</p>
+  <div class="cols">
+    <div data-dg="bike.clear" data-alt="Flowchart tombol Clear"></div>
+    <ul>
+      <li><strong>Input:</strong> "Get … from the form", karena data diambil dari komponen GUI.</li>
+      <li><strong>Output:</strong> "Display … in totalLabel", sebut komponennya supaya cocok dengan GUI.</li>
+      <li><strong>Error:</strong> tampilkan di label, lalu ke End. Pengguna memperbaiki input dan klik lagi.</li>
+    </ul>
+  </div>
+  <details class="contoh">
+    <summary>Pola validasi untuk program console: loop kembali ke Input</summary>
+    <div class="dg-fig" data-kind="flow" data-grid="200,72">
+io a 0 0 Input pages
+dec c 0 1.2 pages &lt;= 0?
+io e 0 2.45 Display error
+io i 0 3.45 Input pages
+proc n 1.2 1.2 total = pages × 500
+a > c
+c > e : Yes
+e > i
+i > c @l
+c > n : No
+    </div>
+    <p>Ini gambar dari validation loop <code>While pages &lt;= 0</code> di <a href="#langkah-2">2️⃣</a>. Untuk soal ber-GUI, pakai cabang error yang langsung ke End.</p>
+  </details>
+
+  <aside class="jebakan">
+    <table>
+      <tr><th>Kesalahan</th><th>Penyebab</th><th>Perbaikan</th></tr>
+      <tr><td>Decision dengan satu panah keluar</td><td>jawaban No tidak punya jalan</td><td>dua panah, Yes dan No, walau salah satunya langsung ke langkah berikutnya</td></tr>
+      <tr><td>Input atau Display di rectangle</td><td>rectangle khusus untuk process</td><td>pakai parallelogram</td></tr>
+      <tr><td>Cabang error berhenti tanpa End</td><td>alur tidak selesai</td><td>sambung ke End yang sama</td></tr>
+      <tr><td>Dua panah keluar dari process</td><td>hanya decision yang boleh bercabang</td><td>tambahkan decision di antaranya</td></tr>
+      <tr><td>Teks simbol berupa kalimat panjang</td><td>sulit dicocokkan dengan pseudocode</td><td>tulis seperti pernyataan: <code>total = pages × 500</code></td></tr>
+    </table>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/latihan.html#print">kanvas latihan</a>, tab <b>Flowchart</b>. Pilih sebuah bentuk lalu klik tombol bentuk berikutnya: bentuk baru muncul di bawahnya dan langsung tersambung. <b>Cek aturan</b> memberi tahu kalau ada decision tanpa label Yes/No atau jalur tanpa End.</p>
+  </aside>
+
+  <p class="intinya">Flowchart = pseudocode yang digambar. Satu Start, satu End, setiap decision punya Yes dan No, dan soal ber-GUI berarti satu flowchart per tombol.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Gambar flowchart untuk pseudocode ini: <code>Input price</code>, lalu <code>If price &gt; 100000 Then Set price = price * 0.9 End If</code>, lalu <code>Display price</code>.</summary>
+    <div class="dg-fig" data-kind="flow" data-alt="Flowchart jawaban soal diskon">
+term s 0 0 Start
+io i 0 1 Input price
+dec c 0 2.2 price > 100000?
+proc d 0.85 3.25 price = price × 0.9
+io o 0 4.3 Display price
+term e 0 5.3 End
+s > i
+i > c
+c > d : Yes
+c > o : No
+d > o @t
+o > e
+    </div>
+    <p>If tanpa Else tetap memakai dua panah: No langsung ke <code>Display price</code>.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Simbol apa untuk "Display error message", dan untuk "fee = first + (hours − 1) × extra"?</summary>
+    <p>"Display error message" adalah output, jadi <strong>parallelogram</strong>. Rumus fee adalah process, jadi <strong>rectangle</strong>.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-4">
+<details>
+  <summary><h2>Data flow diagram (DFD)</h2></summary>
+  <p class="rantai">
+    <span class="dari">kolom Input dan Output di IPO chart (<a href="#langkah-1">1️⃣</a>), kata benda di soal (<a href="#langkah-0">0️⃣</a>)</span>
+    <span class="ke">kuis studi kasus 3, Latihan 2 (<a href="#langkah-5">5️⃣</a>)</span>
+  </p>
+
+  <aside class="analogi">
+    <p>Jalur paket di jasa kurir: pengirim, petugas sortir, gudang, dan penerima. Paket hanya berpindah kalau ada petugas yang memprosesnya.</p>
+    <p class="batas">peta kurir punya urutan waktu. DFD tidak punya urutan, decision, atau loop. DFD hanya menunjukkan data bergerak ke mana.</p>
+  </aside>
+
+  <p><mark>Data flow diagram (DFD)</mark> adalah model grafis yang menunjukkan pergerakan data di sebuah sistem: siapa mengirim data masuk, siapa menerima data keluar, dan data apa yang disimpan. Fokusnya bukan logika program, tapi <b>interaksi sistem dengan penggunanya</b>.</p>
+
+  <h3>Empat komponen (notasi Gane &amp; Sarson)</h3>
+  <table class="simbol">
+    <tr><th>Simbol</th><th>Komponen</th><th>Nama</th></tr>
+    <tr><td><div class="dg-fig mini" data-kind="dfd">ent a 0 0 Member</div></td><td><strong>External entity:</strong> orang, organisasi, atau sistem lain <b>di luar</b> sistem yang mengirim atau menerima data.</td><td>kata benda: Member, Payment Gateway</td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="dfd">dproc a 0 0 [1] Process Loan</div></td><td><strong>Process:</strong> kegiatan yang mengubah data masuk menjadi data keluar. Nomornya di bagian atas.</td><td>kata kerja + objek: Process Loan</td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="dfd">store a 0 0 [D1] Books</div></td><td><strong>Data store:</strong> data yang disimpan (database, file, daftar). ID-nya D1, D2, dan seterusnya.</td><td>kata benda jamak: Books, Loans</td></tr>
+    <tr><td><div class="dg-fig mini" data-kind="dfd">
+pt a 0 0
+pt b 130 0
+a > b : Loan request
+    </div></td><td><strong>Data flow:</strong> data yang bergerak. Selalu diberi nama.</td><td>kata benda: Loan request</td></tr>
+  </table>
+  <aside class="catatan">
+    <p>Slide dosen memakai notasi Gane &amp; Sarson, seperti dua buku System Analysis and Design yang paling banyak dipakai. Notasi Yourdon/DeMarco menggambar process sebagai lingkaran. Pakai notasi yang diminta dosen.</p>
+  </aside>
+
+  <h3>Aturan: data tidak bergerak sendiri</h3>
+  <p>Slide dosen menyebutnya <mark>law of conservation of data</mark>: data tidak muncul, hilang, atau berpindah tanpa process.</p>
+  <ol>
+    <li><strong>Data diam sampai dipindahkan process.</strong> Tidak boleh ada flow langsung dari entity ke data store, entity ke entity, atau store ke store.</li>
+    <li><strong>Process tidak membuat atau menelan data.</strong> Process tanpa output disebut <mark class="jebakan">black hole</mark>, process tanpa input disebut <mark class="jebakan">miracle</mark>.</li>
+    <li><strong>Setiap data flow diberi nama</strong> data yang dibawanya.</li>
+  </ol>
+  <div class="cheat">
+    <section class="c-pink"><h4>Salah: entity langsung ke data store</h4><div class="dg-fig" data-kind="dfd">
+ent m 0 0 Librarian
+store d 250 0 =150x40 [D1] Books
+m > d : New book data !
+    </div><p>Perbaikan: sisipkan process "Add New Book" di antaranya.</p></section>
+    <section class="c-pink"><h4>Salah: black hole</h4><div class="dg-fig" data-kind="dfd">
+ent m 0 0 Member
+dproc p 250 0 [1] Process Loan !
+m > p : Loan request
+    </div><p>Data masuk tapi tidak ada yang keluar. Tambahkan output, misalnya Loan receipt.</p></section>
+    <section class="c-pink"><h4>Salah: miracle</h4><div class="dg-fig" data-kind="dfd">
+dproc p 0 0 [3] Generate Report !
+ent l 250 0 Librarian
+p > l : Monthly report
+    </div><p>Laporan muncul tanpa data. Tambahkan input dari data store Loans.</p></section>
+    <section><h4>Benar</h4><div class="dg-fig" data-kind="dfd">
+ent m 0 0 Librarian
+dproc p 240 0 [4] Add New Book
+store d 480 0 =140x40 [D1] Books
+m > p : New book data
+p > d : Book record
+    </div><p>Data dari entity masuk ke process, lalu process menyimpannya.</p></section>
+  </div>
+
+  <h3>Level DFD: dari paling umum ke paling rinci</h3>
+  <table>
+    <tr><th>Diagram</th><th>Isi</th><th>Nomor process</th></tr>
+    <tr><td>Context diagram</td><td>seluruh sistem sebagai <b>satu process</b>, semua entity, semua flow. Belum ada data store.</td><td>0</td></tr>
+    <tr><td>Level 0</td><td>process utama (satu per use case), data store, dan semua flow dari context diagram</td><td>1, 2, 3, …</td></tr>
+    <tr><td>Level 1</td><td>satu process Level 0 dipecah menjadi subprocess</td><td>1.1, 1.2, … (untuk process 1)</td></tr>
+    <tr><td>Level 2</td><td>satu subprocess dipecah lagi</td><td>1.1.1, 1.1.2, …</td></tr>
+  </table>
+
+  <details class="contoh">
+    <summary>Contoh lengkap: Online Library Loan System (context, Level 0, Level 1)</summary>
+    <div data-dg="lib.case"></div>
+    <ol class="cara">
+      <li><span class="judul">Tandai entity, data store, dan kegiatan</span>
+        <p>Pihak di luar sistem: Member, Librarian. Kalimat "The system stores …": Books, Loans. Kegiatan sistem: memproses peminjaman, mencatat pengembalian, membuat laporan.</p>
+      </li>
+      <li><span class="judul">Context diagram</span>
+        <p>Satu process bernomor 0 dan semua flow ke atau dari entity. Data store belum digambar, karena masih dianggap bagian dari process 0.</p>
+        <div class="lebar" data-dg="lib.ctx"></div>
+      </li>
+      <li><span class="judul">Satu DFD fragment untuk setiap use case</span>
+        <p><mark>DFD fragment</mark> adalah satu process beserta entity, data store, dan flow-nya. Satu fragment per hal yang bisa dilakukan pengguna, supaya tidak ada use case yang terlewat. Contoh fragment untuk "Record Return":</p>
+        <div class="lebar" data-dg="lib.frag"></div>
+      </li>
+      <li><span class="judul">Gabungkan fragment menjadi Level 0</span>
+        <p>Entity dan data store yang sama digambar <b>sekali</b>, lalu fragment disambung lewat mereka. Cek: setiap flow di context diagram harus muncul di Level 0.</p>
+        <div class="lebar" data-dg="lib.l0"></div>
+      </li>
+      <li><span class="judul">Level 1 untuk satu process</span>
+        <p>Process 1 dipecah menjadi 1.1, 1.2, 1.3. Flow internal (Available book, Loan details) boleh ditambah.</p>
+        <div class="lebar" data-dg="lib.l1"></div>
+      </li>
+    </ol>
+  </details>
+
+  <h3>Balancing: Level 1 harus cocok dengan induknya</h3>
+  <p><mark>Balancing</mark> adalah aturan bahwa flow yang masuk dan keluar dari sebuah process harus sama dengan flow di diagram pecahannya. Cara mengeceknya: daftar semua flow process induk, lalu cari satu per satu di diagram level berikutnya.</p>
+  <table>
+    <tr><th>Flow process 1 di Level 0</th><th>Di Level 1</th></tr>
+    <tr><td>Member → Loan request</td><td>masuk ke 1.1 ✓</td></tr>
+    <tr><td>D1 Books → Book availability</td><td>masuk ke 1.1 ✓</td></tr>
+    <tr><td>Book status → D1 Books</td><td>keluar dari 1.2 ✓</td></tr>
+    <tr><td>New loan → D2 Loans</td><td>keluar dari 1.2 ✓</td></tr>
+    <tr><td>Loan receipt → Member</td><td>keluar dari 1.3 ✓</td></tr>
+  </table>
+  <ul>
+    <li><strong>Boleh:</strong> menambah flow <b>internal</b> antar subprocess atau ke data store yang sama.</li>
+    <li><strong>Tidak boleh:</strong> menghapus flow, atau menambah flow baru ke entity. Kalau perlu flow baru ke Member, tambahkan juga di Level 0 dan context diagram.</li>
+    <li><strong>Kapan berhenti memecah:</strong> saat process bisa dijelaskan dalam <b>satu kalimat</b> (<mark>primitive process</mark>). Kurang dari 3 subprocess terlalu sedikit, lebih dari 7 sampai 9 terlalu ramai.</li>
+  </ul>
+
+  <h3>Data dictionary dan bedanya dengan flowchart</h3>
+  <p><mark>Data dictionary</mark> adalah daftar definisi isi data store dan data flow, supaya orang lain paham arti setiap variabel. Contoh untuk D2 Loans:</p>
+  <table>
+    <tr><th>Variable</th><th>Variable name</th><th>Unit</th><th>Allowed values</th><th>Description</th></tr>
+    <tr><td>Loan ID</td><td>LOAN_ID</td><td>Numeric</td><td>00000001–99999999</td><td>ID of the loan</td></tr>
+    <tr><td>Loan date</td><td>LOAN_DATE</td><td>dd/mm/yyyy</td><td>valid date</td><td>date the book is borrowed</td></tr>
+    <tr><td>Returned</td><td>RETURNED</td><td>Boolean</td><td>True / False</td><td>whether the book is back</td></tr>
+  </table>
+  <table>
+    <tr><th>Aspek</th><th>DFD</th><th>Flowchart</th></tr>
+    <tr><td>Yang digambar</td><td><b>ke mana</b> data mengalir di sistem</td><td><b>bagaimana</b> logika berjalan di dalam process</td></tr>
+    <tr><td>Isi</td><td>process, data store, entity, flow</td><td>langkah, decision, loop</td></tr>
+    <tr><td>Start, decision, loop</td><td>tidak ada</td><td>ada, dari Start sampai End</td></tr>
+    <tr><td>Dipakai saat</td><td>analysis (memahami sistem)</td><td>design (merencanakan program)</td></tr>
+    <tr><td>Menampilkan pengguna</td><td>ya, sebagai entity</td><td>tidak</td></tr>
+  </table>
+
+  <aside class="jebakan">
+    <table>
+      <tr><th>Kesalahan</th><th>Penyebab</th><th>Perbaikan</th></tr>
+      <tr><td>Data store di context diagram</td><td>di context diagram semuanya masih satu process</td><td>gambar data store mulai Level 0</td></tr>
+      <tr><td>Flow tanpa nama atau bernama kata kerja ("Send")</td><td>flow adalah data, bukan kegiatan</td><td>nama data: "Loan receipt"</td></tr>
+      <tr><td>Decision atau loop di DFD</td><td>DFD tidak punya logika</td><td>logika ditaruh di flowchart atau pseudocode</td></tr>
+      <tr><td>Flow ke entity di Level 1 tidak ada di Level 0</td><td>tidak balanced</td><td>samakan semua flow ke entity di kedua level</td></tr>
+      <tr><td>Sistem sendiri digambar sebagai entity</td><td>entity selalu di luar sistem</td><td>bagian dari sistem menjadi process</td></tr>
+    </table>
+  </aside>
+
+  <aside class="coba">
+    <p>Buka <a href="viz/latihan.html#library">kanvas latihan</a>, tab <b>DFD</b>, lalu gambar ulang contoh di atas. <b>Cek aturan</b> menandai flow tanpa nama, flow tanpa process, black hole, miracle, dan flow yang tidak sama antara Context dan Level 0.</p>
+  </aside>
+
+  <p class="intinya">DFD menunjukkan ke mana data bergerak, bukan urutan langkah. Data hanya berpindah lewat process, setiap process punya input dan output, dan flow ke entity harus sama di setiap level.</p>
+
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Di Level 0, temanmu menggambar flow "Order data" langsung dari Customer ke D1 Orders. Apa yang salah, dan bagaimana perbaikannya?</summary>
+    <p>Data berpindah tanpa process, jadi melanggar aturan pertama. Sisipkan process, misalnya "1 Place Order": Customer → Order data → 1 Place Order → New order → D1 Orders.</p>
+  </details>
+  <details class="soal">
+    <summary><strong>Soal latihan:</strong> Di Level 1 untuk process 1, kamu menambah flow "Loan rejection" dari 1.1 ke Member. Flow ini tidak ada di Level 0. Apakah diagramnya balanced?</summary>
+    <p>Tidak. Flow baru ke entity harus ada juga di process 1 pada Level 0 dan di context diagram. Pilihannya: tambahkan "Loan rejection" di kedua diagram itu, atau hapus dari Level 1.</p>
+  </details>
+</details>
+</section>
+
+<section class="langkah" id="langkah-5">
+<details>
+  <summary><h2>Latihan bergaya kuis, dengan jawaban</h2></summary>
+  <p class="rantai">
+    <span class="dari">section <a href="#langkah-0">0️⃣</a> sampai <a href="#langkah-4">4️⃣</a></span>
+    <span class="ke">kuis PDM before mid dan Mid Exam</span>
+  </p>
+
+  <p>Dua soal ini meniru bentuk kuis: satu soal logika dengan GUI, satu soal DFD. Kerjakan dulu di kertas atau di kanvas, baru buka jawabannya.</p>
+  <aside class="coba">
+    <p>Buka <a href="viz/latihan.html#bike">Latihan 1</a> atau <a href="viz/latihan.html#clinic">Latihan 2</a> di kanvas latihan: soal di kiri, kanvas di kanan, dan tab <b>Contoh jawaban</b> untuk membandingkan. Pilih <b>Kanvas bebas</b> untuk menempel soal kuis dan mengerjakannya di sana.</p>
+  </aside>
+
+  <h3>Latihan 1: Bike Rental Fee Calculator (GUI)</h3>
+  <aside class="soal-ujian">
+    <div data-dg="bike.case"></div>
+    <div data-dg="bike.gui"></div>
+    <p>Tasks: (a) Create an IPO chart for the Calculate Fee button. (b) Write the pseudocode for the Calculate Fee and Clear buttons. (c) Based on the case study and the GUI design, create a flowchart for each button.</p>
+  </aside>
+  <details class="contoh">
+    <summary>Jawaban Latihan 1</summary>
+    <ol class="cara">
+      <li><span class="judul">Tandai soal</span>
+        <p>Input dari GUI: bike type (dropdown) dan duration (text box). Decision: duration valid? bike type E-Bike? lebih dari 5 jam? Output: fee atau pesan error di label Total Rental Fee.</p>
+      </li>
+      <li><span class="judul">IPO chart</span>
+        <div class="hasil"><div data-dg="bike.ipo"></div></div>
+      </li>
+      <li><span class="judul">Pseudocode: satu module per tombol</span>
+        <p>Rumus "first hour + each additional hour" menjadi <code>first + (hours - 1) * extra</code>. Jam pertama sudah dibayar dengan <code>first</code>, jadi jam tambahannya <code>hours - 1</code>.</p>
+        <div class="hasil"><div data-dg="bike.code"></div></div>
+      </li>
+      <li><span class="judul">Flowchart tombol Calculate Fee</span>
+        <div class="hasil"><div data-dg="bike.calc"></div></div>
+      </li>
+      <li><span class="judul">Flowchart tombol Clear</span>
+        <div class="hasil"><div data-dg="bike.clear"></div></div>
+      </li>
+      <li><span class="judul">Cek dengan contoh angka</span>
+        <div class="hasil"><table>
+          <tr><th>Input</th><th>Hitungan</th><th>Output</th></tr>
+          <tr><td>City Bike, 3</td><td>15000 + (3 − 1) × 5000 = 25000. Tidak lebih dari 5 jam.</td><td>IDR 25,000 (sama dengan contoh di GUI)</td></tr>
+          <tr><td>E-Bike, 6</td><td>25000 + (6 − 1) × 10000 = 75000. Lebih dari 5 jam: 75000 × 0.9 = 67500.</td><td>IDR 67,500</td></tr>
+          <tr><td>City Bike, 0 atau "abc"</td><td>bukan bilangan bulat positif</td><td>pesan error</td></tr>
+        </table></div>
+      </li>
+    </ol>
+  </details>
+
+  <h3>Latihan 2: Online Clinic Appointment System (DFD)</h3>
+  <aside class="soal-ujian">
+    <div data-dg="clinic.case"></div>
+    <p>Tasks: (a) Context Diagram. (b) DFD Level 0 with the major processes, data stores, and data flows. (c) DFD Level 1 for process 2 (Book Appointment), balanced with Level 0.</p>
+  </aside>
+  <details class="contoh">
+    <summary>Jawaban Latihan 2</summary>
+    <ol class="cara">
+      <li><span class="judul">Tandai soal</span>
+        <p>Entity: Patient, Doctor, Administrator, Payment Gateway (sistem luar). Data store: Doctor Schedules, Appointments, Payments. Kegiatan: mengelola jadwal, booking, mengelola janji harian, membuat laporan.</p>
+      </li>
+      <li><span class="judul">Context diagram</span>
+        <div class="lebar" data-dg="clinic.ctx"></div>
+      </li>
+      <li><span class="judul">Level 0: empat process utama</span>
+        <p>Process 2 paling sibuk karena di sanalah pembayaran diverifikasi sebelum janji dikonfirmasi.</p>
+        <div class="lebar" data-dg="clinic.l0"></div>
+      </li>
+      <li><span class="judul">Level 1 untuk process 2</span>
+        <p>Urutan 2.1 sampai 2.4 mengikuti kalimat soal: cek jadwal, minta pembayaran, verifikasi, lalu konfirmasi.</p>
+        <div class="lebar" data-dg="clinic.l1"></div>
+      </li>
+      <li><span class="judul">Cek balancing process 2</span>
+        <div class="hasil"><table>
+          <tr><th>Flow process 2 di Level 0</th><th>Di Level 1</th></tr>
+          <tr><td>Patient → Appointment request</td><td>2.1 ✓</td></tr>
+          <tr><td>D1 → Available slots</td><td>2.1 ✓</td></tr>
+          <tr><td>Payment request → Payment Gateway</td><td>2.2 ✓</td></tr>
+          <tr><td>Payment Gateway → Payment verification</td><td>2.3 ✓</td></tr>
+          <tr><td>Payment record → D3</td><td>2.3 ✓</td></tr>
+          <tr><td>New appointment → D2</td><td>2.4 ✓</td></tr>
+          <tr><td>Appointment confirmation → Patient</td><td>2.4 ✓</td></tr>
+        </table></div>
+      </li>
+    </ol>
+  </details>
+
+  <p class="intinya">Kerjakan soal dengan urutan yang sama: tandai soal, susun IPO, lalu gambar. Setelah selesai, cek dengan satu contoh angka (flowchart) atau dengan tabel balancing (DFD).</p>
+</details>
+</section>
+
+<h2 id="pustaka">Daftar pustaka</h2>
+<ol class="refs">
+  <li>Gaddis, T. (2022). <i>Starting Out with Programming Logic and Design</i> (6th ed.). Pearson. Bab 2 (pseudocode dan flowchart), 3 (module dan hierarchy chart), 4 (decision), 5 (loop), 6 (function dan IPO chart), 7 (validasi input), 15 (GUI dan event handler).</li>
+  <li>Jeremy, N. H. <i>Data Flow Fundamentals</i> dan <i>Data Flow Analysis</i>. Slide kuliah Program Design Methods.</li>
+  <li>Dennis, A., Wixom, B. H., &amp; Roth, R. M. (2022). <i>Systems Analysis and Design</i> (8th ed.). Wiley. Bab DFD (notasi Gane &amp; Sarson, balancing).</li>
+  <li>Satzinger, J. W., Jackson, R. B., &amp; Burd, S. D. (2016). <i>Systems Analysis and Design in a Changing World</i> (7th ed.). Cengage. Bab DFD fragment dan event-partitioned model.</li>
+</ol>
+
+</main>
+</body>
+</html>

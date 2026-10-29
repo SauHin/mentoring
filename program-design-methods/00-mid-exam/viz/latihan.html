@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Latihan Studi Kasus PDM</title>
+  <link rel="icon" href="../../../_shared/favicon.svg">
+  <link rel="stylesheet" href="../../../_shared/gaya.css?v=9273b841">
+  <link rel="stylesheet" href="../../../_shared/style.css?v=cec1c6a4">
+  <link rel="stylesheet" href="../../../_shared/diagram.css?v=2e818b40">
+  <script src="../../../_shared/theme.js?v=8240686c"></script>
+  <style>
+    body.viz.kanvas { max-width: 1440px; }
+    .ws { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+    .kiri, .kanan { min-width: 0; }
+    .kanan, .pane { display: flex; flex-direction: column; min-height: 0; }
+    .pane { flex: 1; }
+    .pane > .dg-ed { flex: 1; }
+    .controls .pick { min-width: 0; max-width: 100%; }
+    .controls .pick select { min-width: 0; flex: 1; text-overflow: ellipsis; } /* judul soal panjang: jangan melebarkan halaman di HP */
+    .pane[hidden], .kiri > [hidden] { display: none; }
+    .kiri .seg, .kanan > .seg { margin: 0 0 12px; }
+    @media (min-width: 960px) {
+      .ws { grid-template-columns: minmax(300px, 2fr) minmax(0, 3fr); height: var(--ws-h, 640px); }
+      .kiri { overflow-y: auto; padding-right: 8px; }
+      .kanan { height: 100%; }
+      /* Kanvas mengecil mengikuti tinggi layar; hasil Cek aturan tetap terlihat di bawahnya. */
+      .ws .dg-wrap, .ws .ps { min-height: 200px; }
+      .ws .dg-check { max-height: 30%; overflow-y: auto; flex: none; }
+    }
+    @media (max-width: 959px) { .pane { min-height: 480px; } }
+    .kiri aside.soal-ujian { margin-top: 0; font-size: .95rem; }
+    .kiri aside.soal-ujian p { margin: 0 0 .6em; }
+    .kiri .tasks { margin-top: .3em; font-size: .95rem; }
+    .kiri h3 { margin: 1.4rem 0 .4rem; font-size: 1.05rem; }
+    .kiri textarea.free { width: 100%; font: inherit; }
+    /* IPO chart: satu kartu per module, tiga kolom dengan label di atas kolom. */
+    .ipo-list { display: grid; gap: 12px; overflow-y: auto; min-height: 0; }
+    .ipo-card { padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+    .ipo-head { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px; }
+    .ipo-head label, .ipo-grid label { flex-direction: column; align-items: stretch; gap: 4px; font-weight: 600; font-size: .9rem; }
+    .ipo-head label { flex: 1; }
+    .ipo-grid { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 600px) { .ipo-grid { grid-template-columns: minmax(0, 1fr); } }
+    .ipo-grid textarea { resize: vertical; min-height: 7.5em; font: 14px/1.5 var(--huruf); }
+    .pane-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 8px; }
+    .pane-bar .push { margin-left: auto; }
+    /* Pseudocode: textarea transparan di atas teks berwarna, nomor baris di kiri. */
+    .ps { display: flex; flex: 1; min-height: 380px; border: 1px solid var(--line); border-radius: 10px; background: var(--kode); overflow: hidden; }
+    .ps-num, .ps-hl, .ps-in { margin: 0; padding: 14px; font: 14px/21px var(--mono); tab-size: 3; white-space: pre; border: 0; border-radius: 0; background: none; }
+    .ps-num { padding-right: 8px; min-width: 3.2em; text-align: right; color: var(--pudar); overflow: hidden; user-select: none; }
+    .ps-area { position: relative; flex: 1; min-width: 0; }
+    .ps-hl, .ps-in { position: absolute; inset: 0; overflow: auto; }
+    .ps-hl { pointer-events: none; overflow: hidden; color: var(--ink); }
+    .ps-in { resize: none; color: transparent; caret-color: var(--ink); outline: none; }
+    .ps-in::placeholder { color: var(--pudar); }
+    .ps-in::selection { background: rgb(35 131 226 / .28); color: transparent; }
+  </style>
+</head>
+<body class="viz kanvas">
+
+<h1>Latihan studi kasus PDM</h1>
+<p>Soal bergaya kuis di kiri, kanvas untuk menjawab di kanan: IPO chart, pseudocode, flowchart, hierarchy chart, dan DFD.</p>
+<p class="coba"><strong>Coba:</strong> pilih soal, buka tab yang diminta di bagian <b>Tasks</b>, lalu kerjakan. Di Flowchart, Hierarchy, dan DFD, klik tombol bentuk untuk menambah dan klik dua kali bentuk untuk menulis.</p>
+<p class="perhatikan"><strong>Perhatikan:</strong> tombol <b>Cek aturan</b> hanya memeriksa aturan bentuk, misalnya Start dan End, label Yes/No, black hole, dan balancing. Isi jawabanmu dibandingkan sendiri dengan tab <b>Contoh jawaban</b>.</p>
+
+<div class="controls">
+  <label class="pick">Soal <select class="field" id="pilih"></select></label>
+  <span class="label">Jawaban tersimpan otomatis di browser ini.</span>
+  <button type="button" class="btn btn-sm push" id="reset">Kosongkan jawaban</button>
+</div>
+
+<div class="ws" id="ws">
+  <section class="kiri" aria-label="Soal">
+    <div class="seg" id="kiriTab">
+      <button type="button" class="btn btn-sm sel" data-k="soal">Soal</button>
+      <button type="button" class="btn btn-sm" data-k="jawab">Contoh jawaban</button>
+    </div>
+    <div id="soal"></div>
+    <div id="jawab" hidden></div>
+  </section>
+
+  <section class="kanan" aria-label="Kanvas jawaban">
+    <div class="seg" id="tab">
+      <button type="button" class="btn btn-sm" data-t="ipo">IPO chart</button>
+      <button type="button" class="btn btn-sm" data-t="code">Pseudocode</button>
+      <button type="button" class="btn btn-sm" data-t="flow">Flowchart</button>
+      <button type="button" class="btn btn-sm" data-t="tree">Hierarchy</button>
+      <button type="button" class="btn btn-sm" data-t="dfd">DFD</button>
+    </div>
+
+    <div class="pane" data-t="ipo" hidden>
+      <div class="pane-bar">
+        <button type="button" class="btn btn-sm" id="ipoAdd">+ IPO chart</button>
+        <span class="label">Satu IPO chart untuk satu module. Tulis satu item per baris.</span>
+        <button type="button" class="btn btn-sm btn-go push" id="ipoCheck">Cek aturan</button>
+      </div>
+      <div class="ipo-list" id="ipoList"></div>
+      <div class="dg-check" id="ipoRes" hidden></div>
+    </div>
+
+    <div class="pane" data-t="code" hidden>
+      <div class="pane-bar">
+        <label class="pick">Sisipkan <select class="field" id="snip"></select></label>
+        <span class="label">Tab = indentasi, Enter mengikuti indentasi baris di atasnya.</span>
+        <button type="button" class="btn btn-sm btn-go push" id="psCheck">Cek aturan</button>
+      </div>
+      <div class="ps">
+        <pre class="ps-num" id="psNum" aria-hidden="true">1</pre>
+        <div class="ps-area">
+          <pre class="ps-hl" id="psHl" aria-hidden="true"></pre>
+          <textarea class="ps-in" id="psIn" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Pseudocode" placeholder="Tulis pseudocode di sini, misalnya Declare Integer pages"></textarea>
+        </div>
+      </div>
+      <div class="dg-check" id="psRes" hidden></div>
+    </div>
+
+    <div class="pane" data-t="flow" hidden><div id="edFlow"></div></div>
+    <div class="pane" data-t="tree" hidden><div id="edTree"></div></div>
+    <div class="pane" data-t="dfd" hidden><div id="edDfd"></div></div>
+  </section>
+</div>
+
+<script src="../../../_shared/diagram.js?v=c3d0dcb3"></script>
+<script src="soal.js"></script>
+<script>
+(function () {
+  const S = DG.soal;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const empty = (name) => ({ name, nodes: [], edges: [] });
+  const blank = (s) => ({
+    note: '', code: '',
+    ipo: [{ module: '', input: '', process: '', output: '' }],
+    flow: (s.flow || ['Flowchart 1']).map(empty),
+    tree: [empty('Hierarchy chart')],
+    dfd: ['Context', 'Level 0', 'Level 1'].map(empty),
+  });
+  let soal = S[0], state = blank(soal);
+  const key = () => 'pdm-latihan-' + soal.id;
+  const persist = () => { try { localStorage.setItem(key(), JSON.stringify(state)); } catch (e) { /* mode privat: jawaban hanya hidup selama halaman terbuka */ } };
+  function load() {
+    try { const v = JSON.parse(localStorage.getItem(key())); if (v && v.flow && v.dfd) return v; } catch (e) { /* tidak ada simpanan */ }
+    return blank(soal);
+  }
+
+  /* ---------- Kiri: soal dan contoh jawaban ---------- */
+  $('pilih').innerHTML = S.map((s) => `<option value="${s.id}">${esc(s.title)}</option>`).join('');
+  function showSoal() {
+    if (soal.free) {
+      $('soal').innerHTML = '<p class="label">Tempel soal studi kasusmu di sini, misalnya soal kuis. Teksnya ikut tersimpan.</p><textarea class="field free" id="freeText" rows="16" placeholder="Tempel soal di sini"></textarea>';
+      $('freeText').value = state.note || '';
+      $('freeText').addEventListener('input', (e) => { state.note = e.target.value; persist(); });
+      return;
+    }
+    $('soal').innerHTML = `<aside class="soal-ujian">${DG.data[soal.case].html}</aside>${soal.gui ? DG.data[soal.gui].html : ''}` +
+      `<p><strong>Tasks</strong></p><ol class="tasks">${soal.tasks.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>`;
+  }
+  function showJawab() {
+    $('jawab').innerHTML = soal.free
+      ? '<p>Soal sendiri tidak punya contoh jawaban. Pakai tombol <b>Cek aturan</b> di setiap tab, lalu bandingkan bentuknya dengan contoh di <a href="../notes.html">notes</a>.</p>'
+      : '<p class="label">Ini salah satu jawaban yang benar. Nama variabel, kalimat, dan jumlah module boleh berbeda, asal logika dan aturannya sama.</p>' +
+        soal.answers.map(([t, k]) => `<h3>${esc(t)}</h3><div data-dg="${k}"></div>`).join('');
+    DG.renderAll($('jawab'));
+  }
+  function side(k) {
+    $('kiriTab').querySelectorAll('button').forEach((b) => b.classList.toggle('sel', b.dataset.k === k));
+    $('soal').hidden = k !== 'soal';
+    $('jawab').hidden = k !== 'jawab';
+  }
+  $('kiriTab').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) side(b.dataset.k); });
+
+  /* ---------- Kanan: tab kanvas ---------- */
+  const ed = {
+    flow: DG.editor($('edFlow'), { kind: 'flow', pages: state.flow, onChange: (p) => { state.flow = p; persist(); } }),
+    tree: DG.editor($('edTree'), { kind: 'tree', pages: state.tree, onChange: (p) => { state.tree = p; persist(); } }),
+    dfd: DG.editor($('edDfd'), { kind: 'dfd', pages: state.dfd, onChange: (p) => { state.dfd = p; persist(); } }),
+  };
+  function openTab(t) {
+    $('tab').querySelectorAll('button').forEach((b) => b.classList.toggle('sel', b.dataset.t === t));
+    document.querySelectorAll('.pane').forEach((p) => { p.hidden = p.dataset.t !== t; });
+    if (ed[t]) ed[t].refresh();
+    if (t === 'code') syncCode();
+  }
+  $('tab').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) openTab(b.dataset.t); });
+
+  /* ---------- IPO chart ---------- */
+  const COLS = [['input', 'Input'], ['process', 'Processing'], ['output', 'Output']];
+  const grow = (t) => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; };
+  function renderIpo() {
+    $('ipoList').innerHTML = state.ipo.map((c, i) => `<div class="ipo-card" data-i="${i}">
+      <div class="ipo-head"><label>Module<input class="field" data-f="module" value="${esc(c.module)}" placeholder="misalnya main atau calculateButton_Click"></label>${state.ipo.length > 1 ? `<button type="button" class="tool" data-del="${i}" title="Hapus IPO chart ini" aria-label="Hapus IPO chart ini">×</button>` : ''}</div>
+      <div class="ipo-grid">${COLS.map(([f, n]) => `<label>${n}<textarea class="field" data-f="${f}" rows="5" placeholder="satu item per baris">${esc(c[f])}</textarea></label>`).join('')}</div></div>`).join('');
+    $('ipoList').querySelectorAll('textarea').forEach(grow);
+  }
+  $('ipoList').addEventListener('input', (e) => {
+    const f = e.target.dataset.f;
+    if (!f) return;
+    state.ipo[+e.target.closest('.ipo-card').dataset.i][f] = e.target.value;
+    if (e.target.tagName === 'TEXTAREA') grow(e.target);
+    $('ipoRes').hidden = true;
+    persist();
+  });
+  $('ipoList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-del]');
+    if (!b) return;
+    state.ipo.splice(+b.dataset.del, 1);
+    persist();
+    renderIpo();
+  });
+  $('ipoAdd').addEventListener('click', () => { state.ipo.push({ module: '', input: '', process: '', output: '' }); persist(); renderIpo(); });
+  function report(el, res, okText) {
+    el.hidden = false;
+    el.innerHTML = res.length ? `<p><strong>${res.length} hal perlu diperbaiki.</strong></p><ul>${res.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : `<p>✅ ${okText}</p>`;
+  }
+  $('ipoCheck').addEventListener('click', () => {
+    const res = [];
+    state.ipo.forEach((c, i) => {
+      const nm = c.module.trim() || `IPO chart ${i + 1}`;
+      if (!c.module.trim()) res.push(`IPO chart ${i + 1} belum diberi nama module.`);
+      COLS.forEach(([f, n]) => { if (!c[f].trim()) res.push(`${nm}: kolom ${n} masih kosong. Kalau memang tidak ada, tulis (none).`); });
+      if (/\b(display|show|print|tampil)/i.test(c.process)) res.push(`${nm}: Display ada di kolom Processing. Yang ditampilkan ke pengguna ditulis di kolom Output.`);
+      if (/\b(input|enter|get|masukkan)\b/i.test(c.process)) res.push(`${nm}: Input ada di kolom Processing. Data yang dimasukkan pengguna ditulis di kolom Input.`);
+      if (/\b(calculate|compute|hitung|validate)/i.test(c.output)) res.push(`${nm}: kolom Output berisi proses. Output adalah hasilnya (misalnya total), bukan langkah menghitung.`);
+    });
+    report($('ipoRes'), res, 'Tidak ada pelanggaran aturan dasar. Isinya tetap dibandingkan dengan contoh jawaban.');
+  });
+
+  /* ---------- Pseudocode ---------- */
+  const SNIP = {
+    'If-Then': 'If condition Then\n   statement\nEnd If',
+    'If-Then-Else': 'If condition Then\n   statement\nElse\n   statement\nEnd If',
+    'If-Then-Else If': 'If condition1 Then\n   statement\nElse If condition2 Then\n   statement\nElse\n   statement\nEnd If',
+    'Select Case': 'Select variable\n   Case value1:\n      statement\n   Case value2:\n      statement\n   Default:\n      statement\nEnd Select',
+    'While': 'While condition\n   statement\nEnd While',
+    'Do-While': 'Do\n   statement\nWhile condition',
+    'For': 'For counter = 1 To 10\n   statement\nEnd For',
+    'Validasi input (loop)': 'Input value\nWhile value <= 0\n   Display "Error: enter a value greater than 0"\n   Input value\nEnd While',
+    'Module': 'Module name()\n   statement\nEnd Module',
+    'Function': 'Function Real name(Real value)\n   Return value\nEnd Function',
+    'Event handler tombol (GUI)': 'Module calculateButton_Click()\n   statement\nEnd Module',
+  };
+  $('snip').innerHTML = '<option value="">pilih struktur…</option>' + Object.keys(SNIP).map((k) => `<option>${k}</option>`).join('');
+  const ta = $('psIn'), hl = $('psHl'), num = $('psNum');
+  function syncCode() {
+    hl.innerHTML = DG.hl(ta.value) + '\n';
+    num.textContent = ta.value.split('\n').map((_, i) => i + 1).join('\n');
+    hl.scrollTop = num.scrollTop = ta.scrollTop;
+    hl.scrollLeft = ta.scrollLeft;
+  }
+  ta.addEventListener('scroll', () => { hl.scrollTop = num.scrollTop = ta.scrollTop; hl.scrollLeft = ta.scrollLeft; });
+  ta.addEventListener('input', () => { state.code = ta.value; $('psRes').hidden = true; persist(); syncCode(); });
+  const insert = (text) => {
+    ta.focus();
+    if (!document.execCommand('insertText', false, text)) ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, 'end');
+    ta.dispatchEvent(new Event('input'));
+  };
+  const OPENS = /^(If\b.*\bThen|Else\b|While\b|For\b|Do$|Module\b|Function\b|Select\b|Case\b.*:|Default:)/;
+  ta.addEventListener('keydown', (e) => {
+    const v = ta.value, s = ta.selectionStart, ls = v.lastIndexOf('\n', s - 1) + 1, line = v.slice(ls, s);
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); insert('   '); }
+    else if (e.key === 'Tab' && e.shiftKey) {
+      e.preventDefault();
+      const cut = (v.slice(ls).match(/^ {1,3}/) || [''])[0].length;
+      if (cut) { ta.setSelectionRange(ls, ls + cut); insert(''); }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const ind = line.match(/^ */)[0];
+      insert('\n' + ind + (OPENS.test(line.trim()) ? '   ' : ''));
+    }
+  });
+  $('snip').addEventListener('change', (e) => {
+    const k = e.target.value;
+    e.target.value = '';
+    if (!k) return;
+    const v = ta.value, s = ta.selectionStart, ls = v.lastIndexOf('\n', s - 1) + 1, ind = v.slice(ls).match(/^ */)[0];
+    const atStart = !v.slice(ls, s).trim();
+    insert((atStart ? '' : '\n' + ind) + SNIP[k].split('\n').join('\n' + ind));
+  });
+  // Pemeriksa sederhana: blok yang belum ditutup, If tanpa Then, = untuk membandingkan, kode C, dan variabel tanpa Declare.
+  function checkCode(src) {
+    const res = [], stack = [], declared = new Set();
+    const PAIR = { If: 'End If', While: 'End While', For: 'End For', Module: 'End Module', Function: 'End Function', Select: 'End Select', Do: 'While/Until' };
+    const cond = (s, n) => { if (/(^|[^=!<>])=($|[^=])/.test(s)) res.push(`Baris ${n}: kondisi memakai =. Untuk membandingkan pakai ==, tanda = hanya untuk Set.`); };
+    src.split('\n').forEach((raw, i) => {
+      const n = i + 1, l = raw.replace(/\/\/.*$/, '').trim();
+      if (!l) return;
+      let m;
+      if (/^(printf|scanf|cout|cin|print)\b|;\s*$/.test(l)) res.push(`Baris ${n}: ini kode bahasa pemrograman. Di pseudocode pakai Display untuk menampilkan dan Input untuk membaca.`);
+      if (/^(if|else|end|while|for|display|input|set|declare|module|function|call|return)\b/.test(l)) res.push(`Baris ${n}: keyword pseudocode ditulis dengan huruf besar di awal, misalnya ${l.split(/\s/)[0].replace(/^./, (c) => c.toUpperCase())}.`);
+      if ((m = l.match(/^Declare\s+\w+\s+(.+)$/))) m[1].split(',').forEach((v) => declared.add(v.split('=')[0].trim()));
+      if ((m = l.match(/^(?:Module|Function\s+\w+)\s+\w+\((.*)\)/))) m[1].split(',').forEach((p) => { const w = p.trim().split(/\s+/); if (w.length > 1) declared.add(w[w.length - 1]); });
+      if ((m = l.match(/^For\s+(\w+)\s*=/))) declared.add(m[1]);
+      const used = (l.match(/^Input\s+(\w+)$/) || l.match(/^Set\s+(\w+)\s*=/) || [])[1];
+      if (used && !declared.has(used)) res.push(`Baris ${n}: variabel ${used} dipakai sebelum Declare.`);
+      if (/^Set\b/.test(l) && !/=/.test(l)) res.push(`Baris ${n}: Set ditulis dalam bentuk Set variabel = nilai.`);
+      if (/^(If|Else If)\b/.test(l)) { if (!/\bThen$/.test(l)) res.push(`Baris ${n}: If harus diakhiri Then.`); cond(l.replace(/^(Else )?If\b|\bThen$/g, ''), n); }
+      if (/^If\b/.test(l)) stack.push(['If', n]);
+      else if (/^Else\b/.test(l)) { if (!stack.length || stack[stack.length - 1][0] !== 'If') res.push(`Baris ${n}: Else tanpa If yang masih terbuka.`); }
+      else if (/^Do$/.test(l)) stack.push(['Do', n]);
+      else if (/^(While|Until)\b/.test(l) && stack.length && stack[stack.length - 1][0] === 'Do') { stack.pop(); cond(l.replace(/^(While|Until)/, ''), n); }
+      else if (/^While\b/.test(l)) { stack.push(['While', n]); cond(l.replace(/^While/, ''), n); }
+      else if (/^(For|Module|Function|Select)\b/.test(l)) stack.push([l.split(/\s/)[0], n]);
+      else if ((m = l.match(/^End\s+(\w+)/))) {
+        const top = stack[stack.length - 1];
+        if (!top) res.push(`Baris ${n}: End ${m[1]} tanpa blok yang dibuka.`);
+        else if (top[0] !== m[1]) res.push(`Baris ${n}: tertulis End ${m[1]}, padahal blok yang masih terbuka adalah ${top[0]} (baris ${top[1]}). Tutup dulu dengan ${PAIR[top[0]]}.`);
+        else stack.pop();
+      }
+    });
+    stack.forEach(([k, n]) => res.push(`Blok ${k} di baris ${n} belum ditutup ${PAIR[k]}.`));
+    return res;
+  }
+  $('psCheck').addEventListener('click', () => report($('psRes'), state.code.trim() ? checkCode(state.code) : ['Pseudocode masih kosong.'], 'Tidak ada pelanggaran aturan dasar. Logikanya tetap dibandingkan dengan contoh jawaban.'));
+
+  /* ---------- Pilih soal ---------- */
+  function choose(id) {
+    soal = S.find((s) => s.id === id) || S[0];
+    $('pilih').value = soal.id;
+    state = load();
+    renderIpo();
+    ta.value = state.code || '';
+    syncCode();
+    ed.flow.load(state.flow);
+    ed.tree.load(state.tree);
+    ed.dfd.load(state.dfd);
+    ['ipoRes', 'psRes'].forEach((r) => { $(r).hidden = true; });
+    showSoal();
+    showJawab();
+    side('soal');
+    openTab(soal.tab);
+    history.replaceState(null, '', '#' + soal.id);
+  }
+  $('pilih').addEventListener('change', (e) => choose(e.target.value));
+  $('reset').addEventListener('click', () => {
+    if (!confirm('Kosongkan semua jawaban untuk soal ini? IPO chart, pseudocode, dan semua diagram akan dihapus.')) return;
+    state = blank(soal);
+    persist();
+    choose(soal.id);
+  });
+
+  // Di layar lebar, area kerja mengisi sisa tinggi layar supaya soal dan kanvas terlihat bersamaan.
+  function fit() {
+    const top = $('ws').getBoundingClientRect().top + scrollY;
+    document.documentElement.style.setProperty('--ws-h', Math.max(480, innerHeight - top - 16) + 'px');
+    document.querySelectorAll('.pane:not([hidden])').forEach((p) => { const t = p.dataset.t; if (ed[t]) ed[t].refresh(); });
+  }
+  addEventListener('resize', fit);
+  choose(location.hash.slice(1));
+  fit();
+})();
+</script>
+</body>
+</html>

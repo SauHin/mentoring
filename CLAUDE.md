@@ -70,7 +70,7 @@ Acuan tampilan: `_shared/gaya.css` (salinan `C:\Users\jonat\Music\belajar\catata
 - Sumbu, satuan, dan nilai yang sedang dipilih selalu terlihat.
 - Warna dan font mengikuti `gaya.css`, di mode terang dan gelap.
 - Kalau notes membahas konsep yang sama, tautkan viz yang sama di notes. `cviz` bisa langsung membuka program tertentu lewat hash, misalnya `viz/loop.html#nested`.
-- Pakai mesin bersama kalau cocok: `_shared/cviz.js` (program C), `listviz.js` (linked list), `logic.js` (logika), `automata.js` dan `grammar.js` (automata dan grammar). Mesin ini sudah mengikuti aturan di bawah.
+- Pakai mesin bersama kalau cocok: `_shared/cviz.js` (program C), `listviz.js` (linked list), `logic.js` (logika), `automata.js` dan `grammar.js` (automata dan grammar), `diagram.js` (flowchart, hierarchy chart, DFD, dan kanvas latihan PDM). Mesin ini sudah mengikuti aturan di bawah.
 - Setelah mengubah `automata.js` atau `grammar.js`, jalankan `node tools/check-engines.js`. Script ini mencocokkan hasil mesin dengan jawaban di slide dosen.
 - Simulasi bertahap selalu punya tombol **Kembali** di sebelah **Langkah berikutnya**.
 - Pilihan contoh lebih dari 4: pakai dropdown (`label.pick` + `select.field`), bukan deretan tombol. Pilihan paling banyak 4: grup tombol `.seg`.

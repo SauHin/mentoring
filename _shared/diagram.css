@@ -1,0 +1,89 @@
+/* Mesin diagram PDM (diagram.js): gambar statis .dg-fig, IPO chart, dan kanvas latihan .dg-ed.
+   Warna bentuk memakai --a-bg dari kelas warna style.css (c-mint, c-lilac, c-jingga, c-pink), jadi ikut tema Siang/Malam. */
+
+/* ---------- Gambar ---------- */
+.dg-fig { margin: 1rem 0; overflow-x: auto; text-align: center; }
+.dg-fig svg { display: inline-block; max-width: 100%; height: auto; vertical-align: top; }
+/* DFD lebar: di layar lebar boleh keluar dari kolom teks (seperti blok lebar penuh di Notion). */
+@media (min-width: 900px) { .dg-fig.lebar { margin-inline: calc(50% - min(50vw - 40px, 470px)); } }
+.dg-fig.mini { margin: 0; }
+td .dg-fig { text-align: left; }
+
+.dg-shape { fill: var(--a-bg, var(--kertas)); stroke: var(--tinta); stroke-width: 1.5; }
+.dg-plain { --a-bg: var(--kertas); } /* bentuk tanpa warna tetap putih walau gambarnya di dalam kotak berwarna */
+.dg-shape.dg-fill { stroke: none; }
+.dg-line { fill: none; stroke: var(--tinta); stroke-width: 1.5; }
+.dg-shadow { fill: var(--garis); stroke: var(--pudar); stroke-width: 1; }
+.dg-band { fill: var(--tinta); }
+.dg-no { fill: var(--kertas); font: 700 13px var(--huruf); text-anchor: middle; dominant-baseline: central; }
+.dg-text, .dg-text tspan { fill: var(--tinta); font: 14px var(--huruf); text-anchor: middle; dominant-baseline: central; }
+.dg-edge path { fill: none; stroke: var(--tinta); stroke-width: 1.5; stroke-linejoin: round; }
+.dg-edge .dg-head { fill: var(--tinta); stroke: none; }
+.dg-lab, .dg-lab tspan { fill: var(--tinta); font: 13px var(--huruf); dominant-baseline: central; }
+.dg-lab { paint-order: stroke; stroke: var(--kertas); stroke-width: 4px; stroke-linejoin: round; }
+.dg-lab.yn { font-weight: 600; }
+/* Contoh yang salah: merah putus-putus. */
+.dg-edge.bad path { stroke: var(--stop); stroke-dasharray: 6 4; }
+.dg-edge.bad .dg-head { fill: var(--stop); stroke-dasharray: none; }
+.dg-lab.bad { fill: var(--stop); }
+.dg-node.bad .dg-shape { stroke: var(--stop); stroke-dasharray: 6 4; }
+
+/* IPO chart: tiga kolom setara, jadi kolom pertama tidak diberi latar header seperti tabel biasa. */
+.dg-ipo { table-layout: fixed; }
+.dg-ipo td:first-child { background: none; font-weight: 400; }
+.dg-ipo thead tr:first-child th { text-align: center; }
+.dg-ipo ul { margin: 0; padding-left: 1.1em; }
+.dg-ipo li { padding: 1px 0; }
+
+/* Mockup GUI di soal studi kasus (gaya gambar GUI di kuis). */
+.gui { max-width: 24rem; margin: 1rem auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--kertas); font-size: .85rem; line-height: 1.4; text-align: left; }
+.gui p { margin: 0; }
+.gui .gui-title { text-align: center; font-weight: 700; font-size: 1rem; letter-spacing: .02em; }
+.gui .gui-sub { margin-bottom: 6px; text-align: center; color: var(--pudar); }
+.gui .gui-lbl { margin-top: 10px; font-weight: 600; }
+.gui .gui-box { display: flex; justify-content: space-between; margin-top: 3px; padding: 5px 8px; border-bottom: 1px solid var(--line); background: var(--kepala-tabel); }
+.gui .gui-ph { color: var(--pudar); }
+.gui .gui-btns { display: grid; grid-template-columns: 1fr 1fr; margin-top: 12px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.gui .gui-btns span { padding: 6px; text-align: center; font-weight: 600; }
+.gui .gui-go { background: var(--go); color: #fff; }
+.gui .gui-out { margin-top: 3px; padding: 8px; text-align: center; font-size: 1.15rem; font-weight: 700; color: var(--hasil-ink); background: var(--stabilo-hijau); }
+.gui .gui-out small { display: block; font-size: .75rem; font-weight: 400; color: var(--pudar); }
+
+/* ---------- Kanvas latihan ---------- */
+.dg-ed { display: flex; flex-direction: column; min-height: 0; }
+.dg-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 0 8px; }
+.dg-add, .dg-act { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dg-add .btn { gap: 6px; padding-left: 8px; }
+.dg-ico { width: 24px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.dg-act .tool { font-size: 18px; }
+.dg-act .tool:disabled { opacity: .4; cursor: default; background: none; }
+.dg-zoom { min-width: 3.2em; text-align: center; font-variant-numeric: tabular-nums; }
+.dg-nofield { display: flex; align-items: center; gap: 6px; font-size: .9rem; color: var(--ink-2); }
+.dg-nofield[hidden] { display: none; }
+.dg-nofield input { width: 4.5em; padding: .25rem .5rem; }
+.dg-pages { margin: 0 0 8px; }
+.dg-pages[hidden] { display: none; }
+.dg-pages .btn.sel { background: rgb(35 131 226 / 0.12); box-shadow: inset 0 0 0 1px var(--go-ink); color: var(--go-ink); }
+.dg-wrap { position: relative; flex: 1; min-height: 380px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); outline: none; }
+.dg-wrap:focus-visible { box-shadow: 0 0 0 2px var(--focus); }
+.dg-svg { display: block; touch-action: none; user-select: none; -webkit-user-select: none; background-image: radial-gradient(circle, var(--garis) 1px, transparent 1.3px); }
+.dg-selbox { fill: none; stroke: var(--go-ink); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.dg-port { fill: var(--kertas); stroke: var(--go-ink); stroke-width: 2; cursor: crosshair; }
+.dg-resize { fill: var(--go-ink); }
+.dg-tmp { fill: none; stroke: var(--go-ink); stroke-width: 2; stroke-dasharray: 5 4; }
+.dg-edge.sel path { stroke: var(--go-ink); stroke-width: 2.5; }
+.dg-edge.sel .dg-head { fill: var(--go-ink); }
+.dg-lab.sel { fill: var(--go-ink); }
+.dg-edit {
+  position: absolute; z-index: 2; margin: 0; resize: none; overflow: hidden;
+  border: 2px solid var(--go-ink); border-radius: 6px; padding: 0 6px;
+  background: var(--pop-bg); color: var(--ink); font-family: var(--huruf); text-align: center;
+}
+.dg-edit:focus { outline: none; }
+.dg-hint { margin: 6px 0 0; }
+.dg-check { margin-top: 8px; padding: 10px 14px; border-radius: 10px; background: var(--callout); font-size: .92rem; }
+.dg-check p { margin: 0; }
+.dg-check ul { margin: 6px 0 0; padding-left: 1.2em; }
+.dg-issue { all: unset; cursor: pointer; text-decoration: underline dotted; text-underline-offset: .2em; }
+.dg-issue:hover { color: var(--go-ink); }
+.dg-issue:focus-visible { outline: 2px solid var(--focus); border-radius: 3px; }
