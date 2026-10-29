@@ -8,7 +8,7 @@
 //   bentuk: tipe id x y [=LxT] teks [!]   x y dalam satuan grid (flow 220×80, dfd 1 px). Tree tanpa x y disusun otomatis.
 //           \n = baris baru, [1] di depan teks = nomor process atau data store, ! di akhir = ditandai salah (merah).
 //   garis : dari > ke [: label] [@jalur] [!]   jalur: h (mendatar dulu), v (tegak dulu), t (turun, menyamping, turun),
-//           r/l (memutar lewat kanan/kiri), s (lurus miring). Tanpa @: lurus kalau sejajar, selain itu h (flow), t (tree), s (dfd).
+//           r/l/u/d (memutar lewat kanan/kiri/atas/bawah), s (lurus miring). Tanpa @: lurus kalau sejajar, selain itu h (flow), t (tree), s (dfd).
 (function () {
   'use strict';
   const FS = 14, LH = 18, SKEW = 14, BAND = 22, IDW = 36;
@@ -146,6 +146,10 @@
         const s = m === 'r' ? 1 : -1, X = s > 0 ? Math.max(A.r, B.r) + 26 + i * 12 : Math.min(A.l, B.l) - 26 - i * 12;
         return [[edgeX(A, A.y, s), A.y], [X, A.y], [X, B.y], [edgeX(B, B.y, s), B.y]];
       }
+      case 'u': case 'd': { // memutar lewat atas atau bawah kedua bentuk
+        const s = m === 'd' ? 1 : -1, Y = s > 0 ? Math.max(A.b, B.b) + 26 + i * 12 : Math.min(A.t, B.t) - 26 - i * 12;
+        return [[A.x, edgeY(A, A.x, s)], [A.x, Y], [B.x, Y], [B.x, edgeY(B, B.x, s)]];
+      }
       default: {
         const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy) || 1, o = flip ? -off : off;
         const px = (-dy / len) * o, py = (dx / len) * o;
@@ -158,28 +162,62 @@
     const bx = q[0] - L * Math.cos(a), by = q[1] - L * Math.sin(a);
     return `M${r1(q[0])} ${r1(q[1])}L${r1(bx - W * Math.sin(a))} ${r1(by + W * Math.cos(a))}L${r1(bx + W * Math.sin(a))} ${r1(by - W * Math.cos(a))}Z`;
   }
-  // Posisi label: Yes/No dekat decision, label mendatar di atas garis, label tegak di samping, label miring di atas garis.
-  function labelAt(pts, text, kind, srcType, i, n, flip) {
+  // Kandidat posisi label, urut dari yang paling disukai. draw() memilih kandidat yang tidak menumpuk.
+  // Yes/No dekat decision. Garis mendatar: di atas (atau di bawah) garis. Garis tegak: di samping.
+  // Garis miring: teks ikut miring searah garis, di sisi luar garisnya sendiri (garis sejajar: sisi berlawanan).
+  function labelCands(pts, text, kind, srcType, i, n, flip) {
     const lines = String(text).split('\n'), w = Math.max(...lines.map((s) => (tw(s) * 13) / 14)), h = lines.length * 16;
-    let x, y, a = 'middle', yn = false, on = false;
+    const out = [];
+    const mk = (x, y, a, rot = 0, yn = false) => {
+      const cx = a === 'start' ? x + w / 2 : a === 'end' ? x - w / 2 : x;
+      const r = (rot * Math.PI) / 180, cos = Math.cos(r), sin = Math.sin(r), hw = w / 2 + 2, hh = h / 2 + 1;
+      const poly = [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]].map(([u, v]) => [cx + u * cos - v * sin, y + u * sin + v * cos]);
+      const xs = poly.map((p) => p[0]), ys = poly.map((p) => p[1]);
+      out.push({ lines, x, y, a, rot, yn, poly, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) });
+    };
     if (kind === 'flow' && srcType === 'dec') {
-      yn = true;
       const [p, q] = pts;
-      if (Math.abs(q[1] - p[1]) < 0.5) { a = q[0] > p[0] ? 'start' : 'end'; x = p[0] + (q[0] > p[0] ? 6 : -6); y = p[1] - 6 - h / 2; }
-      else { a = 'start'; x = p[0] + 6; y = p[1] + (q[1] > p[1] ? 6 + h / 2 : -6 - h / 2); }
-    } else {
-      let j = 0, L = -1;
-      for (let s = 0; s < pts.length - 1; s++) {
-        const l = Math.hypot(pts[s + 1][0] - pts[s][0], pts[s + 1][1] - pts[s][1]);
-        if (l > L + 0.5) { L = l; j = s; }
-      }
-      const p = pts[j], q = pts[j + 1];
-      if (Math.abs(q[1] - p[1]) < 0.5) { x = (p[0] + q[0]) / 2; y = p[1] - 5 - h / 2; }
-      else if (Math.abs(q[0] - p[0]) < 0.5) { const left = n > 1 && i < (n - 1) / 2; a = left ? 'end' : 'start'; x = p[0] + (left ? -6 : 6); y = (p[1] + q[1]) / 2; }
-      else { const f = flip ? 1 - (i + 1) / (n + 1) : (i + 1) / (n + 1); x = p[0] + (q[0] - p[0]) * f; y = p[1] + (q[1] - p[1]) * f; on = true; }
+      if (Math.abs(q[1] - p[1]) < 0.5) [-1, 1].forEach((s) => mk(p[0] + (q[0] > p[0] ? 6 : -6), p[1] + s * (6 + h / 2), q[0] > p[0] ? 'start' : 'end', 0, true));
+      else [1, -1].forEach((s) => mk(p[0] + s * 6, p[1] + (q[1] > p[1] ? 6 + h / 2 : -6 - h / 2), s > 0 ? 'start' : 'end', 0, true));
+      return out;
     }
-    const x0 = a === 'start' ? x : a === 'end' ? x - w : x - w / 2;
-    return { lines, x, y, a, yn, on, x0, y0: y - h / 2, x1: x0 + w, y1: y + h / 2 };
+    let j = 0, L = -1;
+    for (let s = 0; s < pts.length - 1; s++) {
+      const l = Math.hypot(pts[s + 1][0] - pts[s][0], pts[s + 1][1] - pts[s][1]);
+      if (l > L + 0.5) { L = l; j = s; }
+    }
+    const p = pts[j], q = pts[j + 1], dx = q[0] - p[0], dy = q[1] - p[1];
+    const FS = [0.5, 0.38, 0.62, 0.26, 0.74, 0.15, 0.85];
+    const at = (f) => [p[0] + dx * f, p[1] + dy * f];
+    if (Math.abs(dy) < 0.5) {
+      [-1, 1].forEach((s) => FS.forEach((f) => { const [x, y] = at(f); mk(x, y + s * (5 + h / 2), 'middle'); }));
+    } else if (Math.abs(dx) < 0.5) {
+      const first = n > 1 && i < (n - 1) / 2 ? -1 : 1;
+      [first, -first].forEach((s) => FS.forEach((f) => { const [x, y] = at(f); mk(x + s * 6, y, s < 0 ? 'end' : 'start'); }));
+    } else {
+      let deg = (Math.atan2(dy, dx) * 180) / Math.PI;
+      if (deg > 90) deg -= 180;
+      if (deg <= -90) deg += 180;
+      const r = (deg * Math.PI) / 180, nx = Math.sin(r), ny = -Math.cos(r); // normal yang mengarah ke atas
+      const len = Math.hypot(dx, dy), o = (flip ? -1 : 1) * (i - (n - 1) / 2), px = -dy / len, py = dx / len;
+      const first = o === 0 ? 1 : Math.sign((px * nx + py * ny) * o) || 1;
+      [first, -first].forEach((s) => FS.forEach((f) => { const [x, y] = at(f), d = s * (h / 2 + 4); mk(x + nx * d, y + ny * d, 'middle', deg); }));
+    }
+    return out;
+  }
+  // Uji tumpang tindih dua poligon cembung (kotak miring, kotak bentuk, atau ruas garis dua titik).
+  function hits(A, B) {
+    for (const P of [A, B]) {
+      for (let k = 0; k < P.length; k++) {
+        const [x1, y1] = P[k], [x2, y2] = P[(k + 1) % P.length], nx = y2 - y1, ny = x1 - x2;
+        if (!nx && !ny) continue;
+        let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+        A.forEach(([x, y]) => { const d = x * nx + y * ny; a0 = Math.min(a0, d); a1 = Math.max(a1, d); });
+        B.forEach(([x, y]) => { const d = x * nx + y * ny; b0 = Math.min(b0, d); b1 = Math.max(b1, d); });
+        if (a1 < b0 || b1 < a0) return false;
+      }
+    }
+    return true;
   }
 
   /* ---------- Gambar ---------- */
@@ -213,7 +251,35 @@
   }
   function labSvg(L, sel, bad) {
     const y0 = L.y - (L.lines.length - 1) * 8;
-    return `<text class="dg-lab${L.yn ? ' yn' : ''}${sel ? ' sel' : ''}${bad ? ' bad' : ''}" text-anchor="${L.a}">${L.lines.map((s, k) => `<tspan x="${r1(L.x)}" y="${r1(y0 + k * 16)}">${esc(s)}</tspan>`).join('')}</text>`;
+    const rot = L.rot ? ` transform="rotate(${r1(L.rot)} ${r1(L.x)} ${r1(L.y)})"` : '';
+    return `<text class="dg-lab${L.yn ? ' yn' : ''}${sel ? ' sel' : ''}${bad ? ' bad' : ''}" text-anchor="${L.a}"${rot}>${L.lines.map((s, k) => `<tspan x="${r1(L.x)}" y="${r1(y0 + k * 16)}">${esc(s)}</tspan>`).join('')}</text>`;
+  }
+  // Pilih kandidat label: hindari label lain dan bentuk (wajib), lalu garis lain (sebisanya), lalu urutan kandidat.
+  function placeLabels(edges, B) {
+    // Bentuk asli diamond dan parallelogram, supaya label boleh dekat sudutnya tanpa dianggap menumpuk.
+    const boxes = [...B.values()].filter((R) => R.type !== 'pt').map((R) => {
+      if (R.type === 'dec') return [[R.x, R.t], [R.r, R.y], [R.x, R.b], [R.l, R.y]];
+      if (R.type === 'io') return [[R.l + SKEW, R.t], [R.r, R.t], [R.r - SKEW, R.b], [R.l, R.b]];
+      const e = R.type === 'ent' ? 5 : 0;
+      return [[R.l, R.t - e], [R.r + e, R.t - e], [R.r + e, R.b], [R.l, R.b]];
+    });
+    const placed = [];
+    edges.forEach((E, idx) => {
+      if (!E.cands) return;
+      let best = E.cands[0], bestScore = Infinity;
+      E.cands.forEach((c, k) => {
+        let score = k;
+        if (placed.some((p) => hits(c.poly, p))) score += 10000;
+        if (boxes.some((b) => hits(c.poly, b))) score += 5000;
+        edges.forEach((F, f) => {
+          if (f === idx) return;
+          for (let s = 0; s < F.pts.length - 1; s++) if (hits(c.poly, [F.pts[s], F.pts[s + 1]])) score += 100;
+        });
+        if (score < bestScore) { bestScore = score; best = c; }
+      });
+      E.lab = best;
+      placed.push(best.poly);
+    });
   }
   // Menggambar satu halaman diagram. Hasil: isi SVG, batas gambar, kotak tiap bentuk, dan jalur tiap garis (untuk klik di editor).
   function draw(P, kind, o = {}) {
@@ -232,8 +298,9 @@
     pairs.forEach((list) => list.forEach((e, i) => {
       const flip = e.from > e.to, src = nodeOf.get(e.from);
       const pts = route(e, B.get(e.from), B.get(e.to), i, list.length, kind, flip);
-      edges.push({ e, pts, lab: e.label ? labelAt(pts, e.label, kind, src.type, i, list.length, flip) : null });
+      edges.push({ e, pts, lab: null, cands: e.label ? labelCands(pts, e.label, kind, src.type, i, list.length, flip) : null });
     }));
+    placeLabels(edges, B);
     let lines = '', labels = '', shapes = '';
     edges.forEach(({ e, pts, lab }) => {
       pts.forEach((p) => grow(p[0], p[1]));
@@ -741,7 +808,7 @@
       if (Tt < wrapEl.scrollTop || Bb > wrapEl.scrollTop + wrapEl.clientHeight) wrapEl.scrollTop = (Tt + Bb) / 2 - wrapEl.clientHeight / 2;
     }
     const swap = (from, to) => { if (!from.length) return; commit(); to.push(snapshot()); pages = JSON.parse(from.pop()); cur = Math.min(cur, pages.length - 1); sel = null; save(); renderPages(); render(); };
-    const ROUTES = ['auto', 'h', 'v', 't', 'r', 'l', 's'];
+    const ROUTES = ['auto', 'h', 'v', 't', 'r', 'l', 'u', 'd', 's'];
 
     root.addEventListener('click', (e) => {
       const b = e.target.closest('button');

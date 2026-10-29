@@ -12,19 +12,19 @@
   D['print.ipo'] = { ipo: [{
     module: 'Print Order Calculator (whole program)',
     input: ['printType (BW or Color)', 'pages', 'binding (Yes or No)'],
-    process: ['Validate: printType is BW or Color, and pages > 0', 'pricePerPage = 500 (BW) or 1500 (Color)', 'total = pages × pricePerPage', 'If binding = Yes: total = total + 5000'],
+    process: ['Check that printType is BW or Color and pages > 0', 'If printType = Color, pricePerPage = 1500. Else, pricePerPage = 500', 'total = pages × pricePerPage', 'If binding = Yes, total = total + 5000'],
     output: ['Error message (if the input is invalid)', 'Order summary: printType, pages, binding, total'],
   }] };
 
   D['print.ipoMod'] = { ipo: [{
     module: 'calculateTotal',
     input: ['printType', 'pages', 'binding'],
-    process: ['Call getPricePerPage(printType)', 'total = pages × pricePerPage', 'If binding = Yes: total = total + 5000'],
+    process: ['Call getPricePerPage(printType)', 'total = pages × pricePerPage', 'If binding = Yes, total = total + 5000'],
     output: ['total (return value)'],
   }, {
     module: 'getPricePerPage',
     input: ['printType'],
-    process: ['Color: 1500, otherwise 500'],
+    process: ['If printType = Color, return 1500. Else, return 500'],
     output: ['pricePerPage (return value)'],
   }] };
 
@@ -229,7 +229,7 @@ c > m : Loan receipt` };
   D['bike.ipo'] = { ipo: [{
     module: 'calculateButton_Click (Calculate Fee button)',
     input: ['bikeType from the Bike Type dropdown', 'durationText from the Rental Duration text box'],
-    process: ['Validate: durationText is a whole number > 0', 'City Bike: first = 15000, extra = 5000', 'E-Bike: first = 25000, extra = 10000', 'fee = first + (hours − 1) × extra', 'If hours > 5: fee = fee × 0.9'],
+    process: ['Check that durationText is a whole number > 0', 'If bikeType = E-Bike, first = 25000 and extra = 10000. Else, first = 15000 and extra = 5000', 'fee = first + (hours − 1) × extra', 'If hours > 5, fee = fee × 0.9'],
     output: ['Error message (if the duration is invalid)', 'fee in the Total Rental Fee label'],
   }, {
     module: 'clearButton_Click (Clear button)',
@@ -379,6 +379,257 @@ c > d3 : Payment record
 c > d : Paid booking
 d > d2 : New appointment
 d > pat : Appointment\\nconfirmation` };
+
+  /* ---------- Soal kuis PDM before mid, ditulis ulang dengan kalimat sendiri (dipakai slides) ---------- */
+  // Kelas hl + warna menandai bagian soal: IPO (c-mint input, c-jingga processing, c-pink decision, c-lilac output),
+  // DFD (c-jingga entity, c-mint process, c-lilac data store, c-pink data flow), sama dengan warna bentuk di diagram.
+  D['tree.intro'] = { kind: 'tree', alt: 'Contoh hierarchy chart: main memanggil getScores, calcAverage, showGrade; calcAverage memanggil sumScores', spec: `
+mod main main
+mod g getScores
+mod a calcAverage
+mod s showGrade
+mod sum sumScores
+main > g
+main > a
+main > s
+a > sum` };
+
+  D['laundry.case'] = { html: `<p><strong>Soal 1 · Online Laundry Service System</strong></p>
+<p>The customer <span class="hl c-mint">picks a laundry service</span>, <span class="hl c-mint">types the weight of the clothes</span>, and <span class="hl c-mint">decides whether to use express service</span>. <span class="hl c-jingga">Wash Only is IDR 8,000 per kg</span>, <span class="hl c-jingga">Wash and Iron is IDR 12,000 per kg</span>, <span class="hl c-jingga">express adds IDR 5,000 per order</span>, and <span class="hl c-jingga">at least 1 kg is always charged</span>.</p>
+<p>The system first <span class="hl c-pink">makes sure every field is filled and the weight is above zero</span>. Bad input <span class="hl c-lilac">shows an error message</span>. Good input <span class="hl c-jingga">gets its total cost calculated</span> and is <span class="hl c-lilac">shown as an order summary</span>.</p>
+<p><em>Task: draw a flowchart from entering the order until the total cost and the summary appear.</em></p>` };
+
+  D['laundry.tree'] = { kind: 'tree', alt: 'Hierarchy chart soal laundry', spec: `
+mod main main
+mod get getOrderDetails
+mod val isValidOrder
+mod calc calculateTotal
+mod show showSummary
+mod price getPricePerKg
+mod bill getBillableWeight
+main > get
+main > val
+main > calc
+main > show
+calc > price
+calc > bill` };
+
+  // showSummary juga memanggil getPricePerKg (untuk mencetak harga per kg), jadi kotaknya muncul dua kali.
+  D['laundry.tree2'] = { kind: 'tree', alt: 'Hierarchy chart dengan getPricePerKg di bawah calculateTotal dan di bawah showSummary', spec: `
+mod main main
+mod val isValidOrder
+mod calc calculateTotal
+mod show showSummary
+mod price getPricePerKg
+mod bill getBillableWeight
+mod price2 getPricePerKg
+main > val
+main > calc
+main > show
+calc > price
+calc > bill
+show > price2` };
+
+  D['laundry.flowS'] = { kind: 'flow', grid: '220,66', alt: 'Flowchart soal laundry dalam dua kolom', spec: `
+term s 0 0 Start
+io in 0 1 Input service,\\nweight, express
+dec v 0 2.35 Data complete\\nAND weight > 0?
+io err 1.25 2.35 Display\\nerror message
+dec c 0 3.7 service = Wash Only?
+proc p8 0.75 4.6 pricePerKg = 8000
+proc p12 -0.75 4.6 pricePerKg = 12000
+conn a1 0 5.65 A
+conn a2 2.6 0 A
+dec w 2.6 1.05 weight < 1?
+proc b1 3.35 2 billable = 1
+proc bw 1.85 2 billable = weight
+proc t 2.6 3.15 total = billable ×\\npricePerKg
+dec x 2.6 4.25 express = Yes?
+proc add 3.35 5.1 total = total + 5000
+io out 2.6 6.3 Display service, weight,\\nexpress, total
+term e 2.6 7.2 End
+s > in
+in > v
+v > c : Yes
+v > err : No
+err > e @v
+c > p8 : Yes
+c > p12 : No
+p8 > a1 @t
+p12 > a1 @t
+a2 > w
+w > b1 : Yes
+w > bw : No
+b1 > t @t
+bw > t @t
+t > x
+x > add : Yes
+x > out : No
+add > out @t
+out > e` };
+
+  D['parking.case'] = { html: `<p><strong>Soal 2 · Parking Fee Calculator (GUI)</strong></p>
+<p>Staff <span class="hl c-mint">pick the vehicle type</span> and <span class="hl c-mint">type the parking duration</span>, then press <b>Calculate Fee</b>. The app <span class="hl c-pink">checks that the duration is a positive whole number</span> and <span class="hl c-jingga">works out the fee from the vehicle type and the hours</span>.</p>
+<p><span class="hl c-jingga">Motorcycle: IDR 2,000 for the first hour, IDR 1,000 for every extra hour.</span> <span class="hl c-jingga">Car: IDR 5,000 for the first hour, IDR 3,000 for every extra hour.</span> Invalid input <span class="hl c-lilac">shows an error message</span>, valid input <span class="hl c-lilac">shows the total fee</span>. <b>Clear</b> <span class="hl c-jingga">empties every field and the result</span>.</p>
+<p><em>Task: draw a flowchart of the program logic that matches the GUI components.</em></p>` };
+
+  D['parking.gui'] = { html: `<div class="gui" role="img" aria-label="Desain GUI Parking Fee Calculator: dropdown Vehicle Type, kolom Parking Duration, tombol Calculate Fee dan Clear, label Total Parking Fee">
+<p class="gui-title">PARKING FEE CALCULATOR</p>
+<p class="gui-sub">Calculate your parking charges</p>
+<p class="gui-lbl">Vehicle Type</p>
+<p class="gui-box">Car <span aria-hidden="true">▾</span></p>
+<p class="gui-lbl">Parking Duration (hours)</p>
+<p class="gui-box gui-ph">Enter duration, e.g. 3</p>
+<p class="gui-btns"><span class="gui-go">Calculate Fee</span><span>Clear</span></p>
+<p class="gui-lbl">Total Parking Fee</p>
+<p class="gui-out">IDR 11,000<small>Example result: Car parked for 3 hours</small></p>
+</div>` };
+
+  D['parking.calc'] = { kind: 'flow', grid: '220,66', alt: 'Flowchart tombol Calculate Fee soal parking', spec: `
+term s 0 0 Calculate Fee\\nclicked
+io in 0 1.05 Get vehicle and\\ndurationText from the form
+dec v 0 2.4 durationText is\\na whole number > 0?
+io err 1.4 2.4 Display error\\nin feeLabel
+proc h 0 3.85 hours = durationText\\nas integer
+conn a1 0 4.75 A
+conn a2 2.7 0 A
+dec c 2.7 1.05 vehicle =\\nMotorcycle?
+proc m 3.45 2.2 first = 2000\\nextra = 1000
+proc car 1.95 2.2 first = 5000\\nextra = 3000
+proc fee 2.7 3.45 fee = first +\\n(hours − 1) × extra
+io out 2.7 4.5 Display fee\\nin feeLabel
+term e 2.7 5.4 End
+s > in
+in > v
+v > h : Yes
+v > err : No
+err > e @v
+h > a1
+a2 > c
+c > m : Yes
+c > car : No
+m > fee @t
+car > fee @t
+fee > out
+out > e` };
+
+  D['parking.clear'] = { kind: 'flow', alt: 'Flowchart tombol Clear soal parking', spec: `
+term s 0 0 Clear clicked
+proc r 0 1 Reset the vehicle dropdown\\nand empty the duration box
+io l 0 2 Display an empty\\nfeeLabel
+term e 0 3 End
+s > r
+r > l
+l > e` };
+
+  D['catering.case'] = { html: `<p><strong>Soal 3 · Online Catering Order Management System</strong></p>
+<p><span class="hl c-jingga">Customers</span> look through the menu and send an order: <span class="hl c-pink">food items, quantities, and delivery details</span>. The system <span class="hl c-mint">checks menu availability</span>, <span class="hl c-mint">calculates the order total</span>, and sends a <span class="hl c-pink">payment request</span> to an <span class="hl c-jingga">external payment service provider</span>. An order is <span class="hl c-mint">confirmed</span> only after the <span class="hl c-pink">payment is verified</span>.</p>
+<p><span class="hl c-jingga">Kitchen staff</span> open the confirmed orders and <span class="hl c-pink">update the preparation status</span>. <span class="hl c-jingga">Delivery staff</span> get the <span class="hl c-pink">delivery information</span> and update the status when the food leaves and arrives. <span class="hl c-jingga">Administrators</span> <span class="hl c-mint">manage the menu</span> and its availability, and <span class="hl c-mint">produce reports</span> on order totals, payment status, and deliveries. The system keeps <span class="hl c-lilac">customer data</span>, <span class="hl c-lilac">menu details</span>, <span class="hl c-lilac">orders</span>, <span class="hl c-lilac">payment transactions</span>, and <span class="hl c-lilac">delivery information</span>.</p>
+<p><em>Task: draw the Context Diagram, DFD Level 0, and DFD Level 1 for one Level 0 process (balanced).</em></p>` };
+
+  D['catering.ctx'] = { kind: 'dfd', alt: 'Context diagram Online Catering Order Management System', spec: `
+ent adm 330 0 =150x60 Administrator
+ent cus 0 200 =120x130 Customer
+dproc p 330 200 =200x220 [0] Online Catering\\nOrder Management\\nSystem
+ent kit 690 140 =140x80 Kitchen Staff
+ent ds 690 260 =140x80 Delivery Staff
+ent pp 330 400 =160x60 Payment Provider
+adm > p : Menu data
+p > adm : Order report
+cus > p : Order details
+p > cus : Menu list
+p > cus : Order confirmation
+p > kit : Confirmed orders
+kit > p : Preparation status
+p > ds : Delivery info
+ds > p : Delivery status
+p > pp : Payment request
+pp > p : Payment verification` };
+
+  D['catering.frag2'] = { kind: 'dfd', alt: 'DFD fragment untuk process 2 Process Order', spec: `
+store d2 300 0 =150x40 [D2] Menu
+store d4 600 40 =160x40 [D4] Payments
+ent cus 0 150 =120x130 Customer
+dproc p2 300 150 =170x130 [2] Process Order
+store d3 600 150 =150x40 [D3] Orders
+ent pp 0 390 =140x60 Payment Provider
+store d1 300 300 =160x40 [D1] Customers
+d2 > p2 : Menu details
+cus > p2 : Order details
+p2 > cus : Menu list
+p2 > cus : Order confirmation
+p2 > pp : Payment request
+pp > p2 : Payment verification
+p2 > d1 : Customer data
+d1 > p2 : Customer details
+p2 > d4 : Payment record
+p2 > d3 : Confirmed order` };
+
+  D['catering.l0'] = { kind: 'dfd', alt: 'DFD Level 0 Online Catering Order Management System', spec: `
+ent adm 0 -60 =150x60 Administrator
+dproc p1 290 -60 =170x86 [1] Manage Menu
+store d4 560 -60 =160x40 [D4] Payments
+dproc p5 830 -60 =170x86 [5] Generate Report
+store d2 290 60 =150x40 [D2] Menu
+store d5 830 60 =160x40 [D5] Deliveries
+ent cus 0 185 =120x130 Customer
+dproc p2 290 185 =170x130 [2] Process Order
+store d3 560 185 =150x40 [D3] Orders
+dproc p4 830 185 =170x86 [4] Deliver Order
+ent pp 0 420 =140x60 Payment Provider
+store d1 330 330 =160x40 [D1] Customers
+dproc p3 560 310 =170x86 [3] Prepare Order
+ent ds 830 310 =140x60 Delivery Staff
+ent kit 560 430 =140x60 Kitchen Staff
+adm > p1 : Menu data
+p1 > d2 : Menu record
+p5 > adm : Order report @u
+d2 > p2 : Menu details
+cus > p2 : Order details
+p2 > cus : Menu list
+p2 > cus : Order confirmation
+p2 > pp : Payment request
+pp > p2 : Payment verification
+p2 > d1 : Customer data
+d1 > p2 : Customer details
+p2 > d4 : Payment record
+p2 > d3 : Confirmed order
+d3 > p3 : Confirmed orders
+p3 > d3 : Preparation status
+p3 > kit : Confirmed orders
+kit > p3 : Preparation status
+d3 > p4 : Order to deliver
+p4 > ds : Delivery info
+ds > p4 : Delivery status
+p4 > d5 : Delivery record
+d3 > p5 : Order totals
+d4 > p5 : Payment status
+d5 > p5 : Delivery records` };
+
+  D['catering.l1'] = { kind: 'dfd', alt: 'DFD Level 1 untuk process 2 Process Order', spec: `
+ent cus 0 0 =120x86 Customer
+dproc a 300 0 =180x86 [2.1] Receive Order
+dproc b 300 130 =180x78 [2.2] Calculate\\nOrder Total
+dproc c 300 260 =180x78 [2.3] Request\\nPayment
+dproc d 300 390 =180x78 [2.4] Confirm Order
+store d2 620 -40 =150x40 [D2] Menu
+store d1 640 120 =160x40 [D1] Customers
+ent pp 620 325 =150x60 Payment Provider
+store d3 20 480 =150x40 [D3] Orders
+store d4 620 460 =160x40 [D4] Payments
+cus > a : Order details
+a > cus : Menu list
+d2 > a : Menu details
+d1 > a : Customer details
+a > d1 : Customer data
+a > b : Order items
+b > c : Order total
+c > pp : Payment request
+c > d : Pending order
+pp > d : Payment verification
+d > d4 : Payment record
+d > d3 : Confirmed order
+d > cus : Order confirmation @l` };
 
   /* ---------- Daftar soal untuk kanvas latihan ---------- */
   // tab: tab kanvas yang dibuka pertama. flow/dfd: nama halaman diagram. answers: [judul, kunci DG.data].

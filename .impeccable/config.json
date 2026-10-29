@@ -506,6 +506,24 @@
         ],
         "createdAt": "2026-10-29T04:31:52.076Z",
         "reason": "flags white on #2383e2: site-wide btn-go button from _shared/style.css, same markup as every other course index page"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          "program-design-methods/00-mid-exam/slides.html"
+        ],
+        "createdAt": "2026-10-29T10:33:46.518Z",
+        "reason": "deck font scales with viewport (~21px at 1280x720); measured smallest text in browser is 12.5px (code blocks)"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "program-design-methods/00-mid-exam/slides.html"
+        ],
+        "createdAt": "2026-10-29T10:33:46.990Z",
+        "reason": "remaining flag is white on #2383e2 (site-wide btn-go and GUI mock button); red heading text was fixed to ink color"
       }
     ]
   }
