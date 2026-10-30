@@ -94,6 +94,8 @@ mark { color: inherit; background: var(--stabilo-kuning); }
 mark.kaitan { background: var(--stabilo-hijau); }
 mark.jebakan { background: var(--stabilo-pink); }
 mark.kunci { background: var(--stabilo-biru); }
+/* Teks berwarna memakai kelas palet editor di style.css: <b> polos = frasa kunci (kuning),
+   b.tx-merah = salah atau masalah, b.tx-hijau = benar atau solusi, b.tx-biru dan b.tx-oranye = dua pilihan atau jalur. */
 
 .legenda {
   display: flex;
@@ -202,6 +204,33 @@ main { counter-reset: langkah; }
 .keterangan > summary { font-weight: 600; color: var(--pudar); }
 .keterangan dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1.2rem; margin: .5em 0 0; }
 .keterangan dd { margin: 0; }
+
+/* ---------- gaya renggang: satu kalimat per baris, inti tebal, detail di kotak abu di bawahnya ---------- */
+.detail { margin: .4em 0 1.1em; padding: 12px 16px; background: var(--callout); border-radius: 8px; }
+.detail > :first-child { margin-top: 0; }
+.detail > :last-child { margin-bottom: 0; }
+.detail p { margin: .55em 0; }
+li > .detail { margin-top: .5em; }
+/* catatan penulis: suara pribadi, misalnya batas cakupan atau saran belajar */
+.bisik { font-style: italic; color: var(--pudar); }
+/* template kalimat ujian dan pertanyaan pemandu */
+blockquote { margin: 1em 0; padding: 0 0 0 16px; border-left: 3px solid currentColor; }
+
+/* aturan utama: kapan memakai pilihan yang mana, ditaruh sebelum detail setiap pilihan */
+aside.aturan { position: relative; margin: 1.2em 0; padding: 18px 21px 14px 45px; background: var(--callout); border-radius: 10px; }
+aside.aturan::before { content: "🧭"; position: absolute; top: 18px; left: 13px; width: 24px; text-align: center; font-size: 1.05rem; }
+aside.aturan > h4 { margin: 0 0 .5em; font-size: 1rem; }
+aside.aturan table { margin: .4em 0; }
+
+/* soal: satu bentuk untuk semua contoh soal dan soal latihan, supaya langsung terlihat "ini soal" */
+.soal-kotak { margin: 1.5em 0; padding: 14px 18px; border: 1px solid var(--garis); border-radius: 10px; }
+.soal-kotak > .label { margin: 0 0 .5em; font-size: .85rem; font-weight: 700; color: var(--tx-biru); }
+.soal-kotak > .label::before { content: "📝 "; }
+.soal-kotak > p { margin: .5em 0; }
+.soal-kotak > details { margin-top: .8em; }
+.soal-kotak > details > summary { font-weight: 600; color: var(--pudar); }
+.soal-kotak > details[open] > summary { margin-bottom: .5em; }
+.soal-kotak .kesimpulan { margin: .8em 0 0; padding: 10px 14px; font-weight: 600; background: var(--intinya-bg); border-radius: 8px; }
 
 .soal { margin: .8em 0; }
 .soal > summary { font-weight: 600; }

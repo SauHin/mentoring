@@ -15,19 +15,25 @@ Acuan tampilan: `_shared/gaya.css` (salinan `C:\Users\jonat\Music\belajar\catata
 
 **Topik acuan gaya catatan** (disetujui 2026-10-08): `algorithm-and-programming/03-repetition/`. Pakai `notes.html` untuk notes, `slides.html` untuk slide, `viz/loop.html` untuk viz. Template kosongnya ada di `_template/NN-nama-materi/`.
 
+**Acuan gaya renggang untuk notes** (diminta user 2026-10-30): catatan Notion user "Speech Recognition > UTS", diterapkan di `deep-learning/00-mid-exam/notes.html`. Notes lama yang padat tidak wajib diubah, tapi notes baru dan notes yang ditulis ulang mengikuti gaya ini.
+
 ### Gaya bahasa (notes dan slides)
 - Bahasa Indonesia santai, menyapa pembaca dengan "kamu". Istilah teknis tetap dalam bahasa Inggris, tapi **jangan hard translate**: kalau istilahnya lebih umum dalam bahasa Inggris, pakai istilah Inggris.
   - Contoh pemrograman: valid (bukan sah), garbage value (bukan nilai sampah), return value, newline, loop, node, pointer, edge case.
   - Contoh matematika: term, logic gate, predicate, quantifier, statement, truth table, rules of inference.
   - Kata Indonesia yang wajar tetap dipakai: deklarasi, karakter, variabel, negasi, ekuivalen.
+- **Masalah dulu, istilah kemudian.** Buka dengan masalah atau pertanyaan dan contoh sehari-hari, baru beri nama istilahnya ("Cara menebak seperti ini disebut noisy channel model"). Rumus datang paling akhir.
 - Definisi ditulis satu kalimat dengan pola "X adalah …" atau "Ini merupakan …", lalu dijelaskan dengan bahasa santai ("kita", "udah", "kayak").
-- Sederhana dulu, formal kemudian: bangun intuisi dulu, lalu beri istilah dan notasi formal dari materi.
-- Maksimal satu istilah baru per section atau slide. Jelaskan dengan bahasa biasa saat pertama muncul. Jangan anggap mentor akan menjelaskannya.
-- Setiap pernyataan umum langsung diikuti contoh konkret.
+- Jelaskan setiap istilah dengan bahasa biasa saat pertama muncul. Jangan anggap mentor akan menjelaskannya.
+- Setiap pernyataan umum langsung diikuti contoh konkret. Pakai **satu contoh sehari-hari yang dipakai ulang** di seluruh topik (misalnya "saya pergi ke bank"), bukan contoh baru di setiap bagian.
 - Analogi selalu disertai satu kalimat tentang di mana analogi itu tidak berlaku.
 - Jangan melompati langkah dalam hitungan, turunan, atau trace kode.
 - Fokus pada pemahaman, bukan hafalan. Tunjukkan cara menurunkan konsep atau kode sendiri.
-- Paragraf maksimal 3 kalimat. Pakai poin dengan label tebal + titik dua (**Efek:**, **Kelebihan:**). Ringkas: pakai bold, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
+- **Satu kalimat per baris.** Di notes, setiap kalimat menjadi `<p>` sendiri (atau satu poin list), supaya catatan renggang dan mudah dibaca. Jangan gabung beberapa kalimat dalam satu paragraf. Di slide, poin tetap pendek.
+- **Inti dulu, detail di bawahnya.** Setiap poin dibuka dengan satu kalimat inti yang ditebalkan. Penjelasan, contoh, dan alasannya ditaruh di kotak abu `div.detail` atau toggle tepat di bawah poin itu.
+- **Aturan utama sebelum detail.** Kalau ada beberapa pilihan alat atau metode (optimizer, loss, tipe autoencoder, dan sejenisnya), mulai dengan `aside.aturan` berisi `h4` dan tabel satu baris per pilihan: pilihan, pakai kalau, alasan. Detail setiap pilihan ditulis di bawahnya.
+- Boleh ada catatan penulis `p.bisik` (miring, pudar) untuk batas cakupan atau saran belajar, misalnya "Ini esai, jadi cukup intinya" atau "Detail lengkapnya ada di PPT sesi 2".
+- Pakai poin dengan label tebal + titik dua (**Efek:**, **Kelebihan:**). Ringkas: pakai bold, list pendek, tabel, `code`, dan callout, bukan paragraf panjang.
 - Panah → dipakai untuk **satu** sebab-akibat ("update lupa → loop tidak berhenti") dan untuk "makin X → makin Y". Rantai 3 panah atau lebih tanpa penjelasan kenapa tetap dilarang. Salah: "Lupa & → alamat acak → crash". Benar: "Kalau & lupa ditulis, scanf menulis ke alamat sembarang, dan program bisa crash."
   - Di discrete mathematics dan compilation technique, → adalah simbol (conditional, transisi, produksi). Di sana jangan pakai → sebagai sebab-akibat di kalimat biasa. Tulis "jadi", "artinya", atau "menghasilkan".
 - Simbol dan operator (`<`, `<=`, `i++`, `;`) selalu ditulis dengan `code`, supaya tidak menyatu dengan kata biasa. Keyword (`while`, `for`) pakai `code` di judul slide dan saat menunjuk kode, tapi boleh polos di kalimat biasa. Rumus diberi kurung, misalnya "(b − a + 1) kali", atau ditaruh di tabel bersama alasannya. Salah: "Dengan < loop jalan b − a kali, dengan <= jalan b − a + 1 kali".
@@ -39,13 +45,16 @@ Acuan tampilan: `_shared/gaya.css` (salinan `C:\Users\jonat\Music\belajar\catata
 ### Notes
 - Struktur halaman mengikuti `_contoh.html`: `header` (h1, `p.tujuan`, `ul.legenda`, `nav.peta`) lalu `main` berisi `section.langkah`. Peta jalur berisi link ke tiap section. `notes.js` membuka section yang diklik.
 - Satu konsep = satu section toggle bernomor (keycap 1️⃣). **Semua section tertutup secara default**, seperti outline Notion.
-- Urutan isi: kaitan (`p.rantai`: berangkat dari apa, dipakai untuk apa) → analogi singkat + batasnya → definisi → rumus atau tabel → contoh hitungan (toggle) → visualisasi kalau membantu → jebakan kalau ada → intinya → soal latihan dengan jawaban di toggle tertutup.
+- Urutan isi: masalah dan contoh sehari-hari → nama istilah dan definisi → aturan utama kalau ada beberapa pilihan → detail per poin (kalimat inti tebal + `div.detail`) → rumus → visualisasi kalau membantu → contoh soal dan soal latihan → "Jangan sampai salah" (jebakan) di toggle. Analogi boleh dipakai, selalu dengan batasnya.
 - Satu bentuk per ide. Jangan ulang ide yang sama sebagai rumus, resep, hitungan, tabel, kode, dan gambar sekaligus. Kode atau gambar hanya kalau menunjukkan hal baru.
-- Teks yang langsung terlihat 80–180 kata per konsep. Keterangan simbol, contoh hitungan, dan trace ada di toggle.
-- Rumus penting di tengah (`p.rumus`), diikuti arti tiap simbol (`details.keterangan`) dan cara membaca hasilnya.
+- Yang langsung terlihat hanya kalimat inti. Penjelasan panjang, keterangan simbol, contoh hitungan, dan trace ada di `div.detail` atau toggle.
+- Rumus penting di tengah (`p.rumus`), langsung diikuti arti tiap simbol dalam list pendek, lalu cara membaca hasilnya.
+- **Bentuk soal tetap:** semua contoh soal dan soal latihan memakai `div.soal-kotak`: `p.label` ("Contoh soal" atau "Soal latihan", boleh ditambah tingkat seperti "susahan dikit"), teks soal, lalu `details` "Lihat jawaban" berisi langkah berlabel tebal dan `p.kesimpulan`. Template kalimat jawaban ujian ditaruh di `blockquote`.
+- Notes ujian: kisi-kisi (dan bobot kalau ada) dalam satu callout di atas, lalu satu section per soal kisi-kisi. Tanpa section strategi dan tanpa contoh esai panjang. Rujukan slide secukupnya, jangan di setiap kalimat.
 - Algoritma: definisi satu kalimat → cara kerja bernomor → output, kelebihan, kekurangan. Metode yang mirip dibandingkan dalam tabel.
 - Soal hitungan: langkah berlabel tebal, nilai antara ditaruh di tabel.
-- Stabilo punya arti tetap: kuning (`mark`) = istilah baru, hijau (`mark.kaitan`) = kaitan, pink (`mark.jebakan`) = jebakan, biru (`mark.kunci`) = wajib diingat. Maksimal 2 per paragraf. Frasa kunci pakai `<b>`, maksimal 3 per paragraf. Label poin pakai `<strong>`.
+- Teks tebal berwarna punya arti tetap. `<b>` (kuning) = frasa kunci, dan boleh banyak: membaca bagian tebal saja harus memberi ringkasan. `b.tx-merah` = salah atau masalah, `b.tx-hijau` = benar atau solusi, `b.tx-biru` dan `b.tx-oranye` = dua pilihan atau jalur yang dibandingkan. Label poin pakai `<strong>`.
+- Stabilo latar dipakai jarang: kuning (`mark`) = istilah baru saat pertama muncul, pink (`mark.jebakan`) = jebakan, biru (`mark.kunci`) = wajib diingat, hijau (`mark.kaitan`) = kaitan.
 - Tabel biasa: gaya tabel Notion, baris pertama dan kolom pertama abu-abu, tanpa warna per baris (sudah diatur `gaya.css`).
 - Notes ditutup dengan daftar pustaka (`ol.refs`).
 - Setiap `<details>` yang judulnya memuat "full code" otomatis punya mode **Bertahap** (`notes.js`).

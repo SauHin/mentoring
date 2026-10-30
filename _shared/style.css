@@ -555,13 +555,13 @@ aside .reveal-bar { background: var(--callout); }
 /* Warna teks dan latar dari toolbar editor (palet Notion). Warna teks diatur supaya kontrasnya minimal 4.5:1.
    Latar kuning, hijau, biru, dan pink memakai stabilo gaya.css (mark, mark.kaitan, mark.kunci, mark.jebakan). */
 :root {
-  --tx-abu: #6f6c67; --tx-coklat: #8e5f4a; --tx-oranye: #b25c0b; --tx-kuning: #8f6200; --tx-hijau: #3d7a58;
+  --tx-abu: #6f6c67; --tx-coklat: #8e5f4a; --tx-oranye: #a85500; --tx-kuning: #8f6200; --tx-hijau: #2b7a4b;
   --tx-biru: #2c6f96; --tx-ungu: #8a5aad; --tx-pink: #b4447f; --tx-merah: #c03d38;
   --bg-abu: #f1f1ef; --bg-coklat: #f4eeee; --bg-oranye: #fbecdd; --bg-ungu: #f6f3f9; --bg-merah: #fdebec;
 }
 [data-theme='dark'] {
-  --tx-abu: #9b9b9b; --tx-coklat: #ba856f; --tx-oranye: #c77d48; --tx-kuning: #d6a03f; --tx-hijau: #529e72;
-  --tx-biru: #379ad3; --tx-ungu: #a77fdc; --tx-pink: #d96aa3; --tx-merah: #e46a67;
+  --tx-abu: #9b9b9b; --tx-coklat: #ba856f; --tx-oranye: #ffaa5c; --tx-kuning: #d6a03f; --tx-hijau: #6fd19a;
+  --tx-biru: #7ab8ff; --tx-ungu: #a77fdc; --tx-pink: #d96aa3; --tx-merah: #ff8a80;
   --bg-abu: #2f2f2f; --bg-coklat: #4a3228; --bg-oranye: #5c3b23; --bg-ungu: #3c2d49; --bg-merah: #522e2a;
 }
 .tx-abu { color: var(--tx-abu); } .tx-coklat { color: var(--tx-coklat); } .tx-oranye { color: var(--tx-oranye); }
